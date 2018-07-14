@@ -31,13 +31,16 @@ namespace ResourceManager
             Extract();
         }
 
-        public byte[][] GetAnimationFrames(string name)
+        // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
+        // Например, G000UU8029HHITA1A00
+        // Ссылки на PNG нет, но в .ff файле какая-то информация есть
+        public IReadOnlyCollection<Image> GetAnimationFrames(string name)
         {
             if (_animations.ContainsKey(name) == false)
                 return null;
 
             var animation = _animations[name];
-            return GetFrameData(_files[animation.FileId].Frames.ToArray());
+            return GetFrameData(_files[animation.FileId].Frames);
         }
 
 
@@ -121,7 +124,7 @@ namespace ResourceManager
             var buffer = new byte[file.Size];
             stream.Seek(file.Offset, SeekOrigin.Begin);
             stream.Read(buffer, 0, buffer.Length);
-            stream.Position = currentPos;
+            stream.Seek(currentPos, SeekOrigin.Begin);
 
             file.Content = buffer;
         }
@@ -198,10 +201,10 @@ namespace ResourceManager
             }
         }
 
-        private byte[][] GetFrameData(Frame[] frames)
+        private IReadOnlyCollection<Image> GetFrameData(IReadOnlyCollection<Frame> frames)
         {
             using (var imagesStream = new MemoryStream(_files.First(f => f.Value.Name == "-IMAGES.OPT").Value.Content)) {
-                var result = new List<byte[]>(frames.Length);
+                var result = new List<Image>(frames.Count);
 
                 byte[] mainPixels = null;
                 int mainWidth = 0;
@@ -291,10 +294,10 @@ namespace ResourceManager
                         }
                     }
 
-                    result.Add(imageData);
+                    result.Add(new Image(width, height, imageData));
                 }
 
-                return result.ToArray();
+                return result;
             }
         }
 

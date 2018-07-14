@@ -8,8 +8,8 @@
         {
             double newX, newY;
 
-            newX = -290 + 175 * x + 220 * y;
-            newY = -420 + 125 * x - 75 * y;
+            newX = (-340 + 95 * x + 123 * y) * Scale;
+            newY = (-230 + 60 * x - 43 * y) * Scale;
 
             return (newX, newY);
         }

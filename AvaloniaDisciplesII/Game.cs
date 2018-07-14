@@ -22,7 +22,6 @@ namespace AvaloniaDisciplesII
         private readonly IMapVisual _mapVisual;
         private readonly IAudioService _audioService;
 
-
         private long _ticks;
         private DispatcherTimer _timer;
         private Stopwatch _stopwatch;
@@ -48,21 +47,39 @@ namespace AvaloniaDisciplesII
         {
             GameObjects = new[] {
                 CreateUnit("g000uu0010", 0, 2, Direction.Southeast),
-                CreateUnit("g000uu0021", 0, 1, Direction.Southeast),
+                CreateUnit("g000uu0020", 0, 1, Direction.Southeast),
                 CreateUnit("g000uu0017", 0, 0, Direction.Southeast),
 
-                CreateUnit("g000uu0015", 1, 2, Direction.Southeast),
-                CreateUnit("g000uu0015", 1, 1, Direction.Southeast),
-                CreateUnit("g000uu0015", 1, 0, Direction.Southeast),
+                CreateUnit("g000uu0002", 1, 2, Direction.Southeast),
+                CreateUnit("g000uu0003", 1, 1, Direction.Southeast),
+                CreateUnit("g000uu0002", 1, 0, Direction.Southeast),
 
-                CreateUnit("g000uu0093", 2, 2, Direction.Northwest),
-                CreateUnit("g000uu0087", 2, 1, Direction.Northwest),
-                CreateUnit("g000uu0087", 2, 0, Direction.Northwest),
+                //CreateUnit("g000uu0165", 2, 2, Direction.Northwest),
+                CreateUnit("g000uu0165", 2, 1, Direction.Northwest),
+                CreateUnit("g000uu0039", 2, 0, Direction.Northwest),
 
-                //CreateUnit("g000uu0154", 3, 2, Direction.Northwest),
-                CreateUnit("g000uu0079", 3, 1, Direction.Northwest),
-                CreateUnit("g000uu0080", 3, 0, Direction.Northwest),
+                CreateUnit("g000uu0162", 3, 2, Direction.Northwest),
+                CreateUnit("g000uu0027", 3, 1, Direction.Northwest),
+                //CreateUnit("g000uu0162", 3, 0, Direction.Northwest),
             };
+
+            //GameObjects = new[] {
+            //    CreateUnit("g000uu0010", 0, 2, Direction.Southeast),
+            //    CreateUnit("g000uu0021", 0, 1, Direction.Southeast),
+            //    CreateUnit("g000uu0017", 0, 0, Direction.Southeast),
+
+            //    CreateUnit("g000uu0015", 1, 2, Direction.Southeast),
+            //    CreateUnit("g000uu0015", 1, 1, Direction.Southeast),
+            //    CreateUnit("g000uu0015", 1, 0, Direction.Southeast),
+
+            //    CreateUnit("g000uu0093", 2, 2, Direction.Northwest),
+            //    CreateUnit("g000uu0087", 2, 1, Direction.Northwest),
+            //    CreateUnit("g000uu0087", 2, 0, Direction.Northwest),
+
+            //    //CreateUnit("g000uu0154", 3, 2, Direction.Northwest),
+            //    CreateUnit("g000uu0079", 3, 1, Direction.Northwest),
+            //    CreateUnit("g000uu0080", 3, 0, Direction.Northwest),
+            //};
 
             //GameObjects = new[]
             //{

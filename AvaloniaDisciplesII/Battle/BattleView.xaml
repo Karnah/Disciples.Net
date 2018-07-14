@@ -9,14 +9,13 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid Width="{Binding Width}" Height="{Binding Height}"
-      HorizontalAlignment="Center" VerticalAlignment="Center">
-
+  <Grid>
     <Image Source="{Binding Background}" Stretch="Fill" />
 
     <Image Source="{Binding BottomPanel}" ZIndex="5" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
 
-    <Image Source="{Binding LeftPanel}" Height="806" ZIndex="4" VerticalAlignment="Top" HorizontalAlignment="Right" />
+    <Image Source="{Binding LeftPanel}" Height="{Binding LeftPanelHeight}" Margin="{Binding LeftPanelMargin}"
+           ZIndex="6" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
 
     <ItemsControl Items="{Binding MapVisual.Visuals}">
       <ItemsControl.ItemsPanel>
@@ -28,8 +27,8 @@
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <!-- element name почему-то не работает -->
-          <Image Source="{Binding Bitmap}" Stretch="UniformToFill"
-                 Height="1080" />
+          <Image Source="{Binding Bitmap}" Stretch="Fill"
+                 Width="{Binding Width}" Height="{Binding Height}" />
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>

@@ -6,23 +6,25 @@ using System.Runtime.InteropServices;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
+using Engine;
 using Engine.Enums;
 using Engine.Interfaces;
+using Engine.Models;
 using ResourceManager;
+using ResourceManager.Models;
 
 using Action = Engine.Enums.Action;
-using Bitmap = Avalonia.Media.Imaging.Bitmap;
 
 namespace AvaloniaDisciplesII.Implementation
 {
     public class BitmapResources : IBitmapResources
     {
-        private readonly Dictionary<string, IReadOnlyList<Bitmap>> _resources;
+        private readonly Dictionary<string, IReadOnlyList<Frame>> _resources;
         private readonly ImagesExtractor _extractor;
 
         public BitmapResources()
         {
-            _resources = new Dictionary<string, IReadOnlyList<Bitmap>>();
+            _resources = new Dictionary<string, IReadOnlyList<Frame>>();
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\BatUnits.ff");
         }
 
@@ -32,7 +34,7 @@ namespace AvaloniaDisciplesII.Implementation
         // 1 - объект | 2 -аура
         // A - юго-восток, лицом | D - северо-запад, спиной | B - симметрично
         // 00
-        public IReadOnlyList<Bitmap> GetBitmapResources(string name, string code, Action action, Direction direction)
+        public IReadOnlyList<Frame> GetBitmapResources(string name, string code, Action action, Direction direction)
         {
             var fileName = $"{name.ToUpper()}{ConvertAction(action)}{code}{ConvertDirection(direction)}00";
             if (_resources.ContainsKey(fileName) == false) {
@@ -42,33 +44,36 @@ namespace AvaloniaDisciplesII.Implementation
             return _resources[fileName];
         }
 
-        private IReadOnlyList<Bitmap> CacheBitmaps(string fileName)
+        private IReadOnlyList<Frame> CacheBitmaps(string fileName)
         {
             var frames = _extractor.GetAnimationFrames(fileName);
             if (frames == null)
                 return null;
 
-            var result = new List<Bitmap>(frames.Length);
+            var result = new List<Frame>(frames.Count);
 
+            int minRow = int.MaxValue, maxRow = int.MinValue;
+            int minColumn = int.MaxValue, maxColumn = int.MinValue;
             foreach (var frame in frames) {
-                int width = 800,
-                    height = 600;
-                var bitmap = new WritableBitmap(width, height, PixelFormat.Rgba8888);
+                var opacityBounds = GetImageOpacityBounds(frame);
 
-                using (var l = bitmap.Lock()) {
-                    for (int row = 0; row < height; ++row) {
-                        Marshal.Copy(frame, row * l.RowBytes, new IntPtr(l.Address.ToInt64() + row * l.RowBytes), l.RowBytes);
-                    }
-                }
+                minRow = Math.Min(minRow, opacityBounds.MinRow);
+                maxRow = Math.Max(maxRow, opacityBounds.MaxRow);
 
-                result.Add(bitmap);
+                minColumn = Math.Min(minColumn, opacityBounds.MinColumn);
+                maxColumn = Math.Max(maxColumn, opacityBounds.MaxColumn);
+            }
+
+            var bounds = new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
+            foreach (var frame in frames) {
+                result.Add(ConvertImageToFrame(frame, bounds));
             }
 
             return result;
         }
 
 
-        private string ConvertAction(Action action)
+        private static string ConvertAction(Action action)
         {
             switch (action) {
                 case Action.Waiting:
@@ -82,7 +87,7 @@ namespace AvaloniaDisciplesII.Implementation
             }
         }
 
-        private string ConvertDirection(Direction direction)
+        private static string ConvertDirection(Direction direction)
         {
             switch (direction) {
                 case Direction.Northwest:
@@ -92,6 +97,79 @@ namespace AvaloniaDisciplesII.Implementation
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
+        }
+
+        private static OpacityBounds GetImageOpacityBounds(Image image)
+        {
+            int minRow = int.MaxValue,
+                maxRow = int.MinValue;
+            int minColumn = int.MaxValue,
+                maxColumn = int.MinValue;
+
+            for (int row = 0; row < image.Height; ++row) {
+                for (int column = 0; column < image.Width; ++column) {
+                    int pos = (row * image.Width + column) << 2;
+                    if (image.Data[pos + 3] != 0) {
+                        minRow = Math.Min(minRow, row);
+                        maxRow = Math.Max(maxRow, row);
+
+                        minColumn = Math.Min(minColumn, column);
+                        maxColumn = Math.Max(maxColumn, column);
+                    }
+                }
+            }
+
+            return new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
+        }
+
+        private static Frame ConvertImageToFrame(Image image, OpacityBounds opacityBounds)
+        {
+            var frame = new Frame();
+
+            frame.OffsetX = opacityBounds.MinColumn * GameInfo.Scale;
+            frame.OffsetY = opacityBounds.MinRow * GameInfo.Scale;
+
+            var width = opacityBounds.MaxColumn - opacityBounds.MinColumn + 1;
+            var height = opacityBounds.MaxRow - opacityBounds.MinRow + 1;
+
+            var bitmap = new WritableBitmap(width, height, PixelFormat.Rgba8888);
+            using (var l = bitmap.Lock()) {
+                for (int row = opacityBounds.MinRow; row <= opacityBounds.MaxRow; ++row) {
+                    var begin = (row * image.Width + opacityBounds.MinColumn) << 2;
+                    var length = width << 2;
+
+                    Marshal.Copy(image.Data, begin,
+                        new IntPtr(l.Address.ToInt64() + (row - opacityBounds.MinRow) * length), length);
+                }
+            }
+
+            frame.Width = width * GameInfo.Scale;
+            frame.Height = height * GameInfo.Scale;
+
+            frame.Bitmap = bitmap;
+
+            return frame;
+        }
+
+
+        private class OpacityBounds
+        {
+            public OpacityBounds(int minRow, int maxRow, int minColumn, int maxColumn)
+            {
+                MinRow = minRow;
+                MaxRow = maxRow;
+                MinColumn = minColumn;
+                MaxColumn = maxColumn;
+            }
+
+
+            public int MinRow { get; }
+
+            public int MaxRow { get; }
+
+            public int MinColumn { get; }
+
+            public int MaxColumn { get; }
         }
     }
 }

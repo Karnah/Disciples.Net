@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Avalonia.Media.Imaging;
-
 using Engine.Enums;
 using Engine.Interfaces;
 using Engine.Models;
@@ -22,7 +20,7 @@ namespace Engine.Components
         private MapObject _mapObject;
 
         private long _ticksCount = 0;
-        private IReadOnlyList<Bitmap> _animationFrames;
+        private IReadOnlyList<Frame> _animationFrames;
         private int _frameIndex = 0;
         private Action _action;
         private Direction _direction;
@@ -48,8 +46,7 @@ namespace Engine.Components
 
         public override void OnUpdate(long tickCount)
         {
-            if (_mapObject.Action != _action || _mapObject.Direction != _direction)
-            {
+            if (_mapObject.Action != _action || _mapObject.Direction != _direction) {
                 UpdateSource();
                 return;
             }
@@ -57,11 +54,11 @@ namespace Engine.Components
             if (_animationFrames == null)
                 return;
 
-            if (Math.Abs(_visual.X - _mapObject.Position.X) > float.Epsilon)
-                _visual.X = _mapObject.Position.X;
+            //if (Math.Abs(_visual.X - _mapObject.Position.X) > float.Epsilon)
+            //    _visual.X = _mapObject.Position.X;
 
-            if (Math.Abs(_visual.Y - _mapObject.Position.Y) > float.Epsilon)
-                _visual.Y = _mapObject.Position.Y;
+            //if (Math.Abs(_visual.Y - _mapObject.Position.Y) > float.Epsilon)
+            //    _visual.Y = _mapObject.Position.Y;
 
             _ticksCount += tickCount;
             if (_ticksCount < FrameChangeSpeed)
@@ -70,15 +67,35 @@ namespace Engine.Components
             _frameIndex += (int)(_ticksCount / FrameChangeSpeed);
             // todo Хреновая реализация контроллера анимации. 
             // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания
-            if (_frameIndex >= _animationFrames.Count && _action != Action.Waiting)
-            {
+            if (_frameIndex >= _animationFrames.Count && _action != Action.Waiting) {
                 _mapObject.Action = Action.Waiting;
                 return;
             }
 
             _frameIndex %= _animationFrames.Count;
             _ticksCount %= FrameChangeSpeed;
-            _visual.Bitmap = _animationFrames[_frameIndex];
+
+            var frame = _animationFrames[_frameIndex];
+            _visual.Bitmap = frame.Bitmap;
+
+
+            var posX = _mapObject.Position.X + frame.OffsetX;
+            if (Math.Abs(_visual.X - posX) > float.Epsilon) {
+                _visual.X = posX;
+            }
+
+            var posY = _mapObject.Position.Y + frame.OffsetY;
+            if (Math.Abs(_visual.Y - posY) > float.Epsilon) {
+                _visual.Y = posY;
+            }
+
+            if (Math.Abs(_visual.Width - frame.Width) > float.Epsilon) {
+                _visual.Width = frame.Width;
+            }
+
+            if (Math.Abs(_visual.Height - frame.Height) > float.Epsilon) {
+                _visual.Height = frame.Height;
+            }
         }
 
         private void UpdateSource()
@@ -87,31 +104,45 @@ namespace Engine.Components
             _direction = _mapObject.Direction;
             _animationFrames = _bitmapResources.GetBitmapResources(_name, _code, _action, _direction);
 
-            if (_animationFrames == null)
-            {
-                if (_visual != null)
-                {
+            if (_animationFrames == null) {
+                if (_visual != null) {
                     // todo Здесь происходит удаление.
                     // Возможно, просто достаточно перенести в невидимую область
                     _mapVisual.RemoveVisual(_visual);
                     _visual = null;
                 }
-
             }
-            else
-            {
-                if (_visual == null)
-                {
+            else {
+                if (_visual == null) {
                     _visual = new VisualObject();
                     _mapVisual.AddVisual(_visual);
                 }
 
-                _visual.X = _mapObject.Position.X;
-                _visual.Y = _mapObject.Position.Y;
+                //_visual.X = _mapObject.Position.X;
+                //_visual.Y = _mapObject.Position.Y;
 
                 _ticksCount = 0;
                 _frameIndex = 0;
-                _visual.Bitmap = _animationFrames[_frameIndex++];
+                _visual.Bitmap = _animationFrames[_frameIndex++].Bitmap;
+
+                var frame = _animationFrames[_frameIndex];
+                var posX = _mapObject.Position.X + frame.OffsetX;
+                if (Math.Abs(_visual.X - posX) > float.Epsilon) {
+                    _visual.X = posX;
+                }
+
+                var posY = _mapObject.Position.Y + frame.OffsetY;
+                if (Math.Abs(_visual.Y - posY) > float.Epsilon) {
+                    _visual.Y = posY;
+                }
+
+                if (Math.Abs(_visual.Width - frame.Width) > float.Epsilon) {
+                    _visual.Width = frame.Width;
+                }
+
+                if (Math.Abs(_visual.Height - frame.Height) > float.Epsilon) {
+                    _visual.Height = frame.Height;
+                }
             }
         }
     }

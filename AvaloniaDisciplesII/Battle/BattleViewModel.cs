@@ -37,7 +37,7 @@ namespace AvaloniaDisciplesII.Battle
             _currentUnitAura = new GameObject();
 
 
-            Background = GetImageBitmap("Map\\Ship#001.png");
+            Background = GetImageBitmap("Map\\Mountains#001.png");
             BottomPanel = GetImageBitmap("Interface\\IndexMap#95.png");
             LeftPanel = GetImageBitmap("Interface\\IndexMap#107.png");
             _audioService.PlayBackground("battle");
@@ -87,8 +87,9 @@ namespace AvaloniaDisciplesII.Battle
         public Bitmap LeftPanel { get; }
 
 
-        public double Width => 800 * GameInfo.Scale;
+        // todo Переделать в конвертеры? Или как-то поумнее раскидать
+        public double LeftPanelHeight => 448 * GameInfo.Scale;
 
-        public double Height => 600 * GameInfo.Scale;
+        public Thickness LeftPanelMargin => new Thickness(0, 0, 0, 140 * GameInfo.Scale);
     }
 }

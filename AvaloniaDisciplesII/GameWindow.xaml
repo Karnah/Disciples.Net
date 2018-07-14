@@ -6,6 +6,8 @@
         WindowState="Maximized" Background="Black"
         Title="Avalonia Disciples II">
 
-  <battle:BattleView DataContext="{Binding ViewContext}" />
-
+  <Grid Width="{Binding Width}" Height="{Binding Height}"
+        HorizontalAlignment="Center" VerticalAlignment="Center">
+    <battle:BattleView DataContext="{Binding ViewContext}" />
+  </Grid>
 </Window>

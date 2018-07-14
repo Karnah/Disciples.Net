@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-using Avalonia.Media.Imaging;
-
 using Engine.Enums;
+using Engine.Models;
 
 namespace Engine.Interfaces
 {
     public interface IBitmapResources
     {
-        IReadOnlyList<Bitmap> GetBitmapResources(string name, string code, Action action, Direction direction);
+        IReadOnlyList<Frame> GetBitmapResources(string name, string code, Action action, Direction direction);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AvaloniaDisciplesII.ViewModels;
+using Engine;
 
 namespace AvaloniaDisciplesII
 {
@@ -9,6 +10,10 @@ namespace AvaloniaDisciplesII
             ViewContext = viewContext;
         }
 
+
+        public double Width => 800 * GameInfo.Scale;
+
+        public double Height => 600 * GameInfo.Scale;
 
         public PageViewModel ViewContext { get; }
     }
