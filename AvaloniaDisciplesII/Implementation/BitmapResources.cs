@@ -55,13 +55,11 @@ namespace AvaloniaDisciplesII.Implementation
             int minRow = int.MaxValue, maxRow = int.MinValue;
             int minColumn = int.MaxValue, maxColumn = int.MinValue;
             foreach (var frame in frames) {
-                var opacityBounds = GetImageOpacityBounds(frame);
+                minRow = Math.Min(minRow, frame.MinRow);
+                maxRow = Math.Max(maxRow, frame.MaxRow);
 
-                minRow = Math.Min(minRow, opacityBounds.MinRow);
-                maxRow = Math.Max(maxRow, opacityBounds.MaxRow);
-
-                minColumn = Math.Min(minColumn, opacityBounds.MinColumn);
-                maxColumn = Math.Max(maxColumn, opacityBounds.MaxColumn);
+                minColumn = Math.Min(minColumn, frame.MinColumn);
+                maxColumn = Math.Max(maxColumn, frame.MaxColumn);
             }
 
             var bounds = new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
@@ -97,29 +95,6 @@ namespace AvaloniaDisciplesII.Implementation
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
-        }
-
-        private static OpacityBounds GetImageOpacityBounds(Image image)
-        {
-            int minRow = int.MaxValue,
-                maxRow = int.MinValue;
-            int minColumn = int.MaxValue,
-                maxColumn = int.MinValue;
-
-            for (int row = 0; row < image.Height; ++row) {
-                for (int column = 0; column < image.Width; ++column) {
-                    int pos = (row * image.Width + column) << 2;
-                    if (image.Data[pos + 3] != 0) {
-                        minRow = Math.Min(minRow, row);
-                        maxRow = Math.Max(maxRow, row);
-
-                        minColumn = Math.Min(minColumn, column);
-                        maxColumn = Math.Max(maxColumn, column);
-                    }
-                }
-            }
-
-            return new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
         }
 
         private static Frame ConvertImageToFrame(Image image, OpacityBounds opacityBounds)

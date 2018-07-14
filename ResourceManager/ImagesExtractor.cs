@@ -270,6 +270,8 @@ namespace ResourceManager
                     int width = imagesStream.ReadInt(),
                         height = imagesStream.ReadInt();
 
+                    int minRow = int.MaxValue, maxRow = int.MinValue;
+                    int minColumn = int.MaxValue, maxColumn = int.MinValue;
                     var imageData = new byte[width * height * 4];
                     for (int pieceIndex = 0; pieceIndex < piecesNumber; ++pieceIndex) {
                         int x1 = imagesStream.ReadInt(),
@@ -292,9 +294,14 @@ namespace ResourceManager
                                 }
                             }
                         }
+
+                        minRow = Math.Min(minRow, y1);
+                        maxRow = Math.Max(maxRow, y1 + dY);
+                        minColumn = Math.Min(minColumn, x1);
+                        maxColumn = Math.Max(maxColumn, x1 + dX);
                     }
 
-                    result.Add(new Image(width, height, imageData));
+                    result.Add(new Image(minRow, maxRow, minColumn, maxColumn, width, height, imageData));
                 }
 
                 return result;
