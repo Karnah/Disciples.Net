@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Inftastructure.Exceptions
+namespace Engine.Exceptions
 {
     public class ComponentNotFoundException : ApplicationException
     {

@@ -1,4 +1,4 @@
-﻿namespace Inftastructure.Interfaces
+﻿namespace Engine.Interfaces
 {
     public interface IAudioService
     {

@@ -5,12 +5,12 @@ using System.Linq;
 
 using ImageMagick;
 
-using DII.ResourceExtractor.Helpers;
-using DII.ResourceExtractor.Models;
+using ResourceManager.Helpers;
+using ResourceManager.Models;
 
-using File = DII.ResourceExtractor.Models.File;
+using File = ResourceManager.Models.File;
 
-namespace DII.ResourceExtractor
+namespace ResourceManager
 {
     public class ImagesExtractor
     {

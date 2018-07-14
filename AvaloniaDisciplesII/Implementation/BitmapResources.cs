@@ -6,14 +6,14 @@ using System.Runtime.InteropServices;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
-using DII.ResourceExtractor;
-using Inftastructure.Enums;
-using Inftastructure.Interfaces;
+using Engine.Enums;
+using Engine.Interfaces;
+using ResourceManager;
 
-using Action = Inftastructure.Enums.Action;
+using Action = Engine.Enums.Action;
 using Bitmap = Avalonia.Media.Imaging.Bitmap;
 
-namespace Animation.Implementation
+namespace AvaloniaDisciplesII.Implementation
 {
     public class BitmapResources : IBitmapResources
     {

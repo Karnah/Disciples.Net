@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-using Inftastructure.Models;
+using Engine.Models;
 
-namespace Inftastructure.Interfaces
+namespace Engine.Interfaces
 {
     public interface IMapVisual
     {

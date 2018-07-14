@@ -1,4 +1,4 @@
-﻿namespace DII.ResourceExtractor.Models
+﻿namespace ResourceManager.Models
 {
     internal class Frame
     {

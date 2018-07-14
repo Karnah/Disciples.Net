@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-using Inftastructure.Components;
+using Engine.Components;
 
-namespace Inftastructure
+namespace Engine
 {
     public class GameObject
     {

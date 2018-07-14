@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Inftastructure
+namespace Engine
 {
     public static class RandomGenerator
     {

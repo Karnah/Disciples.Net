@@ -5,15 +5,14 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Threading;
 
-using Animation.Implementation;
-using Inftastructure;
-using Inftastructure.Components;
-using Inftastructure.Enums;
-using Inftastructure.Interfaces;
+using Engine;
+using Engine.Components;
+using Engine.Enums;
+using Engine.Interfaces;
 
-using Action = Inftastructure.Enums.Action;
+using Action = Engine.Enums.Action;
 
-namespace Animation
+namespace AvaloniaDisciplesII
 {
     public class Game
     {

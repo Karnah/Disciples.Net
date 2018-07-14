@@ -9,12 +9,12 @@ using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
 
 using AvaloniaDisciplesII.ViewModels;
-using DII.ResourceExtractor;
-using Inftastructure;
-using Inftastructure.Components;
-using Inftastructure.Interfaces;
+using Engine;
+using Engine.Components;
+using Engine.Interfaces;
+using ResourceManager;
 
-using Action = Inftastructure.Enums.Action;
+using Action = Engine.Enums.Action;
 
 namespace AvaloniaDisciplesII.Battle
 {

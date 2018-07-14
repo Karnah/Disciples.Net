@@ -1,7 +1,8 @@
 ﻿using System;
-using Inftastructure.Exceptions;
 
-namespace Inftastructure.Components
+using Engine.Exceptions;
+
+namespace Engine.Components
 {
     public abstract class Component : IComponent
     {

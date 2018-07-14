@@ -3,12 +3,13 @@ using System.Collections.Generic;
 
 using Avalonia.Media.Imaging;
 
-using Inftastructure.Enums;
-using Inftastructure.Interfaces;
-using Inftastructure.Models;
-using Action = Inftastructure.Enums.Action;
+using Engine.Enums;
+using Engine.Interfaces;
+using Engine.Models;
 
-namespace Inftastructure.Components
+using Action = Engine.Enums.Action;
+
+namespace Engine.Components
 {
     public class AnimationComponent : Component
     {

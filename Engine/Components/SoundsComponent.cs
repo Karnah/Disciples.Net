@@ -1,10 +1,10 @@
 ﻿using System;
 
-using Inftastructure.Interfaces;
+using Engine.Interfaces;
 
-using Action = Inftastructure.Enums.Action;
+using Action = Engine.Enums.Action;
 
-namespace Inftastructure.Components
+namespace Engine.Components
 {
     public class SoundsComponent : Component
     {

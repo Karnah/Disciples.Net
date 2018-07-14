@@ -3,10 +3,9 @@ using Avalonia.Logging.Serilog;
 using Unity;
 using Unity.Resolution;
 
-using Animation;
-using Animation.Implementation;
 using AvaloniaDisciplesII.Battle;
-using Inftastructure.Interfaces;
+using AvaloniaDisciplesII.Implementation;
+using Engine.Interfaces;
 
 
 namespace AvaloniaDisciplesII

@@ -2,9 +2,9 @@
 
 using Avalonia.Media.Imaging;
 
-using Inftastructure.Enums;
+using Engine.Enums;
 
-namespace Inftastructure.Interfaces
+namespace Engine.Interfaces
 {
     public interface IBitmapResources
     {

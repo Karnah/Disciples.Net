@@ -8,10 +8,10 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using NLayer.NAudioSupport;
 
-using Inftastructure;
-using Inftastructure.Interfaces;
+using Engine;
+using Engine.Interfaces;
 
-namespace Animation.Implementation
+namespace AvaloniaDisciplesII.Implementation
 {
     public class AudioPlaybackEngine : IAudioService, IDisposable
     {
@@ -41,8 +41,7 @@ namespace Animation.Implementation
         private void LoadMusic()
         {
             var cd = Environment.CurrentDirectory;
-            foreach (var musicFile in Directory.GetFiles($"{cd}\\Music"))
-            {
+            foreach (var musicFile in Directory.GetFiles($"{cd}\\Music")) {
                 var fileName = Path.GetFileNameWithoutExtension(musicFile);
                 var match = Regex.Match(fileName, @"(?<key>\D+)(?<numbers>\d+)");
                 var key = match.Success
@@ -59,8 +58,7 @@ namespace Animation.Implementation
         private void LoadSounds()
         {
             var cd = Environment.CurrentDirectory;
-            foreach (var musicFile in Directory.GetFiles($"{cd}\\Sounds"))
-            {
+            foreach (var musicFile in Directory.GetFiles($"{cd}\\Sounds")) {
                 var fileName = Path.GetFileNameWithoutExtension(musicFile);
                 _sounds.Add(fileName, CreateCachedSound(musicFile, false));
             }
@@ -70,14 +68,12 @@ namespace Animation.Implementation
         private static CachedSound CreateCachedSound(string fileName, bool repeat)
         {
             var builder = new Mp3FileReader.FrameDecompressorBuilder(wf => new Mp3FrameDecompressor(wf));
-            using (var audioFileReader = new Mp3FileReader(fileName, builder))
-            {
+            using (var audioFileReader = new Mp3FileReader(fileName, builder)) {
                 var sampleChannel = new SampleChannel(audioFileReader);
-                var wholeFile = new List<float>((int)(audioFileReader.Length / 4));
+                var wholeFile = new List<float>((int) (audioFileReader.Length / 4));
                 var readBuffer = new float[sampleChannel.WaveFormat.SampleRate * sampleChannel.WaveFormat.Channels];
                 int samplesRead;
-                while ((samplesRead = sampleChannel.Read(readBuffer, 0, readBuffer.Length)) > 0)
-                {
+                while ((samplesRead = sampleChannel.Read(readBuffer, 0, readBuffer.Length)) > 0) {
                     wholeFile.AddRange(readBuffer.Take(samplesRead));
                 }
 
@@ -113,13 +109,11 @@ namespace Animation.Implementation
 
         private ISampleProvider ConvertToRightChannelCount(ISampleProvider input)
         {
-            if (input.WaveFormat.Channels == _mixer.WaveFormat.Channels)
-            {
+            if (input.WaveFormat.Channels == _mixer.WaveFormat.Channels) {
                 return input;
             }
 
-            if (input.WaveFormat.Channels == 1 && _mixer.WaveFormat.Channels == 2)
-            {
+            if (input.WaveFormat.Channels == 1 && _mixer.WaveFormat.Channels == 2) {
                 return new MonoToStereoSampleProvider(input);
             }
 
@@ -167,11 +161,11 @@ namespace Animation.Implementation
             Array.Copy(_cachedSound.AudioData, _position, buffer, offset, samplesToCopy);
             _position += samplesToCopy;
 
-            if (_position == _cachedSound.AudioData.Length && _cachedSound.Repeat)
-            {
+            if (_position == _cachedSound.AudioData.Length && _cachedSound.Repeat) {
                 //AudioPlaybackEngine.Instance.PlaySound(cachedSound);
             }
-            return (int)samplesToCopy;
+
+            return (int) samplesToCopy;
         }
 
         public WaveFormat WaveFormat => _cachedSound.WaveFormat;

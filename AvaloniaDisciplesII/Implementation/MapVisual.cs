@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-using Inftastructure.Interfaces;
-using Inftastructure.Models;
+using Engine.Interfaces;
+using Engine.Models;
 
-namespace Animation.Implementation
+namespace AvaloniaDisciplesII.Implementation
 {
     public class MapVisual : IMapVisual
     {

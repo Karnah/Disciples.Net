@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DII.ResourceExtractor.Models
+namespace ResourceManager.Models
 {
     internal class File
     {

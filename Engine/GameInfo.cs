@@ -1,4 +1,4 @@
-﻿namespace Inftastructure
+﻿namespace Engine
 {
     public static class GameInfo
     {

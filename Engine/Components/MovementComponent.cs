@@ -2,9 +2,9 @@
 
 using Avalonia;
 
-using Inftastructure.Enums;
+using Engine.Enums;
 
-namespace Inftastructure.Components
+namespace Engine.Components
 {
     public class MovementComponent : Component
     {

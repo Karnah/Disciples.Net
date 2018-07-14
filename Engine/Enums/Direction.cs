@@ -1,4 +1,4 @@
-﻿namespace Inftastructure.Enums
+﻿namespace Engine.Enums
 {
     public enum Direction
     {

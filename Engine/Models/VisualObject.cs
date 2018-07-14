@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using ReactiveUI;
 
-namespace Inftastructure.Models
+namespace Engine.Models
 {
     public class VisualObject : ReactiveObject
     {
