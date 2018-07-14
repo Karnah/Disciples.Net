@@ -1,0 +1,11 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:AvaloniaDisciplesII;assembly=AvaloniaDisciplesII"
+        xmlns:battle="clr-namespace:AvaloniaDisciplesII.Battle;assembly=AvaloniaDisciplesII"
+        Icon="resm:AvaloniaDisciplesII.Assets.Icon.ico"
+        WindowState="Maximized" Background="Black"
+        Title="Avalonia Disciples II">
+
+  <battle:BattleView DataContext="{Binding ViewContext}" />
+
+</Window>

@@ -1,0 +1,37 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Styles>
+    <Style Selector="ItemsControl > ContentPresenter">
+      <!--<Setter Property="ZIndex" Value="{Binding Y}" />-->
+      <Setter Property="Canvas.Left" Value="{Binding X}" />
+      <Setter Property="Canvas.Top" Value="{Binding Y}" />
+      <!--<Setter Property="Tr" />-->
+    </Style>
+  </UserControl.Styles>
+
+  <Grid Width="{Binding Width}" Height="{Binding Height}"
+      HorizontalAlignment="Center" VerticalAlignment="Center">
+
+    <Image Source="{Binding Background}" Stretch="Fill" />
+
+    <Image Source="{Binding BottomPanel}" ZIndex="5" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+
+    <Image Source="{Binding LeftPanel}" Height="806" ZIndex="4" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+    <ItemsControl Items="{Binding MapVisual.Visuals}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <Canvas />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <!-- element name почему-то не работает -->
+          <Image Source="{Binding Bitmap}" Stretch="UniformToFill"
+                 Height="1080" />
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</UserControl>
