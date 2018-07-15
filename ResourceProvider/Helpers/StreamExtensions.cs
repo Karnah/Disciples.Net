@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace ResourceManager.Helpers
+namespace ResourceProvider.Helpers
 {
     internal static class StreamExtensions
     {

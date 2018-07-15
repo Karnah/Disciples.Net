@@ -1,4 +1,4 @@
-﻿namespace ResourceManager.Models
+﻿namespace ResourceProvider.Models
 {
     internal class Animation
     {

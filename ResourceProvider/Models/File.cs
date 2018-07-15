@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ResourceManager.Models
+namespace ResourceProvider.Models
 {
     internal class File
     {

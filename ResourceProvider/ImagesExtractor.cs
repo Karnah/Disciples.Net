@@ -5,12 +5,11 @@ using System.Linq;
 
 using ImageMagick;
 
-using ResourceManager.Helpers;
-using ResourceManager.Models;
+using ResourceProvider.Helpers;
+using ResourceProvider.Models;
+using File = ResourceProvider.Models.File;
 
-using File = ResourceManager.Models.File;
-
-namespace ResourceManager
+namespace ResourceProvider
 {
     public class ImagesExtractor
     {

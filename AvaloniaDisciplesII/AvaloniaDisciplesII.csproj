@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj" />
-    <ProjectReference Include="..\ResourceManager\ResourceManager.csproj" />
+    <ProjectReference Include="..\ResourceProvider\ResourceProvider.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Battle\BattleView.xaml">

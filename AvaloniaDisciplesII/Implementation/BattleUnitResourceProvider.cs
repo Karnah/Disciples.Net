@@ -11,8 +11,8 @@ using Engine.Battle.Enums;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
 using Engine.Models;
-using ResourceManager;
-using ResourceManager.Models;
+using ResourceProvider;
+using ResourceProvider.Models;
 
 namespace AvaloniaDisciplesII.Implementation
 {
