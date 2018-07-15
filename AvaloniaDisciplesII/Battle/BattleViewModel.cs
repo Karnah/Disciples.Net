@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
+using Unity;
 using Avalonia;
 using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
@@ -11,8 +12,9 @@ using Avalonia.Media.Imaging;
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
 using Engine.Components;
+using Engine.Enums;
 using Engine.Interfaces;
-using ResourceManager;
+using Engine.Models;
 
 using Action = Engine.Enums.Action;
 
@@ -20,21 +22,24 @@ namespace AvaloniaDisciplesII.Battle
 {
     public class BattleViewModel : PageViewModel
     {
+        private readonly IUnityContainer _container;
+        private readonly IGame _game;
         private readonly IAudioService _audioService;
-        private readonly IList<GameObject> _gameObjects;
+        private IList<GameObject> _units;
 
-        private readonly ImagesExtractor _battleImagesExtractor;
+        //private readonly ImagesExtractor _battleImagesExtractor;
 
         private int _currentUnitIndex = 0;
 
-        public BattleViewModel(IMapVisual mapVisual, IAudioService audioService, IList<GameObject> gameObjects)
+        public BattleViewModel(IUnityContainer container, IGame game, IMapVisual mapVisual, IAudioService audioService, Squad attackSquad, Squad defendSquad)
         {
+            _container = container;
+            _game = game;
             _audioService = audioService;
-            _gameObjects = gameObjects;
             MapVisual = mapVisual;
 
-            _battleImagesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Battle.ff");
-            _currentUnitAura = new GameObject();
+            //_battleImagesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Battle.ff");
+            //_currentUnitAura = new GameObject();
 
 
             Background = GetImageBitmap("Map\\Mountains#001.png");
@@ -43,13 +48,14 @@ namespace AvaloniaDisciplesII.Battle
             _audioService.PlayBackground("battle");
 
             Application.Current.InputManager.PostProcess.OfType<RawMouseEventArgs>().Subscribe(Click);
+
+            ArrangeUnits(attackSquad, defendSquad);
         }
 
         private static Bitmap GetImageBitmap(string path)
         {
             var cd = Environment.CurrentDirectory;
-            using (var stream = new FileStream($"{cd}\\Images\\{path}", FileMode.Open))
-            {
+            using (var stream = new FileStream($"{cd}\\Images\\{path}", FileMode.Open)) {
                 return new Bitmap(stream);
             }
         }
@@ -59,21 +65,63 @@ namespace AvaloniaDisciplesII.Battle
             if (args.Type != RawMouseEventType.LeftButtonUp)
                 return;
 
-            var mo = _gameObjects[_currentUnitIndex].Components.OfType<MapObject>().First().Action = Action.Attacking;
+            var mo = _units[_currentUnitIndex].Components.OfType<MapObject>().First().Action = Action.Attacking;
             ++_currentUnitIndex;
-            _currentUnitIndex %= _gameObjects.Count;
+            _currentUnitIndex %= _units.Count;
         }
 
-
-        private GameObject _currentUnitAura;
-
-        private void SelectUnit()
+        private void ArrangeUnits(Squad attackSquad, Squad defendSquad)
         {
-            var currentUnit = _gameObjects[_currentUnitIndex];
-            var cuCoor = currentUnit.Components.OfType<MapObject>().First();
+            _game.GameObjects.Clear();
 
-            var coor = GameInfo.OffsetCoordinates(cuCoor.Position.X, cuCoor.Position.Y);
+            var units = new List<GameObject>();
 
+            foreach (var attackSquadUnit in attackSquad.Units) {
+                var unit = CreateUnit(
+                    attackSquadUnit.UnitType.UnitTypeId,
+                    attackSquadUnit.SquadLinePosition,
+                    attackSquadUnit.SquadFlankPosition,
+                    Direction.Southeast);
+
+                units.Add(unit);
+            }
+
+            foreach (var defendSquadUnit in defendSquad.Units) {
+                var unit = CreateUnit(
+                    defendSquadUnit.UnitType.UnitTypeId,
+                    ((defendSquadUnit.SquadLinePosition + 1) & 1) + 2,
+                    defendSquadUnit.SquadFlankPosition,
+                    Direction.Northwest);
+
+                units.Add(unit);
+            }
+
+            foreach (var unit in units) {
+                unit.OnInitialize();
+                _game.GameObjects.Add(unit);
+            }
+
+            _units = units;
+        }
+
+        private GameObject CreateUnit(string id, double x, double y, Direction direction)
+        {
+            var bitmapResources = _container.Resolve<IBitmapResources>();
+            var coor = GameInfo.OffsetCoordinates(x, y);
+            var go = new GameObject();
+            go.Components = new IComponent[] {
+                new MapObject(go) {
+                    Position = new Rect(coor.X, coor.Y, 100, 100),
+                    Direction = direction,
+                    Action = Action.Waiting,
+                },
+                new AnimationComponent(go, MapVisual, bitmapResources, id, "S1"),
+                new AnimationComponent(go, MapVisual, bitmapResources, id, "A1"),
+                new AnimationComponent(go, MapVisual, bitmapResources, id, "A2"),
+                //new SoundsComponent(go, AudioService, attackSounds),
+            };
+
+            return go;
         }
 
 
