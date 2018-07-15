@@ -11,12 +11,12 @@ using Avalonia.Media.Imaging;
 
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
+using Engine.Battle.Components;
+using Engine.Battle.Enums;
+using Engine.Battle.Providers;
 using Engine.Components;
-using Engine.Enums;
 using Engine.Interfaces;
 using Engine.Models;
-
-using Action = Engine.Enums.Action;
 
 namespace AvaloniaDisciplesII.Battle
 {
@@ -65,7 +65,7 @@ namespace AvaloniaDisciplesII.Battle
             if (args.Type != RawMouseEventType.LeftButtonUp)
                 return;
 
-            var mo = _units[_currentUnitIndex].Components.OfType<MapObject>().First().Action = Action.Attacking;
+            var mo = _units[_currentUnitIndex].Components.OfType<BattleObjectComponent>().First().Action = BattleAction.Attacking;
             ++_currentUnitIndex;
             _currentUnitIndex %= _units.Count;
         }
@@ -81,7 +81,7 @@ namespace AvaloniaDisciplesII.Battle
                     attackSquadUnit.UnitType.UnitTypeId,
                     attackSquadUnit.SquadLinePosition,
                     attackSquadUnit.SquadFlankPosition,
-                    Direction.Southeast);
+                    BattleDirection.Attacker);
 
                 units.Add(unit);
             }
@@ -91,7 +91,7 @@ namespace AvaloniaDisciplesII.Battle
                     defendSquadUnit.UnitType.UnitTypeId,
                     ((defendSquadUnit.SquadLinePosition + 1) & 1) + 2,
                     defendSquadUnit.SquadFlankPosition,
-                    Direction.Northwest);
+                    BattleDirection.Defender);
 
                 units.Add(unit);
             }
@@ -104,20 +104,18 @@ namespace AvaloniaDisciplesII.Battle
             _units = units;
         }
 
-        private GameObject CreateUnit(string id, double x, double y, Direction direction)
+        private GameObject CreateUnit(string id, double x, double y, BattleDirection direction)
         {
-            var bitmapResources = _container.Resolve<IBitmapResources>();
+            var bitmapResources = _container.Resolve<IBattleUnitResourceProvider>();
             var coor = GameInfo.OffsetCoordinates(x, y);
             var go = new GameObject();
             go.Components = new IComponent[] {
-                new MapObject(go) {
+                new BattleObjectComponent(go) {
                     Position = new Rect(coor.X, coor.Y, 100, 100),
                     Direction = direction,
-                    Action = Action.Waiting,
+                    Action = BattleAction.Waiting,
                 },
-                new AnimationComponent(go, MapVisual, bitmapResources, id, "S1"),
-                new AnimationComponent(go, MapVisual, bitmapResources, id, "A1"),
-                new AnimationComponent(go, MapVisual, bitmapResources, id, "A2"),
+                new BattleUnitAnimationComponent(go, MapVisual, bitmapResources, id)
                 //new SoundsComponent(go, AudioService, attackSounds),
             };
 

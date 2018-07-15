@@ -8,9 +8,9 @@ using Unity.Resolution;
 using AvaloniaDisciplesII.Battle;
 using AvaloniaDisciplesII.Implementation;
 using Engine;
+using Engine.Battle.Providers;
 using Engine.Interfaces;
 using Engine.Models;
-
 
 namespace AvaloniaDisciplesII
 {
@@ -35,8 +35,8 @@ namespace AvaloniaDisciplesII
         {
             Container = new UnityContainer();
 
-            var bitmapResources = new BitmapResources();
-            Container.RegisterInstance<IBitmapResources>(bitmapResources);
+            var battleUnitResourceProvider = new BattleUnitResourceProvider();
+            Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);
 
             var mapVisual = new MapVisual();
             Container.RegisterInstance<IMapVisual>(mapVisual);

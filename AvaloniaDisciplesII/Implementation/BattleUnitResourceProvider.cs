@@ -7,26 +7,48 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
 using Engine;
-using Engine.Enums;
-using Engine.Interfaces;
+using Engine.Battle.Enums;
+using Engine.Battle.Models;
+using Engine.Battle.Providers;
 using Engine.Models;
 using ResourceManager;
 using ResourceManager.Models;
 
-using Action = Engine.Enums.Action;
-
 namespace AvaloniaDisciplesII.Implementation
 {
-    public class BitmapResources : IBitmapResources
+    public class BattleUnitResourceProvider : IBattleUnitResourceProvider
     {
-        private readonly Dictionary<string, IReadOnlyList<Frame>> _resources;
+        private readonly SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations;
         private readonly ImagesExtractor _extractor;
 
-        public BitmapResources()
+        public BattleUnitResourceProvider()
         {
-            _resources = new Dictionary<string, IReadOnlyList<Frame>>();
+            _unitsAnimations = new SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\BatUnits.ff");
         }
+
+
+        public BattleUnitAnimation GetBattleUnitAnimation(string unitId, BattleDirection direction)
+        {
+            if (_unitsAnimations.ContainsKey((unitId, direction)) == false) {
+                _unitsAnimations[(unitId, direction)] = GetUnitAnimation(unitId, direction);
+            }
+
+            return _unitsAnimations[(unitId, direction)];
+        }
+
+
+        private BattleUnitAnimation GetUnitAnimation(string unitId, BattleDirection direction)
+        {
+            var unitFrames = new Dictionary<BattleAction, BattleUnitFrames>();
+            foreach (BattleAction action in Enum.GetValues(typeof(BattleAction))) {
+                unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
+            }
+
+            // todo Добавить анимацию для атаки цели
+            return new BattleUnitAnimation(unitFrames, null);
+        }
+
 
         // g000uu0015 - ид в верхнем регистре
         // HHIT - ограбает | HMOVE - атакует | IDLE - ждёт | STIL - замер | TUCH - бьёт 1 врага | HEFF - бьёт площадь
@@ -34,17 +56,21 @@ namespace AvaloniaDisciplesII.Implementation
         // 1 - объект | 2 -аура
         // A - юго-восток, лицом | D - северо-запад, спиной | B - симметрично
         // 00
-        public IReadOnlyList<Frame> GetBitmapResources(string name, string code, Action action, Direction direction)
+        private BattleUnitFrames GetUnitFrames(string unitId, BattleDirection direction, BattleAction action)
         {
-            var fileName = $"{name.ToUpper()}{ConvertAction(action)}{code}{ConvertDirection(direction)}00";
-            if (_resources.ContainsKey(fileName) == false) {
-                _resources[fileName] = CacheBitmaps(fileName);
-            }
+            var shadowImagesName = $"{unitId.ToUpper()}{ConvertAction(action)}S1{ConvertDirection(direction)}00";
+            var shadowFrames = GetAnimationFrames(shadowImagesName);
 
-            return _resources[fileName];
+            var unitImagesName = $"{unitId.ToUpper()}{ConvertAction(action)}A1{ConvertDirection(direction)}00";
+            var unitFrames = GetAnimationFrames(unitImagesName);
+
+            var auraImagesName = $"{unitId.ToUpper()}{ConvertAction(action)}A2{ConvertDirection(direction)}00";
+            var auraFrames = GetAnimationFrames(auraImagesName);
+
+            return new BattleUnitFrames(shadowFrames, unitFrames, auraFrames);
         }
 
-        private IReadOnlyList<Frame> CacheBitmaps(string fileName)
+        private IReadOnlyList<Frame> GetAnimationFrames(string fileName)
         {
             var frames = _extractor.GetAnimationFrames(fileName);
             if (frames == null)
@@ -62,6 +88,7 @@ namespace AvaloniaDisciplesII.Implementation
                 maxColumn = Math.Max(maxColumn, frame.MaxColumn);
             }
 
+            // todo Здесь можно огрести, если фреймы будут иметь различные размеры
             var bounds = new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
             foreach (var frame in frames) {
                 result.Add(ConvertImageToFrame(frame, bounds));
@@ -71,31 +98,34 @@ namespace AvaloniaDisciplesII.Implementation
         }
 
 
-        private static string ConvertAction(Action action)
+        private static string ConvertAction(BattleAction action)
         {
             switch (action) {
-                case Action.Waiting:
+                case BattleAction.Waiting:
                     return "IDLE";
-                case Action.Attacking:
+                case BattleAction.Attacking:
                     return "HMOV";
-                case Action.TakingDamage:
+                case BattleAction.TakingDamage:
                     return "HHIT";
+                case BattleAction.Paralized:
+                    return "STIL";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
         }
 
-        private static string ConvertDirection(Direction direction)
+        private static string ConvertDirection(BattleDirection direction)
         {
             switch (direction) {
-                case Direction.Northwest:
-                    return "D";
-                case Direction.Southeast:
+                case BattleDirection.Attacker:
                     return "A";
+                case BattleDirection.Defender:
+                    return "D";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
         }
+
 
         private static Frame ConvertImageToFrame(Image image, OpacityBounds opacityBounds)
         {
