@@ -4,6 +4,8 @@
     {
         public static double Scale = 1080.0 / 600.0;
 
+        //public static double Scale = 1;
+
         public static (double X, double Y) OffsetCoordinates(double x, double y)
         {
             double newX, newY;

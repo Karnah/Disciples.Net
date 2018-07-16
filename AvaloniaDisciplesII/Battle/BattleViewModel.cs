@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
-using Unity;
 using Avalonia;
 using Avalonia.Input.Raw;
 using Avalonia.Media.Imaging;
+using ReactiveUI;
+using Unity;
 
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
@@ -25,7 +26,7 @@ namespace AvaloniaDisciplesII.Battle
         private readonly IUnityContainer _container;
         private readonly IGame _game;
         private readonly IAudioService _audioService;
-        private IList<GameObject> _units;
+        private IList<BattleUnit> _units;
 
         //private readonly ImagesExtractor _battleImagesExtractor;
 
@@ -65,20 +66,26 @@ namespace AvaloniaDisciplesII.Battle
             if (args.Type != RawMouseEventType.LeftButtonUp)
                 return;
 
-            var mo = _units[_currentUnitIndex].Components.OfType<BattleObjectComponent>().First().Action = BattleAction.Attacking;
+            _units[_currentUnitIndex].BattleObjectComponent.Action = BattleAction.Attacking;
             ++_currentUnitIndex;
             _currentUnitIndex %= _units.Count;
+
+            CurrentUserFace = _units[_currentUnitIndex].Unit.UnitType.Face;
+            CurrentUnitName = _units[_currentUnitIndex].Unit.UnitType.Name;
         }
 
         private void ArrangeUnits(Squad attackSquad, Squad defendSquad)
         {
             _game.GameObjects.Clear();
 
-            var units = new List<GameObject>();
+            var units = new List<BattleUnit>();
+            var bitmapResources = _container.Resolve<IBattleUnitResourceProvider>();
 
             foreach (var attackSquadUnit in attackSquad.Units) {
-                var unit = CreateUnit(
-                    attackSquadUnit.UnitType.UnitTypeId,
+                var unit = new BattleUnit(
+                    MapVisual,
+                    bitmapResources,
+                    attackSquadUnit,
                     attackSquadUnit.SquadLinePosition,
                     attackSquadUnit.SquadFlankPosition,
                     BattleDirection.Attacker);
@@ -87,8 +94,10 @@ namespace AvaloniaDisciplesII.Battle
             }
 
             foreach (var defendSquadUnit in defendSquad.Units) {
-                var unit = CreateUnit(
-                    defendSquadUnit.UnitType.UnitTypeId,
+                var unit = new BattleUnit(
+                    MapVisual,
+                    bitmapResources,
+                    defendSquadUnit,
                     ((defendSquadUnit.SquadLinePosition + 1) & 1) + 2,
                     defendSquadUnit.SquadFlankPosition,
                     BattleDirection.Defender);
@@ -102,26 +111,9 @@ namespace AvaloniaDisciplesII.Battle
             }
 
             _units = units;
+            CurrentUserFace = _units[_currentUnitIndex].Unit.UnitType.Face;
+            CurrentUnitName = _units[_currentUnitIndex].Unit.UnitType.Name;
         }
-
-        private GameObject CreateUnit(string id, double x, double y, BattleDirection direction)
-        {
-            var bitmapResources = _container.Resolve<IBattleUnitResourceProvider>();
-            var coor = GameInfo.OffsetCoordinates(x, y);
-            var go = new GameObject();
-            go.Components = new IComponent[] {
-                new BattleObjectComponent(go) {
-                    Position = new Rect(coor.X, coor.Y, 100, 100),
-                    Direction = direction,
-                    Action = BattleAction.Waiting,
-                },
-                new BattleUnitAnimationComponent(go, MapVisual, bitmapResources, id)
-                //new SoundsComponent(go, AudioService, attackSounds),
-            };
-
-            return go;
-        }
-
 
 
         public IMapVisual MapVisual { get; set; }
@@ -132,10 +124,16 @@ namespace AvaloniaDisciplesII.Battle
 
         public Bitmap LeftPanel { get; }
 
+        private Bitmap _currentUserFace;
+        public Bitmap CurrentUserFace {
+            get => _currentUserFace;
+            set => this.RaiseAndSetIfChanged(ref _currentUserFace, value);
+        }
 
-        // todo Переделать в конвертеры? Или как-то поумнее раскидать
-        public double LeftPanelHeight => 448 * GameInfo.Scale;
-
-        public Thickness LeftPanelMargin => new Thickness(0, 0, 0, 140 * GameInfo.Scale);
+        private string _currentUnitName;
+        public string CurrentUnitName {
+            get => _currentUnitName;
+            set => this.RaiseAndSetIfChanged(ref _currentUnitName, value);
+        }
     }
 }

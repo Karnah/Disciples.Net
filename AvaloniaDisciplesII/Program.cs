@@ -38,6 +38,9 @@ namespace AvaloniaDisciplesII
             var battleUnitResourceProvider = new BattleUnitResourceProvider();
             Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);
 
+            var unitInfoProvider = new UnitInfoProvider();
+            Container.RegisterInstance<IUnitInfoProvider>(unitInfoProvider);
+
             var mapVisual = new MapVisual();
             Container.RegisterInstance<IMapVisual>(mapVisual);
 
@@ -50,20 +53,22 @@ namespace AvaloniaDisciplesII
 
         public static Squad CreateAttackingSquad()
         {
-            var mage = new UnitType("g000uu0010", "Маг", null);
+            var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+
+            var mage = unitInfoProvider.GetUnitType("g000uu0010");
             var u02 = new Unit(Guid.NewGuid().ToString(), mage, 0, 2);
 
-            var pathfinder = new UnitType("g000uu0020", "Следопыт", null);
+            var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
             var u01 = new Unit(Guid.NewGuid().ToString(), pathfinder, 0, 1);
 
-            var abbess = new UnitType("g000uu0017", "Аббатиса", null);
+            var abbess = unitInfoProvider.GetUnitType("g000uu0017");
             var u00 = new Unit(Guid.NewGuid().ToString(), abbess, 0, 0);
 
 
-            var knight = new UnitType("g000uu0002", "Рыцарь", null);
+            var knight = unitInfoProvider.GetUnitType("g000uu0002");
             var u12 = new Unit(Guid.NewGuid().ToString(), knight, 1, 2);
 
-            var imperiaKnight = new UnitType("g000uu0003", "Имперский рыцарь", null);
+            var imperiaKnight = unitInfoProvider.GetUnitType("g000uu0003");
             var u11 = new Unit(Guid.NewGuid().ToString(), imperiaKnight, 1, 1);
 
             var u10 = new Unit(Guid.NewGuid().ToString(), knight, 1, 0);
@@ -74,17 +79,19 @@ namespace AvaloniaDisciplesII
 
         public static Squad CreateDefendingSquad()
         {
-            var masterOfRunes = new UnitType("g000uu0165", "Мастер рун", null);
+            var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+
+            var masterOfRunes = unitInfoProvider.GetUnitType("g000uu0165");
             var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, 1, 1);
 
-            var gnomesKing = new UnitType("g000uu0039", "Король гномов", null);
+            var gnomesKing = unitInfoProvider.GetUnitType("g000uu0039");
             var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, 1, 0);
 
 
-            var gornDefender = new UnitType("g000uu0162", "Защитник горна", null);
+            var gornDefender = unitInfoProvider.GetUnitType("g000uu0162");
             var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, 0, 2);
 
-            var crossbowman = new UnitType("g000uu0027", "Арбалетчик", null);
+            var crossbowman = unitInfoProvider.GetUnitType("g000uu0027");
             var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, 0, 1);
 
             return new Squad(new []{ u11, u10, u02, u01});

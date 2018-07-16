@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -6,9 +6,12 @@
 
   <ItemGroup>
     <None Include="Imgs/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Globals/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.5.0.1" />
+    <PackageReference Include="NDbfReader" Version="2.2.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@ using ImageMagick;
 
 using ResourceProvider.Helpers;
 using ResourceProvider.Models;
+
 using File = ResourceProvider.Models.File;
 
 namespace ResourceProvider
@@ -40,6 +41,21 @@ namespace ResourceProvider
 
             var animation = _animations[name];
             return GetFrameData(_files[animation.FileId].Frames);
+        }
+
+        public byte[] GetFileContent(string fileName)
+        {
+            var file = _files.FirstOrDefault(f => string.Equals(f.Value.Name, fileName, StringComparison.CurrentCultureIgnoreCase));
+            return file.Value?.Content;
+        }
+
+        public Image GetImage(string name)
+        {
+            var file = _files.FirstOrDefault(f => string.Equals(f.Value.Name, $"{name}.PNG", StringComparison.CurrentCultureIgnoreCase)).Value;
+            if (file == null)
+                return null;
+
+            return GetImage(file.Name, file.Content);
         }
 
 
@@ -131,8 +147,12 @@ namespace ResourceProvider
 
         private void LoadFrames()
         {
+            var animsFile = _files.FirstOrDefault(f => f.Value.Name == "-ANIMS.OPT").Value;
+            if (animsFile == null)
+                return;
+
             var d = new SortedDictionary<string, List<Tuple<int, int>>>();
-            using (var animStream = new MemoryStream(_files.First(f => f.Value.Name == "-ANIMS.OPT").Value.Content)) {
+            using (var animStream = new MemoryStream(animsFile.Content)) {
                 int animNumber = 0;
                 while (true) {
                     var fileAnimNumber = animStream.ReadInt();
@@ -177,7 +197,11 @@ namespace ResourceProvider
 
         private void LoadImages()
         {
-            using (var imagesStream = new MemoryStream(_files.First(f => f.Value.Name == "-IMAGES.OPT").Value.Content)) {
+            var imagesFile = _files.FirstOrDefault(f => f.Value.Name == "-IMAGES.OPT").Value;
+            if (imagesFile == null)
+                return;
+
+            using (var imagesStream = new MemoryStream(imagesFile.Content)) {
                 for (int i = 0; i < _frames.Count; ++i) {
                     imagesStream.Seek(11 + 1024, SeekOrigin.Current);
 
@@ -205,62 +229,13 @@ namespace ResourceProvider
             using (var imagesStream = new MemoryStream(_files.First(f => f.Value.Name == "-IMAGES.OPT").Value.Content)) {
                 var result = new List<Image>(frames.Count);
 
-                byte[] mainPixels = null;
-                int mainWidth = 0;
                 int mainBitmapId = -1;
+                Image mainImage = null;
 
                 foreach (var frame in frames.OrderBy(f => f.SeqNumber)) {
                     if (frame.Id != mainBitmapId) {
                         mainBitmapId = frame.Id;
-
-                        var mainImage = new MagickImage(_files[mainBitmapId].Content);
-
-                        var colorMap = new Dictionary<int, byte>();
-                        var name = Path.GetFileNameWithoutExtension(_files[mainBitmapId].Name);
-                        var fileType = GetFileType(name);
-                        if (fileType == Aura) {
-                            // Если файл содержит ауру, то создаём полупрозрачное изображение
-                            // Прозрачности зависит от индекса цвета в палитре
-                            for (int i = 0; i < 256; ++i) {
-                                unchecked {
-                                    var color = mainImage.GetColormap(i);
-                                    var index = ((byte)color.R << 16) + ((byte)color.G << 8) + (byte)color.B;
-                                    colorMap[index] = (byte)i;
-                                }
-                            }
-                        }
-
-                        mainPixels = mainImage.GetPixels().ToByteArray(PixelMapping.RGBA);
-                        for (int i = 0; i < mainPixels.Length; i += 4) {
-                            if (mainPixels[i] == 0 && mainPixels[i + 1] == 0 && mainPixels[i + 2] == 0) {
-                                mainPixels[i + 3] = 0;
-                            }
-                            else if (mainPixels[i] == 255 && mainPixels[i + 1] == 0 && mainPixels[i + 2] == 255) {
-                                mainPixels[i + 3] = 0;
-                            }
-
-                            // Если файл - аура, то определяем прозрачность по словарю
-                            var index = (mainPixels[i] << 16) + (mainPixels[i + 1] << 8) + mainPixels[i + 2];
-                            if (colorMap.ContainsKey(index)) {
-                                mainPixels[i + 3] = colorMap[index];
-                            }
-
-                            // Если файл тень, то делаем его полупрозрачным
-                            if (fileType == Shadow) {
-                                if (mainPixels[i + 3] != 0) {
-                                    mainPixels[i + 3] = 128;
-                                }
-                            }
-
-                            if (mainPixels[i + 3] == 0) {
-                                mainPixels[i] = 0;
-                                mainPixels[i + 1] = 0;
-                                mainPixels[i + 2] = 0;
-                                continue;
-                            }
-                        }
-
-                        mainWidth = mainImage.Width;
+                        mainImage = GetImage(_files[mainBitmapId].Name, _files[mainBitmapId].Content);
                     }
 
                     imagesStream.Seek(frame.Offset, SeekOrigin.Begin);
@@ -283,13 +258,13 @@ namespace ResourceProvider
                         for (int x = 0; x < dX; ++x) {
                             for (int y = 0; y < dY; ++y) {
                                 unchecked {
-                                    var posS = ((y2 + y) * mainWidth + (x2 + x)) << 2;
+                                    var posS = ((y2 + y) * mainImage.Width + (x2 + x)) << 2;
                                     var posT = ((y1 + y) * width + (x1 + x)) << 2;
 
-                                    imageData[posT] = mainPixels[posS];
-                                    imageData[posT + 1] = mainPixels[posS + 1];
-                                    imageData[posT + 2] = mainPixels[posS + 2];
-                                    imageData[posT + 3] = mainPixels[posS + 3];
+                                    imageData[posT] = mainImage.Data[posS];
+                                    imageData[posT + 1] = mainImage.Data[posS + 1];
+                                    imageData[posT + 2] = mainImage.Data[posS + 2];
+                                    imageData[posT + 3] = mainImage.Data[posS + 3];
                                 }
                             }
                         }
@@ -306,6 +281,65 @@ namespace ResourceProvider
                 return result;
             }
         }
+
+        private static Image GetImage(string name, byte[] content)
+        {
+            var magicImage = new MagickImage(content);
+
+            var colorMap = new Dictionary<int, byte>();
+            var safeName = Path.GetFileNameWithoutExtension(name);
+            var fileType = GetFileType(safeName);
+            if (fileType == Aura) {
+                // Если файл содержит ауру, то создаём полупрозрачное изображение
+                // Прозрачности зависит от индекса цвета в палитре
+                for (int i = 0; i < 256; ++i) {
+                    unchecked {
+                        var color = magicImage.GetColormap(i);
+                        var index = ((byte) color.R << 16) + ((byte) color.G << 8) + (byte) color.B;
+                        colorMap[index] = (byte) i;
+                    }
+                }
+            }
+
+            var pixels = magicImage.GetPixels().ToByteArray(PixelMapping.RGBA);
+            var transparentColor = magicImage.GetColormap(0);
+            if (transparentColor == null) {
+                transparentColor = MagickColor.FromRgb(255, 0, 255);
+            }
+            unchecked {
+                for (int i = 0; i < pixels.Length; i += 4) {
+                    if (pixels[i] == (byte)transparentColor.R &&
+                        pixels[i + 1] == (byte)transparentColor.G &&
+                        pixels[i + 2] == (byte)transparentColor.B) {
+                        pixels[i + 3] = 0;
+                    }
+
+                    // Если файл - аура, то определяем прозрачность по словарю
+                    var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
+                    if (colorMap.ContainsKey(index)) {
+                        pixels[i + 3] = colorMap[index];
+                    }
+
+                    // Если файл тень, то делаем его полупрозрачным
+                    if (fileType == Shadow) {
+                        if (pixels[i + 3] != 0) {
+                            pixels[i + 3] = 128;
+                        }
+                    }
+
+                    if (pixels[i + 3] == 0) {
+                        pixels[i] = 0;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = 0;
+                        continue;
+                    }
+                }
+            }
+
+
+            return new Image(0, magicImage.Height, 0, magicImage.Width, magicImage.Width, magicImage.Height, pixels);
+        }
+
 
         // todo to Enum
         private const byte Unit = 0;

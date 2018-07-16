@@ -263,3 +263,4 @@ __pycache__/
 
 # Disciples II resources files
 *.ff
+*.dbf
