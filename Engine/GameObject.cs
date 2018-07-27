@@ -10,13 +10,20 @@ namespace Engine
         {
         }
 
-        public IReadOnlyCollection<IComponent> Components { get; set; }
+        public IReadOnlyCollection<IComponent> Components { get; protected set; }
 
 
         public void OnInitialize()
         {
             foreach (var component in Components) {
                 component.OnInitialize();
+            }
+        }
+
+        public virtual void OnUpdate(long tickCount)
+        {
+            foreach (var component in Components) {
+                component.OnUpdate(tickCount);
             }
         }
     }

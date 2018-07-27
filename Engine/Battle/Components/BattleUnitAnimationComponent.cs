@@ -21,7 +21,6 @@ namespace Engine.Battle.Components
         private BattleObjectComponent _battleObject;
 
         private long _ticksCount = 0;
-        private int _frameIndex = 0;
         private BattleAction _action;
 
         private BattleUnitAnimation _unitAnimation;
@@ -47,6 +46,12 @@ namespace Engine.Battle.Components
             _unitId = unitId;
         }
 
+
+        public int FrameIndex { get; private set; }
+
+        public int FramesCount { get; private set; }
+
+
         public override void OnInitialize()
         {
             base.OnInitialize();
@@ -68,20 +73,20 @@ namespace Engine.Battle.Components
             if (_ticksCount < FrameChangeSpeed)
                 return;
 
-            _frameIndex += (int) (_ticksCount / FrameChangeSpeed);
+            FrameIndex += (int) (_ticksCount / FrameChangeSpeed);
             // todo Хреновая реализация контроллера анимации.
             // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания
-            if (_frameIndex >= _unitFrames.Count && _action != BattleAction.Waiting) {
+            if (FrameIndex >= FramesCount && _action != BattleAction.Waiting) {
                 _battleObject.Action = BattleAction.Waiting;
                 return;
             }
 
-            _frameIndex %= _unitFrames.Count;
+            FrameIndex %= FramesCount;
             _ticksCount %= FrameChangeSpeed;
 
-            UpdateBitmap(_shadowVisual, _shadowFrames, _frameIndex);
-            UpdateBitmap(_unitVisual, _unitFrames, _frameIndex);
-            UpdateBitmap(_auraVisual, _auraFrames, _frameIndex);
+            UpdateBitmap(_shadowVisual, _shadowFrames, FrameIndex);
+            UpdateBitmap(_unitVisual, _unitFrames, FrameIndex);
+            UpdateBitmap(_auraVisual, _auraFrames, FrameIndex);
         }
 
 
@@ -100,7 +105,7 @@ namespace Engine.Battle.Components
         private void UpdateSource()
         {
             _action = _battleObject.Action;
-            _frameIndex = 1;
+            FrameIndex = 1;
 
             var frames = _unitAnimation.BattleUnitFrameses[_action];
             _shadowFrames = frames.ShadowFrames;
@@ -110,6 +115,8 @@ namespace Engine.Battle.Components
             UpdatePosition(ref _shadowVisual, _shadowFrames);
             UpdatePosition(ref _unitVisual, _unitFrames);
             UpdatePosition(ref _auraVisual, _auraFrames);
+
+            FramesCount = _unitFrames.Count;
         }
 
         private void UpdatePosition(ref VisualObject visual, IReadOnlyList<Frame> frames)

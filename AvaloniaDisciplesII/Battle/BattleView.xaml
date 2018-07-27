@@ -24,12 +24,12 @@
            Margin="{Binding ConverterParameter='0,0,0,140', Converter={StaticResource MarginScaleConverter}}"
            ZIndex="6" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
 
-    <Image Source="{Binding CurrentUserFace}"
-           Height="{Binding CurrentUserFace, Converter={StaticResource BitmapHeightScaleConvrter}}"
+    <Image Source="{Binding CurrentUnit.UnitType.Face}"
+           Height="{Binding CurrentUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
            Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
            ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
 
-    <TextBlock Text="{Binding CurrentUnitName}" FontWeight="Bold" TextWrapping="Wrap"
+    <TextBlock Text="{Binding CurrentUnit.UnitType.Name}" FontWeight="Bold" TextWrapping="Wrap"
                FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
                Margin="{Binding ConverterParameter='190,520,0,0', Converter={StaticResource MarginScaleConverter}}"
                Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"

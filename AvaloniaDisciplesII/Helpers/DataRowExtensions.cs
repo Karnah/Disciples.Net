@@ -19,10 +19,16 @@ namespace AvaloniaDisciplesII.Helpers
             where T : struct
         {
             var value = dataRow[columnName];
-            if (value == DBNull.Value)
+            if (value == null || value == DBNull.Value)
                 return null;
 
-            return (T)value;
+            if (value is T)
+                return (T) value;
+
+            if (value is IConvertible)
+                return (T)Convert.ChangeType(value, typeof(T));
+
+            return null;
         }
     }
 }

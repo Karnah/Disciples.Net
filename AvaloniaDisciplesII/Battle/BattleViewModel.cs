@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
 
 using Avalonia;
@@ -12,10 +11,8 @@ using Unity;
 
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
-using Engine.Battle.Components;
 using Engine.Battle.Enums;
 using Engine.Battle.Providers;
-using Engine.Components;
 using Engine.Interfaces;
 using Engine.Models;
 
@@ -31,6 +28,7 @@ namespace AvaloniaDisciplesII.Battle
         //private readonly ImagesExtractor _battleImagesExtractor;
 
         private int _currentUnitIndex = 0;
+        private bool _isAnimating;
 
         public BattleViewModel(IUnityContainer container, IGame game, IMapVisual mapVisual, IAudioService audioService, Squad attackSquad, Squad defendSquad)
         {
@@ -66,13 +64,24 @@ namespace AvaloniaDisciplesII.Battle
             if (args.Type != RawMouseEventType.LeftButtonUp)
                 return;
 
-            _units[_currentUnitIndex].BattleObjectComponent.Action = BattleAction.Attacking;
+            if (_isAnimating)
+                return;
+
+
+            var currentUnit = _units[_currentUnitIndex];
+            currentUnit.AttackUnit(_units[(_currentUnitIndex + 1) % _units.Count], OnAttackEnd);
+            _isAnimating = true;
+        }
+
+        private void OnAttackEnd()
+        {
             ++_currentUnitIndex;
             _currentUnitIndex %= _units.Count;
+            CurrentUnit = _units[_currentUnitIndex].Unit;
 
-            CurrentUserFace = _units[_currentUnitIndex].Unit.UnitType.Face;
-            CurrentUnitName = _units[_currentUnitIndex].Unit.UnitType.Name;
+            _isAnimating = false;
         }
+
 
         private void ArrangeUnits(Squad attackSquad, Squad defendSquad)
         {
@@ -111,8 +120,7 @@ namespace AvaloniaDisciplesII.Battle
             }
 
             _units = units;
-            CurrentUserFace = _units[_currentUnitIndex].Unit.UnitType.Face;
-            CurrentUnitName = _units[_currentUnitIndex].Unit.UnitType.Name;
+            CurrentUnit = _units[_currentUnitIndex].Unit;
         }
 
 
@@ -124,16 +132,11 @@ namespace AvaloniaDisciplesII.Battle
 
         public Bitmap LeftPanel { get; }
 
-        private Bitmap _currentUserFace;
-        public Bitmap CurrentUserFace {
-            get => _currentUserFace;
-            set => this.RaiseAndSetIfChanged(ref _currentUserFace, value);
-        }
 
-        private string _currentUnitName;
-        public string CurrentUnitName {
-            get => _currentUnitName;
-            set => this.RaiseAndSetIfChanged(ref _currentUnitName, value);
+        private Unit _currentUnit;
+        public Unit CurrentUnit {
+            get => _currentUnit;
+            private set => this.RaiseAndSetIfChanged(ref _currentUnit, value);
         }
     }
 }

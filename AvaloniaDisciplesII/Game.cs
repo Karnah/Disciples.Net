@@ -36,9 +36,7 @@ namespace AvaloniaDisciplesII
             _ticks = ticks;
 
             foreach (var gameObject in GameObjects) {
-                foreach (var gameObjectComponent in gameObject.Components) {
-                    gameObjectComponent.OnUpdate(ticksCount);
-                }
+                gameObject.OnUpdate(ticksCount);
             }
         }
 
