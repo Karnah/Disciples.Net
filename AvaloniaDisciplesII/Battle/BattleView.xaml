@@ -1,10 +1,11 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:AvaloniaDisciplesII.Battle;assembly=AvaloniaDisciplesII"
              xmlns:c="clr-namespace:AvaloniaDisciplesII.Converters;assembly=AvaloniaDisciplesII">
   <UserControl.Styles>
     <Style Selector="ItemsControl > ContentPresenter">
-      <Setter Property="Canvas.Left" Value="{Binding X}" />
-      <Setter Property="Canvas.Top" Value="{Binding Y}" />
+      <Setter Property="Canvas.Left" Value="{Binding BattleUnitAnimationComponent.X}" />
+      <Setter Property="Canvas.Top" Value="{Binding BattleUnitAnimationComponent.Y}" />
     </Style>
   </UserControl.Styles>
 
@@ -35,7 +36,25 @@
                Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
                ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Top" />
 
-    <ItemsControl Items="{Binding MapVisual.Visuals}">
+
+    <Image Source="{Binding TargetUnit.UnitType.Face}"
+       Height="{Binding TargetUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
+       Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
+       ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+      <Image.RenderTransform>
+        <ScaleTransform ScaleX="-1"/>
+      </Image.RenderTransform>
+    </Image>
+
+    <TextBlock Text="{Binding TargetUnit.UnitType.Name}" FontWeight="Bold" TextWrapping="Wrap"
+               FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
+               Margin="{Binding ConverterParameter='0,520,170,0', Converter={StaticResource MarginScaleConverter}}"
+               Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
+               ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Top" />
+
+
+
+    <ItemsControl Items="{Binding Units}">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
           <Canvas />
@@ -44,9 +63,9 @@
 
       <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <!-- element name почему-то не работает -->
-          <Image Source="{Binding Bitmap}" Stretch="Fill"
-                 Width="{Binding Width}" Height="{Binding Height}" />
+          <local:BattleUnitView BattleUnit="{Binding }"
+                                SelectUnitCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.SelectUnitCommand}"
+                                AttackUnitCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.AttackUnitCommand}"/>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>

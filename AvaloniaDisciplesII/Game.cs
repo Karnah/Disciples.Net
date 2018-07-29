@@ -29,15 +29,22 @@ namespace AvaloniaDisciplesII
             _timer.Start();
         }
 
-        private void UpdateScene(object sender, EventArgs e)
+        private void UpdateScene(object sender, EventArgs args)
         {
             var ticks = _stopwatch.ElapsedMilliseconds;
             var ticksCount = ticks - _ticks;
             _ticks = ticks;
 
-            foreach (var gameObject in GameObjects) {
-                gameObject.OnUpdate(ticksCount);
+            try {
+                foreach (var gameObject in GameObjects) {
+                    gameObject.OnUpdate(ticksCount);
+                }
             }
+            catch (Exception e) {
+                // todo Обрабатывать это с помощью логов
+                Console.WriteLine(e);
+            }
+
         }
 
         public IList<GameObject> GameObjects { get; private set; }

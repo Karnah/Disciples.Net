@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media;
+using ReactiveUI;
+using Avalonia.Media.Imaging;
+
 using Engine.Battle.Enums;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
 using Engine.Components;
-using Engine.Interfaces;
 using Engine.Models;
 
 namespace Engine.Battle.Components
@@ -15,7 +20,6 @@ namespace Engine.Battle.Components
     {
         private const int FrameChangeSpeed = 75;
 
-        private readonly IMapVisual _mapVisual;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly string _unitId;
         private BattleObjectComponent _battleObject;
@@ -29,19 +33,19 @@ namespace Engine.Battle.Components
         private IReadOnlyList<Frame> _unitFrames;
         private IReadOnlyList<Frame> _auraFrames;
 
-        private VisualObject _shadowVisual;
-        private VisualObject _unitVisual;
-        private VisualObject _auraVisual;
+        private Bitmap _bitmap;
+        private double _x;
+        private double _y;
+        private double _width;
+        private double _height;
 
 
         public BattleUnitAnimationComponent(
             GameObject gameObject,
-            IMapVisual mapVisual,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             string unitId) : base(
             gameObject)
         {
-            _mapVisual = mapVisual;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _unitId = unitId;
         }
@@ -50,6 +54,33 @@ namespace Engine.Battle.Components
         public int FrameIndex { get; private set; }
 
         public int FramesCount { get; private set; }
+
+
+        public Bitmap Bitmap {
+            get => _bitmap;
+            private set => this.RaiseAndSetIfChanged(ref _bitmap, value);
+        }
+
+        public double X {
+            get => _x;
+            private set => this.RaiseAndSetIfChanged(ref _x, value);
+        }
+
+        public double Y {
+            get => _y;
+            private set => this.RaiseAndSetIfChanged(ref _y, value);
+        }
+
+        public double Width {
+            get => _width;
+            private set => this.RaiseAndSetIfChanged(ref _width, value);
+        }
+
+        public double Height {
+            get => _height;
+            private set => this.RaiseAndSetIfChanged(ref _height, value);
+        }
+
 
 
         public override void OnInitialize()
@@ -84,23 +115,23 @@ namespace Engine.Battle.Components
             FrameIndex %= FramesCount;
             _ticksCount %= FrameChangeSpeed;
 
-            UpdateBitmap(_shadowVisual, _shadowFrames, FrameIndex);
-            UpdateBitmap(_unitVisual, _unitFrames, FrameIndex);
-            UpdateBitmap(_auraVisual, _auraFrames, FrameIndex);
+            Bitmap = UnionFrames(
+                GetFrame(_shadowFrames, FrameIndex),
+                GetFrame(_unitFrames, FrameIndex),
+                GetFrame(_auraFrames, FrameIndex));
         }
 
 
-        private static void UpdateBitmap(VisualObject visual, IReadOnlyList<Frame> frames, int frameIndex)
+        private static Frame GetFrame(IReadOnlyList<Frame> frames, int frameIndex)
         {
-            if (visual == null)
-                return;
-
             if (frames?.Any() != true)
-                return;
+                return null;
 
-            visual.Bitmap = frames[frameIndex].Bitmap;
+            if (frameIndex >= frames.Count)
+                return null;
+
+            return frames[frameIndex];
         }
-
 
         private void UpdateSource()
         {
@@ -112,51 +143,95 @@ namespace Engine.Battle.Components
             _unitFrames = frames.UnitFrames;
             _auraFrames = frames.AuraFrames;
 
-            UpdatePosition(ref _shadowVisual, _shadowFrames);
-            UpdatePosition(ref _unitVisual, _unitFrames);
-            UpdatePosition(ref _auraVisual, _auraFrames);
+            var shadowFrame = GetFrame(_shadowFrames, FrameIndex);
+            var unitFrame = GetFrame(_unitFrames, FrameIndex);
+            var auraFrame = GetFrame(_auraFrames, FrameIndex);
+
+            UpdatePosition(shadowFrame, unitFrame, auraFrame);
+            Bitmap = UnionFrames(shadowFrame, unitFrame, auraFrame);
 
             FramesCount = _unitFrames.Count;
         }
 
-        private void UpdatePosition(ref VisualObject visual, IReadOnlyList<Frame> frames)
+        private void UpdatePosition(params Frame[] frames)
         {
-            if (frames == null) {
-                if (visual != null) {
-                    // todo Здесь происходит удаление.
-                    // Возможно, просто достаточно перенести в невидимую область
-                    _mapVisual.RemoveVisual(visual);
-                    visual = null;
-                }
+            double offsetX = double.MaxValue,
+                offsetY = double.MaxValue,
+                width = 0,
+                height = 0;
+
+            foreach (var frame in frames) {
+                if (frame == null)
+                    continue;
+
+                offsetX = Math.Min(offsetX, frame.OffsetX);
+                offsetY = Math.Min(offsetY, frame.OffsetY);
             }
-            else {
-                if (visual == null) {
-                    visual = new VisualObject();
-                    _mapVisual.AddVisual(visual);
-                }
 
-                var frame = frames[0];
-                visual.Bitmap = frame.Bitmap;
+            foreach (var frame in frames) {
+                if (frame == null)
+                    continue;
 
-                // Предполагается, что размеры и смещение всех фреймов в анимации одинаково
-                // Поэтому это условие проверяется только при изменении действия юнита
-                var posX = _battleObject.Position.X + frame.OffsetX;
-                if (Math.Abs(visual.X - posX) > float.Epsilon) {
-                    visual.X = posX;
-                }
+                width = Math.Max(width, frame.OffsetX - offsetX + frame.Width);
+                height = Math.Max(height, frame.OffsetY - offsetY + frame.Height);
+            }
 
-                var posY = _battleObject.Position.Y + frame.OffsetY;
-                if (Math.Abs(visual.Y - posY) > float.Epsilon) {
-                    visual.Y = posY;
-                }
+            var posX = _battleObject.Position.X + offsetX;
+            if (Math.Abs(X - posX) > float.Epsilon) {
+                X = posX;
+            }
 
-                if (Math.Abs(visual.Width - frame.Width) > float.Epsilon) {
-                    visual.Width = frame.Width;
-                }
+            var posY = _battleObject.Position.Y + offsetY;
+            if (Math.Abs(Y - posY) > float.Epsilon) {
+                Y = posY;
+            }
 
-                if (Math.Abs(visual.Height - frame.Height) > float.Epsilon) {
-                    visual.Height = frame.Height;
-                }
+            if (Math.Abs(Width - width) > float.Epsilon) {
+                Width = width;
+            }
+
+            if (Math.Abs(Height - height) > float.Epsilon) {
+                Height = height;
+            }
+        }
+
+        private Bitmap UnionFrames(params Frame[] frames)
+        {
+            var canvas = new Canvas {
+                Width = Width,
+                Height = Height
+            };
+
+            var offsetX = X - _battleObject.Position.X;
+            var offsetY = Y - _battleObject.Position.Y;
+
+            foreach (var frame in frames) {
+                if (frame == null)
+                    continue;
+
+                var image = new Image {
+                    Source = frame.Bitmap,
+                    Width = frame.Width,
+                    Height = frame.Height,
+                    Stretch = Stretch.Fill
+                };
+
+                Canvas.SetLeft(image, frame.OffsetX - offsetX);
+                Canvas.SetTop(image, frame.OffsetY - offsetY);
+
+                canvas.Children.Add(image);
+            }
+
+            using (var bitmap = new RenderTargetBitmap(
+                (int)canvas.Width,
+                (int)canvas.Height)) {
+                var size = new Size(canvas.Width, canvas.Height);
+                canvas.Measure(size);
+                canvas.Arrange(new Rect(size));
+                bitmap.Render(canvas);
+
+                var copy = new Bitmap(bitmap.PlatformImpl);
+                return copy;
             }
         }
     }

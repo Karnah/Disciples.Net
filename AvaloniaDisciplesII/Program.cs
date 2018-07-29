@@ -102,8 +102,8 @@ namespace AvaloniaDisciplesII
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .UseReactiveUI()
-                //.UseDirect2D1()
-                .UseSkia()
+                .UseDirect2D1()
+                //.UseSkia()
                 .LogToDebug();
     }
 }

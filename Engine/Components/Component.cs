@@ -1,10 +1,12 @@
 ﻿using System;
 
+using ReactiveUI;
+
 using Engine.Exceptions;
 
 namespace Engine.Components
 {
-    public abstract class Component : IComponent
+    public abstract class Component : ReactiveObject, IComponent
     {
         private readonly GameObject _gameObject;
 
