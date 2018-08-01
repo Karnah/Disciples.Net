@@ -8,10 +8,9 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using NLayer.NAudioSupport;
 
-using Engine;
 using Engine.Interfaces;
 
-namespace AvaloniaDisciplesII.Implementation
+namespace Engine.Implementation.Resources
 {
     public class AudioPlaybackEngine : IAudioService, IDisposable
     {

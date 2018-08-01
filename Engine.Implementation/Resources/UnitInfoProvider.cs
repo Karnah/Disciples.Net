@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 
-using AvaloniaDisciplesII.Helpers;
 using Engine.Enums;
+using Engine.Implementation.Helpers;
 using Engine.Interfaces;
 using Engine.Models;
 using ResourceProvider;
 
-namespace AvaloniaDisciplesII.Implementation
+namespace Engine.Implementation.Resources
 {
     public class UnitInfoProvider : IUnitInfoProvider
     {

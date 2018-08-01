@@ -6,9 +6,10 @@ using Unity;
 using Unity.Resolution;
 
 using AvaloniaDisciplesII.Battle;
-using AvaloniaDisciplesII.Implementation;
 using Engine;
 using Engine.Battle.Providers;
+using Engine.Implementation.Game;
+using Engine.Implementation.Resources;
 using Engine.Interfaces;
 using Engine.Models;
 
@@ -34,6 +35,9 @@ namespace AvaloniaDisciplesII
         private static void CreateContainer()
         {
             Container = new UnityContainer();
+
+            var battleResourceProvider = new BattleResourceProvider();
+            Container.RegisterInstance<IBattleResourceProvider>(battleResourceProvider);
 
             var battleUnitResourceProvider = new BattleUnitResourceProvider();
             Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);

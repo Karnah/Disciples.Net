@@ -355,7 +355,8 @@ namespace ResourceProvider
         /// 2, если тень</returns>
         private static byte GetFileType(string name)
         {
-            if (name.EndsWith("A2A00") || name.EndsWith("A2D00"))
+            // todo Ну это уже совсем никуда не годится, исправить
+            if (name.EndsWith("A2A00") || name.EndsWith("A2D00") || name.StartsWith("MRK"))
                 return 1;
 
             if (name.EndsWith("S1A00") || name.EndsWith("S1D00"))

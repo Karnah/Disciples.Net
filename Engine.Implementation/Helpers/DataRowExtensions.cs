@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace AvaloniaDisciplesII.Helpers
+namespace Engine.Implementation.Helpers
 {
     public static class DataRowExtensions
     {

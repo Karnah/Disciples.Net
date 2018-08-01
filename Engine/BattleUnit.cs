@@ -6,13 +6,14 @@ using Engine.Battle.Components;
 using Engine.Battle.Enums;
 using Engine.Battle.Providers;
 using Engine.Components;
+using Engine.Interfaces;
 using Engine.Models;
 
 namespace Engine
 {
     public class BattleUnit : GameObject
     {
-        public BattleUnit(IBattleUnitResourceProvider battleUnitResourceProvider, Unit unit, int x, int y, BattleDirection direction)
+        public BattleUnit(IMapVisual mapVisual, IBattleUnitResourceProvider battleUnitResourceProvider, Unit unit, int x, int y, BattleDirection direction)
         {
             Unit = unit;
 
@@ -23,7 +24,7 @@ namespace Engine
                 Action = BattleAction.Waiting,
             };
 
-            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
+            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, mapVisual, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
 
             this.Components = new IComponent[] {
                 BattleObjectComponent, BattleUnitAnimationComponent

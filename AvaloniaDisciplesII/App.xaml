@@ -12,13 +12,13 @@
         <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default"/>
         <StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"/>
 
-        <Style Selector="battle|BattleUnitView">
+        <Style Selector="battle|VisualObjectView">
           <Setter Property="Template">
             <ControlTemplate>
               <Image Stretch="Fill"
-                     Source="{TemplateBinding BattleUnit.BattleUnitAnimationComponent.Bitmap}"
-                     Width="{TemplateBinding BattleUnit.BattleUnitAnimationComponent.Width}"
-                     Height="{TemplateBinding BattleUnit.BattleUnitAnimationComponent.Height}" />
+                     Source="{TemplateBinding VisualObject.Bitmap}"
+                     Width="{TemplateBinding VisualObject.Width}"
+                     Height="{TemplateBinding VisualObject.Height}" />
             </ControlTemplate>
           </Setter>
         </Style>

@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using Engine.Interfaces;
 using Engine.Models;
 
-namespace AvaloniaDisciplesII.Implementation
+namespace Engine.Implementation.Game
 {
     public class MapVisual : IMapVisual
     {

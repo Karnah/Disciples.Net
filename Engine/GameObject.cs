@@ -10,7 +10,9 @@ namespace Engine
         {
         }
 
-        public IReadOnlyCollection<IComponent> Components { get; protected set; }
+        public IReadOnlyCollection<IComponent> Components { get; set; }
+
+        public bool IsDestroyed { get; private set; }
 
 
         public void OnInitialize()
@@ -25,6 +27,15 @@ namespace Engine
             foreach (var component in Components) {
                 component.OnUpdate(tickCount);
             }
+        }
+
+        public void Destroy()
+        {
+            foreach (var component in Components) {
+                component.Destroy();
+            }
+
+            IsDestroyed = true;
         }
     }
 }

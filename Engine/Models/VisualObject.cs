@@ -11,6 +11,16 @@ namespace Engine.Models
         private double _y;
         private Bitmap _bitmap;
 
+        public VisualObject(GameObject gameObject, int layer)
+        {
+            GameObject = gameObject;
+            Layer = layer;
+        }
+
+        public GameObject GameObject { get; }
+
+        public int Layer { get; }
+
 
         public double Width {
             get => _width;

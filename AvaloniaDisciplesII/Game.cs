@@ -12,13 +12,15 @@ namespace AvaloniaDisciplesII
     {
         private const int TicksPerSecond = 60;
 
+        private readonly LinkedList<GameObject> _gameObjects;
+
         private long _ticks;
         private DispatcherTimer _timer;
         private Stopwatch _stopwatch;
 
         public Game()
         {
-            GameObjects = new List<GameObject>();
+            _gameObjects = new LinkedList<GameObject>();
 
             _stopwatch = new Stopwatch();
             _stopwatch.Start();
@@ -36,17 +38,43 @@ namespace AvaloniaDisciplesII
             _ticks = ticks;
 
             try {
-                foreach (var gameObject in GameObjects) {
-                    gameObject.OnUpdate(ticksCount);
+                for (var gameObjectNode = _gameObjects.First; gameObjectNode != null; ) {
+                    var nextNode = gameObjectNode.Next;
+
+                    if (gameObjectNode.Value.IsDestroyed) {
+                        _gameObjects.Remove(gameObjectNode);
+                    }
+                    else {
+                        gameObjectNode.Value.OnUpdate(ticksCount);
+                    }
+
+                    gameObjectNode = nextNode;
                 }
             }
             catch (Exception e) {
                 // todo Обрабатывать это с помощью логов
                 Console.WriteLine(e);
             }
-
         }
 
-        public IList<GameObject> GameObjects { get; private set; }
+        public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
+
+
+        public void CreateObject(GameObject gameObject)
+        {
+            gameObject.OnInitialize();
+            _gameObjects.AddLast(gameObject);
+        }
+
+        public void DestroyObject(GameObject gameObject)
+        {
+            gameObject.Destroy();
+        }
+
+
+        public void ClearScene()
+        {
+            _gameObjects.Clear();
+        }
     }
 }

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="1.8.4" />
+    <PackageReference Include="NLayer.NAudioSupport" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.csproj" />
+    <ProjectReference Include="..\ResourceProvider\ResourceProvider.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NAudio">
+      <HintPath>..\..\..\..\.nuget\packages\naudio\1.8.4\lib\net35\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="NLayer.NAudioSupport">
+      <HintPath>..\..\..\..\.nuget\packages\nlayer.naudiosupport\1.0.0\lib\net35\NLayer.NAudioSupport.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

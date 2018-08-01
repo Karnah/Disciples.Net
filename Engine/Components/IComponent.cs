@@ -5,5 +5,7 @@
         void OnInitialize();
 
         void OnUpdate(long tickCount);
+
+        void Destroy();
     }
 }

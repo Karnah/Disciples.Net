@@ -8,11 +8,11 @@ namespace Engine.Components
 {
     public abstract class Component : ReactiveObject, IComponent
     {
-        private readonly GameObject _gameObject;
+        protected readonly GameObject GameObject;
 
         protected Component(GameObject gameObject)
         {
-            _gameObject = gameObject;
+            GameObject = gameObject;
         }
 
 
@@ -21,6 +21,10 @@ namespace Engine.Components
         }
 
         public virtual void OnUpdate(long tickCount)
+        {
+        }
+
+        public virtual void Destroy()
         {
         }
 
@@ -33,7 +37,7 @@ namespace Engine.Components
 
         protected object GetComponent(Type componentType)
         {
-            foreach (var component in _gameObject.Components) {
+            foreach (var component in GameObject.Components) {
                 if (component.GetType() == componentType)
                     return component;
             }
