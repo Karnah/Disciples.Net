@@ -17,6 +17,7 @@ namespace Engine.Models
             Layer = layer;
         }
 
+
         public GameObject GameObject { get; }
 
         public int Layer { get; }

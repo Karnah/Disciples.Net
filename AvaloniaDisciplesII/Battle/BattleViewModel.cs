@@ -15,6 +15,8 @@ using Engine.Battle.Components;
 using Engine.Battle.Enums;
 using Engine.Battle.Providers;
 using Engine.Components;
+using Engine.Enums;
+using Engine.Extensions;
 using Engine.Interfaces;
 using Engine.Models;
 
@@ -26,6 +28,8 @@ namespace AvaloniaDisciplesII.Battle
         private readonly IGame _game;
         private readonly IBattleResourceProvider _battleResourceProvider;
         private readonly IAudioService _audioService;
+        private readonly IBattleAttackController _battleAttackController;
+
 
         private int _currentUnitIndex = 0;
 
@@ -41,18 +45,35 @@ namespace AvaloniaDisciplesII.Battle
         /// </summary>
         private int _selectionCounter = 0;
 
-
+        /// <summary>
+        /// Юнит, чей ход активен на данный момент
+        /// </summary>
         private Unit _currentUnit;
+        /// <summary>
+        /// Юнит, который был выбран целью последним
+        /// </summary>
         private Unit _targetUnit;
 
+        /// <summary>
+        /// Игровой объект, отрисовывающий на текущем юните аманицию выделения
+        /// </summary>
+        private GameObject _selectedAnimation;
+
+        /// <summary>
+        /// Игровые объекты, которые отрисовывают анимации цели на юнитах-целях
+        /// </summary>
+        private IList<GameObject> _targetAnimations;
+
+
         public BattleViewModel(IUnityContainer container, IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
-            IAudioService audioService, Squad attackSquad, Squad defendSquad)
+            IAudioService audioService, IBattleAttackController battleAttackController, Squad attackSquad, Squad defendSquad)
         {
             _container = container;
             _game = game;
             MapVisual = mapVisual;
             _battleResourceProvider = battleResourceProvider;
             _audioService = audioService;
+            _battleAttackController = battleAttackController;
 
             Background = GetImageBitmap("Map\\Mountains#001.png");
             BottomPanel = GetImageBitmap("Interface\\IndexMap#95.png");
@@ -144,46 +165,59 @@ namespace AvaloniaDisciplesII.Battle
         public ICommand GameObjectClickedCommand { get; }
 
 
+        /// <summary>
+        /// Обработчик события, что игровой объект был выбран
+        /// </summary>
         private void GameObjectSelected(GameObject gameObject)
         {
             if (gameObject is BattleUnit battleUnit) {
-                ++_selectionCounter;
                 TargetUnit = battleUnit.Unit;
+
+                ++_selectionCounter;
 
                 if (_isAnimating)
                     return;
 
-                AttachTargetAnimations(battleUnit);
+                SelectTargetUnits();
             }
         }
 
+        /// <summary>
+        /// Обработчик события, что с игрового объекта был смещён фокус
+        /// </summary>
         private void GameObjectUnselected(GameObject gameObject)
         {
             if (gameObject is BattleUnit) {
+
                 --_selectionCounter;
-                if (_selectionCounter > 0)
+                if (_selectionCounter > 0) {
+                    _selectionCounter = 1;
                     return;
-
+                }
                 _selectionCounter = 0;
-
-                if (_isAnimating)
-                    return;
 
                 DetachTargetAnimations();
             }
         }
 
+        /// <summary>
+        /// Обработчик события клика на игровом объекта
+        /// </summary>
         private void GameObjectClicked(GameObject gameObject)
         {
             if (_isAnimating)
                 return;
 
+            var currentUnitGameObject = Units.First(u => u.Unit == CurrentUnit);
             if (gameObject is BattleUnit battleUnit) {
-                if (battleUnit.Unit == CurrentUnit)
+                if (_battleAttackController.AttackUnit(
+                        currentUnitGameObject,
+                        Units.Where(u => u.Unit.Player == currentUnitGameObject.Unit.Player).ToArray(),
+                        battleUnit,
+                        Units.Where(u => u.Unit.Player == battleUnit.Unit.Player).ToArray(),
+                        OnAttackEnd) == false)
                     return;
 
-                var currentUnit = Units[_currentUnitIndex];
-                currentUnit.AttackUnit(battleUnit, OnAttackEnd);
 
                 DetachSelectedAnimation();
                 DetachTargetAnimations();
@@ -191,6 +225,9 @@ namespace AvaloniaDisciplesII.Battle
             }
         }
 
+        /// <summary>
+        /// Возникает, когда закончилась анимации атаки у юнита
+        /// </summary>
         private void OnAttackEnd()
         {
             ++_currentUnitIndex;
@@ -199,7 +236,7 @@ namespace AvaloniaDisciplesII.Battle
 
             AttachSelectedAnimation(Units[_currentUnitIndex]);
             if (_selectionCounter > 0) {
-                AttachTargetAnimations(Units.First(u => u.Unit == TargetUnit));
+                SelectTargetUnits();
             }
 
 
@@ -208,9 +245,11 @@ namespace AvaloniaDisciplesII.Battle
 
 
 
-        private GameObject _selectedAnimation;
-        private IList<GameObject> _targetAnimations;
+        #region SelectionAnimations
 
+        /// <summary>
+        /// Отобразить анимацию выделения на текущем юните
+        /// </summary>
         private void AttachSelectedAnimation(BattleUnit battleUnit)
         {
             if (_selectedAnimation != null)
@@ -236,6 +275,9 @@ namespace AvaloniaDisciplesII.Battle
             _game.CreateObject(_selectedAnimation);
         }
 
+        /// <summary>
+        /// Скрыть анимацию выделения на текущем юните
+        /// </summary>
         private void DetachSelectedAnimation()
         {
             _game.DestroyObject(_selectedAnimation);
@@ -243,20 +285,55 @@ namespace AvaloniaDisciplesII.Battle
         }
 
 
-        private void AttachTargetAnimations(params BattleUnit[] units)
+        /// <summary>
+        /// Отобразить анимацию выделения цели исходя из типа атаки текущего юнита
+        /// </summary>
+        private void SelectTargetUnits()
+        {
+            // Если текущий юнит может атаковать только одну цель,
+            // то всегда будет выделена только одна цель
+            if (CurrentUnit.UnitType.FirstAttack.Reach != Reach.All) {
+                AttachTargetAnimations(TargetUnit);
+                return;
+            }
+
+            Unit[] targetUnits;
+
+            // Если юнит применяет способность на союзников (например, лекарь), то при наведении на союзника, будут выделяться все
+            // Также наооборот, если юнит применяет способность на врагов, то выделятся все враги
+            // Иначе, как например, лекарь при наведении на врага будет выделять только 1 врага
+            if (CurrentUnit.Player == TargetUnit.Player && CurrentUnit.HasAllyAbility() ||
+                CurrentUnit.Player != TargetUnit.Player && CurrentUnit.HasEnemyAbility()) {
+                targetUnits = Units
+                    .Where(u => u.Unit.Player == TargetUnit.Player)
+                    .Select(u => u.Unit)
+                    .ToArray();
+            }
+            else {
+                targetUnits = new[] {TargetUnit};
+            }
+
+            AttachTargetAnimations(targetUnits);
+        }
+
+        /// <summary>
+        /// Отобразить анимацию выделения цели на указанных юнитах
+        /// </summary>
+        private void AttachTargetAnimations(params Unit[] units)
         {
             if (_targetAnimations != null)
                 DetachTargetAnimations();
 
             _targetAnimations = new List<GameObject>(units.Length);
-            foreach (var battleUnit in units) {
+            foreach (var unit in units) {
+                var battleUnit = Units.First(u => u.Unit == unit);
+
                 var frames = _battleResourceProvider.GetBattleAnimation(
-                    battleUnit.Unit.UnitType.SizeSmall
+                    unit.UnitType.SizeSmall
                         ? "MRKSMALLA"
                         : "MRKLARGEA");
 
                 var unitPosition = battleUnit.BattleObjectComponent.Position;
-
                 var targetAnimation = new GameObject();
                 targetAnimation.Components = new IComponent[] {
                     new BattleObjectComponent(targetAnimation) {
@@ -271,6 +348,9 @@ namespace AvaloniaDisciplesII.Battle
             }
         }
 
+        /// <summary>
+        /// Скрыть анимации выделения цели на всех юнитах
+        /// </summary>
         private void DetachTargetAnimations()
         {
             if (_targetAnimations == null)
@@ -282,5 +362,9 @@ namespace AvaloniaDisciplesII.Battle
 
             _targetAnimations = null;
         }
+
+        #endregion
+
+
     }
 }

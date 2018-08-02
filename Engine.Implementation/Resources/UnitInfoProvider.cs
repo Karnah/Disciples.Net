@@ -16,6 +16,7 @@ namespace Engine.Implementation.Resources
         private readonly DataExtractor _dataExtractor;
         private readonly ImagesExtractor _facesExtractor;
 
+        private SortedDictionary<string, Attack> _attacks;
         private SortedDictionary<string, ResourceText> _resourceTexts;
         private SortedDictionary<string, UnitType> _units;
 
@@ -25,6 +26,7 @@ namespace Engine.Implementation.Resources
             _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Faces.ff");
 
             LoadResourceText();
+            LoadAttacks();
             LoadUnitTypes();
         }
 
@@ -43,6 +45,20 @@ namespace Engine.Implementation.Resources
             }
         }
 
+        private void LoadAttacks()
+        {
+            _attacks = new SortedDictionary<string, Attack>(StringComparer.InvariantCultureIgnoreCase) {
+                {"G000000000", null }
+            };
+
+            var attacks = _dataExtractor.GetData("Gattacks.dbf");
+            foreach (DataRow attackInfoRow in attacks.Rows) {
+                var attack = ExtractAttack(attackInfoRow);
+                _attacks.Add(attack.AttackId, attack);
+            }
+        }
+
+
         private void LoadUnitTypes()
         {
             _units = new SortedDictionary<string, UnitType>(StringComparer.InvariantCultureIgnoreCase) {
@@ -57,6 +73,34 @@ namespace Engine.Implementation.Resources
             }
         }
 
+
+        private Attack ExtractAttack(DataRow attackInfo)
+        {
+            var attackId = attackInfo.GetClass<string>("ATT_ID");
+            var nameId = attackInfo.GetClass<string>("NAME_TXT");
+            var descriptionId = attackInfo.GetClass<string>("DESC_TXT");
+            var initiative = attackInfo.GetStruct<int>("INITIATIVE") ?? 10;
+            var source = (AttackSource)(attackInfo.GetStruct<int>("SOURCE") ?? 1);
+            var attackClass = (AttackClass)(attackInfo.GetStruct<int>("CLASS") ?? 1);
+            var accuracy = attackInfo.GetStruct<int>("POWER") ?? 80;
+            var reach = (Reach)(attackInfo.GetStruct<int>("REACH") ?? 1);
+            var heal = attackInfo.GetStruct<int>("QTY_HEAL") ?? 0;
+            var damage = attackInfo.GetStruct<int>("QTY_DAM") ?? 0;
+
+
+            return new Attack(
+                attackId,
+                _resourceTexts[nameId].Text,
+                _resourceTexts[descriptionId].Text,
+                initiative,
+                source,
+                attackClass,
+                accuracy,
+                reach,
+                heal,
+                damage
+                );
+        }
 
         private UnitType ExtractUnitType(DataRow unitInfo)
         {
@@ -106,8 +150,8 @@ namespace Engine.Implementation.Resources
                 _resourceTexts[nameId].Text,
                 _resourceTexts[descriptionId].Text,
                 _resourceTexts[abilId].Text,
-                firstAttackId,
-                secondAttackId,
+                _attacks[firstAttackId],
+                _attacks[secondAttackId],
                 attackTwice,
                 hitpoint,
                 null, //todo GetUnitType(baseUnitId),

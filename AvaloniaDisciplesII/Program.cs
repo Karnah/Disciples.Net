@@ -53,29 +53,33 @@ namespace AvaloniaDisciplesII
 
             var game = Container.Resolve<Game>();
             Container.RegisterInstance<IGame>(game);
+
+            var battleAttackController = new BattleAttackController();
+            Container.RegisterInstance<IBattleAttackController>(battleAttackController);
         }
 
         public static Squad CreateAttackingSquad()
         {
             var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+            var player = new Player(0, false);
 
             var mage = unitInfoProvider.GetUnitType("g000uu0010");
-            var u02 = new Unit(Guid.NewGuid().ToString(), mage, 0, 2);
+            var u02 = new Unit(Guid.NewGuid().ToString(), mage, player, 0, 2);
 
             var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
-            var u01 = new Unit(Guid.NewGuid().ToString(), pathfinder, 0, 1);
+            var u01 = new Unit(Guid.NewGuid().ToString(), pathfinder, player, 0, 1);
 
             var abbess = unitInfoProvider.GetUnitType("g000uu0017");
-            var u00 = new Unit(Guid.NewGuid().ToString(), abbess, 0, 0);
+            var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, 0, 0);
 
 
             var knight = unitInfoProvider.GetUnitType("g000uu0002");
-            var u12 = new Unit(Guid.NewGuid().ToString(), knight, 1, 2);
+            var u12 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 2);
 
             var imperiaKnight = unitInfoProvider.GetUnitType("g000uu0003");
-            var u11 = new Unit(Guid.NewGuid().ToString(), imperiaKnight, 1, 1);
+            var u11 = new Unit(Guid.NewGuid().ToString(), imperiaKnight, player, 1, 1);
 
-            var u10 = new Unit(Guid.NewGuid().ToString(), knight, 1, 0);
+            var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 0);
 
 
             return new Squad(new []{ u02, u01, u00, u12, u11, u10});
@@ -84,19 +88,20 @@ namespace AvaloniaDisciplesII
         public static Squad CreateDefendingSquad()
         {
             var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+            var player = new Player(0, false);
 
             var masterOfRunes = unitInfoProvider.GetUnitType("g000uu0165");
-            var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, 1, 1);
+            var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, player, 1, 1);
 
             var gnomesKing = unitInfoProvider.GetUnitType("g000uu0039");
-            var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, 1, 0);
+            var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, player, 1, 0);
 
 
             var gornDefender = unitInfoProvider.GetUnitType("g000uu0162");
-            var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, 0, 2);
+            var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, player, 0, 2);
 
             var crossbowman = unitInfoProvider.GetUnitType("g000uu0027");
-            var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, 0, 1);
+            var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, player, 0, 1);
 
             return new Squad(new []{ u11, u10, u02, u01});
         }

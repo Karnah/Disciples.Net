@@ -22,8 +22,8 @@ namespace Engine.Models
             string name,
             string description,
             string abil,
-            string firstAttack,
-            string secondAttack,
+            Attack firstAttack,
+            Attack secondAttack,
             bool attackTwice,
             int hitpoint,
             UnitType baseUnit,
@@ -138,9 +138,15 @@ namespace Engine.Models
         /// </summary>
         public string Abil { get; }
 
-        public string FirstAttack { get; }
+        /// <summary>
+        /// Основная атака
+        /// </summary>
+        public Attack FirstAttack { get; }
 
-        public string SecondAttack { get; }
+        /// <summary>
+        /// Дополнительная атака
+        /// </summary>
+        public Attack SecondAttack { get; }
 
         /// <summary>
         /// Атакует ли юнит дважды

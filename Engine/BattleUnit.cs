@@ -44,7 +44,7 @@ namespace Engine
         private Action _mainAction;
         private Action _callbackAction;
 
-        public void AttackUnit(BattleUnit attackUnit, Action afterAttack)
+        public void AttackUnits(BattleUnit[] targetUnits, Action afterAttack)
         {
             this.BattleObjectComponent.Action = BattleAction.Attacking;
 
@@ -52,7 +52,9 @@ namespace Engine
             _mainAction = () => {
                 //if (this.BattleUnitAnimationComponent.FrameIndex >= 14) {
                 if (this.BattleUnitAnimationComponent.FramesCount - this.BattleUnitAnimationComponent.FrameIndex <= 12) {
-                    attackUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
+                    foreach (var targetUnit in targetUnits) {
+                        targetUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
+                    }
 
                     _mainAction = null;
                 }
