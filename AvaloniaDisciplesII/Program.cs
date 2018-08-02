@@ -24,10 +24,12 @@ namespace AvaloniaDisciplesII
             BuildAvaloniaApp().Start<GameWindow>(() => {
                 CreateContainer();
 
+                var battleAttackController = Container.Resolve<BattleAttackController>(
+                    new ParameterOverride("attackSquad", CreateAttackingSquad()),
+                    new ParameterOverride("defendSquad", CreateDefendingSquad()));
+
                 return new GameWindowViewModel(
-                    Container.Resolve<BattleViewModel>(
-                        new ParameterOverride("attackSquad", CreateAttackingSquad()),
-                        new ParameterOverride("defendSquad", CreateDefendingSquad())));
+                    Container.Resolve<BattleViewModel>(new ParameterOverride("battleAttackController", battleAttackController)));
             });
         }
 
@@ -53,9 +55,6 @@ namespace AvaloniaDisciplesII
 
             var game = Container.Resolve<Game>();
             Container.RegisterInstance<IGame>(game);
-
-            var battleAttackController = new BattleAttackController();
-            Container.RegisterInstance<IBattleAttackController>(battleAttackController);
         }
 
         public static Squad CreateAttackingSquad()

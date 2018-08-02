@@ -25,7 +25,7 @@ namespace Engine.Models
             Attack firstAttack,
             Attack secondAttack,
             bool attackTwice,
-            int hitpoint,
+            int hitPoints,
             UnitType baseUnit,
             int armor,
             int regen,
@@ -54,7 +54,7 @@ namespace Engine.Models
             FirstAttack = firstAttack;
             SecondAttack = secondAttack;
             AttackTwice = attackTwice;
-            Hitpoint = hitpoint;
+            HitPoints = hitPoints;
             BaseUnit = baseUnit;
             Armor = armor;
             Regen = regen;
@@ -156,7 +156,7 @@ namespace Engine.Models
         /// <summary>
         /// Количество жизней
         /// </summary>
-        public int Hitpoint { get; }
+        public int HitPoints { get; }
 
         /// <summary>
         /// Базовый юнит для юнита-героя

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Avalonia;
 
@@ -6,6 +7,7 @@ using Engine.Battle.Components;
 using Engine.Battle.Enums;
 using Engine.Battle.Providers;
 using Engine.Components;
+using Engine.Extensions;
 using Engine.Interfaces;
 using Engine.Models;
 
@@ -13,6 +15,10 @@ namespace Engine
 {
     public class BattleUnit : GameObject
     {
+        // Разброс атаки при ударе
+        private const int AttackRange = 5;
+
+
         public BattleUnit(IMapVisual mapVisual, IBattleUnitResourceProvider battleUnitResourceProvider, Unit unit, int x, int y, BattleDirection direction)
         {
             Unit = unit;
@@ -44,16 +50,37 @@ namespace Engine
         private Action _mainAction;
         private Action _callbackAction;
 
-        public void AttackUnits(BattleUnit[] targetUnits, Action afterAttack)
+        public void AttackUnits(IReadOnlyCollection<BattleUnit> targetUnits, Action afterAttack)
         {
             this.BattleObjectComponent.Action = BattleAction.Attacking;
 
             _callbackCondition = () => this.BattleObjectComponent.Action == BattleAction.Waiting;
             _mainAction = () => {
+                // todo нужно научиться определять на каком фрейме происходит удар
                 //if (this.BattleUnitAnimationComponent.FrameIndex >= 14) {
                 if (this.BattleUnitAnimationComponent.FramesCount - this.BattleUnitAnimationComponent.FrameIndex <= 12) {
+                    var isAttacking = Unit.HasEnemyAbility();
+
                     foreach (var targetUnit in targetUnits) {
-                        targetUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
+                        // Проверяем меткость юнита
+                        var chanceAttack = RandomGenerator.Next(0, 100);
+                        if (chanceAttack > Unit.UnitType.FirstAttack.Accuracy)
+                            continue;
+
+                        // Если юнит атакует врага, а не лечит союзника, то цели вызываем анимацию получения повреждений
+                        if (isAttacking) {
+                            targetUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
+
+                            var damage = Unit.UnitType.FirstAttack.DamagePower + RandomGenerator.Next(AttackRange);
+                            damage = (int)(damage * (1 - targetUnit.Unit.UnitType.Armor / 100.0));
+
+                            targetUnit.Unit.ChangeHitPoints(- damage);
+                        }
+                        else {
+                            // todo пока только целители
+                            var heal = Unit.UnitType.FirstAttack.HealPower;
+                            targetUnit.Unit.ChangeHitPoints(heal);
+                        }
                     }
 
                     _mainAction = null;

@@ -7,12 +7,10 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
-using Unity;
 
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
 using Engine.Battle.Components;
-using Engine.Battle.Enums;
 using Engine.Battle.Providers;
 using Engine.Components;
 using Engine.Enums;
@@ -24,14 +22,11 @@ namespace AvaloniaDisciplesII.Battle
 {
     public class BattleViewModel : PageViewModel
     {
-        private readonly IUnityContainer _container;
         private readonly IGame _game;
         private readonly IBattleResourceProvider _battleResourceProvider;
         private readonly IAudioService _audioService;
         private readonly IBattleAttackController _battleAttackController;
 
-
-        private int _currentUnitIndex = 0;
 
         /// <summary>
         /// Позволяет заблокировать действия пользователя на время анимации
@@ -65,10 +60,9 @@ namespace AvaloniaDisciplesII.Battle
         private IList<GameObject> _targetAnimations;
 
 
-        public BattleViewModel(IUnityContainer container, IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
-            IAudioService audioService, IBattleAttackController battleAttackController, Squad attackSquad, Squad defendSquad)
+        public BattleViewModel(IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
+            IAudioService audioService, IBattleAttackController battleAttackController)
         {
-            _container = container;
             _game = game;
             MapVisual = mapVisual;
             _battleResourceProvider = battleResourceProvider;
@@ -79,12 +73,13 @@ namespace AvaloniaDisciplesII.Battle
             BottomPanel = GetImageBitmap("Interface\\IndexMap#95.png");
             LeftPanel = GetImageBitmap("Interface\\IndexMap#107.png");
             _audioService.PlayBackground("battle");
-            
-            ArrangeUnits(attackSquad, defendSquad);
 
             GameObjectSelectedCommand = ReactiveCommand.Create<GameObject>(GameObjectSelected);
             GameObjectUnselectedCommand = ReactiveCommand.Create<GameObject>(GameObjectUnselected);
             GameObjectClickedCommand = ReactiveCommand.Create<GameObject>(GameObjectClicked);
+
+            CurrentUnit = TargetUnit = _battleAttackController.CurrentUnitGameObject.Unit;
+            AttachSelectedAnimation(_battleAttackController.CurrentUnitGameObject);
         }
 
         private static Bitmap GetImageBitmap(string path)
@@ -95,50 +90,10 @@ namespace AvaloniaDisciplesII.Battle
             }
         }
 
-        private void ArrangeUnits(Squad attackSquad, Squad defendSquad)
-        {
-            _game.ClearScene();
-
-            var units = new List<BattleUnit>();
-            var bitmapResources = _container.Resolve<IBattleUnitResourceProvider>();
-
-            foreach (var attackSquadUnit in attackSquad.Units) {
-                var unit = new BattleUnit(
-                    MapVisual,
-                    bitmapResources,
-                    attackSquadUnit,
-                    attackSquadUnit.SquadLinePosition,
-                    attackSquadUnit.SquadFlankPosition,
-                    BattleDirection.Attacker);
-
-                units.Add(unit);
-            }
-
-            foreach (var defendSquadUnit in defendSquad.Units) {
-                var unit = new BattleUnit(
-                    MapVisual,
-                    bitmapResources,
-                    defendSquadUnit,
-                    ((defendSquadUnit.SquadLinePosition + 1) & 1) + 2,
-                    defendSquadUnit.SquadFlankPosition,
-                    BattleDirection.Defender);
-
-                units.Add(unit);
-            }
-
-            foreach (var unit in units) {
-                _game.CreateObject(unit);
-            }
-
-            Units = units;
-            CurrentUnit = TargetUnit = Units[_currentUnitIndex].Unit;
-            AttachSelectedAnimation(Units[_currentUnitIndex]);
-        }
-
 
         public IMapVisual MapVisual { get; }
 
-        public IList<BattleUnit> Units { get; private set; }
+        public IReadOnlyList<BattleUnit> Units => _battleAttackController.Units;
 
         public Bitmap Background { get; }
 
@@ -208,16 +163,9 @@ namespace AvaloniaDisciplesII.Battle
             if (_isAnimating)
                 return;
 
-            var currentUnitGameObject = Units.First(u => u.Unit == CurrentUnit);
-            if (gameObject is BattleUnit battleUnit) {
-                if (_battleAttackController.AttackUnit(
-                        currentUnitGameObject,
-                        Units.Where(u => u.Unit.Player == currentUnitGameObject.Unit.Player).ToArray(),
-                        battleUnit,
-                        Units.Where(u => u.Unit.Player == battleUnit.Unit.Player).ToArray(),
-                        OnAttackEnd) == false)
+            if (gameObject is BattleUnit targetUnitGameObject) {
+                if (_battleAttackController.AttackUnit(targetUnitGameObject, OnAttackEnd) == false)
                     return;
-
 
                 DetachSelectedAnimation();
                 DetachTargetAnimations();
@@ -230,11 +178,9 @@ namespace AvaloniaDisciplesII.Battle
         /// </summary>
         private void OnAttackEnd()
         {
-            ++_currentUnitIndex;
-            _currentUnitIndex %= Units.Count;
-            CurrentUnit = Units[_currentUnitIndex].Unit;
+            CurrentUnit = _battleAttackController.CurrentUnitGameObject.Unit;
 
-            AttachSelectedAnimation(Units[_currentUnitIndex]);
+            AttachSelectedAnimation(_battleAttackController.CurrentUnitGameObject);
             if (_selectionCounter > 0) {
                 SelectTargetUnits();
             }
@@ -364,7 +310,5 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         #endregion
-
-
     }
 }

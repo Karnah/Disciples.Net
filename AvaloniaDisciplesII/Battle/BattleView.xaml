@@ -14,6 +14,7 @@
     <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
     <c:BitmapHeightScaleConvrter x:Key="BitmapHeightScaleConvrter" />
     <c:MarginScaleConverter x:Key="MarginScaleConverter" />
+    <c:UnitToPanelInfoConverter x:Key="UnitToPanelInfoConverter" />
   </UserControl.Resources>
 
   <Grid>
@@ -31,27 +32,45 @@
            Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
            ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
 
-    <TextBlock Text="{Binding CurrentUnit.UnitType.Name}" FontWeight="Bold" TextWrapping="Wrap"
+    <TextBlock FontWeight="Bold" TextWrapping="Wrap"
                FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
                Margin="{Binding ConverterParameter='190,520,0,0', Converter={StaticResource MarginScaleConverter}}"
                Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
-               ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Top" />
+               MaxHeight="{Binding ConverterParameter='40', Converter={StaticResource DoubleScaleConverter}}"
+               ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Top">
+      <TextBlock.Text>
+        <MultiBinding Converter="{StaticResource UnitToPanelInfoConverter}">
+          <Binding Path="CurrentUnit.UnitType.Name" />
+          <Binding Path="CurrentUnit.HitPoints" />
+          <Binding Path="CurrentUnit.UnitType.HitPoints" />
+        </MultiBinding>
+      </TextBlock.Text>
+    </TextBlock>
 
 
     <Image Source="{Binding TargetUnit.UnitType.Face}"
-       Height="{Binding TargetUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
-       Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
-       ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+           Height="{Binding TargetUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
+           Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
+           ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Bottom">
       <Image.RenderTransform>
         <ScaleTransform ScaleX="-1"/>
       </Image.RenderTransform>
     </Image>
 
-    <TextBlock Text="{Binding TargetUnit.UnitType.Name}" FontWeight="Bold" TextWrapping="Wrap"
+    <TextBlock FontWeight="Bold" TextWrapping="Wrap"
                FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
                Margin="{Binding ConverterParameter='0,520,170,0', Converter={StaticResource MarginScaleConverter}}"
                Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
-               ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Top" />
+               MaxHeight="{Binding ConverterParameter='40', Converter={StaticResource DoubleScaleConverter}}"
+               ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Top">
+      <TextBlock.Text>
+        <MultiBinding Converter="{StaticResource UnitToPanelInfoConverter}">
+          <Binding Path="TargetUnit.UnitType.Name" />
+          <Binding Path="TargetUnit.HitPoints" />
+          <Binding Path="TargetUnit.UnitType.HitPoints" />
+        </MultiBinding>
+      </TextBlock.Text>
+    </TextBlock>
 
 
 

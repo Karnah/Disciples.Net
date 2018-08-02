@@ -1,7 +1,11 @@
-﻿namespace Engine.Models
+﻿using ReactiveUI;
+
+namespace Engine.Models
 {
-    public class Unit
+    public class Unit : ReactiveObject
     {
+        private int _hitPoints;
+
         public Unit(string id, UnitType unitType, Player player, int squadLinePosition, int squadFlankPosition)
         {
             Id = id;
@@ -10,6 +14,10 @@
 
             SquadLinePosition = squadLinePosition;
             SquadFlankPosition = squadFlankPosition;
+
+            Level = UnitType.Level;
+            Experience = 0;
+            HitPoints = UnitType.HitPoints;
         }
 
 
@@ -20,8 +28,36 @@
         public Player Player { get; }
 
 
-        public int SquadLinePosition { get; }
+        public int SquadLinePosition { get; set; }
 
-        public int SquadFlankPosition { get; }
+        public int SquadFlankPosition { get; set; }
+
+
+        public int Level { get; set; }
+
+        public int Experience { get; set; }
+
+        public int HitPoints {
+            get => _hitPoints;
+            private set => this.RaiseAndSetIfChanged(ref _hitPoints, value);
+        }
+
+        public bool IsDead { get; set; }
+
+
+
+        public void ChangeHitPoints(int value)
+        {
+            var hitpoints = HitPoints + value;
+            if (hitpoints > UnitType.HitPoints) {
+                HitPoints = UnitType.HitPoints;
+            }
+            else if (hitpoints < 0) {
+                HitPoints = 0;
+            }
+            else {
+                HitPoints = hitpoints;
+            }
+        }
     }
 }
