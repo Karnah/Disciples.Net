@@ -131,6 +131,7 @@ namespace Engine.Implementation.Resources
             var xpKilled = unitInfo.GetStruct<int>("XP_KILLED") ?? 0;
             var upgradeBuildingId = unitInfo.GetClass<string>("UPGRADE_B");
             var xpNext = unitInfo.GetStruct<int>("XP_NEXT") ?? 0;
+            var deathAnim = unitInfo.GetStruct<int>("DEATH_ANIM") ?? 1;
 
             var face = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
 
@@ -163,6 +164,7 @@ namespace Engine.Implementation.Resources
                 xpKilled,
                 upgradeBuildingId,
                 xpNext,
+                deathAnim,
                 face
             );
 

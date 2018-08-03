@@ -41,11 +41,11 @@ namespace AvaloniaDisciplesII
             var battleResourceProvider = new BattleResourceProvider();
             Container.RegisterInstance<IBattleResourceProvider>(battleResourceProvider);
 
-            var battleUnitResourceProvider = new BattleUnitResourceProvider();
-            Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);
-
             var unitInfoProvider = new UnitInfoProvider();
             Container.RegisterInstance<IUnitInfoProvider>(unitInfoProvider);
+
+            var battleUnitResourceProvider = new BattleUnitResourceProvider(unitInfoProvider, battleResourceProvider);
+            Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);
 
             var mapVisual = new MapVisual();
             Container.RegisterInstance<IMapVisual>(mapVisual);

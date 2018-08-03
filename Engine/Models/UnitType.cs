@@ -35,6 +35,7 @@ namespace Engine.Models
             int xpKilled,
             string upgradeBuilding,
             int xpNext,
+            int deathAnimationId,
             Bitmap face)
         {
             UnitTypeId = unitTypeId;
@@ -64,6 +65,7 @@ namespace Engine.Models
             XpKilled = xpKilled;
             UpgradeBuilding = upgradeBuilding;
             XpNext = xpNext;
+            DeathAnimationId = deathAnimationId;
 
             Face = face;
         }
@@ -202,6 +204,11 @@ namespace Engine.Models
         /// Количество опыта, необходимо для получения следующего уровня
         /// </summary>
         public int XpNext { get; }
+
+        /// <summary>
+        /// Анимация, которая отображается при смерти юнита
+        /// </summary>
+        public int DeathAnimationId { get; }
 
 
         /// <summary>

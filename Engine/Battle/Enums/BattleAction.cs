@@ -5,6 +5,7 @@
         Waiting,
         Attacking,
         TakingDamage,
-        Paralized
+        Paralized,
+        Dead
     }
 }

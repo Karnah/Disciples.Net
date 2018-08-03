@@ -13,18 +13,24 @@ namespace Engine.Battle.Components
 
         private readonly IMapVisual _mapVisual;
         private readonly IReadOnlyList<Frame> _frames;
+        private readonly int _layer;
 
         private BattleObjectComponent _battleObject;
 
         private VisualObject _visualObject;
-        private int _frameIndex = 0;
         private long _ticksCount = 0;
 
-        public FrameAnimationComponent(GameObject gameObject, IMapVisual mapVisual, IReadOnlyList<Frame> frames) : base(gameObject)
+        public FrameAnimationComponent(GameObject gameObject, IMapVisual mapVisual, IReadOnlyList<Frame> frames, int layer) : base(gameObject)
         {
             _mapVisual = mapVisual;
             _frames = frames;
+            _layer = layer;
         }
+
+
+        public int FrameIndex { get; private set; }
+
+        public int FramesCount => _frames.Count;
 
 
         public override void OnInitialize()
@@ -32,7 +38,7 @@ namespace Engine.Battle.Components
             base.OnInitialize();
 
             _battleObject = GetComponent<BattleObjectComponent>();
-            _visualObject = new VisualObject(GameObject, 1);
+            _visualObject = new VisualObject(GameObject, _layer);
             _mapVisual.AddVisual(_visualObject);
         }
 
@@ -42,11 +48,11 @@ namespace Engine.Battle.Components
             if (_ticksCount < FrameChangeSpeed)
                 return;
             
-            _frameIndex += (int) (_ticksCount / FrameChangeSpeed);
-            _frameIndex %= _frames.Count;
+            ++FrameIndex;
+            FrameIndex %= _frames.Count;
             _ticksCount %= FrameChangeSpeed;
 
-            var frame = _frames[_frameIndex];
+            var frame = _frames[FrameIndex];
 
             _visualObject.Bitmap = frame.Bitmap;
 

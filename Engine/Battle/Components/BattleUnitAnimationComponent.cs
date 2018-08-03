@@ -23,8 +23,6 @@ namespace Engine.Battle.Components
         private long _ticksCount = 0;
         private BattleAction _action;
 
-        private BattleUnitAnimation _unitAnimation;
-
         private IReadOnlyList<Frame> _shadowFrames;
         private IReadOnlyList<Frame> _unitFrames;
         private IReadOnlyList<Frame> _auraFrames;
@@ -47,6 +45,8 @@ namespace Engine.Battle.Components
         }
 
 
+        public BattleUnitAnimation BattleUnitAnimation { get; private set; }
+
         public int FrameIndex { get; private set; }
 
         public int FramesCount { get; private set; }
@@ -57,7 +57,7 @@ namespace Engine.Battle.Components
             base.OnInitialize();
 
             _battleObject = GetComponent<BattleObjectComponent>();
-            _unitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleObject.Direction);
+            BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleObject.Direction);
 
             UpdateSource();
         }
@@ -73,10 +73,10 @@ namespace Engine.Battle.Components
             if (_ticksCount < FrameChangeSpeed)
                 return;
 
-            FrameIndex += (int) (_ticksCount / FrameChangeSpeed);
+            ++FrameIndex;
             // todo Хреновая реализация контроллера анимации.
-            // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания
-            if (FrameIndex >= FramesCount && _action != BattleAction.Waiting) {
+            // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания и смерти
+            if (FrameIndex >= FramesCount && _action != BattleAction.Waiting && _action != BattleAction.Dead) {
                 _battleObject.Action = BattleAction.Waiting;
                 return;
             }
@@ -113,7 +113,7 @@ namespace Engine.Battle.Components
             _action = _battleObject.Action;
             FrameIndex = 1;
 
-            var frames = _unitAnimation.BattleUnitFrameses[_action];
+            var frames = BattleUnitAnimation.BattleUnitFrameses[_action];
             _shadowFrames = frames.ShadowFrames;
             _unitFrames = frames.UnitFrames;
             _auraFrames = frames.AuraFrames;

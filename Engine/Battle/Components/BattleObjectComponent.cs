@@ -12,7 +12,7 @@ namespace Engine.Battle.Components
         { }
 
 
-        public Rect Position { get; set; }
+        public Point Position { get; set; }
 
         public BattleDirection Direction { get; set; }
 

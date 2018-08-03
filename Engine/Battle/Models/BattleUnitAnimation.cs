@@ -9,15 +9,19 @@ namespace Engine.Battle.Models
     {
         public BattleUnitAnimation(
             Dictionary<BattleAction, BattleUnitFrames> battleUnitFrameses,
-            IReadOnlyList<Frame> targetFrames)
+            BattleUnitTargetAnimation targetAnimation,
+            IReadOnlyList<Frame> deathFrames)
         {
             BattleUnitFrameses = battleUnitFrameses;
-            TargetFrames = targetFrames;
+            TargetAnimation = targetAnimation;
+            DeathFrames = deathFrames;
         }
 
 
         public Dictionary<BattleAction, BattleUnitFrames> BattleUnitFrameses { get; }
 
-        public IReadOnlyList<Frame> TargetFrames { get; }
+        public BattleUnitTargetAnimation TargetAnimation { get; }
+
+        public IReadOnlyList<Frame> DeathFrames { get; }
     }
 }

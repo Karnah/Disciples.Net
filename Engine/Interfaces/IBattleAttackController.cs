@@ -5,9 +5,21 @@ namespace Engine.Interfaces
 {
     public interface IBattleAttackController
     {
+        /// <summary>
+        /// Юнит, который сейчас ходит
+        /// </summary>
         BattleUnit CurrentUnitGameObject { get; }
 
+        /// <summary>
+        /// Все юниты
+        /// </summary>
         IReadOnlyList<BattleUnit> Units { get; }
+
+
+        /// <summary>
+        /// Событие возникает, когда следующий юнит готов к ходу
+        /// </summary>
+        event EventHandler AttackEnded;
 
 
 
@@ -21,8 +33,7 @@ namespace Engine.Interfaces
         /// Атаковать выбранного юнита
         /// </summary>
         /// <param name="targetUnitGameObject">Юнит, являющийся целью</param>
-        /// <param name="onAttackEnd">Метод, который будет вызван после завершения анимации атаки</param>
         /// <returns>True, если атака возможна, false если невозможно атаковать</returns>
-        bool AttackUnit(BattleUnit targetUnitGameObject, Action onAttackEnd);
+        bool AttackUnit(BattleUnit targetUnitGameObject);
     }
 }

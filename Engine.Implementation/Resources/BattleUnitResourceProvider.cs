@@ -6,6 +6,7 @@ using Engine.Battle.Enums;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
 using Engine.Implementation.Helpers;
+using Engine.Interfaces;
 using Engine.Models;
 using ResourceProvider;
 
@@ -13,11 +14,29 @@ namespace Engine.Implementation.Resources
 {
     public class BattleUnitResourceProvider : IBattleUnitResourceProvider
     {
+        private readonly string[] DeathAnimationNames = new[] {
+            string.Empty,
+            "DEATH_HUMAN_S13",
+            "DEATH_HERETIC_S13",
+            "DEATH_DWARF_S15",
+            "DEATH_UNDEAD_S15",
+            "DEATH_NEUTRAL_S10",
+            "DEATH_DRAGON_S15",
+            "DEATH_GHOST_S15",
+            "DEATH_ELF_S15"
+        };
+
+        private readonly IUnitInfoProvider _unitInfoProvider;
+        private readonly IBattleResourceProvider _battleResourceProvider;
+
         private readonly SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations;
         private readonly ImagesExtractor _extractor;
 
-        public BattleUnitResourceProvider()
+        public BattleUnitResourceProvider(IUnitInfoProvider unitInfoProvider, IBattleResourceProvider battleResourceProvider)
         {
+            _unitInfoProvider = unitInfoProvider;
+            _battleResourceProvider = battleResourceProvider;
+
             _unitsAnimations = new SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\BatUnits.ff");
         }
@@ -26,22 +45,58 @@ namespace Engine.Implementation.Resources
         public BattleUnitAnimation GetBattleUnitAnimation(string unitId, BattleDirection direction)
         {
             if (_unitsAnimations.ContainsKey((unitId, direction)) == false) {
-                _unitsAnimations[(unitId, direction)] = GetUnitAnimation(unitId, direction);
+                _unitsAnimations[(unitId, direction)] = ExtractUnitAnimation(unitId, direction);
             }
 
             return _unitsAnimations[(unitId, direction)];
         }
 
 
-        private BattleUnitAnimation GetUnitAnimation(string unitId, BattleDirection direction)
+        private BattleUnitAnimation ExtractUnitAnimation(string unitId, BattleDirection direction)
         {
             var unitFrames = new Dictionary<BattleAction, BattleUnitFrames>();
             foreach (BattleAction action in Enum.GetValues(typeof(BattleAction))) {
+                if (action == BattleAction.Dead)
+                    continue;
+
                 unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
             }
 
+            //var deadFrames = _battleResourceProvider.GetBattleAnimation("DEAD_HUMAN_SMALL").First();
+            //unitFrames.Add(BattleAction.Dead, new BattleUnitFrames(null, new []{ deadFrames }, null));
+            unitFrames.Add(BattleAction.Dead, new BattleUnitFrames(null, new []{ new Frame(), }, null));
+
+
+            // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту
+            var singleTargetFrames =
+                // Анимация зависит от положения
+                GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{ConvertDirection(direction)}00") ??
+                // Анимация симметрична
+                GetAnimationFrames($"{unitId.ToUpper()}TUCHA1B00");
+            BattleUnitTargetAnimation unitTargetAnimation = null;
+            if (singleTargetFrames != null) {
+                unitTargetAnimation = new BattleUnitTargetAnimation(true, singleTargetFrames);
+            }
+            else {
+                // Кадры атаки, которые применяется целиком на площадь
+                var areaTargetFrames =
+                    // Анимация зависит от положения
+                    GetAnimationFrames($"{unitId.ToUpper()}HEFFA1{ConvertDirection(direction)}00") ??
+                    // Анимация симметрична
+                    GetAnimationFrames($"{unitId.ToUpper()}HEFFA1B00");
+
+                if (areaTargetFrames != null) {
+                    unitTargetAnimation = new BattleUnitTargetAnimation(false, areaTargetFrames);
+                }
+            }
+
+
+            var unitType = _unitInfoProvider.GetUnitType(unitId);
+            var deathAnimation = GetDeathFrames(unitType.DeathAnimationId);
+
+
             // todo Добавить анимацию для атаки цели
-            return new BattleUnitAnimation(unitFrames, null);
+            return new BattleUnitAnimation(unitFrames, unitTargetAnimation, deathAnimation);
         }
 
 
@@ -49,7 +104,7 @@ namespace Engine.Implementation.Resources
         // HHIT - ограбает | HMOVE - атакует | IDLE - ждёт | STIL - замер | TUCH - бьёт 1 врага | HEFF - бьёт площадь
         // A - объект или аура | S - тень
         // 1 - объект | 2 -аура
-        // A - юго-восток, лицом | D - северо-запад, спиной | B - симметрично
+        // A - атакующий, лицом | D - защищающийся, спиной | B - симметрично
         // 00
         private BattleUnitFrames GetUnitFrames(string unitId, BattleDirection direction, BattleAction action)
         {
@@ -98,6 +153,11 @@ namespace Engine.Implementation.Resources
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
+        }
+
+        private IReadOnlyList<Frame> GetDeathFrames(int deathAnimationId)
+        {
+            return _battleResourceProvider.GetBattleAnimation(DeathAnimationNames[deathAnimationId]);
         }
     }
 }

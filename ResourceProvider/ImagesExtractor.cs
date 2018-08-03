@@ -291,11 +291,13 @@ namespace ResourceProvider
             var fileType = GetFileType(safeName);
             if (fileType == Aura) {
                 // Если файл содержит ауру, то создаём полупрозрачное изображение
-                // Прозрачности зависит от индекса цвета в палитре
+                // Пока берём прозрачность равную индексу цвета в палитре
+                // Но такое чувство, что есть более четкая зависимость
                 for (int i = 0; i < 256; ++i) {
                     unchecked {
                         var color = magicImage.GetColormap(i);
                         var index = ((byte) color.R << 16) + ((byte) color.G << 8) + (byte) color.B;
+
                         colorMap[index] = (byte) i;
                     }
                 }
@@ -356,7 +358,10 @@ namespace ResourceProvider
         private static byte GetFileType(string name)
         {
             // todo Ну это уже совсем никуда не годится, исправить
-            if (name.EndsWith("A2A00") || name.EndsWith("A2D00") || name.StartsWith("MRK"))
+            if (name.EndsWith("A2A00") || name.EndsWith("A2D00") ||
+                name.Substring(name.Length - 9, 4) == "HEFF" ||
+                name.Substring(name.Length - 9, 4) == "TUCH" ||
+                name.StartsWith("MRK") || name.StartsWith("DEATH"))
                 return 1;
 
             if (name.EndsWith("S1A00") || name.EndsWith("S1D00"))

@@ -50,6 +50,8 @@ namespace AvaloniaDisciplesII
 
                     gameObjectNode = nextNode;
                 }
+
+                SceneEndUpdating?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception e) {
                 // todo Обрабатывать это с помощью логов
@@ -58,6 +60,9 @@ namespace AvaloniaDisciplesII
         }
 
         public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
+
+
+        public event EventHandler SceneEndUpdating;
 
 
         public void CreateObject(GameObject gameObject)

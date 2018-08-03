@@ -11,8 +11,6 @@ using Engine.Extensions;
 using Engine.Interfaces;
 using Engine.Models;
 
-using Action = System.Action;
-
 namespace Engine.Implementation.Game
 {
     public class BattleAttackController : IBattleAttackController
@@ -20,12 +18,28 @@ namespace Engine.Implementation.Game
         /// <summary>
         /// Разброс инициативы при вычислении очередности
         /// </summary>
-        private const int InitiativeRange = 5;
+        private const int INITIATIVE_RANGE = 5;
+        /// <summary>
+        /// Разброс атаки при ударе
+        /// </summary>
+        private const int ATTACK_RANGE = 5;
+
 
         private readonly IUnityContainer _container;
         private readonly IGame _game;
+        private readonly IMapVisual _mapVisual;
+        private readonly IBattleResourceProvider _battleResourceProvider;
 
         private List<BattleUnit> _units;
+        private List<FrameAnimationObject> _targetAnimations;
+        private IReadOnlyCollection<BattleUnit> _targetUnits;
+
+        /// <summary>
+        /// Флаг, что в данный момент происходит анимация (атака, смерть и т.д.)
+        /// </summary>
+        private bool _isAnimate;
+
+        private AttackState _attackState = AttackState.WaitingAction;
 
         /// <summary>
         /// Очередность хода юнитов
@@ -38,19 +52,186 @@ namespace Engine.Implementation.Game
         private bool _isSecondAttack = false;
 
 
-        public BattleAttackController(IUnityContainer container, IGame game, Squad attackSquad, Squad defendSquad)
+        public BattleAttackController(IUnityContainer container, IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
+            Squad attackSquad, Squad defendSquad)
         {
             _container = container;
             _game = game;
+            _mapVisual = mapVisual;
+            _battleResourceProvider = battleResourceProvider;
+
+            _targetAnimations = new List<FrameAnimationObject>();
 
             ArrangeUnits(attackSquad, defendSquad);
-            StartNextRound();
+            StartNewRound();
+
+            _game.SceneEndUpdating += OnUpdate;
         }
+
+
+        private void OnUpdate(object sender, EventArgs eventArgs)
+        {
+            if (_attackState == AttackState.WaitingAction)
+                return;
+
+            if (_attackState == AttackState.BeforeTouch) {
+                BeforeTouch();
+                return;
+            }
+
+            if (_attackState == AttackState.AfterTouch) {
+                AfterTouch();
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Проверить, что анимация текущего юнита дошла да крайней точки и юнит готов вернуться в начально положение
+        /// Если это произошло, то пересчитываем урон и добавляем на сцену анимации атаки
+        /// </summary>
+        private void BeforeTouch()
+        {
+            var curUnitAnimation = CurrentUnitGameObject.BattleUnitAnimationComponent;
+            var curUnit = CurrentUnitGameObject.Unit;
+
+            // todo нужно научиться определять на каком фрейме происходит удар
+            //if (this.BattleUnitAnimationComponent.FrameIndex >= 14) {
+            if (curUnitAnimation.FramesCount - curUnitAnimation.FrameIndex <= 12) {
+                var isAttacking = curUnit.HasEnemyAbility();
+                foreach (var targetUnit in _targetUnits) {
+                    // Проверяем меткость юнита
+                    var chanceAttack = RandomGenerator.Next(0, 100);
+                    if (chanceAttack > curUnit.UnitType.FirstAttack.Accuracy)
+                        continue;
+
+                    // Если юнит атакует врага, а не лечит союзника, то цели вызываем анимацию получения повреждений
+                    if (isAttacking) {
+                        targetUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
+
+                        var damage = curUnit.UnitType.FirstAttack.DamagePower + RandomGenerator.Next(ATTACK_RANGE);
+                        damage = (int) (damage * (1 - targetUnit.Unit.UnitType.Armor / 100.0));
+
+                        targetUnit.Unit.ChangeHitPoints(-damage);
+
+                        // Обрабатываем смерть юнита
+                        if (targetUnit.Unit.HitPoints == 0) {
+                            targetUnit.Unit.IsDead = true;
+                            targetUnit.BattleObjectComponent.Action = BattleAction.Dead;
+
+                            var deathAnimation = new FrameAnimationObject(
+                                _mapVisual,
+                                targetUnit.BattleUnitAnimationComponent.BattleUnitAnimation.DeathFrames,
+                                targetUnit.BattleObjectComponent.Position.X,
+                                targetUnit.BattleObjectComponent.Position.Y,
+                                6);
+
+                            _targetAnimations.Add(deathAnimation);
+                            _game.CreateObject(deathAnimation);
+                        }
+                    }
+                    else {
+                        // todo пока только целители
+                        var heal = curUnit.UnitType.FirstAttack.HealPower;
+                        targetUnit.Unit.ChangeHitPoints(heal);
+                    }
+
+                    // Если есть анимация, применяемая к юниту, то добавляем её на сцену
+                    if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == true) {
+                        var targetAnimation = new FrameAnimationObject(
+                            _mapVisual,
+                            curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
+                            targetUnit.BattleObjectComponent.Position.X,
+                            targetUnit.BattleObjectComponent.Position.Y,
+                            6);
+
+                        _targetAnimations.Add(targetAnimation);
+                        _game.CreateObject(targetAnimation);
+                    }
+                }
+
+                if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == false) {
+                    // Центр анимации будет приходиться на середину между первым и вторым рядом
+                    // Дополнительно смещаемся, если это атака на защитников
+                    var offsetX = 0.5;
+                    if (_targetUnits.First().BattleObjectComponent.Direction == BattleDirection.Defender) {
+                        offsetX += 2;
+                    }
+
+                    var targetAnimCoor = GameInfo.OffsetCoordinates(offsetX, 1);
+                    var areaAnimation = new FrameAnimationObject(
+                        _mapVisual,
+                        curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
+                        targetAnimCoor.X,
+                        targetAnimCoor.Y,
+                        6);
+
+                    _targetAnimations.Add(areaAnimation);
+                    _game.CreateObject(areaAnimation);
+                }
+
+                _attackState = AttackState.AfterTouch;
+            }
+        }
+
+        /// <summary>
+        /// Удалить со сцены завершившиеся анимации
+        /// Завершить атаку, если все анимации завершились
+        /// </summary>
+        private void AfterTouch()
+        {
+            var curUnitObject = CurrentUnitGameObject.BattleObjectComponent;
+            var curUnitAnimation = CurrentUnitGameObject.BattleUnitAnimationComponent;
+
+            // Переводим юнита в ожидание если его анимация закончилась
+            if (curUnitObject.Action == BattleAction.Attacking &&
+                curUnitAnimation.FrameIndex == curUnitAnimation.FramesCount - 1) {
+                curUnitObject.Action = BattleAction.Waiting;
+            }
+
+            // Уничтожаем анимации, которые закончили своё выполнение
+            foreach (var frameAnimationObject in _targetAnimations) {
+                if (frameAnimationObject.IsDestroyed)
+                    continue;
+
+                var animComponent = frameAnimationObject.FrameAnimationComponent;
+                if (animComponent.FrameIndex == animComponent.FramesCount - 1) {
+                    _game.DestroyObject(frameAnimationObject);
+                }
+            }
+
+            // Если активных действий нет, заканчиваем
+            if (curUnitObject.Action == BattleAction.Waiting &&
+                _targetAnimations.Any(ta => ta.IsDestroyed == false) == false) {
+                _targetAnimations = new List<FrameAnimationObject>();
+
+                if (IsBattleEnd()) {
+                    // todo Добавить что-то более подходящее
+                    Console.WriteLine("Battle end");
+                    return;
+                }
+
+                // Если юнит может атаковать дважды, и сейчас атаковал в первый раз, то не передаём ход дальше
+                if (CurrentUnitGameObject.Unit.UnitType.AttackTwice && _isSecondAttack == false) {
+                    _isSecondAttack = true;
+                }
+                else {
+                    _isSecondAttack = false;
+                    NextTurn();
+                }
+
+                _attackState = AttackState.WaitingAction;
+                AttackEnded?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
 
 
         public BattleUnit CurrentUnitGameObject { get; private set; }
 
         public IReadOnlyList<BattleUnit> Units => _units;
+
+
+        public event EventHandler AttackEnded;
 
 
         /// <summary>
@@ -94,12 +275,38 @@ namespace Engine.Implementation.Game
 
 
 
-        private void StartNextRound()
+        // Начать новый раунд
+        private void StartNewRound()
         {
             _turnOrder = new Queue<BattleUnit>(
-                _units.OrderByDescending(u => u.Unit.UnitType.FirstAttack.Initiative + RandomGenerator.Next(0, InitiativeRange)));
+                _units
+                    .Where(u => u.Unit.IsDead == false)
+                    .OrderByDescending(u => u.Unit.UnitType.FirstAttack.Initiative + RandomGenerator.Next(0, INITIATIVE_RANGE)));
 
             CurrentUnitGameObject = _turnOrder.Dequeue();
+        }
+
+        // Передать ход следующему юниту
+        private void NextTurn()
+        {
+            do {
+                if (_turnOrder.TryDequeue(out var nextUnit) && nextUnit.Unit.IsDead == false) {
+                    CurrentUnitGameObject = nextUnit;
+                    return;
+                }
+            } while (_turnOrder.Any());
+
+            StartNewRound();
+        }
+
+        // Проверить, если ли враги
+        private bool IsBattleEnd()
+        {
+            return Units
+                       .Where(u => u.Unit.IsDead == false)
+                       .Select(u => u.Unit.Player)
+                       .Distinct()
+                       .Count() < 2;
         }
 
 
@@ -118,53 +325,40 @@ namespace Engine.Implementation.Game
 
             // Если юнит может атаковать только ближайшего, то проверяем препятствия
             if (currentUnit.UnitType.FirstAttack.Reach == Reach.Adjacent) {
-                // Проверка, может ли юнит дотянуть до врага, несмотря на возможное наличие линий между ними
-                var targetSquad = GetUnitSquad(targetUnitGameObject);
-                if (CanAttackOnFlank(
-                        currentUnit.SquadFlankPosition,
-                        targetUnit.SquadFlankPosition,
-                        targetUnit.SquadLinePosition,
-                        targetSquad) == false)
-                    return false;
-
                 // Если атакующий юнит находится сзади и есть линия союзников впереди
                 var currentSquad = GetUnitSquad(CurrentUnitGameObject);
                 if (currentUnit.SquadLinePosition == 0 && IsFirstLineEmpty(currentSquad) == false)
                     return false;
 
                 // Если враг находится сзади, то проверяем, что нет первой вражеской линии
+                var targetSquad = GetUnitSquad(targetUnitGameObject);
                 if (targetUnit.SquadLinePosition == 0 && IsFirstLineEmpty(targetSquad) == false)
+                    return false;
+
+                // Проверка, может ли юнит дотянуться до врага
+                if (CanAttackOnFlank(
+                        currentUnit.SquadFlankPosition,
+                        targetUnit.SquadFlankPosition,
+                        targetUnit.SquadLinePosition,
+                        targetSquad) == false)
                     return false;
             }
 
             return true;
         }
 
-        public bool AttackUnit(BattleUnit targetUnitGameObject, Action onAttackEnd)
+        public bool AttackUnit(BattleUnit targetUnitGameObject)
         {
             if (CanAttack(targetUnitGameObject) == false)
                 return false;
 
-            var battleUnits = CurrentUnitGameObject.Unit.UnitType.FirstAttack.Reach == Reach.All
+            CurrentUnitGameObject.BattleObjectComponent.Action = BattleAction.Attacking;
+
+            _targetUnits = CurrentUnitGameObject.Unit.UnitType.FirstAttack.Reach == Reach.All
                 ? GetUnitSquad(targetUnitGameObject)
                 : new [] { targetUnitGameObject };
 
-            CurrentUnitGameObject.AttackUnits(battleUnits, () => {
-                // Если юнит может атаковать дважды, и сейчас атаковал в первый раз, то не передаём ход дальше
-                if (CurrentUnitGameObject.Unit.UnitType.AttackTwice && _isSecondAttack == false) {
-                    _isSecondAttack = true;
-                }
-                else {
-                    if (_turnOrder.Any() == false) {
-                        StartNextRound();
-                    }
-                    else {
-                        CurrentUnitGameObject = _turnOrder.Dequeue();
-                    }
-                }
-
-                onAttackEnd.Invoke();
-            });
+            _attackState = AttackState.BeforeTouch;
 
             return true;
         }
@@ -175,7 +369,7 @@ namespace Engine.Implementation.Game
         /// </summary>
         private IReadOnlyCollection<BattleUnit> GetUnitSquad(BattleUnit battleUnit)
         {
-            return Units.Where(u => u.Unit.Player == battleUnit.Unit.Player).ToList();
+            return Units.Where(u => u.Unit.Player == battleUnit.Unit.Player && u.Unit.IsDead == false).ToList();
         }
 
 
@@ -212,5 +406,15 @@ namespace Engine.Implementation.Game
         }
 
         #endregion
+
+
+        private enum AttackState
+        {
+            WaitingAction,
+
+            AfterTouch,
+
+            BeforeTouch
+        }
     }
 }

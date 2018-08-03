@@ -4,15 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Windows.Input;
 
-using Avalonia;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
 
 using AvaloniaDisciplesII.ViewModels;
 using Engine;
-using Engine.Battle.Components;
 using Engine.Battle.Providers;
-using Engine.Components;
 using Engine.Enums;
 using Engine.Extensions;
 using Engine.Interfaces;
@@ -52,12 +49,12 @@ namespace AvaloniaDisciplesII.Battle
         /// <summary>
         /// Игровой объект, отрисовывающий на текущем юните аманицию выделения
         /// </summary>
-        private GameObject _selectedAnimation;
+        private FrameAnimationObject _selectedAnimation;
 
         /// <summary>
         /// Игровые объекты, которые отрисовывают анимации цели на юнитах-целях
         /// </summary>
-        private IList<GameObject> _targetAnimations;
+        private IList<FrameAnimationObject> _targetAnimations;
 
 
         public BattleViewModel(IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
@@ -80,6 +77,7 @@ namespace AvaloniaDisciplesII.Battle
 
             CurrentUnit = TargetUnit = _battleAttackController.CurrentUnitGameObject.Unit;
             AttachSelectedAnimation(_battleAttackController.CurrentUnitGameObject);
+            _battleAttackController.AttackEnded += (sender, args) => OnAttackEnd();
         }
 
         private static Bitmap GetImageBitmap(string path)
@@ -164,7 +162,7 @@ namespace AvaloniaDisciplesII.Battle
                 return;
 
             if (gameObject is BattleUnit targetUnitGameObject) {
-                if (_battleAttackController.AttackUnit(targetUnitGameObject, OnAttackEnd) == false)
+                if (_battleAttackController.AttackUnit(targetUnitGameObject) == false)
                     return;
 
                 DetachSelectedAnimation();
@@ -208,16 +206,8 @@ namespace AvaloniaDisciplesII.Battle
 
 
             var unitPosition = battleUnit.BattleObjectComponent.Position;
-
-            _selectedAnimation = new GameObject();
-            _selectedAnimation.Components = new IComponent[] {
-                new BattleObjectComponent(_selectedAnimation) {
-                    // Задаём смещение 190. Возможно, стоит брать просто высоту юнита
-                    Position = new Rect(unitPosition.X, unitPosition.Y + 190 * GameInfo.Scale, unitPosition.Width, unitPosition.Height)
-                },
-                new FrameAnimationComponent(_selectedAnimation, MapVisual, frames),
-            };
-
+            // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде
+            _selectedAnimation = new FrameAnimationObject(MapVisual, frames, unitPosition.X, unitPosition.Y + 190 * GameInfo.Scale, 1);
             _game.CreateObject(_selectedAnimation);
         }
 
@@ -236,12 +226,16 @@ namespace AvaloniaDisciplesII.Battle
         /// </summary>
         private void SelectTargetUnits()
         {
+            if (TargetUnit.IsDead)
+                return;
+
             // Если текущий юнит может атаковать только одну цель,
             // то всегда будет выделена только одна цель
             if (CurrentUnit.UnitType.FirstAttack.Reach != Reach.All) {
                 AttachTargetAnimations(TargetUnit);
                 return;
             }
+
 
             Unit[] targetUnits;
 
@@ -251,12 +245,12 @@ namespace AvaloniaDisciplesII.Battle
             if (CurrentUnit.Player == TargetUnit.Player && CurrentUnit.HasAllyAbility() ||
                 CurrentUnit.Player != TargetUnit.Player && CurrentUnit.HasEnemyAbility()) {
                 targetUnits = Units
-                    .Where(u => u.Unit.Player == TargetUnit.Player)
+                    .Where(u => u.Unit.Player == TargetUnit.Player && u.Unit.IsDead == false)
                     .Select(u => u.Unit)
                     .ToArray();
             }
             else {
-                targetUnits = new[] {TargetUnit};
+                targetUnits = new[] { TargetUnit };
             }
 
             AttachTargetAnimations(targetUnits);
@@ -270,7 +264,7 @@ namespace AvaloniaDisciplesII.Battle
             if (_targetAnimations != null)
                 DetachTargetAnimations();
 
-            _targetAnimations = new List<GameObject>(units.Length);
+            _targetAnimations = new List<FrameAnimationObject>(units.Length);
             foreach (var unit in units) {
                 var battleUnit = Units.First(u => u.Unit == unit);
 
@@ -279,16 +273,10 @@ namespace AvaloniaDisciplesII.Battle
                         ? "MRKSMALLA"
                         : "MRKLARGEA");
 
-                var unitPosition = battleUnit.BattleObjectComponent.Position;
-                var targetAnimation = new GameObject();
-                targetAnimation.Components = new IComponent[] {
-                    new BattleObjectComponent(targetAnimation) {
-                        // Задаём смещение 190. Возможно, стоит брать просто высоту юнита
-                        Position = new Rect(unitPosition.X, unitPosition.Y + 190 * GameInfo.Scale, unitPosition.Width, unitPosition.Height)
-                    },
-                    new FrameAnimationComponent(targetAnimation, MapVisual, frames),
-                };
 
+                var unitPosition = battleUnit.BattleObjectComponent.Position;
+                // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде
+                var targetAnimation = new FrameAnimationObject(MapVisual, frames, unitPosition.X, unitPosition.Y + 190 * GameInfo.Scale, 1);
                 _targetAnimations.Add(targetAnimation);
                 _game.CreateObject(targetAnimation);
             }

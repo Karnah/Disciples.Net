@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -8,6 +9,12 @@ namespace Engine
         /// Все объекты, размещённые на сцене
         /// </summary>
         IReadOnlyCollection<GameObject> GameObjects { get; }
+
+
+        /// <summary>
+        /// Событие, которое возникает после того, как сцена была обновлена
+        /// </summary>
+        event EventHandler SceneEndUpdating;
 
 
         /// <summary>
