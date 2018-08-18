@@ -24,20 +24,19 @@ namespace Engine.Implementation.Game
         /// </summary>
         private const int ATTACK_RANGE = 5;
 
+        /// <summary>
+        /// Слой, который перекрывает всех юнитов
+        /// </summary>
+        private const int ABOVE_ALL_UNITS_LAYER = 100 * 4;
 
         private readonly IUnityContainer _container;
         private readonly IGame _game;
         private readonly IMapVisual _mapVisual;
-        private readonly IBattleResourceProvider _battleResourceProvider;
 
         private List<BattleUnit> _units;
         private List<FrameAnimationObject> _targetAnimations;
         private IReadOnlyCollection<BattleUnit> _targetUnits;
 
-        /// <summary>
-        /// Флаг, что в данный момент происходит анимация (атака, смерть и т.д.)
-        /// </summary>
-        private bool _isAnimate;
 
         private AttackState _attackState = AttackState.WaitingAction;
 
@@ -52,13 +51,11 @@ namespace Engine.Implementation.Game
         private bool _isSecondAttack = false;
 
 
-        public BattleAttackController(IUnityContainer container, IGame game, IMapVisual mapVisual, IBattleResourceProvider battleResourceProvider,
-            Squad attackSquad, Squad defendSquad)
+        public BattleAttackController(IUnityContainer container, IGame game, IMapVisual mapVisual, Squad attackSquad, Squad defendSquad)
         {
             _container = container;
             _game = game;
             _mapVisual = mapVisual;
-            _battleResourceProvider = battleResourceProvider;
 
             _targetAnimations = new List<FrameAnimationObject>();
 
@@ -71,7 +68,7 @@ namespace Engine.Implementation.Game
 
         private void OnUpdate(object sender, EventArgs eventArgs)
         {
-            if (_attackState == AttackState.WaitingAction)
+            if (_attackState == AttackState.WaitingAction || _attackState == AttackState.BattleEnd)
                 return;
 
             if (_attackState == AttackState.BeforeTouch) {
@@ -95,7 +92,6 @@ namespace Engine.Implementation.Game
             var curUnit = CurrentUnitGameObject.Unit;
 
             // todo нужно научиться определять на каком фрейме происходит удар
-            //if (this.BattleUnitAnimationComponent.FrameIndex >= 14) {
             if (curUnitAnimation.FramesCount - curUnitAnimation.FrameIndex <= 12) {
                 var isAttacking = curUnit.HasEnemyAbility();
                 foreach (var targetUnit in _targetUnits) {
@@ -104,7 +100,7 @@ namespace Engine.Implementation.Game
                     if (chanceAttack > curUnit.UnitType.FirstAttack.Accuracy)
                         continue;
 
-                    // Если юнит атакует врага, а не лечит союзника, то цели вызываем анимацию получения повреждений
+                    // Если юнит атакует врага, а не лечит союзника, то у цели вызываем анимацию получения повреждений
                     if (isAttacking) {
                         targetUnit.BattleObjectComponent.Action = BattleAction.TakingDamage;
 
@@ -112,22 +108,6 @@ namespace Engine.Implementation.Game
                         damage = (int) (damage * (1 - targetUnit.Unit.UnitType.Armor / 100.0));
 
                         targetUnit.Unit.ChangeHitPoints(-damage);
-
-                        // Обрабатываем смерть юнита
-                        if (targetUnit.Unit.HitPoints == 0) {
-                            targetUnit.Unit.IsDead = true;
-                            targetUnit.BattleObjectComponent.Action = BattleAction.Dead;
-
-                            var deathAnimation = new FrameAnimationObject(
-                                _mapVisual,
-                                targetUnit.BattleUnitAnimationComponent.BattleUnitAnimation.DeathFrames,
-                                targetUnit.BattleObjectComponent.Position.X,
-                                targetUnit.BattleObjectComponent.Position.Y,
-                                6);
-
-                            _targetAnimations.Add(deathAnimation);
-                            _game.CreateObject(deathAnimation);
-                        }
                     }
                     else {
                         // todo пока только целители
@@ -142,7 +122,7 @@ namespace Engine.Implementation.Game
                             curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
                             targetUnit.BattleObjectComponent.Position.X,
                             targetUnit.BattleObjectComponent.Position.Y,
-                            6);
+                            targetUnit.BattleUnitAnimationComponent.Layer + 2);
 
                         _targetAnimations.Add(targetAnimation);
                         _game.CreateObject(targetAnimation);
@@ -157,13 +137,13 @@ namespace Engine.Implementation.Game
                         offsetX += 2;
                     }
 
-                    var targetAnimCoor = GameInfo.OffsetCoordinates(offsetX, 1);
+                    var (x, y) = GameInfo.OffsetCoordinates(offsetX, 1);
                     var areaAnimation = new FrameAnimationObject(
                         _mapVisual,
                         curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
-                        targetAnimCoor.X,
-                        targetAnimCoor.Y,
-                        6);
+                        x,
+                        y,
+                        ABOVE_ALL_UNITS_LAYER);
 
                     _targetAnimations.Add(areaAnimation);
                     _game.CreateObject(areaAnimation);
@@ -199,6 +179,45 @@ namespace Engine.Implementation.Game
                 }
             }
 
+            // Обрабатываем конец анимации получения повреждений для юнитов
+            foreach (var targetUnitGameObject in _targetUnits) {
+                var tarUnit = targetUnitGameObject.Unit;
+                var tarUnitObject = targetUnitGameObject.BattleObjectComponent;
+                var tarUnitAnim = targetUnitGameObject.BattleUnitAnimationComponent;
+
+                if (tarUnitObject.Action == BattleAction.TakingDamage &&
+                    tarUnitAnim.FrameIndex == tarUnitAnim.FramesCount - 1) {
+
+                    tarUnitObject.Action = BattleAction.Waiting;
+
+                    // В начале просто добавлеяем анимацию смерти юнита
+                    // Только спустя несколько тиков он превратится в кучку костей
+                    if (tarUnit.HitPoints == 0) {
+                        tarUnit.IsDead = true;
+
+                        var deathAnimation = new FrameAnimationObject(
+                            _mapVisual,
+                            targetUnitGameObject.BattleUnitAnimationComponent.BattleUnitAnimation.DeathFrames,
+                            targetUnitGameObject.BattleObjectComponent.Position.X,
+                            targetUnitGameObject.BattleObjectComponent.Position.Y,
+                            targetUnitGameObject.BattleUnitAnimationComponent.Layer + 2);
+
+                        _targetAnimations.Add(deathAnimation);
+                        _game.CreateObject(deathAnimation);
+                    }
+
+                    continue;
+                }
+
+                // Отображаем мертвого юнита как кости на сцене
+                if (tarUnit.IsDead &&
+                    tarUnitObject.Action == BattleAction.Waiting &&
+                    tarUnitAnim.FrameIndex == tarUnitAnim.FramesCount / 2) {
+                    tarUnitObject.Action = BattleAction.Dead;
+                }
+            }
+
+
             // Если активных действий нет, заканчиваем
             if (curUnitObject.Action == BattleAction.Waiting &&
                 _targetAnimations.Any(ta => ta.IsDestroyed == false) == false) {
@@ -207,6 +226,9 @@ namespace Engine.Implementation.Game
                 if (IsBattleEnd()) {
                     // todo Добавить что-то более подходящее
                     Console.WriteLine("Battle end");
+
+                    _attackState = AttackState.BattleEnd;
+
                     return;
                 }
 
@@ -414,7 +436,9 @@ namespace Engine.Implementation.Game
 
             AfterTouch,
 
-            BeforeTouch
+            BeforeTouch,
+
+            BattleEnd
         }
     }
 }

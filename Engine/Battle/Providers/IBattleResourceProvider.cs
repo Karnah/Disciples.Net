@@ -7,5 +7,7 @@ namespace Engine.Battle.Providers
     public interface IBattleResourceProvider
     {
         IReadOnlyList<Frame> GetBattleAnimation(string animationName);
+
+        Frame GetBattleFrame(string frameName);
     }
 }

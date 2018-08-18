@@ -54,18 +54,18 @@ namespace Engine.Implementation.Resources
 
         private BattleUnitAnimation ExtractUnitAnimation(string unitId, BattleDirection direction)
         {
-            var unitFrames = new Dictionary<BattleAction, BattleUnitFrames>();
+            var unitType = _unitInfoProvider.GetUnitType(unitId);
+            // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно
+            var unitFrames = new Dictionary<BattleAction, BattleUnitFrames> {
+                { BattleAction.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.SizeSmall), null) }
+            };
+
             foreach (BattleAction action in Enum.GetValues(typeof(BattleAction))) {
                 if (action == BattleAction.Dead)
                     continue;
 
                 unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
             }
-
-            //var deadFrames = _battleResourceProvider.GetBattleAnimation("DEAD_HUMAN_SMALL").First();
-            //unitFrames.Add(BattleAction.Dead, new BattleUnitFrames(null, new []{ deadFrames }, null));
-            unitFrames.Add(BattleAction.Dead, new BattleUnitFrames(null, new []{ new Frame(), }, null));
-
 
             // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту
             var singleTargetFrames =
@@ -91,17 +91,15 @@ namespace Engine.Implementation.Resources
             }
 
 
-            var unitType = _unitInfoProvider.GetUnitType(unitId);
             var deathAnimation = GetDeathFrames(unitType.DeathAnimationId);
 
 
-            // todo Добавить анимацию для атаки цели
             return new BattleUnitAnimation(unitFrames, unitTargetAnimation, deathAnimation);
         }
 
 
         // g000uu0015 - ид в верхнем регистре
-        // HHIT - ограбает | HMOVE - атакует | IDLE - ждёт | STIL - замер | TUCH - бьёт 1 врага | HEFF - бьёт площадь
+        // HHIT - юнита ударили | HMOVE - атакует | IDLE - ждёт | STIL - замер(например, паралич) | TUCH - бьёт 1 врага | HEFF - бьёт площадь
         // A - объект или аура | S - тень
         // 1 - объект | 2 -аура
         // A - атакующий, лицом | D - защищающийся, спиной | B - симметрично
@@ -153,6 +151,23 @@ namespace Engine.Implementation.Resources
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
             }
+        }
+
+        private IReadOnlyList<Frame> GetDeadFrames(bool isSmall)
+        {
+            var sizeChar = isSmall ? 'S' : 'L';
+            var imageIndex = RandomGenerator.Next(2);
+            var deadFrame = _battleResourceProvider.GetBattleFrame($"DEAD_HUMAN_{sizeChar}A{imageIndex:00}");
+
+            // Необходимо задать дополнительно смещение, так как картинка не 800*600, как анимации юнитов
+            var frame = new Frame(
+                deadFrame.Width,
+                deadFrame.Height,
+                deadFrame.OffsetX + 350 * GameInfo.Scale,
+                deadFrame.OffsetY + 400 * GameInfo.Scale,
+                deadFrame.Bitmap);
+
+            return new []{ frame };
         }
 
         private IReadOnlyList<Frame> GetDeathFrames(int deathAnimationId)

@@ -1,30 +1,34 @@
-﻿using System.Collections.Generic;
-
-namespace ResourceProvider.Models
+﻿namespace ResourceProvider.Models
 {
     internal class File
     {
-        public File(int id, int size, long offset, string name)
+        public File(int id, string name, int size, long offset)
         {
             Id = id;
+            Name = name;
             Size = size;
             Offset = offset;
-            Name = name;
-            Content = null;
-            Frames = new List<Frame>();
         }
 
 
+        /// <summary>
+        /// Идентификатор файла
+        /// </summary>
         public int Id { get; }
 
-        public int Size { get; }
-
-        public long Offset { get; }
-
+        /// <summary>
+        /// Имя файла
+        /// </summary>
         public string Name { get; }
 
-        public byte[] Content { get; set; }
+        /// <summary>
+        /// Размер файла
+        /// </summary>
+        public int Size { get; }
 
-        public List<Frame> Frames { get; set; }
+        /// <summary>
+        /// Позиция начала файла в файле ресуров
+        /// </summary>
+        public long Offset { get; }
     }
 }

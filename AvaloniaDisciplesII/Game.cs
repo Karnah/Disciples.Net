@@ -10,7 +10,7 @@ namespace AvaloniaDisciplesII
 {
     public class Game : IGame
     {
-        private const int TicksPerSecond = 60;
+        private const int TICKS_PER_SECOND = 60;
 
         private readonly LinkedList<GameObject> _gameObjects;
 
@@ -26,7 +26,7 @@ namespace AvaloniaDisciplesII
             _stopwatch.Start();
             _ticks = _stopwatch.ElapsedMilliseconds;
 
-            _timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1000 / TicksPerSecond) };
+            _timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1000 / TICKS_PER_SECOND) };
             _timer.Tick += UpdateScene;
             _timer.Start();
         }

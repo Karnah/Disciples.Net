@@ -10,10 +10,19 @@
         }
 
 
+        /// <summary>
+        /// Идентификатор записи
+        /// </summary>
         public int Id { get; }
 
+        /// <summary>
+        /// Размер записи
+        /// </summary>
         public int Size { get; }
 
+        /// <summary>
+        /// Смещение записи относительно начала файла ресурсов
+        /// </summary>
         public long Offset { get; }
     }
 }

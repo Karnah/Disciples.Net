@@ -9,7 +9,10 @@ namespace Engine.Battle.Components
 {
     public class FrameAnimationComponent : Component
     {
-        private const int FrameChangeSpeed = 75;
+        /// <summary>
+        /// Промежуток времени в мс через которое происходит смена кадра в анимации
+        /// </summary>
+        private const int FRAME_CHANGE_SPEED = 75;
 
         private readonly IMapVisual _mapVisual;
         private readonly IReadOnlyList<Frame> _frames;
@@ -45,12 +48,12 @@ namespace Engine.Battle.Components
         public override void OnUpdate(long tickCount)
         {
             _ticksCount += tickCount;
-            if (_ticksCount < FrameChangeSpeed)
+            if (_ticksCount < FRAME_CHANGE_SPEED)
                 return;
             
             ++FrameIndex;
             FrameIndex %= _frames.Count;
-            _ticksCount %= FrameChangeSpeed;
+            _ticksCount %= FRAME_CHANGE_SPEED;
 
             var frame = _frames[FrameIndex];
 

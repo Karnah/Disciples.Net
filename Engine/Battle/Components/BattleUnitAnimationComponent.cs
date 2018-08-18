@@ -13,7 +13,7 @@ namespace Engine.Battle.Components
 {
     public class BattleUnitAnimationComponent : Component
     {
-        private const int FrameChangeSpeed = 75;
+        private const int FRAME_CHANGE_SPEED = 75;
 
         private readonly IMapVisual _mapVisual;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
@@ -36,12 +36,37 @@ namespace Engine.Battle.Components
             GameObject gameObject,
             IMapVisual mapVisual,
             IBattleUnitResourceProvider battleUnitResourceProvider,
-            string unitId) : base(
-            gameObject)
+            string unitId) : base(gameObject)
         {
             _mapVisual = mapVisual;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _unitId = unitId;
+
+            Layer = GetLayer();
+        }
+
+
+        /// <summary>
+        /// Вычислить на каком слое располгается юнит визуально
+        /// </summary>
+        private int GetLayer()
+        {
+            var battleUnit = GameObject as BattleUnit;
+            if (battleUnit == null) {
+                // todo Вообще, это должна быть ошибка
+                return 1;
+            }
+
+            int battleLine;
+            if (battleUnit.BattleObjectComponent.Direction == BattleDirection.Attacker) {
+                battleLine = battleUnit.Unit.SquadLinePosition;
+            }
+            else {
+                battleLine = ((battleUnit.Unit.SquadLinePosition + 1) & 1) + 2;
+            }
+
+
+            return battleLine * 100 + battleUnit.Unit.SquadFlankPosition * 10 + 5;
         }
 
 
@@ -51,6 +76,8 @@ namespace Engine.Battle.Components
 
         public int FramesCount { get; private set; }
 
+        public int Layer { get; }
+
 
         public override void OnInitialize()
         {
@@ -59,18 +86,21 @@ namespace Engine.Battle.Components
             _battleObject = GetComponent<BattleObjectComponent>();
             BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleObject.Direction);
 
+            // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно
+            FrameIndex = RandomGenerator.Next(BattleUnitAnimation.BattleUnitFrames[_battleObject.Action].UnitFrames.Count);
             UpdateSource();
         }
 
         public override void OnUpdate(long tickCount)
         {
             if (_battleObject.Action != _action) {
+                FrameIndex = 0;
                 UpdateSource();
                 return;
             }
 
             _ticksCount += tickCount;
-            if (_ticksCount < FrameChangeSpeed)
+            if (_ticksCount < FRAME_CHANGE_SPEED)
                 return;
 
             ++FrameIndex;
@@ -82,7 +112,7 @@ namespace Engine.Battle.Components
             }
 
             FrameIndex %= FramesCount;
-            _ticksCount %= FrameChangeSpeed;
+            _ticksCount %= FRAME_CHANGE_SPEED;
 
             UpdateBitmap(_shadowVisual, _shadowFrames, FrameIndex);
             UpdateBitmap(_unitVisual, _unitFrames, FrameIndex);
@@ -98,34 +128,27 @@ namespace Engine.Battle.Components
             if (frames?.Any() != true)
                 return;
 
-            // bug Коряво извлекаются ресурсы, из-за чего часть фреймов нет
-            if (frameIndex >= frames.Count) {
-                visual.Bitmap = null;
-            }
-            else {
-                visual.Bitmap = frames[frameIndex].Bitmap;
-            }
+            visual.Bitmap = frames[frameIndex].Bitmap;
         }
 
 
         private void UpdateSource()
         {
             _action = _battleObject.Action;
-            FrameIndex = 1;
 
-            var frames = BattleUnitAnimation.BattleUnitFrameses[_action];
+            var frames = BattleUnitAnimation.BattleUnitFrames[_action];
             _shadowFrames = frames.ShadowFrames;
             _unitFrames = frames.UnitFrames;
             _auraFrames = frames.AuraFrames;
 
-            UpdatePosition(ref _shadowVisual, _shadowFrames);
-            UpdatePosition(ref _unitVisual, _unitFrames);
-            UpdatePosition(ref _auraVisual, _auraFrames);
+            UpdatePosition(ref _shadowVisual, _shadowFrames, Layer - 1);
+            UpdatePosition(ref _unitVisual, _unitFrames, Layer);
+            UpdatePosition(ref _auraVisual, _auraFrames, Layer + 1);
 
             FramesCount = _unitFrames.Count;
         }
 
-        private void UpdatePosition(ref VisualObject visual, IReadOnlyList<Frame> frames)
+        private void UpdatePosition(ref VisualObject visual, IReadOnlyList<Frame> frames, int layer)
         {
             if (frames == null) {
                 if (visual != null) {
@@ -137,11 +160,11 @@ namespace Engine.Battle.Components
             }
             else {
                 if (visual == null) {
-                    visual = new VisualObject(GameObject, 2);
+                    visual = new VisualObject(GameObject, layer);
                     _mapVisual.AddVisual(visual);
                 }
 
-                var frame = frames[0];
+                var frame = frames[FrameIndex];
                 visual.Bitmap = frame.Bitmap;
 
                 // Предполагается, что размеры и смещение всех фреймов в анимации одинаково

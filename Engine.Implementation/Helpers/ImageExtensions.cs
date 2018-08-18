@@ -12,25 +12,21 @@ namespace Engine.Implementation.Helpers
 {
     public static class ImageExtensions
     {
-        public static Bitmap ToBitmap(this Image image)
+        /// <summary>
+        /// Сконвертировать сырое изображение в битмап
+        /// </summary>
+        public static Bitmap ToBitmap(this RowImage image)
         {
             if (image == null)
                 return null;
 
-            var bitmap = new WritableBitmap(image.Width, image.Height, PixelFormat.Rgba8888);
-            using (var l = bitmap.Lock()) {
-                for (int row = 0; row < image.Height; ++row) {
-                    var begin = (row * image.Width) << 2;
-                    var length = image.Width << 2;
-
-                    Marshal.Copy(image.Data, begin, new IntPtr(l.Address.ToInt64() + row * length), length);
-                }
-            }
-
-            return bitmap;
+            return ConvertImageToFrame(image).Bitmap;
         }
 
-        public static IReadOnlyList<Frame> ConvertToFrames(this IReadOnlyCollection<Image> images)
+        /// <summary>
+        /// Получить конечные кадры анимации из сырых
+        /// </summary>
+        public static IReadOnlyList<Frame> ConvertToFrames(this IReadOnlyCollection<RowImage> images)
         {
             var result = new List<Frame>(images.Count);
 
@@ -53,13 +49,25 @@ namespace Engine.Implementation.Helpers
             return result;
         }
 
-
-        private static Frame ConvertImageToFrame(Image image, OpacityBounds opacityBounds)
+        /// <summary>
+        /// Получить кадр из сырого изображения
+        /// </summary>
+        public static Frame ConvertToFrame(this RowImage image)
         {
-            var frame = new Frame();
+            return ConvertImageToFrame(image);
+        }
 
-            frame.OffsetX = opacityBounds.MinColumn * GameInfo.Scale;
-            frame.OffsetY = opacityBounds.MinRow * GameInfo.Scale;
+
+        /// <summary>
+        /// Получить кадр из сырого изображения
+        /// </summary>
+        /// <param name="image">Сырое изображение</param>
+        /// <param name="opacityBounds">Границы кадра. Если null, то используются границы сырого изображения</param>
+        private static Frame ConvertImageToFrame(RowImage image, OpacityBounds opacityBounds = null)
+        {
+            if (opacityBounds == null) {
+                opacityBounds = new OpacityBounds(image.MinRow, image.MaxRow, image.MinColumn, image.MaxColumn);
+            }
 
             var width = opacityBounds.MaxColumn - opacityBounds.MinColumn + 1;
             var height = opacityBounds.MaxRow - opacityBounds.MinRow + 1;
@@ -70,17 +78,17 @@ namespace Engine.Implementation.Helpers
                     var begin = (row * image.Width + opacityBounds.MinColumn) << 2;
                     var length = width << 2;
 
-                    Marshal.Copy(image.Data, begin,
-                        new IntPtr(l.Address.ToInt64() + (row - opacityBounds.MinRow) * length), length);
+                    Marshal.Copy(image.Data, begin, new IntPtr(l.Address.ToInt64() + (row - opacityBounds.MinRow) * length), length);
                 }
             }
 
-            frame.Width = width * GameInfo.Scale;
-            frame.Height = height * GameInfo.Scale;
+            var scaledWidth = width * GameInfo.Scale;
+            var scaledHeight = height * GameInfo.Scale;
 
-            frame.Bitmap = bitmap;
+            var offsetX = opacityBounds.MinColumn * GameInfo.Scale;
+            var offsetY = opacityBounds.MinRow * GameInfo.Scale;
 
-            return frame;
+            return new Frame(scaledWidth, scaledHeight, offsetX, offsetY, new Bitmap(bitmap.PlatformImpl));
         }
 
 

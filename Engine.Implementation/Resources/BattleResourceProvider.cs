@@ -10,12 +10,14 @@ namespace Engine.Implementation.Resources
 {
     public class BattleResourceProvider : IBattleResourceProvider
     {
-        private readonly SortedDictionary<string, IReadOnlyList<Frame>> _animations;
+        private readonly IDictionary<string, IReadOnlyList<Frame>> _animations;
+        private readonly IDictionary<string, Frame> _images;
         private readonly ImagesExtractor _extractor;
 
         public BattleResourceProvider()
         {
             _animations = new SortedDictionary<string, IReadOnlyList<Frame>>();
+            _images = new SortedDictionary<string, Frame>();
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Battle.ff");
         }
 
@@ -33,6 +35,17 @@ namespace Engine.Implementation.Resources
         {
             var images = _extractor.GetAnimationFrames(fileName);
             return images?.ConvertToFrames();
+        }
+
+
+        public Frame GetBattleFrame(string frameName)
+        {
+            if (_images.ContainsKey(frameName) == false) {
+                var image = _extractor.GetImage(frameName);
+                _images[frameName] = image?.ConvertToFrame();
+            }
+
+            return _images[frameName];
         }
     }
 }

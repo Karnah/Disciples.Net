@@ -4,14 +4,39 @@ namespace Engine.Models
 {
     public class Frame
     {
-        public double Width { get; set; }
+        public Frame(double width, double height, double offsetX, double offsetY, Bitmap bitmap)
+        {
+            Width = width;
+            Height = height;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+            Bitmap = bitmap;
+        }
 
-        public double Height { get; set; }
 
-        public double OffsetX { get; set; }
+        /// <summary>
+        /// Ширина изображения
+        /// </summary>
+        public double Width { get; }
 
-        public double OffsetY { get; set; }
+        /// <summary>
+        /// Высота изображения
+        /// </summary>
+        public double Height { get; }
 
-        public Bitmap Bitmap { get; set; }
+        /// <summary>
+        /// Дополнительное смещение по оси X (вправо)
+        /// </summary>
+        public double OffsetX { get; }
+
+        /// <summary>
+        /// Дополнительно смещение по оси Y (вниз)
+        /// </summary>
+        public double OffsetY { get; }
+
+        /// <summary>
+        /// Изображение
+        /// </summary>
+        public Bitmap Bitmap { get; }
     }
 }
