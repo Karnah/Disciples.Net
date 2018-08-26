@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Engine.Models;
+using Engine.Common.Models;
 
 namespace Engine.Battle.Models
 {

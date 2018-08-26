@@ -4,10 +4,13 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NAudio" Version="1.8.4" />
     <PackageReference Include="NLayer.NAudioSupport" Version="1.0.0" />
-    <PackageReference Include="Unity" Version="5.8.6" />
   </ItemGroup>
 
   <ItemGroup>

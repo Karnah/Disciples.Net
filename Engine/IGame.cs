@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Engine.Common.GameObjects;
+
 namespace Engine
 {
     public interface IGame

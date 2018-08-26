@@ -2,7 +2,8 @@
 using System.Globalization;
 
 using Avalonia;
-using Avalonia.Markup;
+using Avalonia.Data.Converters;
+
 using Engine;
 
 namespace AvaloniaDisciplesII.Converters
@@ -15,7 +16,7 @@ namespace AvaloniaDisciplesII.Converters
             if (thiknessString == null)
                 return new Thickness();
 
-            var thikness = Thickness.Parse(thiknessString, CultureInfo.CurrentCulture);
+            var thikness = Thickness.Parse(thiknessString);
             return new Thickness(
                 thikness.Left * GameInfo.Scale,
                 thikness.Top * GameInfo.Scale,

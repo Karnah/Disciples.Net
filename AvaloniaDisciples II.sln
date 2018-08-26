@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResourceProvider", "ResourceProvider\ResourceProvider.csproj", "{081F4FC9-4C43-4C37-B33B-25AF509D692C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Implementation", "Engine.Implementation\Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Implementation", "Engine.Implementation\Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

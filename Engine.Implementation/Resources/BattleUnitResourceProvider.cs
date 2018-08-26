@@ -5,9 +5,9 @@ using System.IO;
 using Engine.Battle.Enums;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
+using Engine.Common.Models;
+using Engine.Common.Providers;
 using Engine.Implementation.Helpers;
-using Engine.Interfaces;
-using Engine.Models;
 using ResourceProvider;
 
 namespace Engine.Implementation.Resources
@@ -38,7 +38,7 @@ namespace Engine.Implementation.Resources
             _battleResourceProvider = battleResourceProvider;
 
             _unitsAnimations = new SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
-            _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\BatUnits.ff");
+            _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\BatUnits.ff");
         }
 
 
@@ -163,8 +163,8 @@ namespace Engine.Implementation.Resources
             var frame = new Frame(
                 deadFrame.Width,
                 deadFrame.Height,
-                deadFrame.OffsetX + 350 * GameInfo.Scale,
-                deadFrame.OffsetY + 400 * GameInfo.Scale,
+                deadFrame.OffsetX + 350,
+                deadFrame.OffsetY + 400,
                 deadFrame.Bitmap);
 
             return new []{ frame };

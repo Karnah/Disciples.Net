@@ -2,35 +2,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AvaloniaDisciplesII.Battle;assembly=AvaloniaDisciplesII"
              xmlns:c="clr-namespace:AvaloniaDisciplesII.Converters;assembly=AvaloniaDisciplesII">
+  <UserControl.Resources>
+      <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
+      <c:BitmapHeightScaleConvrter x:Key="BitmapHeightScaleConvrter" />
+      <c:MarginScaleConverter x:Key="MarginScaleConverter" />
+      <c:UnitToPanelInfoConverter x:Key="UnitToPanelInfoConverter" />
+  </UserControl.Resources>
+
   <UserControl.Styles>
     <Style Selector="ItemsControl > ContentPresenter">
-      <Setter Property="Canvas.Left" Value="{Binding X}" />
-      <Setter Property="Canvas.Top" Value="{Binding Y}" />
+      <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource DoubleScaleConverter}}" />
+      <Setter Property="Canvas.Top" Value="{Binding Y, Converter={StaticResource DoubleScaleConverter}}" />
       <Setter Property="ZIndex" Value="{Binding Layer}" />
     </Style>
   </UserControl.Styles>
 
-  <UserControl.Resources>
-    <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
-    <c:BitmapHeightScaleConvrter x:Key="BitmapHeightScaleConvrter" />
-    <c:MarginScaleConverter x:Key="MarginScaleConverter" />
-    <c:UnitToPanelInfoConverter x:Key="UnitToPanelInfoConverter" />
-  </UserControl.Resources>
 
   <Grid>
-    <Image Source="{Binding Background}" Stretch="Fill" />
+    <Image Source="{Binding InterfaceController.Battleground}" Stretch="Fill" />
 
-    <Image Source="{Binding BottomPanel}" ZIndex="5" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
 
-    <Image Source="{Binding LeftPanel}"
-           Height="{Binding LeftPanel, Converter={StaticResource BitmapHeightScaleConvrter}}"
-           Margin="{Binding ConverterParameter='0,0,0,140', Converter={StaticResource MarginScaleConverter}}"
-           ZIndex="6" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+    <ItemsControl ZIndex="7" VerticalAlignment="Top" HorizontalAlignment="Right"
+                  Margin="{Binding ConverterParameter='0,85,7.2,0', Converter={StaticResource MarginScaleConverter}}"
+                  Items="{Binding InterfaceController.RightPanelUnits}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <Grid />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
 
-    <Image Source="{Binding CurrentUnit.UnitType.Face}"
-           Height="{Binding CurrentUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
-           Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
-           ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <local:BattleUnitFaceView HorizontalAlignment="Right"
+                                    BattleUnit="{Binding }"
+                                    InterfaceController="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.InterfaceController}"
+                                    BattleUnitSelectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.UnitSelectedOnPanelCommand}"
+                                    BattleUnitClickedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectClickedCommand}" />
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
 
     <TextBlock FontWeight="Bold" TextWrapping="Wrap"
                FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
@@ -46,16 +57,6 @@
         </MultiBinding>
       </TextBlock.Text>
     </TextBlock>
-
-
-    <Image Source="{Binding TargetUnit.UnitType.Face}"
-           Height="{Binding TargetUnit.UnitType.Face, Converter={StaticResource BitmapHeightScaleConvrter}}"
-           Margin="{Binding ConverterParameter='0,0,0,5', Converter={StaticResource MarginScaleConverter}}"
-           ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-      <Image.RenderTransform>
-        <ScaleTransform ScaleX="-1"/>
-      </Image.RenderTransform>
-    </Image>
 
     <TextBlock FontWeight="Bold" TextWrapping="Wrap"
                FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
@@ -86,6 +87,7 @@
           <local:VisualObjectView VisualObject="{Binding }"
                                   VisualSelectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectSelectedCommand}"
                                   VisualUnselectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectUnselectedCommand}"
+                                  VisualPressedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectPressedCommand}"
                                   VisualClickedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectClickedCommand}"/>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

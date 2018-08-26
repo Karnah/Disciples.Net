@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Engine.Battle.Enums;
+using Engine.Battle.GameObjects;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
-using Engine.Components;
-using Engine.Interfaces;
-using Engine.Models;
+using Engine.Common.Components;
+using Engine.Common.Controllers;
+using Engine.Common.Models;
 
 namespace Engine.Battle.Components
 {
@@ -15,10 +16,10 @@ namespace Engine.Battle.Components
     {
         private const int FRAME_CHANGE_SPEED = 75;
 
+        private readonly BattleUnit _battleUnit;
         private readonly IMapVisual _mapVisual;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly string _unitId;
-        private BattleObjectComponent _battleObject;
 
         private long _ticksCount = 0;
         private BattleAction _action;
@@ -33,11 +34,12 @@ namespace Engine.Battle.Components
 
 
         public BattleUnitAnimationComponent(
-            GameObject gameObject,
+            BattleUnit battleUnit,
             IMapVisual mapVisual,
             IBattleUnitResourceProvider battleUnitResourceProvider,
-            string unitId) : base(gameObject)
+            string unitId) : base(battleUnit)
         {
+            _battleUnit = battleUnit;
             _mapVisual = mapVisual;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _unitId = unitId;
@@ -51,22 +53,13 @@ namespace Engine.Battle.Components
         /// </summary>
         private int GetLayer()
         {
-            var battleUnit = GameObject as BattleUnit;
-            if (battleUnit == null) {
-                // todo Вообще, это должна быть ошибка
-                return 1;
-            }
-
-            int battleLine;
-            if (battleUnit.BattleObjectComponent.Direction == BattleDirection.Attacker) {
-                battleLine = battleUnit.Unit.SquadLinePosition;
-            }
-            else {
-                battleLine = ((battleUnit.Unit.SquadLinePosition + 1) & 1) + 2;
-            }
+            var battleLine = _battleUnit.IsAttacker
+                ? _battleUnit.Unit.SquadLinePosition
+                : 3 - _battleUnit.Unit.SquadLinePosition;
+            var flankPosition = 2 - _battleUnit.Unit.SquadFlankPosition;
 
 
-            return battleLine * 100 + battleUnit.Unit.SquadFlankPosition * 10 + 5;
+            return battleLine * 100 + flankPosition * 10 + 5;
         }
 
 
@@ -83,17 +76,16 @@ namespace Engine.Battle.Components
         {
             base.OnInitialize();
 
-            _battleObject = GetComponent<BattleObjectComponent>();
-            BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleObject.Direction);
+            BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleUnit.Direction);
 
             // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно
-            FrameIndex = RandomGenerator.Next(BattleUnitAnimation.BattleUnitFrames[_battleObject.Action].UnitFrames.Count);
+            FrameIndex = RandomGenerator.Next(BattleUnitAnimation.BattleUnitFrames[_battleUnit.Action].UnitFrames.Count);
             UpdateSource();
         }
 
         public override void OnUpdate(long tickCount)
         {
-            if (_battleObject.Action != _action) {
+            if (_battleUnit.Action != _action) {
                 FrameIndex = 0;
                 UpdateSource();
                 return;
@@ -107,7 +99,7 @@ namespace Engine.Battle.Components
             // todo Хреновая реализация контроллера анимации.
             // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания и смерти
             if (FrameIndex >= FramesCount && _action != BattleAction.Waiting && _action != BattleAction.Dead) {
-                _battleObject.Action = BattleAction.Waiting;
+                _battleUnit.Action = BattleAction.Waiting;
                 return;
             }
 
@@ -134,7 +126,7 @@ namespace Engine.Battle.Components
 
         private void UpdateSource()
         {
-            _action = _battleObject.Action;
+            _action = _battleUnit.Action;
 
             var frames = BattleUnitAnimation.BattleUnitFrames[_action];
             _shadowFrames = frames.ShadowFrames;
@@ -169,12 +161,12 @@ namespace Engine.Battle.Components
 
                 // Предполагается, что размеры и смещение всех фреймов в анимации одинаково
                 // Поэтому это условие проверяется только при изменении действия юнита
-                var posX = _battleObject.Position.X + frame.OffsetX;
+                var posX = _battleUnit.X + frame.OffsetX;
                 if (Math.Abs(visual.X - posX) > float.Epsilon) {
                     visual.X = posX;
                 }
 
-                var posY = _battleObject.Position.Y + frame.OffsetY;
+                var posY = _battleUnit.Y + frame.OffsetY;
                 if (Math.Abs(visual.Y - posY) > float.Epsilon) {
                     visual.Y = posY;
                 }

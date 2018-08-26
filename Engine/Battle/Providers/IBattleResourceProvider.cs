@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 
-using Engine.Models;
+using Avalonia.Media.Imaging;
+
+using Engine.Common.Models;
 
 namespace Engine.Battle.Providers
 {
@@ -9,5 +11,11 @@ namespace Engine.Battle.Providers
         IReadOnlyList<Frame> GetBattleAnimation(string animationName);
 
         Frame GetBattleFrame(string frameName);
+
+
+        /// <summary>
+        /// Получить случайную картинку поля боя
+        /// </summary>
+        Bitmap GetRandomBattleground();
     }
 }

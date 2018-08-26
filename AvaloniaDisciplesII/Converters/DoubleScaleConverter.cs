@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-using Avalonia.Markup;
+using Avalonia.Data.Converters;
 
 using Engine;
 
@@ -11,19 +11,24 @@ namespace AvaloniaDisciplesII.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var sizeString = parameter as string;
-            if (sizeString == null)
-                return 0;
+            if (value is double d) {
+                return d * GameInfo.Scale;
+            }
 
-            if (double.TryParse(sizeString, out var size) == false)
-                return 0;
+            if (parameter is string sizeString) {
+                if (double.TryParse(sizeString, NumberStyles.Float, CultureInfo.InvariantCulture, out var size) == false)
+                    return 0;
 
-            return size * GameInfo.Scale;
+                return size * GameInfo.Scale;
+            }
+
+
+            return 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return parameter;
+            return value ?? parameter;
         }
     }
 }

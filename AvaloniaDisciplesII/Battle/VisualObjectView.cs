@@ -5,7 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 
-using Engine.Models;
+using Engine.Common.Models;
 
 namespace AvaloniaDisciplesII.Battle
 {
@@ -14,35 +14,43 @@ namespace AvaloniaDisciplesII.Battle
         public static readonly DirectProperty<VisualObjectView, VisualObject> VisualObjectProperty =
             AvaloniaProperty.RegisterDirect<VisualObjectView, VisualObject>(
                 nameof(VisualObject),
-                buv => buv.VisualObject,
-                (buv, vo) => buv.VisualObject = vo,
+                uc => uc.VisualObject,
+                (uc, vo) => uc.VisualObject = vo,
                 defaultBindingMode:BindingMode.TwoWay);
 
         public static readonly DirectProperty<VisualObjectView, ICommand> VisualSelectedCommandProperty =
             AvaloniaProperty.RegisterDirect<VisualObjectView, ICommand>(
                 nameof(VisualSelectedCommand),
-                buv => buv.VisualSelectedCommand,
-                (buv, vo) => buv.VisualSelectedCommand = vo,
+                uc => uc.VisualSelectedCommand,
+                (uc, vo) => uc.VisualSelectedCommand = vo,
                 defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly DirectProperty<VisualObjectView, ICommand> VisualUnselectedCommandProperty =
             AvaloniaProperty.RegisterDirect<VisualObjectView, ICommand>(
                 nameof(VisualUnselectedCommand),
-                buv => buv.VisualUnselectedCommand,
-                (buv, vo) => buv.VisualUnselectedCommand = vo,
+                uc => uc.VisualUnselectedCommand,
+                (uc, vo) => uc.VisualUnselectedCommand = vo,
+                defaultBindingMode: BindingMode.TwoWay);
+
+        public static readonly DirectProperty<VisualObjectView, ICommand> VisualPressedCommandProperty =
+            AvaloniaProperty.RegisterDirect<VisualObjectView, ICommand>(
+                nameof(VisualPressedCommand),
+                uc => uc.VisualPressedCommand,
+                (uc, vo) => uc.VisualPressedCommand = vo,
                 defaultBindingMode: BindingMode.TwoWay);
 
         public static readonly DirectProperty<VisualObjectView, ICommand> VisualClickedCommandProperty =
             AvaloniaProperty.RegisterDirect<VisualObjectView, ICommand>(
                 nameof(VisualClickedCommand),
-                buv => buv.VisualClickedCommand,
-                (buv, vo) => buv.VisualClickedCommand = vo,
+                uc => uc.VisualClickedCommand,
+                (uc, vo) => uc.VisualClickedCommand = vo,
                 defaultBindingMode: BindingMode.TwoWay);
 
 
         private VisualObject _visualObject;
         private ICommand _visualSelectedCommand;
         private ICommand _visualUnselectedCommand;
+        private ICommand _visualPressedCommand;
         private ICommand _visualClickedCommand;
 
 
@@ -59,6 +67,11 @@ namespace AvaloniaDisciplesII.Battle
         public ICommand VisualUnselectedCommand {
             get => _visualUnselectedCommand;
             set => SetAndRaise(VisualUnselectedCommandProperty, ref _visualUnselectedCommand, value);
+        }
+
+        public ICommand VisualPressedCommand {
+            get => _visualPressedCommand;
+            set => SetAndRaise(VisualPressedCommandProperty, ref _visualPressedCommand, value);
         }
 
         public ICommand VisualClickedCommand {
@@ -79,6 +92,13 @@ namespace AvaloniaDisciplesII.Battle
             base.OnPointerLeave(e);
 
             VisualUnselectedCommand?.Execute(VisualObject.GameObject);
+        }
+
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+
+            VisualPressedCommand?.Execute(VisualObject.GameObject);
         }
 
         protected override void OnPointerReleased(PointerReleasedEventArgs e)

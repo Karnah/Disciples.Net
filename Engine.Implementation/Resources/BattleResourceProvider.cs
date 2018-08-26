@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
+using Avalonia.Media.Imaging;
 
 using Engine.Battle.Providers;
+using Engine.Common.Models;
 using Engine.Implementation.Helpers;
-using Engine.Models;
 using ResourceProvider;
 
 namespace Engine.Implementation.Resources
@@ -18,7 +21,7 @@ namespace Engine.Implementation.Resources
         {
             _animations = new SortedDictionary<string, IReadOnlyList<Frame>>();
             _images = new SortedDictionary<string, Frame>();
-            _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Battle.ff");
+            _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Battle.ff");
         }
 
 
@@ -46,6 +49,20 @@ namespace Engine.Implementation.Resources
             }
 
             return _images[frameName];
+        }
+
+
+        public Bitmap GetRandomBattleground()
+        {
+            var battlegrounds = _extractor.GetAllImagesNames()
+                .Where(name => name.EndsWith("_BG"))
+                .ToList();
+
+            var index = RandomGenerator.Next(battlegrounds.Count);
+
+            // Картинка поля боя имеет размер 950 * 600. Если игрок атакует, то первые 150 пикселей высоты пропускаются
+            // Если игрок защищается, то откидываются последние 150 пикселей
+            return _extractor.GetImage(battlegrounds[index]).ToBitmap(new ImageExtensions.Bounds(0, 600, 150, 950));
         }
     }
 }

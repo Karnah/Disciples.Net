@@ -6,8 +6,10 @@ namespace AvaloniaDisciplesII
 {
     public class GameWindow : Window
     {
-        public GameWindow()
+        public GameWindow(GameWindowViewModel viewModel)
         {
+            this.DataContext = viewModel;
+
             InitializeComponent();
 #if DEBUG
             this.AttachDevTools();

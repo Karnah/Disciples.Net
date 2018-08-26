@@ -264,3 +264,8 @@ __pycache__/
 # Disciples II resources files
 *.ff
 *.dbf
+*.dlg
+*.mft
+
+# This libraries use for up-to-date Avalonia build
+!**/AdditionalPackages/*

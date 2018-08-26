@@ -15,6 +15,9 @@ namespace ResourceProvider
 {
     public class ImagesExtractor
     {
+        // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным
+        private readonly MagickColor _additionalTransparentColor = MagickColor.FromRgb(252, 2, 252);
+
         private readonly string _path;
 
         private IDictionary<int, Record> _records;
@@ -31,6 +34,10 @@ namespace ResourceProvider
             Load();
         }
 
+
+        /// <summary>
+        /// Получить кадры анимации по её имени
+        /// </summary>
         // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
         // Например, G000UU8029HHITA1A00
         // Ссылки на PNG нет, но в .ff файле какая-то информация есть
@@ -42,6 +49,9 @@ namespace ResourceProvider
             return GetAnimationFramesInternal(_mqAnimations[name]);
         }
 
+        /// <summary>
+        /// Получить изображение по его имени
+        /// </summary>
         public RowImage GetImage(string name)
         {
             // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям
@@ -53,18 +63,36 @@ namespace ResourceProvider
             }
 
             // Иначе мы ищем файл с таким именем. Его можно просто отдать целиком, предварительно избавившись от прозрачности
-            _filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var imageFile);
-            if (imageFile == null)
+            if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var imageFile) == false)
                 return null;
 
             return PrepareImage(imageFile);
+        }
+
+        /// <summary>
+        /// Получить данные файла по его имени
+        /// </summary>
+        public byte[] GetFileContent(string name)
+        {
+            if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var file) == false)
+                return null;
+
+            return GetFileContent(file);
+        }
+
+        /// <summary>
+        /// Получить имена всех изображений в ресурсе
+        /// </summary>
+        public IReadOnlyList<string> GetAllImagesNames()
+        {
+            return _mqImages.Keys.ToList();
         }
 
 
         #region LoadData
 
         /// <summary>
-        /// Извлечь все метаданные из файла-контейнера
+        /// Извлечь все метаданные из файла ресурсов
         /// </summary>
         private void Load()
         {
@@ -343,13 +371,16 @@ namespace ResourceProvider
         /// <returns>Сырые данные, которые содержат картинку в массиве RGBA</returns>
         private RowImage PrepareImage(File file)
         {
-            var fileContent = new byte[file.Size];
-            using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
-                fileStream.Seek(file.Offset, SeekOrigin.Begin);
-                fileStream.Read(fileContent, 0, file.Size);
+            MagickImage magickImage;
+            try {
+                magickImage = new MagickImage(GetFileContent(file));
             }
-
-            var magickImage = new MagickImage(fileContent);
+            catch (MagickCoderErrorException) {
+                // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты
+                // Нужно получить решение
+                Console.WriteLine($"Corrupted image: {_path}\\{file.Name}");
+                return null;
+            }
 
             var colorMap = new Dictionary<int, byte>();
             var safeName = Path.GetFileNameWithoutExtension(file.Name);
@@ -381,6 +412,13 @@ namespace ResourceProvider
                         pixels[i + 3] = 0;
                     }
 
+                    // Костыль, так как иначе буду оставать розовые пятна на правой панели с юнитами
+                    if (pixels[i] == (byte)_additionalTransparentColor.R &&
+                        pixels[i + 1] == (byte)_additionalTransparentColor.G &&
+                        pixels[i + 2] == (byte)_additionalTransparentColor.B) {
+                        pixels[i + 3] = 0;
+                    }
+
                     // Если файл - аура, то определяем прозрачность по словарю
                     var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
                     if (colorMap.ContainsKey(index)) {
@@ -404,7 +442,21 @@ namespace ResourceProvider
             }
 
 
-            return new RowImage(0, magickImage.Height - 1, 0, magickImage.Width - 1, magickImage.Width, magickImage.Height, pixels);
+            return new RowImage(0, magickImage.Height, 0, magickImage.Width, magickImage.Width, magickImage.Height, pixels);
+        }
+
+        /// <summary>
+        /// Получить содержимое файла из ресурса
+        /// </summary>
+        private byte[] GetFileContent(File file)
+        {
+            var fileContent = new byte[file.Size];
+            using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
+                fileStream.Seek(file.Offset, SeekOrigin.Begin);
+                fileStream.Read(fileContent, 0, file.Size);
+            }
+
+            return fileContent;
         }
 
         /// <summary>
@@ -418,8 +470,8 @@ namespace ResourceProvider
 
             // todo Ну это уже совсем никуда не годится, исправить
             if (safeName.EndsWith("A2A00") || safeName.EndsWith("A2D00") ||
-                safeName.Substring(safeName.Length - 9, 4) == "HEFF" ||
-                safeName.Substring(safeName.Length - 9, 4) == "TUCH" ||
+                (safeName.Length > 8 && (safeName.Substring(safeName.Length - 9, 4) == "HEFF" ||
+                                         safeName.Substring(safeName.Length - 9, 4) == "TUCH")) ||
                 safeName.StartsWith("MRK") || safeName.StartsWith("DEATH"))
                 return ImageType.Aura;
 

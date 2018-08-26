@@ -20,7 +20,7 @@
         public int MinRow { get; }
 
         /// <summary>
-        /// Все пиксели ниже этой строки - прозрачные
+        /// Все пиксели на этой строке и ниже - прозрачные
         /// </summary>
         public int MaxRow { get; set; }
 
@@ -30,7 +30,7 @@
         public int MinColumn { get; }
 
         /// <summary>
-        /// Все пиксели дальше этой колонки - прозрачные
+        /// Все пиксели на этой колонке и дальше - прозрачные
         /// </summary>
         public int MaxColumn { get; }
 

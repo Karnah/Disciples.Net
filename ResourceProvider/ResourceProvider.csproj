@@ -5,12 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Imgs/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="Globals/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources/Common/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources/Globals/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources/Imgs/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources/interf/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.6.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.6.0.1" />
     <PackageReference Include="NDbfReader" Version="2.2.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
   </ItemGroup>

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Avalonia.Threading;
 
 using Engine;
+using Engine.Common.GameObjects;
 
 namespace AvaloniaDisciplesII
 {
@@ -21,7 +22,20 @@ namespace AvaloniaDisciplesII
         public Game()
         {
             _gameObjects = new LinkedList<GameObject>();
+        }
 
+
+        public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
+
+
+        public event EventHandler SceneEndUpdating;
+
+
+        /// <summary>
+        /// Запускает внутренний таймер, который обновляет объекты на сцене
+        /// </summary>
+        public void Start()
+        {
             _stopwatch = new Stopwatch();
             _stopwatch.Start();
             _ticks = _stopwatch.ElapsedMilliseconds;
@@ -31,6 +45,18 @@ namespace AvaloniaDisciplesII
             _timer.Start();
         }
 
+        /// <summary>
+        /// Останавливает внутренний таймер, который обновляет объекты на сцене
+        /// </summary>
+        public void Stop()
+        {
+            _stopwatch.Stop();
+            _stopwatch = null;
+
+            _timer.Stop();
+            _timer = null;
+        }
+
         private void UpdateScene(object sender, EventArgs args)
         {
             var ticks = _stopwatch.ElapsedMilliseconds;
@@ -38,7 +64,7 @@ namespace AvaloniaDisciplesII
             _ticks = ticks;
 
             try {
-                for (var gameObjectNode = _gameObjects.First; gameObjectNode != null; ) {
+                for (var gameObjectNode = _gameObjects.First; gameObjectNode != null;) {
                     var nextNode = gameObjectNode.Next;
 
                     if (gameObjectNode.Value.IsDestroyed) {
@@ -58,12 +84,6 @@ namespace AvaloniaDisciplesII
                 Console.WriteLine(e);
             }
         }
-
-        public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
-
-
-        public event EventHandler SceneEndUpdating;
-
 
         public void CreateObject(GameObject gameObject)
         {

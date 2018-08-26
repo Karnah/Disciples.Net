@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 
-using Engine.Enums;
+using Engine.Common.Enums.Units;
+using Engine.Common.Models;
+using Engine.Common.Providers;
 using Engine.Implementation.Helpers;
-using Engine.Interfaces;
-using Engine.Models;
 using ResourceProvider;
 
 namespace Engine.Implementation.Resources
@@ -22,8 +22,8 @@ namespace Engine.Implementation.Resources
 
         public UnitInfoProvider()
         {
-            _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Globals");
-            _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Imgs\\Faces.ff");
+            _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
+            _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
 
             LoadResourceText();
             LoadAttacks();
@@ -133,7 +133,10 @@ namespace Engine.Implementation.Resources
             var xpNext = unitInfo.GetStruct<int>("XP_NEXT") ?? 0;
             var deathAnim = unitInfo.GetStruct<int>("DEATH_ANIM") ?? 1;
 
-            var face = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
+            // Лицо юнита дополнительно обрабатывать не надо.
+            // Кроме того, там есть проблемы с некоторым потрератами, если их получать обычным путём
+            var face = _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap();
+            var battleFace = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
 
 
             var unit = new UnitType(
@@ -165,7 +168,8 @@ namespace Engine.Implementation.Resources
                 upgradeBuildingId,
                 xpNext,
                 deathAnim,
-                face
+                face,
+                battleFace
             );
 
             return unit;

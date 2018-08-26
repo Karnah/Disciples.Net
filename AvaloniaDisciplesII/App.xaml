@@ -2,26 +2,101 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AvaloniaDisciplesII"
              xmlns:battle="clr-namespace:AvaloniaDisciplesII.Battle"
-             xmlns:models="clr-namespace:Engine.Models;assembly=Engine"
              xmlns:c="clr-namespace:AvaloniaDisciplesII.Converters;assembly=AvaloniaDisciplesII">
   <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
+      <local:ViewLocator/>
+  </Application.DataTemplates>
 
-    <Application.Styles>
-        <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default"/>
-        <StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"/>
+  <Application.Resources>
+    <c:BitmapHeightScaleConvrter x:Key="BitmapHeightScaleConvrter" />
+    <c:UnitHitpointsToStringConverter x:Key="UnitHitpointsToStringConverter" />
+    <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
+    <c:MarginScaleConverter x:Key="MarginScaleConverter" />
+    <c:UnitPositionToMarginConverter x:Key="UnitPositionToMarginConverter" />
+    <c:DamageImageHeightConverter x:Key="DamageImageHeightConverter" />
+    <c:DirectionToFaceTransformConverter x:Key="DirectionToFaceTransformConverter" />
+  </Application.Resources>
 
-        <Style Selector="battle|VisualObjectView">
-          <Setter Property="Template">
-            <ControlTemplate>
-              <Image Stretch="Fill"
-                     Source="{TemplateBinding VisualObject.Bitmap}"
-                     Width="{TemplateBinding VisualObject.Width}"
-                     Height="{TemplateBinding VisualObject.Height}" />
-            </ControlTemplate>
-          </Setter>
-        </Style>
+  <Application.Styles>
+    <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default"/>
+    <StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"/>
 
-    </Application.Styles>
+    <!-- bug Необходимо использовать TemplateBinding, но на данный момент он не позволяет писать VisualObject.Bitmap, только просто свойство -->
+    <Style Selector="battle|VisualObjectView">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Image Stretch="Fill"
+                 Source="{Binding VisualObject.Bitmap, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                 Width="{Binding VisualObject.Width, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                     Converter={StaticResource DoubleScaleConverter}}"
+                 Height="{Binding VisualObject.Height, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                       Converter={StaticResource DoubleScaleConverter}}"
+                 RenderTransform="{Binding VisualObject.Transform, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+    <Style Selector="battle|BattleUnitFaceView">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Grid RowDefinitions="Auto,Auto,Auto"
+                  Margin="{Binding BattleUnit, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                               Converter={StaticResource UnitPositionToMarginConverter}}">
+              <Image Name="PART_Face" Grid.Row="0"
+                     RenderTransform="{Binding BattleUnit.Direction, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                                     Converter={StaticResource DirectionToFaceTransformConverter}}"
+                     Source="{Binding BattleUnit.Unit.UnitType.Face, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                     Height="{Binding BattleUnit.Unit.UnitType.Face, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                                     Converter={StaticResource BitmapHeightScaleConvrter}}" />
+              
+              <Rectangle Grid.Row="0" Fill="#80FF0000" VerticalAlignment="Bottom"
+                         IsVisible="{Binding !BattleUnit.Unit.IsDead, RelativeSource={RelativeSource Mode=TemplatedParent}}">
+                  <Rectangle.Height>
+                      <MultiBinding Converter="{StaticResource DamageImageHeightConverter}">
+                          <Binding ElementName="PART_Face" Path="Height" />
+                          <Binding Path="BattleUnit.Unit.HitPoints" RelativeSource="{RelativeSource Mode=TemplatedParent}" />
+                          <Binding Path="BattleUnit.Unit.UnitType.HitPoints" RelativeSource="{RelativeSource Mode=TemplatedParent}" />
+                      </MultiBinding>
+                  </Rectangle.Height>
+              </Rectangle>
+
+              <Image Grid.Row="0" Opacity="0.5"
+                     IsVisible="{Binding BattleUnit.Unit.IsDead, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                     Source="{Binding InterfaceController.DeathSkull, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                     Height="{Binding InterfaceController.DeathSkull, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                                      Converter={StaticResource BitmapHeightScaleConvrter}}" />
+
+
+              <Rectangle Grid.Row="1" Fill="Transparent"
+                         Height="{Binding ConverterParameter='3', Converter={StaticResource DoubleScaleConverter}}" />
+
+
+              <Image Grid.Row="2" HorizontalAlignment="Center"
+                     Source="{Binding InterfaceController.PanelSeparator, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                     Height="{Binding InterfaceController.PanelSeparator, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                                          Converter={StaticResource BitmapHeightScaleConvrter}}"
+                     Margin="{Binding ConverterParameter='0,1.4,0,0', Converter={StaticResource MarginScaleConverter}}"
+                     IsVisible="{Binding !BattleUnit.Unit.UnitType.SizeSmall, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+              
+              <TextBlock Grid.Row="2" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Top"
+                         Height="{Binding InterfaceController.PanelSeparator, RelativeSource={RelativeSource Mode=TemplatedParent},
+                                                                              Converter={StaticResource BitmapHeightScaleConvrter}}"
+                         FontSize="{Binding ConverterParameter='11', Converter={StaticResource DoubleScaleConverter}}">
+                  <TextBlock.Text>
+                      <MultiBinding Converter="{StaticResource UnitHitpointsToStringConverter}">
+                          <Binding Path="BattleUnit.Unit.HitPoints" RelativeSource="{RelativeSource Mode=TemplatedParent}" />
+                          <Binding Path="BattleUnit.Unit.UnitType.HitPoints" RelativeSource="{RelativeSource Mode=TemplatedParent}" />
+                      </MultiBinding>
+                  </TextBlock.Text>
+              </TextBlock>
+
+            </Grid>
+          </Grid>
+
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+  </Application.Styles>
 </Application>

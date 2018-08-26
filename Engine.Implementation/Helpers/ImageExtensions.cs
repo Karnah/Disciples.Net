@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
-using Engine.Models;
+using Engine.Common.Models;
 using ResourceProvider.Models;
 
 namespace Engine.Implementation.Helpers
@@ -15,12 +16,25 @@ namespace Engine.Implementation.Helpers
         /// <summary>
         /// Сконвертировать сырое изображение в битмап
         /// </summary>
-        public static Bitmap ToBitmap(this RowImage image)
+        public static Bitmap ToBitmap(this byte[] content, Bounds bounds = null)
+        {
+            if (content == null)
+                return null;
+
+            using (var memoryStream = new MemoryStream(content)) {
+                return new Bitmap(memoryStream);
+            }
+        }
+
+        /// <summary>
+        /// Сконвертировать сырое изображение в битмап
+        /// </summary>
+        public static Bitmap ToBitmap(this RowImage image, Bounds bounds = null)
         {
             if (image == null)
                 return null;
 
-            return ConvertImageToFrame(image).Bitmap;
+            return ConvertImageToFrame(image, bounds).Bitmap;
         }
 
         /// <summary>
@@ -41,7 +55,7 @@ namespace Engine.Implementation.Helpers
             }
 
             // todo Здесь можно огрести, если фреймы будут иметь различные размеры
-            var bounds = new OpacityBounds(minRow, maxRow, minColumn, maxColumn);
+            var bounds = new Bounds(minRow, maxRow, minColumn, maxColumn);
             foreach (var image in images) {
                 result.Add(ConvertImageToFrame(image, bounds));
             }
@@ -62,39 +76,39 @@ namespace Engine.Implementation.Helpers
         /// Получить кадр из сырого изображения
         /// </summary>
         /// <param name="image">Сырое изображение</param>
-        /// <param name="opacityBounds">Границы кадра. Если null, то используются границы сырого изображения</param>
-        private static Frame ConvertImageToFrame(RowImage image, OpacityBounds opacityBounds = null)
+        /// <param name="bounds">Границы кадра. Если null, то используются границы сырого изображения</param>
+        private static Frame ConvertImageToFrame(RowImage image, Bounds bounds = null)
         {
-            if (opacityBounds == null) {
-                opacityBounds = new OpacityBounds(image.MinRow, image.MaxRow, image.MinColumn, image.MaxColumn);
+            if (bounds == null) {
+                bounds = new Bounds(image.MinRow, image.MaxRow, image.MinColumn, image.MaxColumn);
             }
 
-            var width = opacityBounds.MaxColumn - opacityBounds.MinColumn + 1;
-            var height = opacityBounds.MaxRow - opacityBounds.MinRow + 1;
+            var width = bounds.MaxColumn - bounds.MinColumn;
+            var height = bounds.MaxRow - bounds.MinRow;
 
-            var bitmap = new WritableBitmap(width, height, PixelFormat.Rgba8888);
+            var bitmap = new WriteableBitmap(width, height, PixelFormat.Rgba8888);
             using (var l = bitmap.Lock()) {
-                for (int row = opacityBounds.MinRow; row <= opacityBounds.MaxRow; ++row) {
-                    var begin = (row * image.Width + opacityBounds.MinColumn) << 2;
+                for (int row = bounds.MinRow; row < bounds.MaxRow; ++row) {
+                    var begin = (row * image.Width + bounds.MinColumn) << 2;
                     var length = width << 2;
 
-                    Marshal.Copy(image.Data, begin, new IntPtr(l.Address.ToInt64() + (row - opacityBounds.MinRow) * length), length);
+                    Marshal.Copy(image.Data, begin, new IntPtr(l.Address.ToInt64() + (row - bounds.MinRow) * length), length);
                 }
             }
 
-            var scaledWidth = width * GameInfo.Scale;
-            var scaledHeight = height * GameInfo.Scale;
+            var scaledWidth = width;
+            var scaledHeight = height;
 
-            var offsetX = opacityBounds.MinColumn * GameInfo.Scale;
-            var offsetY = opacityBounds.MinRow * GameInfo.Scale;
+            var offsetX = bounds.MinColumn;
+            var offsetY = bounds.MinRow;
 
-            return new Frame(scaledWidth, scaledHeight, offsetX, offsetY, new Bitmap(bitmap.PlatformImpl));
+            return new Frame(scaledWidth, scaledHeight, offsetX, offsetY, bitmap);
         }
 
 
-        private class OpacityBounds
+        public class Bounds
         {
-            public OpacityBounds(int minRow, int maxRow, int minColumn, int maxColumn)
+            public Bounds(int minRow, int maxRow, int minColumn, int maxColumn)
             {
                 MinRow = minRow;
                 MaxRow = maxRow;
