@@ -13,14 +13,16 @@ namespace AvaloniaDisciplesII
     {
         private const int TICKS_PER_SECOND = 60;
 
+        private readonly ILogger _logger;
         private readonly LinkedList<GameObject> _gameObjects;
 
         private long _ticks;
         private DispatcherTimer _timer;
         private Stopwatch _stopwatch;
 
-        public Game()
+        public Game(ILogger logger)
         {
+            _logger = logger;
             _gameObjects = new LinkedList<GameObject>();
         }
 
@@ -29,6 +31,8 @@ namespace AvaloniaDisciplesII
 
 
         public event EventHandler SceneEndUpdating;
+
+        public event EventHandler SceneRedraw;
 
 
         /// <summary>
@@ -43,6 +47,9 @@ namespace AvaloniaDisciplesII
             _timer = new DispatcherTimer { Interval = new TimeSpan(0, 0, 0, 0, 1000 / TICKS_PER_SECOND) };
             _timer.Tick += UpdateScene;
             _timer.Start();
+
+            // Перед началом боя обновляем сцену, чтобы все объекты успели отрисоваться на старте
+            SceneRedraw?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -78,10 +85,10 @@ namespace AvaloniaDisciplesII
                 }
 
                 SceneEndUpdating?.Invoke(this, EventArgs.Empty);
+                SceneRedraw?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception e) {
-                // todo Обрабатывать это с помощью логов
-                Console.WriteLine(e);
+                _logger.Log(e.ToString());
             }
         }
 

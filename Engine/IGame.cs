@@ -18,6 +18,12 @@ namespace Engine
         /// </summary>
         event EventHandler SceneEndUpdating;
 
+        // Сделано, так как EventHandler не поддерживает приоритет в вызове, а делать на Action не хочется
+        /// <summary>
+        /// Событие возникает после того, как вся логика была выполнена и можно перерисовать сцену
+        /// </summary>
+        event EventHandler SceneRedraw;
+
 
         /// <summary>
         /// Инициализировать новый объект и разместить его на сцене

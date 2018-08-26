@@ -93,14 +93,13 @@ namespace AvaloniaDisciplesII
             logger.Log($"End load BattleInterfaceProvider{Environment.NewLine}");
 
 
-            Container.RegisterSingleton<IMapVisual, MapVisual>();
-
             var audioPlaybackEngine = new AudioPlaybackEngine();
             Container.RegisterInstance<IAudioController>(audioPlaybackEngine);
 
             _game = Container.Resolve<Game>();
             Container.RegisterInstance<IGame>(_game);
 
+            Container.RegisterSingleton<IMapVisual, MapVisual>();
             Container.RegisterSingleton<IVisualSceneController, VisualSceneController>();
         }
 
