@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
+
 using Engine.Common.Providers;
 using Engine.Implementation.Helpers;
 using ResourceProvider;
@@ -45,10 +46,6 @@ namespace Engine.Implementation.Resources
                 var text = resourceTextRow.GetClass<string>("TEXT");
                 var isVerified = resourceTextRow.GetStruct<bool>("VERIFIED") ?? false;
                 var context = resourceTextRow.GetClass<string>("CONTEXT");
-
-                if (text != null && text.Contains("Ждать")) {
-                    Console.WriteLine($"{textId} {DestroyTag(text)}");
-                }
 
                 _resourceTexts.Add(textId, new ResourceText(textId, DestroyTag(text), isVerified, context));
             }
