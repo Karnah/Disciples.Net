@@ -11,7 +11,7 @@ using Action = System.Action;
 namespace Engine.Common.GameObjects
 {
     /// <summary>
-    /// Класс для кнопки
+    /// Класс для кнопки.
     /// </summary>
     public class ButtonObject : GameObject
     {
@@ -19,7 +19,7 @@ namespace Engine.Common.GameObjects
         private readonly IDictionary<ButtonState, Bitmap> _buttonStates;
         private readonly Action _buttonPressedAction;
 
-        private VisualObject _buttonVisualObject;
+        private ImageVisualObject _buttonVisualObject;
 
         public ButtonObject(IMapVisual mapVisual, IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer)
             : base(x, y)
@@ -28,11 +28,16 @@ namespace Engine.Common.GameObjects
             _buttonStates = buttonStates;
             _buttonPressedAction = buttonPressedAction;
 
+
             ButtonState = ButtonState.Disabled;
             var bitmap = _buttonStates[ButtonState];
-            _buttonVisualObject = new VisualObject(this, layer) {
-                Width = bitmap.PixelWidth,
-                Height = bitmap.PixelHeight,
+
+            Width = bitmap.PixelSize.Width;
+            Height = bitmap.PixelSize.Height;
+
+            _buttonVisualObject = new ImageVisualObject(layer) {
+                Width = bitmap.PixelSize.Width,
+                Height = bitmap.PixelSize.Height,
                 X = X,
                 Y = Y,
                 Bitmap = bitmap
@@ -41,11 +46,15 @@ namespace Engine.Common.GameObjects
 
 
         /// <summary>
-        /// Состояние кнопки
+        /// Состояние кнопки.
         /// </summary>
         public ButtonState ButtonState { get; protected set; }
 
+        /// <inheritdoc />
+        public override bool IsInteractive => true;
 
+
+        /// <inheritdoc />
         public override void OnInitialize()
         {
             base.OnInitialize();
@@ -53,6 +62,7 @@ namespace Engine.Common.GameObjects
             _mapVisual.AddVisual(_buttonVisualObject);
         }
 
+        /// <inheritdoc />
         public override void Destroy()
         {
             base.Destroy();
@@ -63,7 +73,7 @@ namespace Engine.Common.GameObjects
 
 
         /// <summary>
-        /// Сделать кнопку доступной для нажатия
+        /// Сделать кнопку доступной для нажатия.
         /// </summary>
         public virtual void Activate()
         {
@@ -72,7 +82,7 @@ namespace Engine.Common.GameObjects
         }
 
         /// <summary>
-        /// Запретить нажатия на кнопку
+        /// Запретить нажатия на кнопку.
         /// </summary>
         public virtual void Disable()
         {
@@ -82,7 +92,7 @@ namespace Engine.Common.GameObjects
 
 
         /// <summary>
-        /// Обработка события наведения курсора на кнопку
+        /// Обработка события наведения курсора на кнопку.
         /// </summary>
         public virtual void OnSelected()
         {
@@ -94,7 +104,7 @@ namespace Engine.Common.GameObjects
         }
 
         /// <summary>
-        /// Обработка события перемещения курсора с кнопки
+        /// Обработка события перемещения курсора с кнопки.
         /// </summary>
         public virtual void OnUnselected()
         {
@@ -106,7 +116,7 @@ namespace Engine.Common.GameObjects
         }
 
         /// <summary>
-        /// Обработка события нажатия на кнопку
+        /// Обработка события нажатия на кнопку.
         /// </summary>
         public virtual void OnPressed()
         {
@@ -118,30 +128,36 @@ namespace Engine.Common.GameObjects
         }
 
         /// <summary>
-        /// Обработка события клика на кнопку (мышь отпустили)
+        /// Обработка события клика на кнопку (мышь отпустили).
         /// </summary>
         public virtual void OnReleased()
         {
-            // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место
+            // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
             if (ButtonState != ButtonState.Pressed)
                 return;
 
-            ButtonClicked();
+            OnButtonClicked();
 
-            ButtonState = ButtonState.Selected;
+            // Если после клика состояние кнопки не изменилось, то делаем её просто выделенной.
+            if (ButtonState == ButtonState.Pressed)
+                ButtonState = ButtonState.Selected;
+
             UpdateButtonVisualObject();
         }
 
 
         /// <summary>
-        /// Обновить внешний вид кнопки на сцене
+        /// Обновить внешний вид кнопки на сцене.
         /// </summary>
         protected void UpdateButtonVisualObject()
         {
             _buttonVisualObject.Bitmap = _buttonStates[ButtonState];
         }
 
-        protected void ButtonClicked()
+        /// <summary>
+        /// Обработать событие нажатия на кнопку.
+        /// </summary>
+        protected void OnButtonClicked()
         {
             _buttonPressedAction?.Invoke();
         }

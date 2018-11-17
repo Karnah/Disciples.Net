@@ -1,12 +1,11 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AvaloniaDisciplesII.Battle;assembly=AvaloniaDisciplesII"
-             xmlns:c="clr-namespace:AvaloniaDisciplesII.Converters;assembly=AvaloniaDisciplesII">
+             xmlns:c="clr-namespace:AvaloniaDisciplesII.Converters;assembly=AvaloniaDisciplesII"
+             xmlns:views="clr-namespace:AvaloniaDisciplesII.Common.Views"
+             xmlns:model="clr-namespace:Engine.Common.Models;assembly=Engine">
   <UserControl.Resources>
       <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
-      <c:BitmapHeightScaleConvrter x:Key="BitmapHeightScaleConvrter" />
-      <c:MarginScaleConverter x:Key="MarginScaleConverter" />
-      <c:UnitToPanelInfoConverter x:Key="UnitToPanelInfoConverter" />
   </UserControl.Resources>
 
   <UserControl.Styles>
@@ -21,76 +20,26 @@
   <Grid>
     <Image Source="{Binding InterfaceController.Battleground}" Stretch="Fill" />
 
-
-    <ItemsControl ZIndex="7" VerticalAlignment="Top" HorizontalAlignment="Right"
-                  Margin="{Binding ConverterParameter='0,85,7.2,0', Converter={StaticResource MarginScaleConverter}}"
-                  Items="{Binding InterfaceController.RightPanelUnits}">
-      <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate>
-          <Grid />
-        </ItemsPanelTemplate>
-      </ItemsControl.ItemsPanel>
-
-      <ItemsControl.ItemTemplate>
-        <DataTemplate>
-          <local:BattleUnitFaceView HorizontalAlignment="Right"
-                                    BattleUnit="{Binding }"
-                                    InterfaceController="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.InterfaceController}"
-                                    BattleUnitSelectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.UnitSelectedOnPanelCommand}"
-                                    BattleUnitClickedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectClickedCommand}" />
-        </DataTemplate>
-      </ItemsControl.ItemTemplate>
-    </ItemsControl>
-
-
-    <TextBlock FontWeight="Bold" TextWrapping="Wrap"
-               FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
-               Margin="{Binding ConverterParameter='190,520,0,0', Converter={StaticResource MarginScaleConverter}}"
-               Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
-               MaxHeight="{Binding ConverterParameter='40', Converter={StaticResource DoubleScaleConverter}}"
-               ZIndex="7" HorizontalAlignment="Left" VerticalAlignment="Top">
-      <TextBlock.Text>
-        <MultiBinding Converter="{StaticResource UnitToPanelInfoConverter}">
-          <Binding Path="CurrentUnit.UnitType.Name" />
-          <Binding Path="CurrentUnit.HitPoints" />
-          <Binding Path="CurrentUnit.UnitType.HitPoints" />
-        </MultiBinding>
-      </TextBlock.Text>
-    </TextBlock>
-
-    <TextBlock FontWeight="Bold" TextWrapping="Wrap"
-               FontSize="{Binding ConverterParameter='14', Converter={StaticResource DoubleScaleConverter}}"
-               Margin="{Binding ConverterParameter='0,520,170,0', Converter={StaticResource MarginScaleConverter}}"
-               Width="{Binding ConverterParameter='120', Converter={StaticResource DoubleScaleConverter}}"
-               MaxHeight="{Binding ConverterParameter='40', Converter={StaticResource DoubleScaleConverter}}"
-               ZIndex="7" HorizontalAlignment="Right" VerticalAlignment="Top">
-      <TextBlock.Text>
-        <MultiBinding Converter="{StaticResource UnitToPanelInfoConverter}">
-          <Binding Path="TargetUnit.UnitType.Name" />
-          <Binding Path="TargetUnit.HitPoints" />
-          <Binding Path="TargetUnit.UnitType.HitPoints" />
-        </MultiBinding>
-      </TextBlock.Text>
-    </TextBlock>
-
-
-
     <ItemsControl Items="{Binding MapVisual.Visuals}">
+      <ItemsControl.DataTemplates>
+        <DataTemplate DataType="{x:Type model:ImageVisualObject}">
+            <Image Stretch="Fill"
+                   Source="{Binding Bitmap}"
+                   Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                   Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                   RenderTransform="{Binding Transform}" />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type model:TextVisualObject}">
+          <views:TextVisualObjectView TextVisualObject="{Binding }" />
+        </DataTemplate>
+      </ItemsControl.DataTemplates>
+
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
           <Canvas />
         </ItemsPanelTemplate>
       </ItemsControl.ItemsPanel>
-
-      <ItemsControl.ItemTemplate>
-        <DataTemplate>
-          <local:VisualObjectView VisualObject="{Binding }"
-                                  VisualSelectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectSelectedCommand}"
-                                  VisualUnselectedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectUnselectedCommand}"
-                                  VisualPressedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectPressedCommand}"
-                                  VisualClickedCommand="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.GameObjectClickedCommand}"/>
-        </DataTemplate>
-      </ItemsControl.ItemTemplate>
     </ItemsControl>
   </Grid>
 </UserControl>

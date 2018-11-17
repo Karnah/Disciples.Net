@@ -28,9 +28,9 @@ namespace Engine.Battle.Components
         private IReadOnlyList<Frame> _unitFrames;
         private IReadOnlyList<Frame> _auraFrames;
 
-        private VisualObject _shadowVisual;
-        private VisualObject _unitVisual;
-        private VisualObject _auraVisual;
+        private ImageVisualObject _shadowVisual;
+        private ImageVisualObject _unitVisual;
+        private ImageVisualObject _auraVisual;
 
 
         public BattleUnitAnimationComponent(
@@ -49,7 +49,7 @@ namespace Engine.Battle.Components
 
 
         /// <summary>
-        /// Вычислить на каком слое располгается юнит визуально
+        /// Вычислить на каком слое располагается юнит визуально.
         /// </summary>
         private int GetLayer()
         {
@@ -112,15 +112,15 @@ namespace Engine.Battle.Components
         }
 
 
-        private static void UpdateBitmap(VisualObject visual, IReadOnlyList<Frame> frames, int frameIndex)
+        private static void UpdateBitmap(ImageVisualObject imageVisual, IReadOnlyList<Frame> frames, int frameIndex)
         {
-            if (visual == null)
+            if (imageVisual == null)
                 return;
 
             if (frames?.Any() != true)
                 return;
 
-            visual.Bitmap = frames[frameIndex].Bitmap;
+            imageVisual.Bitmap = frames[frameIndex].Bitmap;
         }
 
 
@@ -140,43 +140,43 @@ namespace Engine.Battle.Components
             FramesCount = _unitFrames.Count;
         }
 
-        private void UpdatePosition(ref VisualObject visual, IReadOnlyList<Frame> frames, int layer)
+        private void UpdatePosition(ref ImageVisualObject imageVisual, IReadOnlyList<Frame> frames, int layer)
         {
             if (frames == null) {
-                if (visual != null) {
+                if (imageVisual != null) {
                     // todo Здесь происходит удаление.
                     // Возможно, просто достаточно перенести в невидимую область
-                    _mapVisual.RemoveVisual(visual);
-                    visual = null;
+                    _mapVisual.RemoveVisual(imageVisual);
+                    imageVisual = null;
                 }
             }
             else {
-                if (visual == null) {
-                    visual = new VisualObject(GameObject, layer);
-                    _mapVisual.AddVisual(visual);
+                if (imageVisual == null) {
+                    imageVisual = new ImageVisualObject(layer);
+                    _mapVisual.AddVisual(imageVisual);
                 }
 
                 var frame = frames[FrameIndex];
-                visual.Bitmap = frame.Bitmap;
+                imageVisual.Bitmap = frame.Bitmap;
 
-                // Предполагается, что размеры и смещение всех фреймов в анимации одинаково
-                // Поэтому это условие проверяется только при изменении действия юнита
+                // Предполагается, что размеры и смещение всех кадров в анимации одинаково,
+                // Поэтому это условие проверяется только при изменении действия юнита.
                 var posX = _battleUnit.X + frame.OffsetX;
-                if (Math.Abs(visual.X - posX) > float.Epsilon) {
-                    visual.X = posX;
+                if (Math.Abs(imageVisual.X - posX) > float.Epsilon) {
+                    imageVisual.X = posX;
                 }
 
                 var posY = _battleUnit.Y + frame.OffsetY;
-                if (Math.Abs(visual.Y - posY) > float.Epsilon) {
-                    visual.Y = posY;
+                if (Math.Abs(imageVisual.Y - posY) > float.Epsilon) {
+                    imageVisual.Y = posY;
                 }
 
-                if (Math.Abs(visual.Width - frame.Width) > float.Epsilon) {
-                    visual.Width = frame.Width;
+                if (Math.Abs(imageVisual.Width - frame.Width) > float.Epsilon) {
+                    imageVisual.Width = frame.Width;
                 }
 
-                if (Math.Abs(visual.Height - frame.Height) > float.Epsilon) {
-                    visual.Height = frame.Height;
+                if (Math.Abs(imageVisual.Height - frame.Height) > float.Epsilon) {
+                    imageVisual.Height = frame.Height;
                 }
             }
         }

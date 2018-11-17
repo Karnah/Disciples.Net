@@ -14,7 +14,7 @@ namespace Engine.Implementation.Resources
 {
     public class BattleUnitResourceProvider : IBattleUnitResourceProvider
     {
-        private readonly string[] DeathAnimationNames = new[] {
+        private readonly string[] _deathAnimationNames = {
             string.Empty,
             "DEATH_HUMAN_S13",
             "DEATH_HERETIC_S13",
@@ -55,7 +55,7 @@ namespace Engine.Implementation.Resources
         private BattleUnitAnimation ExtractUnitAnimation(string unitId, BattleDirection direction)
         {
             var unitType = _unitInfoProvider.GetUnitType(unitId);
-            // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно
+            // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
             var unitFrames = new Dictionary<BattleAction, BattleUnitFrames> {
                 { BattleAction.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.SizeSmall), null) }
             };
@@ -67,22 +67,22 @@ namespace Engine.Implementation.Resources
                 unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
             }
 
-            // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту
+            // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту.
             var singleTargetFrames =
-                // Анимация зависит от положения
+                // Анимация зависит от положения.
                 GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{ConvertDirection(direction)}00") ??
-                // Анимация симметрична
+                // Анимация симметрична.
                 GetAnimationFrames($"{unitId.ToUpper()}TUCHA1B00");
             BattleUnitTargetAnimation unitTargetAnimation = null;
             if (singleTargetFrames != null) {
                 unitTargetAnimation = new BattleUnitTargetAnimation(true, singleTargetFrames);
             }
             else {
-                // Кадры атаки, которые применяется целиком на площадь
+                // Кадры атаки, которые применяется целиком на площадь.
                 var areaTargetFrames =
-                    // Анимация зависит от положения
+                    // Анимация зависит от положения.
                     GetAnimationFrames($"{unitId.ToUpper()}HEFFA1{ConvertDirection(direction)}00") ??
-                    // Анимация симметрична
+                    // Анимация симметрична.
                     GetAnimationFrames($"{unitId.ToUpper()}HEFFA1B00");
 
                 if (areaTargetFrames != null) {
@@ -98,7 +98,7 @@ namespace Engine.Implementation.Resources
         }
 
 
-        // g000uu0015 - ид в верхнем регистре
+        // g000uu0015 - ид в верхнем регистре.
         // HHIT - юнита ударили | HMOVE - атакует | IDLE - ждёт | STIL - замер(например, паралич) | TUCH - бьёт 1 врага | HEFF - бьёт площадь
         // A - объект или аура | S - тень
         // 1 - объект | 2 -аура
@@ -159,12 +159,12 @@ namespace Engine.Implementation.Resources
             var imageIndex = RandomGenerator.Next(2);
             var deadFrame = _battleResourceProvider.GetBattleFrame($"DEAD_HUMAN_{sizeChar}A{imageIndex:00}");
 
-            // Необходимо задать дополнительно смещение, так как картинка не 800*600, как анимации юнитов
+            // Необходимо задать дополнительно смещение, чтобы кости оказались в нужном месте.
             var frame = new Frame(
                 deadFrame.Width,
                 deadFrame.Height,
-                deadFrame.OffsetX + 350,
-                deadFrame.OffsetY + 400,
+                deadFrame.OffsetX - 30,
+                deadFrame.OffsetY - 10,
                 deadFrame.Bitmap);
 
             return new []{ frame };
@@ -172,7 +172,7 @@ namespace Engine.Implementation.Resources
 
         private IReadOnlyList<Frame> GetDeathFrames(int deathAnimationId)
         {
-            return _battleResourceProvider.GetBattleAnimation(DeathAnimationNames[deathAnimationId]);
+            return _battleResourceProvider.GetBattleAnimation(_deathAnimationNames[deathAnimationId]);
         }
     }
 }

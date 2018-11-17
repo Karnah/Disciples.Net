@@ -16,7 +16,7 @@ namespace AvaloniaDisciplesII.Converters
             if (bitmap == null)
                 return 0;
 
-            return bitmap.PixelHeight * GameInfo.Scale;
+            return bitmap.PixelSize.Height * GameInfo.Scale;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

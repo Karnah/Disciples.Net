@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-using ReactiveUI;
+using ReactiveUI.Legacy;
 
 using Engine.Common.Controllers;
 using Engine.Common.Models;
+using Engine.Models;
 
 namespace Engine.Implementation.Controllers
 {
@@ -40,11 +40,15 @@ namespace Engine.Implementation.Controllers
         }
 
 
-        // Все объекты складываются в буфер, который потом централизовано обновляется
-        private void OnSceneRedraw(object sender, EventArgs eventArgs)
+        // Все объекты складываются в буфер, который потом централизовано обновляется.
+        private void OnSceneRedraw(object sender, SceneUpdatingEventArgs args)
         {
             if (_removeVisualBuffer.Any()) {
                 _visuals.RemoveAll(_removeVisualBuffer);
+
+                foreach (var visualObject in _removeVisualBuffer) {
+                    visualObject.Destroy();
+                }
                 _removeVisualBuffer.Clear();
             }
 

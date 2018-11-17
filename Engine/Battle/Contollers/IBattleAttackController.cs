@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 using Engine.Battle.Enums;
 using Engine.Battle.GameObjects;
+using Engine.Battle.Models;
+using Engine.Common.Models;
 
 namespace Engine.Battle.Contollers
 {
@@ -27,7 +29,7 @@ namespace Engine.Battle.Contollers
         /// <summary>
         /// Событие возникает, когда юнит начинает действие
         /// </summary>
-        event EventHandler UnitActionBegin;
+        event EventHandler<UnitActionBeginEventArgs> UnitActionBegin;
 
         /// <summary>
         /// Событие возникает, когда следующий юнит готов к ходу
@@ -39,6 +41,11 @@ namespace Engine.Battle.Contollers
         /// </summary>
         event EventHandler BattleEnded;
 
+
+        /// <summary>
+        /// Получить игровой объект юнита
+        /// </summary>
+        BattleUnit GetUnitObject(Unit unit);
 
         /// <summary>
         /// Проверить на возможность атаки юнита

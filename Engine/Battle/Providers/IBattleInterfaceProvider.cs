@@ -33,6 +33,9 @@ namespace Engine.Battle.Providers
         IDictionary<ButtonState, Bitmap> AutoBattleButton { get; }
 
 
+        Bitmap GetColorBitmap(GameColor color);
+
+
         IReadOnlyList<Frame> GetUnitAttackBorder(bool sizeSmall);
 
         IReadOnlyList<Frame> GetFieldAttackBorder();

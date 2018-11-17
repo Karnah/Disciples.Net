@@ -14,10 +14,10 @@
     <None Remove="Battle\BattleView.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.6.2-build5984-beta" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.6.2-build5984-beta" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.6.2-build5984-beta" />
-    <PackageReference Include="Unity" Version="5.8.9" />
+    <PackageReference Include="Avalonia" Version="0.7.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.7.0" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.7.0" />
+    <PackageReference Include="Unity" Version="5.8.11" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="GameWindow.xaml.cs">
@@ -28,6 +28,7 @@
     <None Include="Images/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Music/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Sounds/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Resources/Colors/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine.Implementation\Engine.Implementation.csproj" />
@@ -38,5 +39,8 @@
     <EmbeddedResource Update="Battle\BattleView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\Colors\" />
   </ItemGroup>
 </Project>

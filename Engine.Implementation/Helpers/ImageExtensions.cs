@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
@@ -14,7 +15,17 @@ namespace Engine.Implementation.Helpers
     public static class ImageExtensions
     {
         /// <summary>
-        /// Сконвертировать сырое изображение в битмап
+        /// Уменьшение смещение для больших изображений по оси X.
+        /// </summary>
+        private const int BIG_FRAME_OFFSET_X = 380;
+        /// <summary>
+        /// Уменьшение смещение для больших изображений по оси Y.
+        /// </summary>
+        private const int BIG_FRAME_OFFSET_Y = 410;
+
+
+        /// <summary>
+        /// Сконвертировать сырое изображение в битмап.
         /// </summary>
         public static Bitmap ToBitmap(this byte[] content, Bounds bounds = null)
         {
@@ -27,7 +38,7 @@ namespace Engine.Implementation.Helpers
         }
 
         /// <summary>
-        /// Сконвертировать сырое изображение в битмап
+        /// Сконвертировать сырое изображение в битмап.
         /// </summary>
         public static Bitmap ToBitmap(this RowImage image, Bounds bounds = null)
         {
@@ -38,7 +49,7 @@ namespace Engine.Implementation.Helpers
         }
 
         /// <summary>
-        /// Получить конечные кадры анимации из сырых
+        /// Получить конечные кадры анимации из сырых.
         /// </summary>
         public static IReadOnlyList<Frame> ConvertToFrames(this IReadOnlyCollection<RowImage> images)
         {
@@ -64,7 +75,7 @@ namespace Engine.Implementation.Helpers
         }
 
         /// <summary>
-        /// Получить кадр из сырого изображения
+        /// Получить кадр из сырого изображения.
         /// </summary>
         public static Frame ConvertToFrame(this RowImage image)
         {
@@ -73,10 +84,10 @@ namespace Engine.Implementation.Helpers
 
 
         /// <summary>
-        /// Получить кадр из сырого изображения
+        /// Получить кадр из сырого изображения.
         /// </summary>
-        /// <param name="image">Сырое изображение</param>
-        /// <param name="bounds">Границы кадра. Если null, то используются границы сырого изображения</param>
+        /// <param name="image">Сырое изображение.</param>
+        /// <param name="bounds">Границы кадра. Если null, то используются границы сырого изображения.</param>
         private static Frame ConvertImageToFrame(RowImage image, Bounds bounds = null)
         {
             if (bounds == null) {
@@ -86,7 +97,7 @@ namespace Engine.Implementation.Helpers
             var width = bounds.MaxColumn - bounds.MinColumn;
             var height = bounds.MaxRow - bounds.MinRow;
 
-            var bitmap = new WriteableBitmap(width, height, PixelFormat.Rgba8888);
+            var bitmap = new WriteableBitmap(new PixelSize(width, height), new Vector(), PixelFormat.Rgba8888);
             using (var l = bitmap.Lock()) {
                 for (int row = bounds.MinRow; row < bounds.MaxRow; ++row) {
                     var begin = (row * image.Width + bounds.MinColumn) << 2;
@@ -101,6 +112,14 @@ namespace Engine.Implementation.Helpers
 
             var offsetX = bounds.MinColumn;
             var offsetY = bounds.MinRow;
+
+            // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
+            // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
+            // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
+            if (image.Width == GameInfo.OriginalWidth && image.Height == GameInfo.OriginalHeight) {
+                offsetX -= BIG_FRAME_OFFSET_X;
+                offsetY -= BIG_FRAME_OFFSET_Y;
+            }
 
             return new Frame(scaledWidth, scaledHeight, offsetX, offsetY, bitmap);
         }

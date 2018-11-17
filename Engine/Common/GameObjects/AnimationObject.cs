@@ -6,6 +6,9 @@ using Engine.Common.Models;
 
 namespace Engine.Common.GameObjects
 {
+    /// <summary>
+    /// Игровой объект анимации.
+    /// </summary>
     public class AnimationObject : GameObject
     {
         public AnimationObject(IMapVisual mapVisual, IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
@@ -21,21 +24,32 @@ namespace Engine.Common.GameObjects
         }
 
 
+        /// <summary>
+        /// Компонент анимации.
+        /// </summary>
         public AnimationComponent AnimationComponent { get; }
 
+        /// <summary>
+        /// Зациклена ли анимация.
+        /// </summary>
         public bool Repeat { get; }
 
 
-        public override void OnUpdate(long tickCount)
+        /// <inheritdoc />
+        public override bool IsInteractive => false;
+
+
+        /// <inheritdoc />
+        public override void OnUpdate(long ticksCount)
         {
             // Если анимация не зациклена, то объект уничтожает сам себя
-            // Такая проверка ужасна, так как можно переписать анимацию так, чтобы пропускались фреймы, но сейчас это работает
+            // Такая проверка ужасна, так как можно переписать анимацию так, чтобы пропускались фреймы, но сейчас это работает.
             if (Repeat == false && AnimationComponent.FrameIndex == AnimationComponent.FramesCount - 1) {
                 this.Destroy();
                 return;
             }
 
-            base.OnUpdate(tickCount);
+            base.OnUpdate(ticksCount);
         }
     }
 }

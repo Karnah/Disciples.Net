@@ -1,112 +1,141 @@
-﻿using System.Collections.Generic;
-using System.Windows.Input;
+﻿using System;
+using System.Collections.Generic;
 
 using ReactiveUI;
 
 using AvaloniaDisciplesII.ViewModels;
+using Engine;
 using Engine.Battle.Contollers;
 using Engine.Battle.GameObjects;
 using Engine.Common.Controllers;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
+using Engine.Models;
 
 namespace AvaloniaDisciplesII.Battle
 {
     public class BattleViewModel : PageViewModel
     {
+        private readonly IGame _game;
         private readonly IAudioController _audioController;
         private readonly IBattleAttackController _battleAttackController;
-        private readonly IBattleInterfaceController _battleInterfaceController;
 
 
         /// <summary>
-        /// Позволяет заблокировать действия пользователя на время анимации
+        /// Позволяет заблокировать действия пользователя на время анимации.
         /// </summary>
         private bool _isAnimating;
         /// <summary>
-        /// Юнит, чей ход активен на данный момент
+        /// Юнит, чей ход активен на данный момент.
         /// </summary>
         private Unit _currentUnit;
         /// <summary>
-        /// Юнит, который был выбран целью последним
+        /// Юнит, который был выбран целью последним.
         /// </summary>
         private Unit _targetUnit;
 
-        public BattleViewModel(IMapVisual mapVisual, IAudioController audioController, IBattleAttackController battleAttackController, IBattleInterfaceController battleInterfaceController)
+        public BattleViewModel(
+            IGame game,
+            IMapVisual mapVisual,
+            IAudioController audioController,
+            IBattleAttackController battleAttackController,
+            IBattleInterfaceController battleInterfaceController)
         {
-            MapVisual = mapVisual;
+            _game = game;
             _audioController = audioController;
             _battleAttackController = battleAttackController;
-            _battleInterfaceController = battleInterfaceController;
 
-            // todo Библиотека слишком долго грузит и декодирует данные
-            // Для тестов убрал, потом нужно будет заменить на кроссплатформенное решение
+            MapVisual = mapVisual;
+            InterfaceController = battleInterfaceController;
+
+            // todo Библиотека слишком долго грузит и декодирует данные.
+            // Для тестов убрал, потом нужно будет заменить на кроссплатформенное решение.
             //_audioService.PlayBackground("battle");
 
-            UnitSelectedOnPanelCommand = ReactiveCommand.Create<BattleUnit>(UnitSelectedOnPanel);
-            GameObjectSelectedCommand = ReactiveCommand.Create<GameObject>(GameObjectSelected);
-            GameObjectUnselectedCommand = ReactiveCommand.Create<GameObject>(GameObjectUnselected);
-            GameObjectPressedCommand = ReactiveCommand.Create<GameObject>(GameObjectPressed);
-            GameObjectClickedCommand = ReactiveCommand.Create<GameObject>(GameObjectClicked);
-
             OnUnitActionEnded();
+
+            _game.GameObjectAction += OnGameObjectAction;
+
             _battleAttackController.UnitActionBegin += (sender, args) => OnUnitActionBegin();
             _battleAttackController.UnitActionEnded += (sender, args) => OnUnitActionEnded();
             _battleAttackController.BattleEnded += (sender, args) => OnBattleEnded();
 
-            _battleInterfaceController.Initialize();
+            InterfaceController.Initialize();
         }
 
-
+        /// <summary>
+        /// Все объекты, которые отрисовываются на сцене.
+        /// </summary>
         public IMapVisual MapVisual { get; }
 
+        /// <summary>
+        /// Юниты, которые находятся на сцене.
+        /// </summary>
         public IReadOnlyList<BattleUnit> Units => _battleAttackController.Units;
 
-        public IBattleInterfaceController InterfaceController => _battleInterfaceController;
+        /// <summary>
+        /// Менеджер для управления интерфейсом.
+        /// </summary>
+        public IBattleInterfaceController InterfaceController { get; }
 
+        /// <summary>
+        /// Юнит, чей ход активен на данный момент.
+        /// </summary>
         public Unit CurrentUnit {
             get => _currentUnit;
             private set => this.RaiseAndSetIfChanged(ref _currentUnit, value);
         }
 
+        /// <summary>
+        /// Юнит, который был выбран целью последним.
+        /// </summary>
         public Unit TargetUnit {
             get => _targetUnit;
             private set => this.RaiseAndSetIfChanged(ref _targetUnit, value);
         }
 
 
-        public ICommand UnitSelectedOnPanelCommand { get; }
-
-        public ICommand GameObjectSelectedCommand { get; }
-
-        public ICommand GameObjectUnselectedCommand { get; }
-
-        public ICommand GameObjectPressedCommand { get; }
-
-        public ICommand GameObjectClickedCommand { get; }
-
-
         /// <summary>
-        /// Обработчик события, что юнит выбран на панели
+        /// Обработчик события воздействия с игровым объектом (наведение, клик мышью и т.д.).
         /// </summary>
-        private void UnitSelectedOnPanel(BattleUnit battleUnit)
+        private void OnGameObjectAction(object o, GameObjectActionEventArgs args)
         {
-            TargetUnit = battleUnit.Unit;
-            _battleInterfaceController.UpdateTargetUnit(battleUnit, false);
+            switch (args.ActionType) {
+                case GameObjectActionType.Selected:
+                    GameObjectSelected(args.GameObject);
+                    break;
+                case GameObjectActionType.Unselected:
+                    GameObjectUnselected(args.GameObject);
+                    break;
+                case GameObjectActionType.LeftButtonPressed:
+                    GameObjectPressed(args.GameObject);
+                    break;
+                case GameObjectActionType.LeftButtonReleased:
+                    GameObjectClicked(args.GameObject);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <summary>
-        /// Обработчик события, что игровой объект был выбран
+        /// Обработчик события, что игровой объект был выбран.
         /// </summary>
         private void GameObjectSelected(GameObject gameObject)
         {
             if (gameObject is BattleUnit battleUnit) {
-                // Если выбрали кости юнита, то не нужно менять портрет
+                // Если выбрали кости юнита, то не нужно менять портрет.
                 if (battleUnit.Unit.IsDead)
                     return;
 
                 TargetUnit = battleUnit.Unit;
-                _battleInterfaceController.UpdateTargetUnit(battleUnit);
+                InterfaceController.UpdateTargetUnit(battleUnit);
+            }
+            else if(gameObject is UnitPortraitObject unitPortrait) {
+                TargetUnit = unitPortrait.Unit;
+
+                var targetUnitObject = _battleAttackController.GetUnitObject(unitPortrait.Unit);
+                InterfaceController.UpdateTargetUnit(targetUnitObject, false);
             }
             else if (gameObject is ButtonObject button) {
                 button.OnSelected();
@@ -114,12 +143,12 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         /// <summary>
-        /// Обработчик события, что с игрового объекта был смещён фокус
+        /// Обработчик события, что с игрового объекта был смещён фокус.
         /// </summary>
         private void GameObjectUnselected(GameObject gameObject)
         {
             if (gameObject is BattleUnit) {
-                _battleInterfaceController.UpdateTargetUnit(null);
+                InterfaceController.UpdateTargetUnit(null);
             }
             else if (gameObject is ButtonObject button) {
                 button.OnUnselected();
@@ -127,7 +156,7 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         /// <summary>
-        /// Обработчик события, что на объект нажали мышью
+        /// Обработчик события, что на объект нажали мышью.
         /// </summary>
         private void GameObjectPressed(GameObject gameObject)
         {
@@ -137,7 +166,7 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         /// <summary>
-        /// Обработчик события клика на игровом объекта
+        /// Обработчик события клика на игровом объекта.
         /// </summary>
         private void GameObjectClicked(GameObject gameObject)
         {
@@ -147,6 +176,13 @@ namespace AvaloniaDisciplesII.Battle
 
                 _battleAttackController.AttackUnit(targetUnitGameObject);
             }
+            else if(gameObject is UnitPortraitObject unitPortrait) {
+                if (_isAnimating)
+                    return;
+
+                var targetUnitObject = _battleAttackController.GetUnitObject(unitPortrait.Unit);
+                _battleAttackController.AttackUnit(targetUnitObject);
+            }
             else if (gameObject is ButtonObject button) {
                 button.OnReleased();
             }
@@ -154,7 +190,7 @@ namespace AvaloniaDisciplesII.Battle
 
 
         /// <summary>
-        /// Заблокировать интерфейс на время действия юнита
+        /// Заблокировать интерфейс на время действия юнита.
         /// </summary>
         private void OnUnitActionBegin()
         {
@@ -162,7 +198,7 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         /// <summary>
-        /// Возникает, когда закончилась анимации атаки у юнита
+        /// Возникает, когда закончилась анимации атаки у юнита.
         /// </summary>
         private void OnUnitActionEnded()
         {
@@ -171,7 +207,7 @@ namespace AvaloniaDisciplesII.Battle
         }
 
         /// <summary>
-        /// Разблокировать интерфейс под конец битвы
+        /// Разблокировать интерфейс под конец битвы.
         /// </summary>
         private void OnBattleEnded()
         {

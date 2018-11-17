@@ -1,9 +1,9 @@
 ﻿namespace Engine.Battle.Enums
 {
-    public enum BattleUnitEffectType
+    public enum UnitBattleEffectType
     {
         /// <summary>
-        /// Юнит защитился
+        /// Юнит защитился.
         /// </summary>
         Defend,
     }

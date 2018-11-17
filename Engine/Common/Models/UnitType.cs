@@ -6,7 +6,7 @@ namespace Engine.Common.Models
 {
     public class UnitType
     {
-        // todo перепилить под рефлектор
+        // todo перепилить под рефлектор.
         public UnitType(
             string unitTypeId,
             UnitCategory unitCategory,
@@ -73,67 +73,67 @@ namespace Engine.Common.Models
         }
 
         /// <summary>
-        /// Идентификатор типа юнита
+        /// Идентификатор типа юнита.
         /// </summary>
         public string UnitTypeId { get; }
 
         /// <summary>
-        /// Kатегория юнита
+        /// Категория юнита.
         /// </summary>
         public UnitCategory UnitCategory { get; }
 
         /// <summary>
-        /// Базовый уровень юнита
+        /// Базовый уровень юнита.
         /// </summary>
         public int Level { get; }
 
         /// <summary>
-        /// Предыдущий тип юнита в иерархии
+        /// Предыдущий тип юнита в иерархии.
         /// </summary>
         public UnitType PrevUnitType { get; }
 
         /// <summary>
-        /// todo Раса юнита
+        /// todo Раса юнита.
         /// </summary>
         public string Race { get; }
 
         /// <summary>
-        /// Подраса юнита
+        /// Подраса юнита.
         /// </summary>
         public Subrace Subrace { get; }
 
         /// <summary>
-        /// Ветвь юнита
+        /// Ветвь юнита.
         /// </summary>
         public UnitBranch Branch { get; }
 
         /// <summary>
-        /// Занимает ли юнит одну клетку. Занимает две клетки, если false
+        /// Занимает ли юнит одну клетку. Занимает две клетки, если false.
         /// </summary>
         public bool SizeSmall { get; }
 
         /// <summary>
-        /// Является ли юнит мужчиной
+        /// Является ли юнит мужчиной.
         /// </summary>
         public bool IsMale { get; }
 
         /// <summary>
-        /// todo Определяет стоимость найма юнита в столице
+        /// todo Определяет стоимость найма юнита в столице.
         /// </summary>
         public string EnrollCost { get; }
 
         /// <summary>
-        /// todo Определяет здание, позволяющее нанимать юнита
+        /// todo Определяет здание, позволяющее нанимать юнита.
         /// </summary>
         public string EnrollBnding { get; }
 
         /// <summary>
-        /// Имя типа юнита
+        /// Имя типа юнита.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Описание тип юнита
+        /// Описание тип юнита.
         /// </summary>
         public string Description { get; }
 
@@ -143,88 +143,88 @@ namespace Engine.Common.Models
         public string Abil { get; }
 
         /// <summary>
-        /// Основная атака
+        /// Основная атака.
         /// </summary>
         public Attack FirstAttack { get; }
 
         /// <summary>
-        /// Дополнительная атака
+        /// Дополнительная атака.
         /// </summary>
         public Attack SecondAttack { get; }
 
         /// <summary>
-        /// Атакует ли юнит дважды
+        /// Атакует ли юнит дважды.
         /// </summary>
         public bool AttackTwice { get; }
 
         /// <summary>
-        /// Количество жизней
+        /// Количество жизней.
         /// </summary>
         public int HitPoints { get; }
 
         /// <summary>
-        /// Базовый юнит для юнита-героя
+        /// Базовый юнит для юнита-героя.
         /// </summary>
         public UnitType BaseUnit { get; }
 
         /// <summary>
-        /// Базовая защита юнита
+        /// Базовая защита юнита.
         /// </summary>
         public int Armor { get; }
 
         /// <summary>
-        /// Базовое восстановления % жизней за ход
+        /// Базовое восстановления % жизней за ход.
         /// </summary>
         public int Regen { get; }
 
         /// <summary>
-        /// todo Стоимость возрождения юнита
+        /// todo Стоимость возрождения юнита.
         /// </summary>
         public string ReviveCost { get; }
 
         /// <summary>
-        /// todo Стоимость восстановления здоровья
+        /// todo Стоимость восстановления здоровья.
         /// </summary>
         public string HealCost { get; }
 
         /// <summary>
-        /// todo Стоимость обучения юнита
+        /// todo Стоимость обучения юнита.
         /// </summary>
         public string TrainingCost { get; }
 
         /// <summary>
-        /// Количество опыта за убийство юнита
+        /// Количество опыта за убийство юнита.
         /// </summary>
         public int XpKilled { get; }
 
         /// <summary>
-        /// Здание, которое позволяет тренировать данный тип юнита
+        /// Здание, которое позволяет тренировать данный тип юнита.
         /// </summary>
         public string UpgradeBuilding { get; }
 
         /// <summary>
-        /// Количество опыта, необходимо для получения следующего уровня
+        /// Количество опыта, необходимо для получения следующего уровня.
         /// </summary>
         public int XpNext { get; }
 
         /// <summary>
-        /// Анимация, которая отображается при смерти юнита
+        /// Анимация, которая отображается при смерти юнита.
         /// </summary>
         public int DeathAnimationId { get; }
 
 
         /// <summary>
-        /// Картинка лица юнита
+        /// Картинка лица юнита.
         /// </summary>
         public Bitmap Face { get; }
 
         /// <summary>
-        /// Скруглённая картинка лица юнита, используется в битвах
+        /// Скруглённая картинка лица юнита, используется в битвах.
         /// </summary>
         public Bitmap BattleFace { get; }
 
         /// <summary>
-        /// todo Большой портрет в информации о юните. Извлекать из Events.ff
+        /// todo Большой портрет в информации о юните. Извлекать из Events.ff.
         /// </summary>
         public Bitmap Portret { get; }
     }

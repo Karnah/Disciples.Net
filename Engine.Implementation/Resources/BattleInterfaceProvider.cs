@@ -17,12 +17,15 @@ namespace Engine.Implementation.Resources
         private readonly IBattleResourceProvider _battleResourceProvider;
         private readonly ImagesExtractor _extractor;
 
+        private Dictionary<GameColor, Bitmap> _gameColors;
+
         public BattleInterfaceProvider(IBattleResourceProvider battleResourceProvider)
         {
             _battleResourceProvider = battleResourceProvider;
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.ff");
 
             LoadBitmaps();
+            InitGameColors();
         }
 
         private void LoadBitmaps()
@@ -35,7 +38,7 @@ namespace Engine.Implementation.Resources
 
             PanelSeparator = _extractor.GetImage("SPLITLRG_BATTLE").ToBitmap();
 
-            // todo Хоть убейте, не могу найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета
+            // todo Хоть убейте, не могу найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
             DeathSkull = new Bitmap($"{Directory.GetCurrentDirectory()}\\Resources\\Common\\Skull.png");
 
 
@@ -86,6 +89,73 @@ namespace Engine.Implementation.Resources
 
         #endregion
 
+        #region GameColors
+
+        public Bitmap GetColorBitmap(GameColor color)
+        {
+            return _gameColors[color];
+        }
+
+        private void InitGameColors()
+        {
+            var gameColors = new Dictionary<GameColor, Bitmap>();
+
+            foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
+                var colorFilePath = $"Resources/Colors/{color}.png";
+                if (!File.Exists(colorFilePath))
+                    gameColors.Add(color, null);
+
+                var bitmap = new Bitmap(colorFilePath);
+                gameColors.Add(color, bitmap);
+            }
+
+            _gameColors = gameColors;
+        }
+
+        // todo Так как наблюдаются проблемы со Skia, то генерировать во время выполнения так цвета - не вариант.
+        // Используем вариант с загрузкой.
+        //private void InitGameColors()
+        //{
+        //    var gameColors = new Dictionary<GameColor, Bitmap>();
+
+        //    foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
+        //        byte[] colorBytes = new byte[4];
+
+        //        switch (color) {
+        //            case GameColor.Red:
+        //                colorBytes = new byte[] { 255, 0, 0, 128 };
+        //                break;
+        //            case GameColor.Gray:
+        //                break;
+        //            case GameColor.Green:
+        //                break;
+        //            case GameColor.Yellow:
+        //                colorBytes = new byte[] { 255, 255, 0, 128 };
+        //                break;
+        //            case GameColor.Blue:
+        //                colorBytes = new byte[] { 0, 0, 255, 128 };
+        //                break;
+        //            default:
+        //                throw new ArgumentOutOfRangeException();
+        //        }
+
+        //        var bitmap = GetColorBitmap(colorBytes);
+        //        bitmap.Save($"Resources/Colors/{color}.png");
+        //        gameColors.Add(color, bitmap);
+        //    }
+
+        //    _gameColors = gameColors;
+        //}
+
+        //private static Bitmap GetColorBitmap(byte[] colorBytes)
+        //{
+        //    var rowImage = new ResourceProvider.Models.RowImage(0, 1, 0, 1, 1, 1, colorBytes);
+        //    var bitmap = rowImage.ToBitmap();
+
+        //    return bitmap;
+        //}
+
+        #endregion
 
 
 
@@ -144,7 +214,7 @@ namespace Engine.Implementation.Resources
 
 
         /// <summary>
-        /// Получить часть названия файла по типу рамки
+        /// Получить часть названия файла по типу рамки.
         /// </summary>
         private static string GetBattleBorderTypeSuffix(BattleBorderType battleBorderType)
         {
@@ -163,17 +233,17 @@ namespace Engine.Implementation.Resources
         private enum BattleBorderType
         {
             /// <summary>
-            /// Тип рамки для юнита, занимающего одну клетку
+            /// Тип рамки для юнита, занимающего одну клетку.
             /// </summary>
             SmallUnit,
 
             /// <summary>
-            /// Тип рамки для юнита, занимающего две клетки
+            /// Тип рамки для юнита, занимающего две клетки.
             /// </summary>
             LargeUnit,
 
             /// <summary>
-            /// Тип рамки, когда юнит атакует всё поле
+            /// Тип рамки, когда юнит атакует всё поле.
             /// </summary>
             Field
         }

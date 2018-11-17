@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-
-using Engine.Battle.Components;
+﻿using Engine.Battle.Components;
 using Engine.Battle.Enums;
-using Engine.Battle.Models;
 using Engine.Battle.Providers;
 using Engine.Common.Components;
 using Engine.Common.Controllers;
@@ -11,8 +8,20 @@ using Engine.Common.Models;
 
 namespace Engine.Battle.GameObjects
 {
+    /// <summary>
+    /// Игровой объект юнита во время сражения.
+    /// </summary>
     public class BattleUnit : GameObject
     {
+        /// <summary>
+        /// Ширина юнита на сцене.
+        /// </summary>
+        private const int BATTLE_UNIT_WIDTH = 75;
+        /// <summary>
+        /// Высота юнита на сцене.
+        /// </summary>
+        private const int BATTLE_UNIT_HEIGHT = 100;
+
         public BattleUnit(IMapVisual mapVisual, IBattleUnitResourceProvider battleUnitResourceProvider, Unit unit, bool isAttacker)
             : base(GetSceneUnitPosition(isAttacker, unit.SquadLinePosition, unit.SquadFlankPosition))
         {
@@ -22,33 +31,51 @@ namespace Engine.Battle.GameObjects
                 ? BattleDirection.Attacker
                 : BattleDirection.Defender;
             Action = BattleAction.Waiting;
-            BattleUnitEffects = new HashSet<BattleUnitEffect>();
 
             BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, mapVisual, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
             this.Components = new IComponent[] { BattleUnitAnimationComponent };
+
+            Width = BATTLE_UNIT_WIDTH;
+            Height = BATTLE_UNIT_HEIGHT;
         }
 
 
+        /// <inheritdoc />
+        public override bool IsInteractive => true;
+
+        /// <summary>
+        /// Компонент анимации юнита.
+        /// </summary>
         public BattleUnitAnimationComponent BattleUnitAnimationComponent { get; }
 
 
+        /// <summary>
+        /// Информация о юните.
+        /// </summary>
         public Unit Unit { get; }
 
+        /// <summary>
+        /// Принадлежит ли юнит атакующему отряду.
+        /// </summary>
         public bool IsAttacker { get; }
 
+        /// <summary>
+        /// Направление, куда смотрит юнит.
+        /// </summary>
         public BattleDirection Direction { get; set; }
 
+        /// <summary>
+        /// Действие, которое выполняет юнит в данный момент.
+        /// </summary>
         public BattleAction Action { get; set; }
-
-        public HashSet<BattleUnitEffect> BattleUnitEffects { get; }
 
 
         /// <summary>
-        /// Рассчитать позицию юнита на сцене
+        /// Рассчитать позицию юнита на сцене.
         /// </summary>
-        /// <param name="isAttacker">Находится ли юнит в атакующем отряде</param>
-        /// <param name="line">Линия, на которой распологается юнит</param>
-        /// <param name="flank">Позиция на которой находится юнит (центр, правый и левый фланги)</param>
+        /// <param name="isAttacker">Находится ли юнит в атакующем отряде.</param>
+        /// <param name="line">Линия, на которой располагается юнит.</param>
+        /// <param name="flank">Позиция на которой находится юнит (центр, правый и левый фланги).</param>
         public static (double X, double Y) GetSceneUnitPosition(bool isAttacker, double line, double flank)
         {
             // Если смотреть на поле, то фронт защищающегося отряда (линия 0) - это 2 линия
@@ -57,8 +84,8 @@ namespace Engine.Battle.GameObjects
                 ? line
                 : 3 - line;
 
-            var x = -340 + 95 * gameLine + 123 * flank;
-            var y = -230 + 60 * gameLine - 43 * flank;
+            var x = 60 + 95 * gameLine + 123 * flank;
+            var y = 200 + 60 * gameLine - 43 * flank;
 
             return (x, y);
         }

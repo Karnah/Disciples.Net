@@ -7,7 +7,7 @@
         WindowState="Maximized" Background="Black"
         Title="Avalonia Disciples II">
 
-  <Grid Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
+  <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
         HorizontalAlignment="Center" VerticalAlignment="Center">
     <battle:BattleView DataContext="{Binding ViewContext}" />
   </Grid>
