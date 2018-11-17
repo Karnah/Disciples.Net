@@ -4,6 +4,7 @@ using System.IO;
 
 using Avalonia.Media.Imaging;
 
+using Engine.Battle.Enums;
 using Engine.Battle.Providers;
 using Engine.Common.Enums;
 using Engine.Common.Models;
@@ -12,6 +13,7 @@ using ResourceProvider;
 
 namespace Engine.Implementation.Resources
 {
+    /// <inheritdoc />
     public class BattleInterfaceProvider : IBattleInterfaceProvider
     {
         private readonly IBattleResourceProvider _battleResourceProvider;
@@ -19,6 +21,7 @@ namespace Engine.Implementation.Resources
 
         private Dictionary<GameColor, Bitmap> _gameColors;
 
+        /// <inheritdoc />
         public BattleInterfaceProvider(IBattleResourceProvider battleResourceProvider)
         {
             _battleResourceProvider = battleResourceProvider;
@@ -28,6 +31,9 @@ namespace Engine.Implementation.Resources
             InitGameColors();
         }
 
+        /// <summary>
+        /// Инициализировать картинки.
+        /// </summary>
         private void LoadBitmaps()
         {
             Battleground = _battleResourceProvider.GetRandomBattleground();
@@ -42,6 +48,11 @@ namespace Engine.Implementation.Resources
             DeathSkull = new Bitmap($"{Directory.GetCurrentDirectory()}\\Resources\\Common\\Skull.png");
 
 
+            UnitButtleEffectsIcon = new Dictionary<UnitBattleEffectType, Bitmap> {
+                { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap }
+            };
+
+
             ToggleRightButton = GetBattleBitmaps("TOGGLERIGHT");
             DefendButton = GetBattleBitmaps("DEFEND");
             RetreatButton = GetBattleBitmaps("RETREAT");
@@ -51,29 +62,44 @@ namespace Engine.Implementation.Resources
         }
 
 
+        /// <inheritdoc />
         public Bitmap Battleground { get; private set; }
 
+        /// <inheritdoc />
         public Bitmap RightPanel { get; private set; }
 
+        /// <inheritdoc />
         public Bitmap BottomPanel { get; private set; }
 
+        /// <inheritdoc />
         public Bitmap PanelSeparator { get; private set; }
 
+        /// <inheritdoc />
         public Bitmap DeathSkull { get; private set; }
+
+
+        /// <inheritdoc />
+        public IDictionary<UnitBattleEffectType, Bitmap> UnitButtleEffectsIcon { get; private set; }
 
 
         #region Buttons
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> ToggleRightButton { get; private set; }
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> DefendButton { get; private set; }
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> RetreatButton { get; private set; }
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> WaitButton { get; private set; }
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> InstantResolveButton { get; private set; }
 
+        /// <inheritdoc />
         public IDictionary<ButtonState, Bitmap> AutoBattleButton { get; private set; }
 
 
@@ -91,11 +117,15 @@ namespace Engine.Implementation.Resources
 
         #region GameColors
 
+        /// <inheritdoc />
         public Bitmap GetColorBitmap(GameColor color)
         {
             return _gameColors[color];
         }
 
+        /// <summary>
+        /// Инициализировать цвета приложения.
+        /// </summary>
         private void InitGameColors()
         {
             var gameColors = new Dictionary<GameColor, Bitmap>();
@@ -162,88 +192,108 @@ namespace Engine.Implementation.Resources
 
         #region UnitPanelBorders
 
+        /// <inheritdoc />
         public IReadOnlyList<Frame> GetUnitAttackBorder(bool sizeSmall)
         {
-            return GetAttackBorder(sizeSmall ? BattleBorderType.SmallUnit : BattleBorderType.LargeUnit);
+            return GetAttackBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
         }
 
+        /// <inheritdoc />
         public IReadOnlyList<Frame> GetFieldAttackBorder()
         {
-            return GetAttackBorder(BattleBorderType.Field);
+            return GetAttackBorder(BattleBorderSize.Field);
         }
 
-        private IReadOnlyList<Frame> GetAttackBorder(BattleBorderType battleBorderType)
+        /// <summary>
+        /// Извлечь из ресурсов рамку атаки.
+        /// </summary>
+        /// <param name="battleBorderSize">Размер рамки.</param>
+        private IReadOnlyList<Frame> GetAttackBorder(BattleBorderSize battleBorderSize)
         {
-            var suffix = GetBattleBorderTypeSuffix(battleBorderType);
+            var suffix = GetBattleBorderTypeSuffix(battleBorderSize);
 
             // todo Выяснить в чем отличие от SELALLA
             return _battleResourceProvider.GetBattleAnimation($"ISEL{suffix}A");
         }
 
 
+        /// <inheritdoc />
         public IReadOnlyList<Frame> GetUnitSelectionBorder(bool sizeSmall)
         {
-            return GetSelectionBorder(sizeSmall ? BattleBorderType.SmallUnit : BattleBorderType.LargeUnit);
+            return GetSelectionBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
         }
 
-        private IReadOnlyList<Frame> GetSelectionBorder(BattleBorderType battleBorderType)
+        /// <summary>
+        /// Извлечь из ресурсов рамку выделения текущего юнита.
+        /// </summary>
+        /// <param name="battleBorderSize">Размер рамки.</param>
+        private IReadOnlyList<Frame> GetSelectionBorder(BattleBorderSize battleBorderSize)
         {
-            if (battleBorderType == BattleBorderType.Field)
-                throw new ArgumentException("Selection border can not use for field", nameof(battleBorderType));
+            if (battleBorderSize == BattleBorderSize.Field)
+                throw new ArgumentException("Selection border can not use for field", nameof(battleBorderSize));
 
-            var suffix = GetBattleBorderTypeSuffix(battleBorderType);
+            var suffix = GetBattleBorderTypeSuffix(battleBorderSize);
             return _battleResourceProvider.GetBattleAnimation($"PLY{suffix}A");
         }
 
 
+        /// <inheritdoc />
         public IReadOnlyList<Frame> GetUnitHealBorder(bool sizeSmall)
         {
-            return GetHealBorder(sizeSmall ? BattleBorderType.SmallUnit : BattleBorderType.LargeUnit);
+            return GetHealBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
         }
 
+        /// <inheritdoc />
         public IReadOnlyList<Frame> GetFieldHealBorder()
         {
-            return GetHealBorder(BattleBorderType.Field);
+            return GetHealBorder(BattleBorderSize.Field);
         }
 
-        private IReadOnlyList<Frame> GetHealBorder(BattleBorderType battleBorderType)
+        /// <summary>
+        /// Извлечь из ресурсов рамку исцеления.
+        /// </summary>
+        /// <param name="battleBorderSize">Размер рамки.</param>
+        private IReadOnlyList<Frame> GetHealBorder(BattleBorderSize battleBorderSize)
         {
-            var suffix = GetBattleBorderTypeSuffix(battleBorderType);
+            var suffix = GetBattleBorderTypeSuffix(battleBorderSize);
             return _battleResourceProvider.GetBattleAnimation($"HEA{suffix}A");
         }
 
 
         /// <summary>
-        /// Получить часть названия файла по типу рамки.
+        /// Получить часть названия файла по размеру рамки.
         /// </summary>
-        private static string GetBattleBorderTypeSuffix(BattleBorderType battleBorderType)
+        private static string GetBattleBorderTypeSuffix(BattleBorderSize battleBorderSize)
         {
-            switch (battleBorderType) {
-                case BattleBorderType.SmallUnit:
+            switch (battleBorderSize) {
+                case BattleBorderSize.SmallUnit:
                     return "SMALL";
-                case BattleBorderType.LargeUnit:
+                case BattleBorderSize.LargeUnit:
                     return "LARGE";
-                case BattleBorderType.Field:
+                case BattleBorderSize.Field:
                     return "ALL";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(battleBorderType), battleBorderType, null);
+                    throw new ArgumentOutOfRangeException(nameof(battleBorderSize), battleBorderSize, null);
             }
         }
 
-        private enum BattleBorderType
+        /// <summary>
+        /// Размер рамки на панели с юнитами.
+        /// </summary>
+        private enum BattleBorderSize
         {
             /// <summary>
-            /// Тип рамки для юнита, занимающего одну клетку.
+            /// Рамка занимает одну клетку.
             /// </summary>
             SmallUnit,
 
             /// <summary>
-            /// Тип рамки для юнита, занимающего две клетки.
+            /// Рамка занимает две клетки.
             /// </summary>
             LargeUnit,
 
             /// <summary>
-            /// Тип рамки, когда юнит атакует всё поле.
+            /// Рамка занимает всю панель целиком.
             /// </summary>
             Field
         }

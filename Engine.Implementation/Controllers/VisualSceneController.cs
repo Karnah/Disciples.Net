@@ -10,6 +10,7 @@ using Engine.Common.Controllers;
 using Engine.Common.Enums;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
+using Engine.Common.Providers;
 
 namespace Engine.Implementation.Controllers
 {
@@ -18,17 +19,20 @@ namespace Engine.Implementation.Controllers
     {
         private readonly IGame _game;
         private readonly IMapVisual _mapVisual;
+        private readonly ITextProvider _textProvider;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
 
         public VisualSceneController(
             IGame game,
             IMapVisual mapVisual,
+            ITextProvider textProvider,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             IBattleInterfaceProvider battleInterfaceProvider)
         {
             _game = game;
             _mapVisual = mapVisual;
+            _textProvider = textProvider;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _battleInterfaceProvider = battleInterfaceProvider;
         }
@@ -140,7 +144,7 @@ namespace Engine.Implementation.Controllers
         /// <inheritdoc />
         public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
         {
-            var unitPortrait = new UnitPortraitObject(this, _mapVisual, _battleInterfaceProvider, unit, rightToLeft, x, y);
+            var unitPortrait = new UnitPortraitObject(_textProvider, this, _mapVisual, _battleInterfaceProvider, unit, rightToLeft, x, y);
             _game.CreateObject(unitPortrait);
 
             return unitPortrait;

@@ -49,11 +49,11 @@ namespace Engine.Common.Models
         }
 
         /// <summary>
-        /// Получить эффект указанного типа, воздействующий на юнита.
+        /// Получить эффекты, воздействующий на юнита.
         /// </summary>
-        public UnitBattleEffect GetBattleEffect(UnitBattleEffectType effectType)
+        public IReadOnlyList<UnitBattleEffect> GetBattleEffects()
         {
-            return _battleEffects[effectType];
+            return _battleEffects.Select(be => be.Value).ToList();
         }
 
 

@@ -72,6 +72,11 @@ namespace AvaloniaDisciplesII
             Container.RegisterInstance<ILogger>(logger);
 
 
+            logger.Log("Start load TextProvider");
+            var textProvider = Container.Resolve<TextProvider>();
+            Container.RegisterInstance<ITextProvider>(textProvider);
+            logger.Log($"End load TextProvider{Environment.NewLine}");
+
             logger.Log("Start load BattleResource");
             var battleResourceProvider = Container.Resolve<BattleResourceProvider>();
             Container.RegisterInstance<IBattleResourceProvider>(battleResourceProvider);

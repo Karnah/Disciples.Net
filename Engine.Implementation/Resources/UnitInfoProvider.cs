@@ -13,38 +13,28 @@ namespace Engine.Implementation.Resources
 {
     public class UnitInfoProvider : IUnitInfoProvider
     {
+        private readonly ITextProvider _textProvider;
         private readonly DataExtractor _dataExtractor;
         private readonly ImagesExtractor _facesExtractor;
 
         private SortedDictionary<string, Attack> _attacks;
-        private SortedDictionary<string, ResourceText> _resourceTexts;
         private SortedDictionary<string, UnitType> _units;
 
-        public UnitInfoProvider()
+        public UnitInfoProvider(ITextProvider textProvider)
         {
+            _textProvider = textProvider;
+
             _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
             _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
 
-            LoadResourceText();
             LoadAttacks();
             LoadUnitTypes();
         }
 
-        private void LoadResourceText()
-        {
-            _resourceTexts = new SortedDictionary<string, ResourceText>();
 
-            var resourceTexts = _dataExtractor.GetData("Tglobal.dbf");
-            foreach (DataRow resourceTextRow in resourceTexts.Rows) {
-                var textId = resourceTextRow.GetClass<string>("TXT_ID");
-                var text = resourceTextRow.GetClass<string>("TEXT");
-                var isVerified = resourceTextRow.GetStruct<bool>("VERIFIED") ?? false;
-                var context = resourceTextRow.GetClass<string>("CONTEXT");
-
-                _resourceTexts.Add(textId, new ResourceText(textId, text, isVerified, context));
-            }
-        }
-
+        /// <summary>
+        /// Загрузить информацию о типах атаки.
+        /// </summary>
         private void LoadAttacks()
         {
             _attacks = new SortedDictionary<string, Attack>(StringComparer.InvariantCultureIgnoreCase) {
@@ -58,7 +48,9 @@ namespace Engine.Implementation.Resources
             }
         }
 
-
+        /// <summary>
+        /// Загрузить информацию о юнитах.
+        /// </summary>
         private void LoadUnitTypes()
         {
             _units = new SortedDictionary<string, UnitType>(StringComparer.InvariantCultureIgnoreCase) {
@@ -74,6 +66,9 @@ namespace Engine.Implementation.Resources
         }
 
 
+        /// <summary>
+        /// Извлечь из строки информацию об атаке.
+        /// </summary>
         private Attack ExtractAttack(DataRow attackInfo)
         {
             var attackId = attackInfo.GetClass<string>("ATT_ID");
@@ -90,8 +85,8 @@ namespace Engine.Implementation.Resources
 
             return new Attack(
                 attackId,
-                _resourceTexts[nameId].Text,
-                _resourceTexts[descriptionId].Text,
+                _textProvider.GetText(nameId),
+                _textProvider.GetText(descriptionId),
                 initiative,
                 source,
                 attackClass,
@@ -102,6 +97,9 @@ namespace Engine.Implementation.Resources
                 );
         }
 
+        /// <summary>
+        /// Извлечь из строки информацию о юните.
+        /// </summary>
         private UnitType ExtractUnitType(DataRow unitInfo)
         {
             var unitId = unitInfo.GetClass<string>("UNIT_ID");
@@ -134,7 +132,7 @@ namespace Engine.Implementation.Resources
             var deathAnim = unitInfo.GetStruct<int>("DEATH_ANIM") ?? 1;
 
             // Лицо юнита дополнительно обрабатывать не надо.
-            // Кроме того, там есть проблемы с некоторым потрератами, если их получать обычным путём
+            // Кроме того, там есть проблемы с некоторым портретами, если их получать обычным путём.
             var face = _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap();
             var battleFace = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
 
@@ -151,9 +149,9 @@ namespace Engine.Implementation.Resources
                 isMale,
                 enrollCost,
                 enrollBuilding,
-                _resourceTexts[nameId].Text,
-                _resourceTexts[descriptionId].Text,
-                _resourceTexts[abilId].Text,
+                _textProvider.GetText(nameId),
+                _textProvider.GetText(descriptionId),
+                _textProvider.GetText(abilId),
                 _attacks[firstAttackId],
                 _attacks[secondAttackId],
                 attackTwice,
@@ -176,31 +174,10 @@ namespace Engine.Implementation.Resources
         }
 
 
-
-
+        /// <inheritdoc />
         public UnitType GetUnitType(string unitTypeId)
         {
             return _units[unitTypeId];
-        }
-
-
-        private class ResourceText
-        {
-            public ResourceText(string textId, string text, bool isVerified, string context)
-            {
-                TextId = textId;
-                Text = text;
-                IsVerified = isVerified;
-                Context = context;
-            }
-
-            public string TextId { get; }
-
-            public string Text { get; }
-
-            public bool IsVerified { get; }
-
-            public string Context { get; }
         }
     }
 }

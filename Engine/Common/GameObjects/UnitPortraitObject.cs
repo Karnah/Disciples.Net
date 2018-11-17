@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Avalonia.Media;
 
@@ -8,6 +10,7 @@ using Engine.Battle.Providers;
 using Engine.Common.Controllers;
 using Engine.Common.Enums;
 using Engine.Common.Models;
+using Engine.Common.Providers;
 
 namespace Engine.Common.GameObjects
 {
@@ -26,6 +29,20 @@ namespace Engine.Common.GameObjects
         /// </summary>
         private const long PROCESSING_MOMENTAL_EFFECT_TIME = 1500;
 
+        /// <summary>
+        /// Идентификатор в ресурсах с текстом "Промах".
+        /// </summary>
+        private const string MISS_TEXT_ID = "X008TA0001";
+        /// <summary>
+        /// Идентификатор в ресурсах с текстом "Защита".
+        /// </summary>
+        private const string DEFEND_TEXT_ID = "X008TA0011";
+        /// <summary>
+        /// Идентификатор в ресурсах с текстом "Ждать".
+        /// </summary>
+        private const string WAIT_TEXT_ID = "X008TA0020";
+
+        private readonly ITextProvider _textProvider;
         private readonly IVisualSceneController _visualSceneController;
         private readonly IMapVisual _mapVisual;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
@@ -60,6 +77,10 @@ namespace Engine.Common.GameObjects
         /// </summary>
         private ImageVisualObject _unitPanelSeparator;
         /// <summary>
+        /// Иконки эффектов, которые воздействуют на юнита.
+        /// </summary>
+        private Dictionary<UnitBattleEffectType, ImageVisualObject> _battleEffectsIcons;
+        /// <summary>
         /// Количество ОЗ, которое было при предыдущей проверке.
         /// </summary>
         private int _lastUnitHitPoints;
@@ -70,6 +91,7 @@ namespace Engine.Common.GameObjects
 
 
         public UnitPortraitObject(
+            ITextProvider textProvider,
             IVisualSceneController visualSceneController,
             IMapVisual mapVisual,
             IBattleInterfaceProvider battleInterfaceProvider,
@@ -78,6 +100,7 @@ namespace Engine.Common.GameObjects
             double x,
             double y) : base(x, y)
         {
+            _textProvider = textProvider;
             _visualSceneController = visualSceneController;
             _mapVisual = mapVisual;
             _battleInterfaceProvider = battleInterfaceProvider;
@@ -87,6 +110,8 @@ namespace Engine.Common.GameObjects
 
             Width = Unit.UnitType.Face.PixelSize.Width;
             Height = Unit.UnitType.Face.PixelSize.Height;
+
+            _battleEffectsIcons = new Dictionary<UnitBattleEffectType, ImageVisualObject>();
         }
 
 
@@ -140,6 +165,10 @@ namespace Engine.Common.GameObjects
             RemoveVisual(ref _unitDamageImage);
             RemoveVisual(ref _unitPanelSeparator);
 
+            foreach (var battleEffectsIcon in _battleEffectsIcons) {
+                _mapVisual.RemoveVisual(battleEffectsIcon.Value);
+            }
+
             base.Destroy();
         }
 
@@ -148,6 +177,31 @@ namespace Engine.Common.GameObjects
         /// </summary>
         private void UpdateUnitEffects(long ticksCount = 0)
         {
+            var battleEffects = Unit.Effects.GetBattleEffects();
+            // Добавляем иконки тех эффектов, которые еще не появились.
+            foreach (var battleEffect in battleEffects) {
+                if (_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
+                    continue;
+
+                var icon = _battleInterfaceProvider.UnitButtleEffectsIcon[battleEffect.EffectType];
+                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImageVisual(
+                    icon,
+                    X + (Width - icon.PixelSize.Width) / 2,
+                    Y + Height - icon.PixelSize.Height,
+                    INTERFACE_LAYER + 4));
+            }
+
+            // Удаляем иконки тех эффектов, действие которых закончилось.
+            var expiredEffects = _battleEffectsIcons
+                .Where(bei => battleEffects.All(be => be.EffectType != bei.Key))
+                .ToList();
+            foreach (var expiredEffect in expiredEffects) {
+                var effectIcon = _battleEffectsIcons[expiredEffect.Key];
+                _mapVisual.RemoveVisual(effectIcon);
+                _battleEffectsIcons.Remove(expiredEffect.Key);
+            }
+
+
             // Обрабатываем действующий мгновенный эффект.
             if (_processingMomentalEffectTime > 0) {
                 _processingMomentalEffectTime -= ticksCount;
@@ -217,13 +271,13 @@ namespace Engine.Common.GameObjects
                     break;
                 case UnitMomentalEffectType.Miss:
                     _momentalEffectImage = AddColorImage(GameColor.Yellow);
-                    _momentalEffectText = AddText("Промах");
+                    _momentalEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
                     break;
                 case UnitMomentalEffectType.Defended:
-                    _momentalEffectText = AddText("Защита");
+                    _momentalEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
                     break;
                 case UnitMomentalEffectType.Waiting:
-                    _momentalEffectText = AddText("Ждать");
+                    _momentalEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -246,7 +300,6 @@ namespace Engine.Common.GameObjects
         /// </summary>
         private TextVisualObject AddText(string text)
         {
-            // todo Текст из ресурсов.
             return _visualSceneController.AddTextVisual(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: Colors.White);
         }
 

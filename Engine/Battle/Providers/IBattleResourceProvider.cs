@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-
 using Avalonia.Media.Imaging;
-
 using Engine.Common.Models;
 
 namespace Engine.Battle.Providers
