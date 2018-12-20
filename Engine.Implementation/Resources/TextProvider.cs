@@ -54,7 +54,7 @@ namespace Engine.Implementation.Resources
         /// <summary>
         /// Удалить все специфичные теги.
         /// </summary>
-        private string DestroyTag(string text)
+        private static string DestroyTag(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return text;

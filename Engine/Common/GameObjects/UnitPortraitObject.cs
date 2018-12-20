@@ -11,6 +11,7 @@ using Engine.Common.Controllers;
 using Engine.Common.Enums;
 using Engine.Common.Models;
 using Engine.Common.Providers;
+using Engine.Common.VisualObjects;
 
 namespace Engine.Common.GameObjects
 {
@@ -24,10 +25,6 @@ namespace Engine.Common.GameObjects
         /// </summary>
         // todo вынести это в одно место
         private const int INTERFACE_LAYER = 1000;
-        /// <summary>
-        /// Время, которое будет отображаться действие моментального эффекта.
-        /// </summary>
-        private const long PROCESSING_MOMENTAL_EFFECT_TIME = 1500;
 
         /// <summary>
         /// Идентификатор в ресурсах с текстом "Промах".
@@ -44,7 +41,6 @@ namespace Engine.Common.GameObjects
 
         private readonly ITextProvider _textProvider;
         private readonly IVisualSceneController _visualSceneController;
-        private readonly IMapVisual _mapVisual;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly bool _rightToLeft;
 
@@ -84,16 +80,11 @@ namespace Engine.Common.GameObjects
         /// Количество ОЗ, которое было при предыдущей проверке.
         /// </summary>
         private int _lastUnitHitPoints;
-        /// <summary>
-        /// Время, которое еще должен отображаться мгновенный эффект.
-        /// </summary>
-        private long? _processingMomentalEffectTime;
 
 
         public UnitPortraitObject(
             ITextProvider textProvider,
             IVisualSceneController visualSceneController,
-            IMapVisual mapVisual,
             IBattleInterfaceProvider battleInterfaceProvider,
             Unit unit,
             bool rightToLeft,
@@ -102,7 +93,6 @@ namespace Engine.Common.GameObjects
         {
             _textProvider = textProvider;
             _visualSceneController = visualSceneController;
-            _mapVisual = mapVisual;
             _battleInterfaceProvider = battleInterfaceProvider;
             _rightToLeft = rightToLeft;
 
@@ -140,8 +130,8 @@ namespace Engine.Common.GameObjects
                 _unitPanelSeparator = _visualSceneController.AddImageVisual(
                     _battleInterfaceProvider.PanelSeparator,
                     X + (Width - _battleInterfaceProvider.PanelSeparator.PixelSize.Width) / 2 - 1,
-                    Y + Height + 4.5,
-                    INTERFACE_LAYER + 2);
+                    Y + Height - 1,
+                    INTERFACE_LAYER);
             }
 
             UpdateUnitEffects();
@@ -151,7 +141,7 @@ namespace Engine.Common.GameObjects
         {
             base.OnUpdate(ticksCount);
 
-            UpdateUnitEffects(ticksCount);
+            UpdateUnitEffects();
         }
 
         /// <inheritdoc />
@@ -166,7 +156,7 @@ namespace Engine.Common.GameObjects
             RemoveVisual(ref _unitPanelSeparator);
 
             foreach (var battleEffectsIcon in _battleEffectsIcons) {
-                _mapVisual.RemoveVisual(battleEffectsIcon.Value);
+                _visualSceneController.RemoveVisualObject(battleEffectsIcon.Value);
             }
 
             base.Destroy();
@@ -175,52 +165,14 @@ namespace Engine.Common.GameObjects
         /// <summary>
         /// Обновить состояние юнита.
         /// </summary>
-        private void UpdateUnitEffects(long ticksCount = 0)
+        private void UpdateUnitEffects()
         {
-            var battleEffects = Unit.Effects.GetBattleEffects();
-            // Добавляем иконки тех эффектов, которые еще не появились.
-            foreach (var battleEffect in battleEffects) {
-                if (_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
-                    continue;
+            ProcessBattleEffects();
+            ProcessMomentalEffects();
 
-                var icon = _battleInterfaceProvider.UnitButtleEffectsIcon[battleEffect.EffectType];
-                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImageVisual(
-                    icon,
-                    X + (Width - icon.PixelSize.Width) / 2,
-                    Y + Height - icon.PixelSize.Height,
-                    INTERFACE_LAYER + 4));
-            }
-
-            // Удаляем иконки тех эффектов, действие которых закончилось.
-            var expiredEffects = _battleEffectsIcons
-                .Where(bei => battleEffects.All(be => be.EffectType != bei.Key))
-                .ToList();
-            foreach (var expiredEffect in expiredEffects) {
-                var effectIcon = _battleEffectsIcons[expiredEffect.Key];
-                _mapVisual.RemoveVisual(effectIcon);
-                _battleEffectsIcons.Remove(expiredEffect.Key);
-            }
-
-
-            // Обрабатываем действующий мгновенный эффект.
-            if (_processingMomentalEffectTime > 0) {
-                _processingMomentalEffectTime -= ticksCount;
-
-                // Если мы сейчас мгновенный эффект еще не закончился, то больше ничего не меняем.
-                if (_processingMomentalEffectTime > 0)
-                    return;
-
-                _processingMomentalEffectTime = null;
-                RemoveVisual(ref _momentalEffectImage);
-                RemoveVisual(ref _momentalEffectText);
-            }
-
-            // Обрабатываем новый мгновенный эффект.
-            var momentalEffect = Unit.Effects.GetMomentalEffect();
-            if (momentalEffect != null) {
-                ProcessMomentaEffect(momentalEffect);
+            // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
+            if (Unit.Effects.CurrentMomentalEffect != null && !Unit.Effects.MomentalEffectEnded)
                 return;
-            }
 
             if (Unit.IsDead) {
                 if (_deathIcon == null) {
@@ -251,22 +203,72 @@ namespace Engine.Common.GameObjects
         }
 
         /// <summary>
-        /// Обработать мгновенный эффект.
+        /// Обработать эффекты битвы - добавить новые и удалить старые.
         /// </summary>
-        private void ProcessMomentaEffect(UnitMomentalEffect momentalEffect)
+        private void ProcessBattleEffects()
         {
-            RemoveVisual(ref _unitDamageImage);
+            var battleEffects = Unit.Effects.GetBattleEffects();
 
+            // Добавляем иконки новых эффектов.
+            foreach (var battleEffect in battleEffects) {
+                if (_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
+                    continue;
+
+                var icon = _battleInterfaceProvider.UnitButtleEffectsIcon[battleEffect.EffectType];
+                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImageVisual(
+                    icon,
+                    X + (Width - icon.PixelSize.Width) / 2,
+                    Y + Height - icon.PixelSize.Height,
+                    INTERFACE_LAYER + 4));
+            }
+
+            // Удаляем иконки тех эффектов, действие которых закончилось.
+            var expiredEffects = _battleEffectsIcons
+                .Where(bei => battleEffects.All(be => be.EffectType != bei.Key))
+                .ToList();
+            foreach (var expiredEffect in expiredEffects) {
+                var effectIcon = _battleEffectsIcons[expiredEffect.Key];
+                _visualSceneController.RemoveVisualObject(effectIcon);
+                _battleEffectsIcons.Remove(expiredEffect.Key);
+            }
+        }
+
+        /// <summary>
+        /// Обработать моментальные эффекты - обработать новые и завершенные.
+        /// </summary>
+        private void ProcessMomentalEffects()
+        {
+            // Обрабатываем новый мгновенный эффект.
+            if (Unit.Effects.MomentalEffectBegin) {
+                ProcessNewMomentalEffect(Unit.Effects.CurrentMomentalEffect);
+                return;
+            }
+
+            // Обрабатываем действующий мгновенный эффект.
+            if (Unit.Effects.MomentalEffectEnded) {
+                RemoveVisual(ref _momentalEffectImage);
+                RemoveVisual(ref _momentalEffectText);
+
+                // Сбрасываем количество ХП, чтобы обновить рамку.
+                _lastUnitHitPoints = int.MaxValue;
+            }
+        }
+
+        /// <summary>
+        /// Обработать новый мгновенный эффект.
+        /// </summary>
+        private void ProcessNewMomentalEffect(UnitMomentalEffect momentalEffect)
+        {
             switch (momentalEffect.EffectType) {
                 case UnitMomentalEffectType.Damaged:
                     _momentalEffectImage = AddColorImage(GameColor.Red);
-                    _momentalEffectText = AddText($"{Unit.HitPoints - _lastUnitHitPoints}");
+                    _momentalEffectText = AddText($"-{momentalEffect.Power}");
                     break;
                 case UnitMomentalEffectType.Healed:
                     var hitPointsDiff = Unit.HitPoints - _lastUnitHitPoints;
                     if (hitPointsDiff > 0) {
                         _momentalEffectImage = AddColorImage(GameColor.Blue);
-                        _momentalEffectText = AddText($"+{hitPointsDiff}");
+                        _momentalEffectText = AddText($"+{momentalEffect.Power}");
                     }
                     break;
                 case UnitMomentalEffectType.Miss:
@@ -284,7 +286,6 @@ namespace Engine.Common.GameObjects
             }
 
             _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
-            _processingMomentalEffectTime = PROCESSING_MOMENTAL_EFFECT_TIME;
         }
 
         /// <summary>
@@ -292,6 +293,9 @@ namespace Engine.Common.GameObjects
         /// </summary>
         private ImageVisualObject AddColorImage(GameColor color)
         {
+            // Если мы добавляем изображение поверх портрета, то должны на время очистить изображение с % здоровья.
+            RemoveVisual(ref _unitDamageImage);
+
             return _visualSceneController.AddColorImageVisual(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
         }
 
@@ -310,10 +314,7 @@ namespace Engine.Common.GameObjects
         /// <param name="visualObject">Объект, который необходимо удалить.</param>
         private void RemoveVisual<T>(ref T visualObject) where T : VisualObject
         {
-            if (visualObject == null)
-                return;
-
-            _mapVisual.RemoveVisual(visualObject);
+            _visualSceneController.RemoveVisualObject(visualObject);
             visualObject = null;
         }
     }

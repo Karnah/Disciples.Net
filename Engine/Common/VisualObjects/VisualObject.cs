@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace Engine.Common.Models
+namespace Engine.Common.VisualObjects
 {
     /// <summary>
     /// Объект, который отрисовывается на сцене.

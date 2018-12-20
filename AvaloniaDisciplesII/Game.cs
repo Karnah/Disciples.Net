@@ -47,6 +47,14 @@ namespace AvaloniaDisciplesII
         /// Была ли отпущена ЛКМ.
         /// </summary>
         private bool _isLeftMouseButtonReleased;
+        /// <summary>
+        /// Нажата ли ПКМ.
+        /// </summary>
+        private bool _isRightMouseButtonPressed;
+        /// <summary>
+        /// Была ли отпущена ПКМ.
+        /// </summary>
+        private bool _isRightMouseButtonReleased;
 
         /// <inheritdoc />
         public Game(ILogger logger)
@@ -91,7 +99,7 @@ namespace AvaloniaDisciplesII
         }
 
         /// <summary>
-        /// Останавливает внутренний таймер, который обновляет объекты на сцене.
+        /// Остановить внутренний таймер, который обновляет объекты на сцене.
         /// </summary>
         public void Stop()
         {
@@ -102,6 +110,9 @@ namespace AvaloniaDisciplesII
             _timer = null;
         }
 
+        /// <summary>
+        /// Обновить состояние сцены.
+        /// </summary>
         private void UpdateScene(object sender, EventArgs args)
         {
             var ticks = _stopwatch.ElapsedMilliseconds;
@@ -120,6 +131,53 @@ namespace AvaloniaDisciplesII
             }
         }
 
+        /// <summary>
+        /// Обработать все события курсора, которые произошли с момента последнего обновления сцены.
+        /// </summary>
+        private void ProcessCursorEvents()
+        {
+            var selectedGameObject = GameObjects
+                .OrderBy(go => go.Y)
+                .FirstOrDefault(go => go.IsInteractive &&
+                                      go.X * GameInfo.Scale <= _mousePosition.X && _mousePosition.X < (go.X + go.Width) * GameInfo.Scale &&
+                                      go.Y * GameInfo.Scale <= _mousePosition.Y && _mousePosition.Y < (go.Y + go.Height) * GameInfo.Scale);
+
+            // Если изменился выбранный объект, то отправляем события снятия выделения/выделения.
+            if (selectedGameObject != _selectedGameObject)
+            {
+                if (_selectedGameObject != null)
+                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Unselected, _selectedGameObject));
+
+                if (selectedGameObject != null)
+                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Selected, selectedGameObject));
+
+                _selectedGameObject = selectedGameObject;
+            }
+
+            // Обрабатываем события нажатия ЛКМ и ПКМ.
+            if (_selectedGameObject != null)
+            {
+                if (_isRightMouseButtonPressed)
+                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.RightButtonPressed, _selectedGameObject));
+
+                if (_isLeftMouseButtonPressed)
+                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonPressed, _selectedGameObject));
+            }
+
+            // Обрабатываем события того, что ПКМ или ЛКМ были отпущены.
+            if (_isRightMouseButtonReleased)
+                GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.RightButtonReleased, _selectedGameObject));
+
+            if (_isLeftMouseButtonReleased)
+                GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonReleased, _selectedGameObject));
+
+
+            _isLeftMouseButtonPressed = false;
+            _isLeftMouseButtonReleased = false;
+            _isRightMouseButtonPressed = false;
+            _isRightMouseButtonReleased = false;
+        }
+
         private void UpdateGameObjects(long ticksCount)
         {
             for (var gameObjectNode = _gameObjects.First; gameObjectNode != null;) {
@@ -135,38 +193,6 @@ namespace AvaloniaDisciplesII
 
                 gameObjectNode = nextNode;
             }
-        }
-
-        private void ProcessCursorEvents()
-        {
-            var selectedGameObject = GameObjects
-                .OrderBy(go => go.Y)
-                .FirstOrDefault(go => go.IsInteractive &&
-                                      go.X * GameInfo.Scale <= _mousePosition.X && _mousePosition.X < (go.X + go.Width) * GameInfo.Scale &&
-                                      go.Y * GameInfo.Scale <= _mousePosition.Y && _mousePosition.Y < (go.Y + go.Height) * GameInfo.Scale);
-
-            if (selectedGameObject != _selectedGameObject)
-            {
-                if (_selectedGameObject != null)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Unselected, _selectedGameObject));
-
-                if (selectedGameObject != null)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Selected, selectedGameObject));
-
-                _selectedGameObject = selectedGameObject;
-            }
-
-            if (_selectedGameObject != null)
-            {
-                if (_isLeftMouseButtonPressed)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonPressed, _selectedGameObject));
-
-                if (_isLeftMouseButtonReleased)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonReleased, _selectedGameObject));
-            }
-
-            _isLeftMouseButtonPressed = false;
-            _isLeftMouseButtonReleased = false;
         }
 
         private void OnMouseStateChanged(RawMouseEventArgs args)
@@ -188,6 +214,12 @@ namespace AvaloniaDisciplesII
                     break;
                 case RawMouseEventType.LeftButtonUp:
                     _isLeftMouseButtonReleased = true;
+                    break;
+                case RawMouseEventType.RightButtonDown:
+                    _isRightMouseButtonPressed = true;
+                    break;
+                case RawMouseEventType.RightButtonUp:
+                    _isRightMouseButtonReleased = true;
                     break;
             }
         }

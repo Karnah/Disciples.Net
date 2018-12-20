@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
+
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+
 using Engine.Battle.GameObjects;
 using Engine.Common.Enums;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
+using Engine.Common.VisualObjects;
 
 namespace Engine.Common.Controllers
 {
     /// <summary>
     /// Позволяет добавлять на сцену различные объекты.
+    /// todo Разделить на VisualObject и GameObject?
     /// </summary>
     public interface IVisualSceneController
     {
@@ -140,5 +145,20 @@ namespace Engine.Common.Controllers
         /// <param name="y">Положение портрета, координата Y.</param>
         /// <returns></returns>
         UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y);
+
+        /// <summary>
+        /// Отобразить детальную информацию о юните.
+        /// </summary>
+        /// <param name="unit">Юнит, о котором необходимо вывести информацию.</param>
+        /// <returns></returns>
+        DetailUnitInfoObject ShowDetailUnitInfo(Unit unit);
+
+
+
+        /// <summary>
+        /// Удалить указанный объект со сцены.
+        /// </summary>
+        /// <param name="visualObject">Объект, который необходимо удалить.</param>
+        void RemoveVisualObject([CanBeNull]VisualObject visualObject);
     }
 }

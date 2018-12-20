@@ -1,44 +1,47 @@
 ﻿namespace Engine.Common.Enums.Units
 {
+    /// <summary>
+    /// Источник атаки юнита.
+    /// </summary>
     public enum AttackSource
     {
         /// <summary>
-        /// Оружие
+        /// Оружие.
         /// </summary>
-        Weapon = 1,
+        Weapon = 0,
 
         /// <summary>
-        /// Разум
+        /// Разум.
         /// </summary>
         Mind,
 
         /// <summary>
-        /// Жизнь
+        /// Жизнь.
         /// </summary>
         Life,
 
         /// <summary>
-        /// Смерть
+        /// Смерть.
         /// </summary>
         Death,
 
         /// <summary>
-        /// Огонь
+        /// Огонь.
         /// </summary>
         Fire,
 
         /// <summary>
-        /// Вода
+        /// Вода.
         /// </summary>
         Water,
 
         /// <summary>
-        /// Земля
+        /// Земля.
         /// </summary>
         Earth,
 
         /// <summary>
-        /// Воздух
+        /// Воздух.
         /// </summary>
         Air
     }

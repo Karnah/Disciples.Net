@@ -3,10 +3,13 @@ using Engine.Common.Models;
 
 namespace Engine.Extensions
 {
+    /// <summary>
+    /// Набор методов для упрощения работы с юнитами.
+    /// </summary>
     public static class UnitExtensions
     {
         /// <summary>
-        /// Проверить, что атака юнита может быть направлена на союзников
+        /// Проверить, что атака юнита может быть направлена на союзников.
         /// </summary>
         public static bool HasAllyAbility(this Unit unit)
         {
@@ -24,7 +27,7 @@ namespace Engine.Extensions
         }
 
         /// <summary>
-        /// Проверить, что атака юнита может быть направлена на врагов
+        /// Проверить, что атака юнита может быть направлена на врагов.
         /// </summary>
         public static bool HasEnemyAbility(this Unit unit)
         {

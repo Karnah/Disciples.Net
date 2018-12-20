@@ -1,25 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using ReactiveUI.Legacy;
+using Avalonia.Collections;
 
 using Engine.Common.Controllers;
-using Engine.Common.Models;
+using Engine.Common.VisualObjects;
 using Engine.Models;
 
 namespace Engine.Implementation.Controllers
 {
+    /// <inheritdoc />
     public class MapVisual : IMapVisual
     {
         private readonly IGame _game;
-        private readonly ReactiveList<VisualObject> _visuals;
+        private readonly AvaloniaList<VisualObject> _visuals;
         private readonly IList<VisualObject> _addVisualBuffer;
         private readonly IList<VisualObject> _removeVisualBuffer;
 
+        /// <inheritdoc />
         public MapVisual(IGame game)
         {
             _game = game;
-            _visuals = new ReactiveList<VisualObject>();
+            _visuals = new AvaloniaList<VisualObject>();
             _addVisualBuffer = new List<VisualObject>();
             _removeVisualBuffer = new List<VisualObject>();
 
@@ -27,20 +29,31 @@ namespace Engine.Implementation.Controllers
         }
 
 
+        /// <inheritdoc />
         public IReadOnlyCollection<VisualObject> Visuals => _visuals;
 
+        /// <inheritdoc />
         public void AddVisual(VisualObject visual)
         {
             _addVisualBuffer.Add(visual);
         }
 
+        /// <inheritdoc />
         public void RemoveVisual(VisualObject visual)
         {
+            //Обрабатываем ситуацию, когда объект был добавлен и тут же удалён.
+            if (_addVisualBuffer.Contains(visual)) {
+                _addVisualBuffer.Remove(visual);
+                return;
+            }
+
             _removeVisualBuffer.Add(visual);
         }
 
 
-        // Все объекты складываются в буфер, который потом централизовано обновляется.
+        /// <summary>
+        /// Обновить список объектов на сцене во время отрисовки сцены.
+        /// </summary>
         private void OnSceneRedraw(object sender, SceneUpdatingEventArgs args)
         {
             if (_removeVisualBuffer.Any()) {

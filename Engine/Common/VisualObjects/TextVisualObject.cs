@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media;
 using ReactiveUI;
 
-namespace Engine.Common.Models
+namespace Engine.Common.VisualObjects
 {
     /// <summary>
     /// Игровой объект, который отображает текст на сцене.

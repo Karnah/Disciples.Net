@@ -24,5 +24,15 @@
         /// Была отпущена ЛКМ.
         /// </summary>
         LeftButtonReleased,
+
+        /// <summary>
+        /// Была нажата ПКМ.
+        /// </summary>
+        RightButtonPressed,
+
+        /// <summary>
+        /// Была отпущена ПКМ.
+        /// </summary>
+        RightButtonReleased,
     }
 }

@@ -1,7 +1,8 @@
 ﻿using System;
 using ReactiveUI;
+using Engine.Common.Models;
 
-namespace Engine.Common.Models
+namespace Engine.Common.VisualObjects
 {
     /// <summary>
     /// Текст на сцене, который содержит информацию о юните и обновляет её, если меняется состояние юнита / сам юнит.

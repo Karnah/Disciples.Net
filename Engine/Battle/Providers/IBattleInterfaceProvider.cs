@@ -38,6 +38,10 @@ namespace Engine.Battle.Providers
         /// </summary>
         Bitmap DeathSkull { get; }
 
+        /// <summary>
+        /// Задний фон для подробной информации о юните (раскрытый свиток).
+        /// </summary>
+        Bitmap UnitInfoBackground { get; }
 
         /// <summary>
         /// Иконки для эффектов, воздействующих на юнита.

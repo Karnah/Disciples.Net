@@ -9,6 +9,7 @@ using Engine.Battle.Providers;
 using Engine.Common.Components;
 using Engine.Common.Controllers;
 using Engine.Common.Models;
+using Engine.Common.VisualObjects;
 
 namespace Engine.Battle.Components
 {

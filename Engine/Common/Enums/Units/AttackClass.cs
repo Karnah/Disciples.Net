@@ -1,69 +1,72 @@
 ﻿namespace Engine.Common.Enums.Units
 {
+    /// <summary>
+    /// Тип того, что делает атака юнита.
+    /// </summary>
     public enum AttackClass
     {
         /// <summary>
-        /// Повреждение
+        /// Повреждение.
         /// </summary>
         Damage = 1,
 
         /// <summary>
-        /// Истощение
+        /// Истощение.
         /// </summary>
         Drain = 2,
 
         /// <summary>
-        /// Паралич
+        /// Паралич.
         /// </summary>
         Paralyze = 3,
 
         /// <summary>
-        /// Исцеление
+        /// Исцеление.
         /// </summary>
         Heal = 6,
 
         /// <summary>
-        /// Страх
+        /// Страх.
         /// </summary>
         Fear = 7,
 
         /// <summary>
-        /// Увеличение урона
+        /// Увеличение урона.
         /// </summary>
         BoostDamage = 8,
 
         /// <summary>
-        /// Окаменение
+        /// Окаменение.
         /// </summary>
         Petrify = 9,
 
         /// <summary>
-        /// Снижение повреждения
+        /// Снижение повреждения.
         /// </summary>
         LowerDamage = 10,
 
         /// <summary>
-        /// Снижение инициативы
+        /// Снижение инициативы.
         /// </summary>
         LowerInitiative = 11,
 
         /// <summary>
-        /// Отравление
+        /// Отравление.
         /// </summary>
         Poison = 12,
 
         /// <summary>
-        /// Обморожение
+        /// Обморожение.
         /// </summary>
         Frostbite = 13,
 
         /// <summary>
-        /// Воскрешение
+        /// Воскрешение.
         /// </summary>
         Revive = 14,
 
         /// <summary>
-        /// Выпить жизненную силу
+        /// Выпить жизненную силу.
         /// </summary>
         DrainOverflow = 15,
 
@@ -73,12 +76,12 @@
         Cure = 16,
 
         /// <summary>
-        /// Призыв
+        /// Призыв.
         /// </summary>
         Summon = 17,
 
         /// <summary>
-        /// Позинить уровень
+        /// Понизить уровень.
         /// </summary>
         DrainLevel = 18,
 
@@ -88,32 +91,32 @@
         GiveAttack = 19,
 
         /// <summary>
-        /// Передать жизненную силу
+        /// Передать жизненную силу.
         /// </summary>
         Doppelganger = 20,
 
         /// <summary>
-        /// Превратить себя
+        /// Превратить себя.
         /// </summary>
         TransformSelf = 21,
 
         /// <summary>
-        /// Превратить другого
+        /// Превратить другого.
         /// </summary>
         TransformOther = 22,
 
         /// <summary>
-        /// Ожог
+        /// Ожог.
         /// </summary>
         Blister = 23,
 
         /// <summary>
-        /// Даровать защиту от стихий
+        /// Даровать защиту от стихий.
         /// </summary>
         BestowWards = 24,
 
         /// <summary>
-        /// Разбить броню
+        /// Разбить броню.
         /// </summary>
         Shatter = 25
     }

@@ -11,6 +11,7 @@ using Engine.Common.Enums;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
 using Engine.Common.Providers;
+using Engine.Common.VisualObjects;
 
 namespace Engine.Implementation.Controllers
 {
@@ -144,10 +145,30 @@ namespace Engine.Implementation.Controllers
         /// <inheritdoc />
         public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
         {
-            var unitPortrait = new UnitPortraitObject(_textProvider, this, _mapVisual, _battleInterfaceProvider, unit, rightToLeft, x, y);
+            var unitPortrait = new UnitPortraitObject(_textProvider, this, _battleInterfaceProvider, unit, rightToLeft, x, y);
             _game.CreateObject(unitPortrait);
 
             return unitPortrait;
+        }
+
+        /// <inheritdoc />
+        public DetailUnitInfoObject ShowDetailUnitInfo(Unit unit)
+        {
+            var detailUnitInfoObject = new DetailUnitInfoObject(this, _battleInterfaceProvider, _textProvider, unit);
+            _game.CreateObject(detailUnitInfoObject);
+
+            return detailUnitInfoObject;
+        }
+
+
+
+        /// <inheritdoc />
+        public void RemoveVisualObject(VisualObject visualObject)
+        {
+            if (visualObject == null)
+                return;
+
+            _mapVisual.RemoveVisual(visualObject);
         }
     }
 }

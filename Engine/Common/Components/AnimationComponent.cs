@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Engine.Common.Controllers;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
+using Engine.Common.VisualObjects;
 
 namespace Engine.Common.Components
 {

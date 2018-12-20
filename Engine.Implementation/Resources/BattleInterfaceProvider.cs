@@ -37,21 +37,17 @@ namespace Engine.Implementation.Resources
         private void LoadBitmaps()
         {
             Battleground = _battleResourceProvider.GetRandomBattleground();
-
             RightPanel = _extractor.GetImage("DLG_BATTLE_A_RUNITGROUP").ToBitmap();
-
             BottomPanel = _extractor.GetImage("DLG_BATTLE_A_MAINCOMBATBG").ToBitmap();
-
-            PanelSeparator = _extractor.GetImage("SPLITLRG_BATTLE").ToBitmap();
-
+            PanelSeparator = _extractor.GetImage("DLG_BATTLE_A_SPLITLRG").ToBitmap();
             // todo Хоть убейте, не могу найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
             DeathSkull = new Bitmap($"{Directory.GetCurrentDirectory()}\\Resources\\Common\\Skull.png");
+            UnitInfoBackground = _extractor.GetImage("_PG0500IX").ToBitmap();
 
 
             UnitButtleEffectsIcon = new Dictionary<UnitBattleEffectType, Bitmap> {
                 { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap }
             };
-
 
             ToggleRightButton = GetBattleBitmaps("TOGGLERIGHT");
             DefendButton = GetBattleBitmaps("DEFEND");
@@ -76,6 +72,9 @@ namespace Engine.Implementation.Resources
 
         /// <inheritdoc />
         public Bitmap DeathSkull { get; private set; }
+
+        /// <inheritdoc />
+        public Bitmap UnitInfoBackground { get; private set; }
 
 
         /// <inheritdoc />

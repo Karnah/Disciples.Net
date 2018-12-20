@@ -31,9 +31,9 @@ namespace Engine.Implementation.Controllers
         /// </summary>
         private const int ABOVE_ALL_UNITS_LAYER = 100 * 4;
         /// <summary>
-        /// Задержка после некоторых действия игрока, прежде чем ход перейдёт к следующему юниту.
+        /// Задержка после завершения всех действий, прежде чем ход перейдёт к следующему юниту.
         /// </summary>
-        private const long ACTION_DELAY = 1500;
+        private const long ACTION_DELAY = 250;
 
 
         private readonly IGame _game;
@@ -49,11 +49,7 @@ namespace Engine.Implementation.Controllers
         /// </summary>
         private Queue<BattleUnit> _turnOrder;
         /// <summary>
-        /// Некоторые юниты могут атаковать дважды за ход.
-        /// </summary>
-        private bool _isSecondAttack = false;
-        /// <summary>
-        /// 
+        /// Задержка, которая необходима, чтобы завершились все эффекты после удара/действия.
         /// </summary>
         private long? _delayTime;
 
@@ -76,14 +72,57 @@ namespace Engine.Implementation.Controllers
             if (BattleState == BattleState.WaitingAction || BattleState == BattleState.BattleEnd)
                 return;
 
-            if (BattleState == BattleState.Delay) {
-                _delayTime -= args.TicksCount;
-                if (_delayTime <= 0) {
-                    _delayTime = null;
-                    NextTurn();
-                    BattleState = BattleState.WaitingAction;
-                    UnitActionEnded?.Invoke(this, EventArgs.Empty);
+            // Обрабатываем моментальные эффекты.
+            foreach (var battleUnit in Units) {
+                var unitEffects = battleUnit.Unit.Effects;
+                unitEffects.OnTick(args.TicksCount);
+
+                if (unitEffects.CurrentMomentalEffect == null)
+                    continue;
+
+                // Обрабатываем начало эффекта.
+                if (unitEffects.MomentalEffectBegin) {
+                    OnUnitMomentalEffectBegin(battleUnit.Unit);
+                    continue;
                 }
+
+                // Обрабатываем завершение эффекта.
+                if (unitEffects.MomentalEffectEnded) {
+                    OnUnitMomentalEffectEnded(battleUnit.Unit);
+                    continue;
+                }
+            }
+
+            if (BattleState == BattleState.Delay) {
+                // Если остался хотя бы один действующий эффект, то не завершаем действие.
+                if (Units.Any(u => u.Unit.Effects.CurrentMomentalEffect != null))
+                    return;
+
+                // Сразу после завершения всех действий, мы не передаём ход дальше, а ждём немного времени.
+                if (_delayTime == null) {
+                    _delayTime = ACTION_DELAY;
+                    return;
+                }
+
+                // Продолжаем ожидание.
+                if (_delayTime > 0) {
+                    _delayTime -= args.TicksCount;
+                    return;
+                }
+
+                _delayTime = null;
+
+                // Если юнит может атаковать дважды, и сейчас атаковал в первый раз, то не передаём ход дальше.
+                if (CurrentUnitObject.Unit.UnitType.AttackTwice && IsSecondAttack == false) {
+                    IsSecondAttack = true;
+                }
+                else {
+                    IsSecondAttack = false;
+                    NextTurn();
+                }
+
+                BattleState = BattleState.WaitingAction;
+                UnitActionEnded?.Invoke(this, EventArgs.Empty);
 
                 return;
             }
@@ -108,11 +147,10 @@ namespace Engine.Implementation.Controllers
             var curUnitAnimation = CurrentUnitObject.BattleUnitAnimationComponent;
             var curUnit = CurrentUnitObject.Unit;
 
-            // todo нужно научиться определять на каком фрейме происходит удар.
+            // todo Нужно научиться определять на каком фрейме происходит удар.
             if (curUnitAnimation.FramesCount - curUnitAnimation.FrameIndex > 12)
                 return;
 
-            var isAttacking = curUnit.HasEnemyAbility();
             foreach (var targetUnit in _targetUnits) {
                 var unit = targetUnit.Unit;
 
@@ -123,27 +161,7 @@ namespace Engine.Implementation.Controllers
                     continue;
                 }
 
-                // Если юнит атакует врага, а не лечит союзника, то у цели вызываем анимацию получения повреждений.
-                if (isAttacking) {
-                    targetUnit.Action = BattleAction.TakingDamage;
-
-                    var damage = curUnit.UnitType.FirstAttack.DamagePower + RandomGenerator.Next(ATTACK_RANGE);
-                    damage = (int) (damage * (1 - unit.UnitType.Armor / 100.0));
-
-                    // Если юнит защитился, то урон уменьшается в два раза.
-                    if (unit.Effects.ExistsBattleEffect(UnitBattleEffectType.Defend)) {
-                        damage /= 2;
-                    }
-
-                    unit.ChangeHitPoints(-damage);
-                    unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Damaged));
-                }
-                else {
-                    // todo пока только целители
-                    var heal = curUnit.UnitType.FirstAttack.HealPower;
-                    unit.ChangeHitPoints(heal);
-                    unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Healed));
-                }
+                ProcessAttack(CurrentUnitObject, targetUnit, true);
 
                 // Если есть анимация, применяемая к юниту, то добавляем её на сцену.
                 if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == true) {
@@ -227,7 +245,10 @@ namespace Engine.Implementation.Controllers
 
 
             // Если активных действий нет, заканчиваем.
-            if (CurrentUnitObject.Action == BattleAction.Waiting && _targetAnimations.All(ta => ta.IsDestroyed)) {
+            var isCurrentUnitWaiting = CurrentUnitObject.Action == BattleAction.Waiting;
+            var isAllAnimationsEnded = _targetAnimations.All(ta => ta.IsDestroyed);
+            var isAllMomentalEffectsEnded = Units.All(u => u.Unit.Effects.CurrentMomentalEffect == null);
+            if (isCurrentUnitWaiting && isAllAnimationsEnded && isAllMomentalEffectsEnded) {
                 _targetAnimations = new List<AnimationObject>();
 
                 if (IsBattleEnd()) {
@@ -240,25 +261,175 @@ namespace Engine.Implementation.Controllers
                     return;
                 }
 
-                // Если юнит может атаковать дважды, и сейчас атаковал в первый раз, то не передаём ход дальше.
-                if (CurrentUnitObject.Unit.UnitType.AttackTwice && _isSecondAttack == false) {
-                    _isSecondAttack = true;
-                }
-                else {
-                    _isSecondAttack = false;
-                    NextTurn();
-                }
-
-                BattleState = BattleState.WaitingAction;
-                UnitActionEnded?.Invoke(this, EventArgs.Empty);
+                BattleState = BattleState.Delay;
             }
         }
 
+        /// <summary>
+        /// Обработать действие одного юнита на другого.
+        /// </summary>
+        /// <param name="attackingUnitObject">Юнит, который воздействует.</param>
+        /// <param name="targetUnitObject">Юнит, на которого воздействует.</param>
+        /// <param name="isFirstAttack">Используется базовая атака или вторичная.</param>
+        private static void ProcessAttack(BattleUnit attackingUnitObject, BattleUnit targetUnitObject, bool isFirstAttack)
+        {
+            var attackingUnit = attackingUnitObject.Unit;
+            var targetUnit = targetUnitObject.Unit;
 
+            var power = isFirstAttack
+                ? attackingUnit.FirstAttackPower
+                : attackingUnit.SecondAttackPower.Value;
+            var attack = isFirstAttack
+                ? attackingUnit.UnitType.FirstAttack
+                : attackingUnit.UnitType.SecondAttack;
+
+            // todo Сразу обработать иммунитет + сопротивления. Также вернуть результат.
+            // Вторая атака не будет действовать, если первая упёрлась в иммунитет.
+
+            switch (attack.AttackClass) {
+                case AttackClass.Damage:
+                    targetUnitObject.Action = BattleAction.TakingDamage;
+
+                    // todo Максимальное значение атаки - 250/300/400.
+                    var attackPower = power + RandomGenerator.Next(ATTACK_RANGE);
+
+                    // Уменьшаем входящий урон в зависимости от защиты.
+                    attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
+
+                    // Если юнит защитился, то урон уменьшается в два раза.
+                    if (targetUnit.Effects.ExistsBattleEffect(UnitBattleEffectType.Defend)) {
+                        attackPower /= 2;
+                    }
+
+                    // Мы не можем нанести урон больше, чем осталось очков здоровья.
+                    attackPower = Math.Min(attackPower, targetUnit.HitPoints);
+
+                    targetUnit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Damaged, attackPower));
+                    break;
+
+                case AttackClass.Drain:
+                    break;
+
+                case AttackClass.Paralyze:
+                    break;
+
+                case AttackClass.Heal:
+                    targetUnit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Healed, power));
+                    break;
+
+                case AttackClass.Fear:
+                    break;
+
+                case AttackClass.BoostDamage:
+                    break;
+
+                case AttackClass.Petrify:
+                    break;
+
+                case AttackClass.LowerDamage:
+                    break;
+
+                case AttackClass.LowerInitiative:
+                    break;
+
+                case AttackClass.Poison:
+                    break;
+
+                case AttackClass.Frostbite:
+                    break;
+
+                case AttackClass.Revive:
+                    break;
+
+                case AttackClass.DrainOverflow:
+                    break;
+
+                case AttackClass.Cure:
+                    break;
+
+                case AttackClass.Summon:
+                    break;
+
+                case AttackClass.DrainLevel:
+                    break;
+
+                case AttackClass.GiveAttack:
+                    break;
+
+                case AttackClass.Doppelganger:
+                    break;
+
+                case AttackClass.TransformSelf:
+                    break;
+
+                case AttackClass.TransformOther:
+                    break;
+
+                case AttackClass.Blister:
+                    break;
+
+                case AttackClass.BestowWards:
+                    break;
+
+                case AttackClass.Shatter:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        /// <summary>
+        /// Обработать начало моментального эффекта.
+        /// </summary>
+        /// <param name="unit">Юнит у которого начался моментальный эффект.</param>
+        private void OnUnitMomentalEffectBegin(Unit unit)
+        {
+            var currentMomentalEffect = unit.Effects.CurrentMomentalEffect;
+            switch (currentMomentalEffect.EffectType) {
+                case UnitMomentalEffectType.Damaged:
+                    unit.ChangeHitPoints(- currentMomentalEffect.Power.Value);
+                    break;
+                case UnitMomentalEffectType.Healed:
+                    unit.ChangeHitPoints(currentMomentalEffect.Power.Value);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Обработать завершение моментального эффекта.
+        /// </summary>
+        /// <param name="unit">Юнит у которого завершился моментальный эффект.</param>
+        private void OnUnitMomentalEffectEnded(Unit unit)
+        {
+            var currentMomentalEffect = unit.Effects.CurrentMomentalEffect;
+            switch (currentMomentalEffect.EffectType)
+            {
+                case UnitMomentalEffectType.Defended:
+                    // При защите юнита, который бьёт дважды, необходимо сразу передать ход следующему.
+                    // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
+                    IsSecondAttack = true;
+
+                    unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
+                    break;
+                case UnitMomentalEffectType.Waiting:
+                    // При ожидании юнита, который бьёт дважды, необходимо сразу передать ход следующему.
+                    // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
+                    IsSecondAttack = true;
+
+                    // todo Перебросить в конец очереди.
+                    break;
+            }
+        }
+
+        /// <inheritdoc />
         public BattleState BattleState { get; private set; } = BattleState.WaitingAction;
 
         public BattleUnit CurrentUnitObject { get; private set; }
 
+        /// <inheritdoc />
+        public bool IsSecondAttack { get; private set; }
+
+        /// <inheritdoc />
         public IReadOnlyList<BattleUnit> Units => _units;
 
 
@@ -298,7 +469,7 @@ namespace Engine.Implementation.Controllers
             _turnOrder = new Queue<BattleUnit>(
                 _units
                     .Where(u => u.Unit.IsDead == false)
-                    .OrderByDescending(u => u.Unit.UnitType.FirstAttack.Initiative + RandomGenerator.Next(0, INITIATIVE_RANGE)));
+                    .OrderByDescending(u => u.Unit.Initiative + RandomGenerator.Next(0, INITIATIVE_RANGE)));
 
             CurrentUnitObject = _turnOrder.Dequeue();
             CurrentUnitObject.Unit.Effects.OnUnitTurn();
@@ -410,10 +581,8 @@ namespace Engine.Implementation.Controllers
         {
             UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Defend));
 
-            CurrentUnitObject.Unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
             CurrentUnitObject.Unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Defended));
 
-            _delayTime = ACTION_DELAY;
             BattleState = BattleState.Delay;
         }
 
@@ -423,8 +592,6 @@ namespace Engine.Implementation.Controllers
 
             CurrentUnitObject.Unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Waiting));
             // todo Перебросить в конец очереди.
-
-            _delayTime = ACTION_DELAY;
             BattleState = BattleState.Delay;
         }
 

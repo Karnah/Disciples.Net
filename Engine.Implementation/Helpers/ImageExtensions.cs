@@ -49,6 +49,17 @@ namespace Engine.Implementation.Helpers
         }
 
         /// <summary>
+        /// Сконвертировать сырое изображение в битмап, сохраняя исходные размеры.
+        /// </summary>
+        public static Bitmap ToOriginalBitmap(this RowImage image)
+        {
+            if (image == null)
+                return null;
+
+            return ConvertImageToFrame(image, new Bounds(0, image.Height, 0, image.Width)).Bitmap;
+        }
+
+        /// <summary>
         /// Получить конечные кадры анимации из сырых.
         /// </summary>
         public static IReadOnlyList<Frame> ConvertToFrames(this IReadOnlyCollection<RowImage> images)

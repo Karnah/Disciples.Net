@@ -37,7 +37,8 @@ namespace Engine.Common.Models
             int xpNext,
             int deathAnimationId,
             Bitmap face,
-            Bitmap battleFace)
+            Bitmap battleFace,
+            Bitmap portret)
         {
             UnitTypeId = unitTypeId;
             UnitCategory = unitCategory;
@@ -67,9 +68,10 @@ namespace Engine.Common.Models
             UpgradeBuilding = upgradeBuilding;
             XpNext = xpNext;
             DeathAnimationId = deathAnimationId;
-            
+
             Face = face;
             BattleFace = battleFace;
+            Portret = portret;
         }
 
         /// <summary>

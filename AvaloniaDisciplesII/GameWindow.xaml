@@ -4,7 +4,7 @@
         xmlns:battle="clr-namespace:AvaloniaDisciplesII.Battle;assembly=AvaloniaDisciplesII"
         xmlns:e="clr-namespace:Engine;assembly=Engine"
         Icon="resm:AvaloniaDisciplesII.Assets.Icon.ico"
-        WindowState="Maximized" Background="Black"
+        WindowState="Maximized" Background="Black" HasSystemDecorations="False" CanResize="False"
         Title="Avalonia Disciples II">
 
   <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"

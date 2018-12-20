@@ -22,6 +22,7 @@ namespace Engine.Common.GameObjects
         }
 
 
+        /// <inheritdoc />
         public override void Disable()
         {
             _isChecked = false;
@@ -30,6 +31,7 @@ namespace Engine.Common.GameObjects
         }
 
 
+        /// <inheritdoc />
         public override void OnSelected()
         {
             if (ButtonState == ButtonState.Pressed && _isChecked)
@@ -38,6 +40,7 @@ namespace Engine.Common.GameObjects
             base.OnSelected();
         }
 
+        /// <inheritdoc />
         public override void OnUnselected()
         {
             if (ButtonState == ButtonState.Pressed && _isChecked)
@@ -46,6 +49,7 @@ namespace Engine.Common.GameObjects
             base.OnUnselected();
         }
 
+        /// <inheritdoc />
         public override void OnReleased()
         {
             // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
@@ -57,6 +61,21 @@ namespace Engine.Common.GameObjects
             _isChecked = !_isChecked;
 
             OnButtonClicked();
+            UpdateButtonVisualObject();
+        }
+
+        /// <summary>
+        /// Установить новое состояние кнопки.
+        /// </summary>
+        public void SetState(bool isChecked)
+        {
+            if (ButtonState == ButtonState.Disabled || _isChecked == isChecked)
+                return;
+
+            _isChecked = isChecked;
+            ButtonState = _isChecked
+                ? ButtonState.Pressed
+                : ButtonState.Active;
             UpdateButtonVisualObject();
         }
     }

@@ -1,10 +1,12 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-
 using ReactiveUI;
 
-namespace Engine.Common.Models
+namespace Engine.Common.VisualObjects
 {
+    /// <summary>
+    /// Картинка, которая отображается на сцене.
+    /// </summary>
     public class ImageVisualObject : VisualObject
     {
         private Bitmap _bitmap;

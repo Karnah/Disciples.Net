@@ -16,6 +16,7 @@ namespace Engine.Implementation.Resources
         private readonly ITextProvider _textProvider;
         private readonly DataExtractor _dataExtractor;
         private readonly ImagesExtractor _facesExtractor;
+        private readonly ImagesExtractor _portretExtractor;
 
         private SortedDictionary<string, Attack> _attacks;
         private SortedDictionary<string, UnitType> _units;
@@ -26,6 +27,7 @@ namespace Engine.Implementation.Resources
 
             _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
             _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
+            _portretExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
 
             LoadAttacks();
             LoadUnitTypes();
@@ -135,7 +137,7 @@ namespace Engine.Implementation.Resources
             // Кроме того, там есть проблемы с некоторым портретами, если их получать обычным путём.
             var face = _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap();
             var battleFace = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
-
+            var portret = _portretExtractor.GetImage(unitId.ToUpper()).ToOriginalBitmap();
 
             var unit = new UnitType(
                 unitId,
@@ -167,7 +169,8 @@ namespace Engine.Implementation.Resources
                 xpNext,
                 deathAnim,
                 face,
-                battleFace
+                battleFace,
+                portret
             );
 
             return unit;

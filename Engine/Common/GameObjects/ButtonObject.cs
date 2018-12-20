@@ -4,8 +4,7 @@ using Avalonia.Media.Imaging;
 
 using Engine.Common.Controllers;
 using Engine.Common.Enums;
-using Engine.Common.Models;
-
+using Engine.Common.VisualObjects;
 using Action = System.Action;
 
 namespace Engine.Common.GameObjects

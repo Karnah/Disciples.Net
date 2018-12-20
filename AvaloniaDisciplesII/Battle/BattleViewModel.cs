@@ -33,6 +33,14 @@ namespace AvaloniaDisciplesII.Battle
         /// Юнит, который был выбран целью последним.
         /// </summary>
         private Unit _targetUnit;
+        /// <summary>
+        /// Отображается ли подробная информация о юните в данный момент.
+        /// </summary>
+        private bool _isUnitInfoShowing;
+        /// <summary>
+        /// Объект, над которым была зажата кнопка мыши.
+        /// </summary>
+        private GameObject _pressedObject;
 
         public BattleViewModel(
             IGame game,
@@ -94,12 +102,22 @@ namespace AvaloniaDisciplesII.Battle
             private set => this.RaiseAndSetIfChanged(ref _targetUnit, value);
         }
 
-
         /// <summary>
         /// Обработчик события воздействия с игровым объектом (наведение, клик мышью и т.д.).
         /// </summary>
         private void OnGameObjectAction(object o, GameObjectActionEventArgs args)
         {
+            // Если отпустили ПКМ, то прекращаем отображать информацию о юните.
+            if (args.ActionType == GameObjectActionType.RightButtonReleased) {
+                GameObjectRightButtonReleased(args.GameObject);
+                return;
+            }
+
+            // Если ПКМ зажата, то не меняем выбранного юнита до тех пор, пока не будет отпущена кнопка.
+            if (_isUnitInfoShowing) {
+                return;
+            }
+
             switch (args.ActionType) {
                 case GameObjectActionType.Selected:
                     GameObjectSelected(args.GameObject);
@@ -112,6 +130,9 @@ namespace AvaloniaDisciplesII.Battle
                     break;
                 case GameObjectActionType.LeftButtonReleased:
                     GameObjectClicked(args.GameObject);
+                    break;
+                case GameObjectActionType.RightButtonPressed:
+                    GameObjectRightButtonPressed(args.GameObject);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -160,6 +181,8 @@ namespace AvaloniaDisciplesII.Battle
         /// </summary>
         private void GameObjectPressed(GameObject gameObject)
         {
+            _pressedObject = gameObject;
+
             if (gameObject is ButtonObject button) {
                 button.OnPressed();
             }
@@ -170,6 +193,10 @@ namespace AvaloniaDisciplesII.Battle
         /// </summary>
         private void GameObjectClicked(GameObject gameObject)
         {
+            // В том случае, если нажали кнопку на одном объекте, а отпустили на другом, то ничего не делаем.
+            if (_pressedObject != gameObject)
+                return;
+
             if (gameObject is BattleUnit targetUnitGameObject) {
                 if (_isAnimating)
                     return;
@@ -185,6 +212,52 @@ namespace AvaloniaDisciplesII.Battle
             }
             else if (gameObject is ButtonObject button) {
                 button.OnReleased();
+            }
+        }
+
+        /// <summary>
+        /// Обработать событие того, что на игровой объект нажали ПКМ.
+        /// </summary>
+        private void GameObjectRightButtonPressed(GameObject gameObject)
+        {
+            Unit unit = null;
+
+            if (gameObject is BattleUnit battleUnit) {
+                unit = battleUnit.Unit;
+            }
+            else if(gameObject is UnitPortraitObject unitPortrait) {
+                unit = unitPortrait.Unit;
+            }
+            // todo Вообще, при наведении на портреты внизу по бокам тоже нужно показывать информацию.
+            // Но сейчас они позиционируются только как картинки, а не как объекты.
+
+            // На ПКМ мы показываем только информацию о выбранном юните.
+            // Поэтому, если был выбран игровой объект, который никак не относится к юниту,
+            // То ничего не делам.
+            if (unit == null)
+                return;
+
+            _isUnitInfoShowing = true;
+            _pressedObject = gameObject;
+            InterfaceController.ShowDetailUnitInfo(TargetUnit);
+        }
+
+        /// <summary>
+        /// Обработать событие того, что на игровой объект нажали ПКМ.
+        /// </summary>
+        private void GameObjectRightButtonReleased(GameObject gameObject)
+        {
+            if (!_isUnitInfoShowing)
+                return;
+
+            _isUnitInfoShowing = false;
+            InterfaceController.StopShowDetailUnitInfo();
+
+            // Если во время того, как отображалась информация о юните,
+            // Курсор мыши был перемещён, то после того, как отпустили ПКМ, мы должны выделить нового юнита.
+            if (_pressedObject != gameObject) {
+                GameObjectUnselected(_pressedObject);
+                GameObjectSelected(gameObject);
             }
         }
 

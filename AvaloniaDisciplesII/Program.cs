@@ -118,8 +118,9 @@ namespace AvaloniaDisciplesII
             var mage = unitInfoProvider.GetUnitType("g000uu0010");
             var u02 = new Unit(Guid.NewGuid().ToString(), mage, player, 0, 2);
 
-            var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
-            var u01 = new Unit(Guid.NewGuid().ToString(), pathfinder, player, 0, 1);
+            var wight = unitInfoProvider.GetUnitType("g000uu0178");
+            //var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
+            var u01 = new Unit(Guid.NewGuid().ToString(), wight, player, 0, 1);
 
             var abbess = unitInfoProvider.GetUnitType("g000uu0017");
             var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, 0, 0);

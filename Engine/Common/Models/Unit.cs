@@ -53,6 +53,12 @@ namespace Engine.Common.Models
 
 
         /// <summary>
+        /// Имя юнита.
+        /// todo Герои могут иметь собственные имена.
+        /// </summary>
+        public string Name => UnitType.Name;
+
+        /// <summary>
         /// Уровень юнита.
         /// </summary>
         public int Level { get; set; }
@@ -69,6 +75,100 @@ namespace Engine.Common.Models
             get => _hitPoints;
             private set => this.RaiseAndSetIfChanged(ref _hitPoints, value);
         }
+
+        /// <summary>
+        /// Максимальное количество очков здоровья.
+        /// todo Рассчитывать, зависит от уровня и эффектов типа эликсира.
+        /// </summary>
+        public int MaxHitPoints => UnitType.HitPoints;
+
+        /// <summary>
+        /// Базовая броня юнита.
+        /// </summary>
+        public int BaseArmor => UnitType.Armor;
+
+        /// <summary>
+        /// Модификатор брони.
+        /// todo Рассчитывать, зависит от эффектов.
+        /// </summary>
+        public int ArmorModifier => 0;
+
+        /// <summary>
+        /// Текущая броня юнита.
+        /// </summary>
+        public int Armor => BaseArmor + ArmorModifier;
+
+        /// <summary>
+        /// Базовое значение силы первой атаки.
+        /// todo Рассчитывать, зависит от уровня.
+        /// </summary>
+        public int BaseFirstAttackPower => UnitType.FirstAttack.HealPower > 0
+            ? UnitType.FirstAttack.HealPower
+            : UnitType.FirstAttack.DamagePower;
+
+        /// <summary>
+        /// Модификатор значения силы первой атаки.
+        /// todo Рассчитывать, зависит от эффектов.
+        /// </summary>
+        public int FirstAttackPowerModifier => 0;
+
+        /// <summary>
+        /// Текущее значение силы первой атаки.
+        /// </summary>
+        public int FirstAttackPower => BaseFirstAttackPower + FirstAttackPowerModifier;
+
+        /// <summary>
+        /// Базовое значение силы второй атаки.
+        /// todo Рассчитывать, зависит от уровня.
+        /// </summary>
+        /// <remarks>
+        /// На вторую атаку модификаторы не распространяются.
+        /// </remarks>
+        public int? SecondAttackPower => UnitType.SecondAttack?.HealPower > 0
+            ? UnitType.SecondAttack?.HealPower
+            : UnitType.SecondAttack?.DamagePower;
+
+        /// <summary>
+        /// Базовое значение точности первой атаки.
+        /// todo Рассчитывать, зависит от уровня.
+        /// </summary>
+        public int BaseFirstAttackAccuracy => UnitType.FirstAttack.Accuracy;
+
+        /// <summary>
+        /// Модификатор точности первой атаки.
+        /// todo Рассчитывать, зависит эффектов.
+        /// </summary>
+        public int FirstAttackAccuracyModifier => 0;
+
+        /// <summary>
+        /// Текущее значение точность первой атаки.
+        /// </summary>
+        public int FirstAttackAccuracy => BaseFirstAttackAccuracy + FirstAttackAccuracyModifier;
+
+        /// <summary>
+        /// Значение точности второй атаки.
+        /// todo Рассчитывать, зависит от уровня.
+        /// </summary>
+        /// <remarks>
+        /// На вторую атаку модификаторы не распространяются.
+        /// </remarks>
+        public int? SecondAttackAccuracy => UnitType.SecondAttack?.Accuracy;
+
+        /// <summary>
+        /// Базовая инициатива.
+        /// </summary>
+        public int BaseInitiative => UnitType.FirstAttack.Initiative;
+
+        /// <summary>
+        /// Модификатор инициативы.
+        /// todo Рассчитывать, зависит от эффектов.
+        /// </summary>
+        public int InitiativeModifier => 0;
+
+        /// <summary>
+        /// Текущее значение инициативы.
+        /// </summary>
+        public int Initiative => BaseInitiative + InitiativeModifier;
 
         /// <summary>
         /// Мёртв ли юнит.

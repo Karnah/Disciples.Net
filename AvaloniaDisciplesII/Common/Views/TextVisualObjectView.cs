@@ -2,7 +2,7 @@
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 
-using Engine.Common.Models;
+using Engine.Common.VisualObjects;
 
 namespace AvaloniaDisciplesII.Common.Views
 {
