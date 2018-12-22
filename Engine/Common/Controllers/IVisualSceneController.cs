@@ -46,7 +46,8 @@ namespace Engine.Common.Controllers
         /// <param name="x">Положение кнопки, координата X.</param>
         /// <param name="y">Положение кнопки, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-        ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer);
+        /// <param name="hotkey">Горячая клавиша для кнопки.</param>
+        ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
         /// <summary>
         /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
@@ -56,7 +57,8 @@ namespace Engine.Common.Controllers
         /// <param name="x">Положение кнопки, координата X.</param>
         /// <param name="y">Положение кнопки, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-        ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer);
+        /// <param name="hotkey">Горячая клавиша для кнопки.</param>
+        ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
         /// <summary>
         /// Добавить статичное изображение на сцену.

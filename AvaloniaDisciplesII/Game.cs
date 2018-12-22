@@ -6,10 +6,12 @@ using System.Reactive.Linq;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Threading;
 
 using Engine;
+using Engine.Common.Enums;
 using Engine.Common.GameObjects;
 using Engine.Models;
 
@@ -96,6 +98,7 @@ namespace AvaloniaDisciplesII
 
             // Подписываемся на события перемещения курсора и нажатия кнопок.
             Application.Current.InputManager.PostProcess.OfType<RawMouseEventArgs>().Subscribe(OnMouseStateChanged);
+            Application.Current.InputManager.PostProcess.OfType<RawKeyEventArgs>().Subscribe(OnKeyStateChanged);
         }
 
         /// <summary>
@@ -195,6 +198,9 @@ namespace AvaloniaDisciplesII
             }
         }
 
+        /// <summary>
+        /// Обработать событие от курсора.
+        /// </summary>
         private void OnMouseStateChanged(RawMouseEventArgs args)
         {
             switch (args.Type) {
@@ -224,6 +230,56 @@ namespace AvaloniaDisciplesII
             }
         }
 
+        /// <summary>
+        /// Обработать событие от клавиатуры.
+        /// </summary>
+        private void OnKeyStateChanged(RawKeyEventArgs args)
+        {
+            // Обрабатываем только нажатию на клавишу.
+            if (args.Type != RawKeyEventType.KeyDown)
+                return;
+
+            // Если были какие-то модификаторы, то игнорируем.
+            if (args.Modifiers != InputModifiers.None)
+                return;
+
+            var keyboardButton = ToKeyboardButton(args.Key);
+            if (keyboardButton == null)
+                return;
+
+            var button = _gameObjects.OfType<ButtonObject>().FirstOrDefault(b => b.Hotkey == keyboardButton);
+            if (button == null || button.ButtonState == ButtonState.Disabled)
+                return;
+
+            button.OnButtonClicked();
+        }
+
+        /// <summary>
+        /// Получить нажатую клавишу.
+        /// </summary>
+        private static KeyboardButton? ToKeyboardButton(Key key)
+        {
+            switch (key) {
+                case Key.Tab:
+                    return KeyboardButton.Tab;
+                case Key.A:
+                    return KeyboardButton.A;
+                case Key.D:
+                    return KeyboardButton.D;
+                case Key.I:
+                    return KeyboardButton.I;
+                case Key.P:
+                    return KeyboardButton.P;
+                case Key.R:
+                    return KeyboardButton.R;
+                case Key.S:
+                    return KeyboardButton.S;
+                case Key.W:
+                    return KeyboardButton.W;
+                default:
+                    return null;
+            }
+        }
 
         /// <inheritdoc />
         public void CreateObject(GameObject gameObject)

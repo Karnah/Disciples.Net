@@ -20,17 +20,24 @@ namespace Engine.Common.GameObjects
 
         private ImageVisualObject _buttonVisualObject;
 
-        public ButtonObject(IMapVisual mapVisual, IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer)
+        public ButtonObject(
+            IMapVisual mapVisual,
+            IDictionary<ButtonState, Bitmap> buttonStates,
+            Action buttonPressedAction,
+            double x,
+            double y,
+            int layer,
+            KeyboardButton? hotkey = null)
             : base(x, y)
         {
             _mapVisual = mapVisual;
             _buttonStates = buttonStates;
             _buttonPressedAction = buttonPressedAction;
 
-
             ButtonState = ButtonState.Disabled;
-            var bitmap = _buttonStates[ButtonState];
+            Hotkey = hotkey;
 
+            var bitmap = _buttonStates[ButtonState];
             Width = bitmap.PixelSize.Width;
             Height = bitmap.PixelSize.Height;
 
@@ -48,6 +55,11 @@ namespace Engine.Common.GameObjects
         /// Состояние кнопки.
         /// </summary>
         public ButtonState ButtonState { get; protected set; }
+
+        /// <summary>
+        /// Горячая клавиша для кнопки.
+        /// </summary>
+        public KeyboardButton? Hotkey { get; }
 
         /// <inheritdoc />
         public override bool IsInteractive => true;
@@ -156,7 +168,7 @@ namespace Engine.Common.GameObjects
         /// <summary>
         /// Обработать событие нажатия на кнопку.
         /// </summary>
-        protected void OnButtonClicked()
+        public virtual void OnButtonClicked()
         {
             _buttonPressedAction?.Invoke();
         }

@@ -10,6 +10,7 @@ using Engine.Battle.GameObjects;
 using Engine.Battle.Models;
 using Engine.Battle.Providers;
 using Engine.Common.Controllers;
+using Engine.Common.Enums;
 using Engine.Common.Enums.Units;
 using Engine.Common.GameObjects;
 using Engine.Common.Models;
@@ -154,27 +155,27 @@ namespace Engine.Implementation.Controllers
         private void InitializeButtons()
         {
             _reflectUnitPanelButton = _visualSceneController.AddToggleButton(_interfaceProvider.ToggleRightButton,
-                ReflectRightUnitsPanel, 633, 402, INTERFACE_LAYER + 2);
+                ReflectRightUnitsPanel, 633, 402, INTERFACE_LAYER + 2, KeyboardButton.Tab);
 
             _defendButton = _visualSceneController.AddButton(_interfaceProvider.DefendButton, () => {
                     _attackController.Defend();
-                }, 380, 504, INTERFACE_LAYER + 2);
+                }, 380, 504, INTERFACE_LAYER + 2, KeyboardButton.D);
 
             _retreatButton = _visualSceneController.AddButton(_interfaceProvider.RetreatButton, () => {
                 //todo
-            }, 343, 524, INTERFACE_LAYER + 2);
+            }, 343, 524, INTERFACE_LAYER + 2, KeyboardButton.R);
 
             _waitButton = _visualSceneController.AddButton(_interfaceProvider.WaitButton, () => {
                     _attackController.Wait();
-                }, 419, 524, INTERFACE_LAYER + 2);
+                }, 419, 524, INTERFACE_LAYER + 2, KeyboardButton.W);
 
             _instantResolveButton = _visualSceneController.AddButton(_interfaceProvider.InstantResolveButton, () => {
                 // todo
-            }, 359, 563, INTERFACE_LAYER + 2);
+            }, 359, 563, INTERFACE_LAYER + 2, KeyboardButton.I);
 
             _autoBattleButton = _visualSceneController.AddToggleButton(_interfaceProvider.AutoBattleButton, () => {
                 // todo
-            }, 403, 563, INTERFACE_LAYER + 2);
+            }, 403, 563, INTERFACE_LAYER + 2, KeyboardButton.A);
 
 
             ActivateButtons(_reflectUnitPanelButton, _defendButton, _retreatButton, _waitButton, _instantResolveButton, _autoBattleButton);

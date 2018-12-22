@@ -15,8 +15,15 @@ namespace Engine.Common.GameObjects
     {
         private bool _isChecked;
 
-        public ToggleButtonObject(IMapVisual mapVisual, IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer)
-            : base(mapVisual, buttonStates, buttonPressedAction, x, y, layer)
+        public ToggleButtonObject(
+            IMapVisual mapVisual,
+            IDictionary<ButtonState, Bitmap> buttonStates,
+            Action buttonPressedAction,
+            double x,
+            double y,
+            int layer,
+            KeyboardButton? hotkey = null)
+            : base(mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey)
         {
             _isChecked = false;
         }
@@ -58,10 +65,18 @@ namespace Engine.Common.GameObjects
 
             if (_isChecked)
                 ButtonState = ButtonState.Selected;
-            _isChecked = !_isChecked;
 
             OnButtonClicked();
             UpdateButtonVisualObject();
+        }
+
+
+        /// <inheritdoc />
+        public override void OnButtonClicked()
+        {
+            SetState(!_isChecked);
+
+            base.OnButtonClicked();
         }
 
         /// <summary>

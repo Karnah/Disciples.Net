@@ -55,18 +55,18 @@ namespace Engine.Implementation.Controllers
         }
 
         /// <inheritdoc />
-        public ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer)
+        public ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
-            var button = new ButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer);
+            var button = new ButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(button);
 
             return button;
         }
 
         /// <inheritdoc />
-        public ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer)
+        public ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
-            var toggleButton = new ToggleButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer);
+            var toggleButton = new ToggleButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(toggleButton);
 
             return toggleButton;
