@@ -87,7 +87,7 @@ namespace Engine.Common.GameObjects
                 _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);
 
             _unitPortret = _visualSceneController.AddImageVisual(
-                Unit.UnitType.Portret,
+                Unit.UnitType.Portrait,
                 X + 70,
                 Y + 10,
                 INTERFACE_LAYER + 1

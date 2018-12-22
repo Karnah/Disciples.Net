@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 
+using Avalonia.Media.Imaging;
+
 using Engine.Common.Enums.Units;
 using Engine.Common.Models;
 using Engine.Common.Providers;
@@ -16,7 +18,7 @@ namespace Engine.Implementation.Resources
         private readonly ITextProvider _textProvider;
         private readonly DataExtractor _dataExtractor;
         private readonly ImagesExtractor _facesExtractor;
-        private readonly ImagesExtractor _portretExtractor;
+        private readonly ImagesExtractor _portraitExtractor;
 
         private SortedDictionary<string, Attack> _attacks;
         private SortedDictionary<string, UnitType> _units;
@@ -27,7 +29,7 @@ namespace Engine.Implementation.Resources
 
             _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
             _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
-            _portretExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
+            _portraitExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
 
             LoadAttacks();
             LoadUnitTypes();
@@ -135,9 +137,9 @@ namespace Engine.Implementation.Resources
 
             // Лицо юнита дополнительно обрабатывать не надо.
             // Кроме того, там есть проблемы с некоторым портретами, если их получать обычным путём.
-            var face = _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap();
-            var battleFace = _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap();
-            var portret = _portretExtractor.GetImage(unitId.ToUpper()).ToOriginalBitmap();
+            var face = new Lazy<Bitmap>(() => _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap());
+            var battleFace = new Lazy<Bitmap>(() => _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap());
+            var portrait = new Lazy<Bitmap>(() => _portraitExtractor.GetImage(unitId.ToUpper()).ToOriginalBitmap());
 
             var unit = new UnitType(
                 unitId,
@@ -170,7 +172,7 @@ namespace Engine.Implementation.Resources
                 deathAnim,
                 face,
                 battleFace,
-                portret
+                portrait
             );
 
             return unit;

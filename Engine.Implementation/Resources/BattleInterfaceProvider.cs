@@ -10,6 +10,7 @@ using Engine.Common.Enums;
 using Engine.Common.Models;
 using Engine.Implementation.Helpers;
 using ResourceProvider;
+using ResourceProvider.Models;
 
 namespace Engine.Implementation.Resources
 {
@@ -18,6 +19,7 @@ namespace Engine.Implementation.Resources
     {
         private readonly IBattleResourceProvider _battleResourceProvider;
         private readonly ImagesExtractor _extractor;
+        private readonly IDictionary<string, RowImage> _battleIcons;
 
         private Dictionary<GameColor, Bitmap> _gameColors;
 
@@ -26,6 +28,7 @@ namespace Engine.Implementation.Resources
         {
             _battleResourceProvider = battleResourceProvider;
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.ff");
+            _battleIcons = _extractor.GetImageParts("DLG_BATTLE_A.PNG");
 
             LoadBitmaps();
             InitGameColors();
@@ -37,15 +40,14 @@ namespace Engine.Implementation.Resources
         private void LoadBitmaps()
         {
             Battleground = _battleResourceProvider.GetRandomBattleground();
-            RightPanel = _extractor.GetImage("DLG_BATTLE_A_RUNITGROUP").ToBitmap();
-            BottomPanel = _extractor.GetImage("DLG_BATTLE_A_MAINCOMBATBG").ToBitmap();
-            PanelSeparator = _extractor.GetImage("DLG_BATTLE_A_SPLITLRG").ToBitmap();
+            RightPanel = _battleIcons["DLG_BATTLE_A_RUNITGROUP"].ToBitmap();
+            BottomPanel = _battleIcons["DLG_BATTLE_A_MAINCOMBATBG"].ToBitmap();
+            PanelSeparator = _battleIcons["DLG_BATTLE_A_SPLITLRG"].ToBitmap();
             // todo Хоть убейте, не могу найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
             DeathSkull = new Bitmap($"{Directory.GetCurrentDirectory()}\\Resources\\Common\\Skull.png");
             UnitInfoBackground = _extractor.GetImage("_PG0500IX").ToBitmap();
 
-
-            UnitButtleEffectsIcon = new Dictionary<UnitBattleEffectType, Bitmap> {
+            UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, Bitmap> {
                 { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap }
             };
 
@@ -78,7 +80,7 @@ namespace Engine.Implementation.Resources
 
 
         /// <inheritdoc />
-        public IDictionary<UnitBattleEffectType, Bitmap> UnitButtleEffectsIcon { get; private set; }
+        public IDictionary<UnitBattleEffectType, Bitmap> UnitBattleEffectsIcon { get; private set; }
 
 
         #region Buttons
@@ -105,10 +107,10 @@ namespace Engine.Implementation.Resources
         private IDictionary<ButtonState, Bitmap> GetBattleBitmaps(string buttonName)
         {
             return new Dictionary<ButtonState, Bitmap> {
-                { ButtonState.Disabled, _extractor.GetImage($"DLG_BATTLE_A_{buttonName}_D").ToBitmap() },
-                { ButtonState.Active, _extractor.GetImage($"DLG_BATTLE_A_{buttonName}_N").ToBitmap() },
-                { ButtonState.Selected, _extractor.GetImage($"DLG_BATTLE_A_{buttonName}_H").ToBitmap() },
-                { ButtonState.Pressed, _extractor.GetImage($"DLG_BATTLE_A_{buttonName}_C").ToBitmap() }
+                { ButtonState.Disabled, _battleIcons[$"DLG_BATTLE_A_{buttonName}_D"].ToBitmap() },
+                { ButtonState.Active, _battleIcons[$"DLG_BATTLE_A_{buttonName}_N"].ToBitmap() },
+                { ButtonState.Selected,_battleIcons[$"DLG_BATTLE_A_{buttonName}_H"].ToBitmap() },
+                { ButtonState.Pressed, _battleIcons[$"DLG_BATTLE_A_{buttonName}_C"].ToBitmap() }
             };
         }
 

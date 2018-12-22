@@ -46,7 +46,7 @@ namespace Engine.Battle.Providers
         /// <summary>
         /// Иконки для эффектов, воздействующих на юнита.
         /// </summary>
-        IDictionary<UnitBattleEffectType, Bitmap> UnitButtleEffectsIcon { get; }
+        IDictionary<UnitBattleEffectType, Bitmap> UnitBattleEffectsIcon { get; }
 
 
         /// <summary>

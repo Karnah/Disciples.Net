@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System;
+using Avalonia.Media.Imaging;
 
 using Engine.Common.Enums.Units;
 
@@ -6,6 +7,10 @@ namespace Engine.Common.Models
 {
     public class UnitType
     {
+        private readonly Lazy<Bitmap> _face;
+        private readonly Lazy<Bitmap> _battleFace;
+        private readonly Lazy<Bitmap> _portrait;
+
         // todo перепилить под рефлектор.
         public UnitType(
             string unitTypeId,
@@ -18,7 +23,7 @@ namespace Engine.Common.Models
             bool sizeSmall,
             bool isMale,
             string enrollCost,
-            string enrollBnding,
+            string enrollBuilding,
             string name,
             string description,
             string abil,
@@ -36,9 +41,9 @@ namespace Engine.Common.Models
             string upgradeBuilding,
             int xpNext,
             int deathAnimationId,
-            Bitmap face,
-            Bitmap battleFace,
-            Bitmap portret)
+            Lazy<Bitmap> face,
+            Lazy<Bitmap> battleFace,
+            Lazy<Bitmap> portrait)
         {
             UnitTypeId = unitTypeId;
             UnitCategory = unitCategory;
@@ -50,7 +55,7 @@ namespace Engine.Common.Models
             SizeSmall = sizeSmall;
             IsMale = isMale;
             EnrollCost = enrollCost;
-            EnrollBnding = enrollBnding;
+            EnrollBuilding = enrollBuilding;
             Name = name;
             Description = description;
             Abil = abil;
@@ -69,9 +74,9 @@ namespace Engine.Common.Models
             XpNext = xpNext;
             DeathAnimationId = deathAnimationId;
 
-            Face = face;
-            BattleFace = battleFace;
-            Portret = portret;
+            _face = face;
+            _battleFace = battleFace;
+            _portrait = portrait;
         }
 
         /// <summary>
@@ -127,7 +132,7 @@ namespace Engine.Common.Models
         /// <summary>
         /// todo Определяет здание, позволяющее нанимать юнита.
         /// </summary>
-        public string EnrollBnding { get; }
+        public string EnrollBuilding { get; }
 
         /// <summary>
         /// Имя типа юнита.
@@ -218,16 +223,16 @@ namespace Engine.Common.Models
         /// <summary>
         /// Картинка лица юнита.
         /// </summary>
-        public Bitmap Face { get; }
+        public Bitmap Face => _face.Value;
 
         /// <summary>
         /// Скруглённая картинка лица юнита, используется в битвах.
         /// </summary>
-        public Bitmap BattleFace { get; }
+        public Bitmap BattleFace => _battleFace.Value;
 
         /// <summary>
-        /// todo Большой портрет в информации о юните. Извлекать из Events.ff.
+        /// Большой портрет юнита.
         /// </summary>
-        public Bitmap Portret { get; }
+        public Bitmap Portrait => _portrait.Value;
     }
 }

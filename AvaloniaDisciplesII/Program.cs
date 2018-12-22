@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 using Avalonia;
 using Avalonia.Logging.Serilog;
@@ -28,6 +29,9 @@ namespace AvaloniaDisciplesII
             try {
                 var app = BuildAvaloniaApp().SetupWithoutStarting();
 
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 CreateContainer();
 
                 var logger = Container.Resolve<ILogger>();
@@ -54,6 +58,9 @@ namespace AvaloniaDisciplesII
                 gw.Closing += (sender, eventArgs) => { _game.Stop(); };
                 gw.ShowDialog();
                 logger.Log("Battle begin");
+                logger.Log($"Loading time: {stopwatch.ElapsedMilliseconds / 1000.0} s.");
+
+                stopwatch.Stop();
 
                 _game.Start();
                 app.Instance.Run(gw);

@@ -214,7 +214,7 @@ namespace Engine.Common.GameObjects
                 if (_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
                     continue;
 
-                var icon = _battleInterfaceProvider.UnitButtleEffectsIcon[battleEffect.EffectType];
+                var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
                 _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImageVisual(
                     icon,
                     X + (Width - icon.PixelSize.Width) / 2,

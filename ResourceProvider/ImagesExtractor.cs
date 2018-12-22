@@ -15,7 +15,7 @@ namespace ResourceProvider
 {
     public class ImagesExtractor
     {
-        // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным
+        // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным.
         private readonly MagickColor _additionalTransparentColor = MagickColor.FromRgb(252, 2, 252);
 
         private readonly string _path;
@@ -36,11 +36,11 @@ namespace ResourceProvider
 
 
         /// <summary>
-        /// Получить кадры анимации по её имени
+        /// Получить кадры анимации по её имени.
         /// </summary>
         // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
-        // Например, G000UU8029HHITA1A00
-        // Ссылки на PNG нет, но в .ff файле какая-то информация есть
+        // Например, G000UU8029HHITA1A00.
+        // Ссылки на PNG нет, но в .ff файле какая-то информация есть.
         public IReadOnlyCollection<RowImage> GetAnimationFrames(string name)
         {
             if (_mqAnimations?.ContainsKey(name) != true)
@@ -50,11 +50,36 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Получить изображение по его имени
+        /// Получить все изображения, которые создаются из указанного базового.
+        /// </summary>
+        /// <param name="name">Имя базового изображения.</param>
+        /// <returns>Список всех изображений-частей.</returns>
+        /// <remarks>
+        /// Элементы интерфейса располагаются на одной картинке.
+        /// Данный метод позволяет получить их за один проход.
+        /// </remarks>
+        public IDictionary<string, RowImage> GetImageParts(string name)
+        {
+            if (_filesByName?.ContainsKey(name) != true)
+                return null;
+
+            var result = new Dictionary<string, RowImage>();
+            var baseFile = _filesByName[name];
+            var baseImage = PrepareImage(baseFile);
+            var parts = _mqImages.Select(i => i.Value).Where(i => i.FileId == baseFile.Id);
+            foreach (var part in parts) {
+                result.Add(part.Name, BuildImage(baseImage, part));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Получить изображение по его имени.
         /// </summary>
         public RowImage GetImage(string name)
         {
-            // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям
+            // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям.
             if (_mqImages?.ContainsKey(name) == true) {
                 var mqImage = _mqImages[name];
                 var baseImage = PrepareImage(_filesById[mqImage.FileId]);
@@ -62,7 +87,7 @@ namespace ResourceProvider
                 return BuildImage(baseImage, mqImage);
             }
 
-            // Иначе мы ищем файл с таким именем. Его можно просто отдать целиком, предварительно избавившись от прозрачности
+            // Иначе мы ищем файл с таким именем. Его можно просто отдать целиком, предварительно избавившись от прозрачности.
             if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var imageFile) == false)
                 return null;
 
@@ -70,7 +95,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Получить данные файла по его имени
+        /// Получить данные файла по его имени.
         /// </summary>
         public byte[] GetFileContent(string name)
         {
@@ -81,7 +106,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Получить имена всех изображений в ресурсе
+        /// Получить имена всех изображений в ресурсе.
         /// </summary>
         public IReadOnlyList<string> GetAllImagesNames()
         {
@@ -92,7 +117,7 @@ namespace ResourceProvider
         #region LoadData
 
         /// <summary>
-        /// Извлечь все метаданные из файла ресурсов
+        /// Извлечь все метаданные из файла ресурсов.
         /// </summary>
         private void Load()
         {
@@ -105,15 +130,14 @@ namespace ResourceProvider
                 LoadFilesList(stream);
             }
 
-            var mqIndices = LoadMqIndices();
-            if (mqIndices == null)
+            var mqIndexes = LoadMqIndexes();
+            if (mqIndexes == null)
                 return;
 
-            // Конвертируем в другой словарь, чтобы после выкинуть все картинки, которые являются частями анимаций
-            // Это позволит не хранить огромный словарь изображений
-            var mqImages = LoadMqImages(mqIndices)
+            // Конвертируем в другой словарь, чтобы после выкинуть все картинки, которые являются частями анимации.
+            // Это позволит не хранить огромный словарь изображений.
+            var mqImages = LoadMqImages(mqIndexes)
                 .ToDictionary(mi => mi.Key, mi => new MqImageInfo(mi.Value));
-
 
             _mqAnimations = LoadMqAnimations(mqImages);
             _mqImages = mqImages
@@ -122,7 +146,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Загрузка информации о записях
+        /// Загрузка информации о записях.
         /// </summary>
         private void LoadRecords(Stream stream)
         {
@@ -152,11 +176,11 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Загрузка информации о файлах
+        /// Загрузка информации о файлах.
         /// </summary>
         private void LoadFilesList(Stream stream)
         {
-            // Информация о списке файлов лежит в записи с идентификатором 2
+            // Информация о списке файлов лежит в записи с идентификатором 2.
             stream.Seek(_records[2].Offset, SeekOrigin.Begin);
 
             var filesCount = stream.ReadInt();
@@ -177,9 +201,9 @@ namespace ResourceProvider
 
 
         /// <summary>
-        /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени)
+        /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени).
         /// </summary>
-        private IDictionary<string, MqIndex> LoadMqIndices()
+        private IDictionary<string, MqIndex> LoadMqIndexes()
         {
             _filesByName.TryGetValue("-INDEX.OPT", out var indexFile);
             if (indexFile == null)
@@ -206,7 +230,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Загрузить изображения. Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую
+        /// Загрузить изображения. Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую.
         /// </summary>
         private IDictionary<string, MqImage> LoadMqImages(IDictionary<string, MqIndex> mqIndices)
         {
@@ -254,7 +278,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Загрузить анимации. Анимации хранят информацию о изображениях из которых состоят
+        /// Загрузить анимации. Анимации хранят информацию о изображениях из которых состоят.
         /// </summary>
         private IDictionary<string, MqAnimation> LoadMqAnimations(IDictionary<string, MqImageInfo> mqImages)
         {
@@ -290,8 +314,8 @@ namespace ResourceProvider
                     var safeFileName = Path.GetFileNameWithoutExtension(_filesById[mqAnimationFrame.FileId].Name);
                     var mqAnimation = new MqAnimation(animationInfo.AnimationIndex, safeFileName, animationInfo.Frames);
 
-                    // Имя анимации - это имя базового изображения для первого фрейма
-                    // Фреймы могут иметь разные базовые изображения, но пока это работает
+                    // Имя анимации - это имя базового изображения для первого фрейма.
+                    // Фреймы могут иметь разные базовые изображения, но пока это работает.
                     mqAnimations.TryAdd(safeFileName, mqAnimation);
                     break;
                 }
@@ -306,15 +330,15 @@ namespace ResourceProvider
         #region HelpMethods
 
         /// <summary>
-        /// Получить кадры анимации
+        /// Получить кадры анимации.
         /// </summary>
-        /// <param name="animation">Информация об анимации</param>
-        /// <returns>Коллекция кадров анимации</returns>
+        /// <param name="animation">Информация об анимации.</param>
+        /// <returns>Коллекция кадров анимации.</returns>
         private IReadOnlyCollection<RowImage> GetAnimationFramesInternal(MqAnimation animation)
         {
             var result = new List<RowImage>(animation.Frames.Count);
             // Обычно анимация "нарезается" из одного базового изображения,
-            // Однака это не всегда. Поэтому необходимо иметь возможность кэшировать несколько изображений
+            // Однако это не всегда. Поэтому необходимо иметь возможность кэшировать несколько изображений.
             var baseImages = new Dictionary<int, RowImage>();
 
             foreach (var frame in animation.Frames) {
@@ -330,10 +354,10 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Создать новое изображение из частей базового
+        /// Создать новое изображение из частей базового.
         /// </summary>
-        /// <param name="baseImage">Базовое изображение</param>
-        /// <param name="mqImage">Информация о новом изображении</param>
+        /// <param name="baseImage">Базовое изображение.</param>
+        /// <param name="mqImage">Информация о новом изображении.</param>
         private static RowImage BuildImage(RowImage baseImage, MqImage mqImage)
         {
             int minRow = int.MaxValue, maxRow = int.MinValue;
@@ -341,18 +365,12 @@ namespace ResourceProvider
             var imageData = new byte[mqImage.Width * mqImage.Height * 4];
 
             foreach (var framePart in mqImage.ImagePieces) {
-                for (int x = 0; x < framePart.Width; ++x) {
-                    for (int y = 0; y < framePart.Height; ++y) {
-                        unchecked {
-                            var posS = ((framePart.DestY + y) * baseImage.Width + (framePart.DestX + x)) << 2;
-                            var posT = ((framePart.SourceY + y) * mqImage.Width + (framePart.SourceX + x)) << 2;
+                var partWidth = framePart.Width << 2;
+                for (int row = 0; row < framePart.Height; ++row) {
+                    var posS = ((framePart.DestY + row) * baseImage.Width + framePart.DestX) << 2;
+                    var posT = ((framePart.SourceY + row) * mqImage.Width + framePart.SourceX) << 2;
 
-                            imageData[posT] = baseImage.Data[posS];
-                            imageData[posT + 1] = baseImage.Data[posS + 1];
-                            imageData[posT + 2] = baseImage.Data[posS + 2];
-                            imageData[posT + 3] = baseImage.Data[posS + 3];
-                        }
-                    }
+                    Buffer.BlockCopy(baseImage.Data, posS, imageData, posT, partWidth);
                 }
 
                 minRow = Math.Min(minRow, framePart.SourceY);
@@ -365,10 +383,10 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Извлечь изображение из файла и обработать его (заменить прозрачность и т.д.)
+        /// Извлечь изображение из файла и обработать его (заменить прозрачность и т.д.).
         /// </summary>
-        /// <param name="file">Файл с изображением</param>
-        /// <returns>Сырые данные, которые содержат картинку в массиве RGBA</returns>
+        /// <param name="file">Файл с изображением.</param>
+        /// <returns>Сырые данные, которые содержат картинку в массиве RGBA.</returns>
         private RowImage PrepareImage(File file)
         {
             MagickImage magickImage;
@@ -376,8 +394,8 @@ namespace ResourceProvider
                 magickImage = new MagickImage(GetFileContent(file));
             }
             catch (MagickCoderErrorException) {
-                // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты
-                // Нужно получить решение
+                // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты.
+                // Нужно получить решение.
                 Console.WriteLine($"Corrupted image: {_path}\\{file.Name}");
                 return null;
             }
@@ -386,9 +404,9 @@ namespace ResourceProvider
             var safeName = Path.GetFileNameWithoutExtension(file.Name);
             var imageType = GetImageType(safeName);
             if (imageType == ImageType.Aura) {
-                // Если файл содержит ауру, то создаём полупрозрачное изображение
-                // Пока берём прозрачность равную индексу цвета в палитре
-                // Но такое чувство, что есть более четкая зависимость
+                // Если файл содержит ауру, то создаём полупрозрачное изображение.
+                // Пока берём прозрачность равную индексу цвета в палитре,
+                // Но такое чувство, что есть более четкая зависимость.
                 for (int i = 0; i < 256; ++i) {
                     unchecked {
                         var color = magickImage.GetColormap(i);
@@ -404,49 +422,67 @@ namespace ResourceProvider
             if (transparentColor == null) {
                 transparentColor = MagickColor.FromRgb(255, 0, 255);
             }
-            unchecked {
+
+            unchecked
+            {
+                var tcRed = (byte) transparentColor.R;
+                var tcGreen = (byte) transparentColor.G;
+                var tcBlue = (byte) transparentColor.B;
+
+                var atcRed = (byte)_additionalTransparentColor.R;
+                var atcGreen = (byte)_additionalTransparentColor.G;
+                var atcBlue = (byte)_additionalTransparentColor.B;
+
                 for (int i = 0; i < pixels.Length; i += 4) {
-                    if (pixels[i] == (byte)transparentColor.R &&
-                        pixels[i + 1] == (byte)transparentColor.G &&
-                        pixels[i + 2] == (byte)transparentColor.B) {
+                    // Проверяем прозрачную область.
+                    if (pixels[i] == tcRed && pixels[i + 1] == tcGreen && pixels[i + 2] == tcBlue)
+                    {
+                        pixels[i] = 0;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = 0;
                         pixels[i + 3] = 0;
+
+                        continue;
                     }
 
-                    // Костыль, так как иначе буду оставать розовые пятна на правой панели с юнитами
-                    if (pixels[i] == (byte)_additionalTransparentColor.R &&
-                        pixels[i + 1] == (byte)_additionalTransparentColor.G &&
-                        pixels[i + 2] == (byte)_additionalTransparentColor.B) {
+                    // Проверяем прозрачную область с помощью альтернативной кисти.
+                    // Так как иначе будут оставаться розовые пятна на правой панели с юнитами.
+                    if (pixels[i] == atcRed && pixels[i + 1] == atcGreen && pixels[i + 2] == atcBlue)
+                    {
+                        pixels[i] = 0;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = 0;
                         pixels[i + 3] = 0;
+
+                        continue;
                     }
 
-                    // Если файл - аура, то определяем прозрачность по словарю
-                    var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
-                    if (colorMap.ContainsKey(index)) {
-                        pixels[i + 3] = colorMap[index];
+                    // Если файл - аура, то определяем прозрачность по словарю.
+                    if (imageType == ImageType.Aura) {
+                        var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
+                        if (colorMap.TryGetValue(index, out var alphaChannel)) {
+                            pixels[i + 3] = alphaChannel;
+                        }
+
+                        continue;
                     }
 
-                    // Если файл тень, то делаем его полупрозрачным
+                    // Если файл тень, то делаем его полупрозрачным.
                     if (imageType == ImageType.Shadow) {
                         if (pixels[i + 3] != 0) {
                             pixels[i + 3] = 128;
                         }
-                    }
 
-                    if (pixels[i + 3] == 0) {
-                        pixels[i] = 0;
-                        pixels[i + 1] = 0;
-                        pixels[i + 2] = 0;
                         continue;
                     }
                 }
             }
 
-
             return new RowImage(0, magickImage.Height, 0, magickImage.Width, magickImage.Width, magickImage.Height, pixels);
         }
 
         /// <summary>
-        /// Получить содержимое файла из ресурса
+        /// Получить содержимое файла из ресурса.
         /// </summary>
         private byte[] GetFileContent(File file)
         {
@@ -460,7 +496,7 @@ namespace ResourceProvider
         }
 
         /// <summary>
-        /// Получить тип изображения по его имени. Жуткий костыль, так как не знаю, где это находится в метаданных
+        /// Получить тип изображения по его имени. Жуткий костыль, так как не знаю, где это находится в метаданных.
         /// </summary>
         private static ImageType GetImageType(string name)
         {
@@ -468,7 +504,7 @@ namespace ResourceProvider
                 ? name.Substring(0, name.Length - 2)
                 : name;
 
-            // todo Ну это уже совсем никуда не годится, исправить
+            // todo Ну это уже совсем никуда не годится, исправить.
             if (safeName.EndsWith("A2A00") || safeName.EndsWith("A2D00") ||
                 (safeName.Length > 8 && (safeName.Substring(safeName.Length - 9, 4) == "HEFF" ||
                                          safeName.Substring(safeName.Length - 9, 4) == "TUCH")) ||
