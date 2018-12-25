@@ -4,16 +4,28 @@ using Engine.Common.Models;
 
 namespace Engine.Battle.Providers
 {
+    /// <summary>
+    /// Поставщик ресурсов для сцены битвы.
+    /// </summary>
     public interface IBattleResourceProvider
     {
+        /// <summary>
+        /// Получить анимацию для сцены битвы.
+        /// </summary>
+        /// <param name="animationName">Имя анимации.</param>
         IReadOnlyList<Frame> GetBattleAnimation(string animationName);
 
+        /// <summary>
+        /// Получить изображение для сцены битвы.
+        /// </summary>
+        /// <param name="frameName">Имя изображения.</param>
         Frame GetBattleFrame(string frameName);
 
 
         /// <summary>
-        /// Получить случайную картинку поля боя
+        /// Получить случайный фон для поля боя.
         /// </summary>
-        Bitmap GetRandomBattleground();
+        /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
+        IReadOnlyList<Bitmap> GetRandomBattleground();
     }
 }

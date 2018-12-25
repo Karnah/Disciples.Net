@@ -61,7 +61,7 @@ namespace Engine.Implementation.Resources
 
 
         /// <inheritdoc />
-        public Bitmap Battleground { get; private set; }
+        public IReadOnlyList<Bitmap> Battleground { get; private set; }
 
         /// <inheritdoc />
         public Bitmap RightPanel { get; private set; }

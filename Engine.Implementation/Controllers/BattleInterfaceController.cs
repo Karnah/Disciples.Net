@@ -109,7 +109,9 @@ namespace Engine.Implementation.Controllers
         /// </summary>
         private void InitializeMainInterface()
         {
-            _visualSceneController.AddImageVisual(_interfaceProvider.Battleground, 0, 0, 0);
+            foreach (var battleground in _interfaceProvider.Battleground) {
+                _visualSceneController.AddImageVisual(battleground, 0, 0, 0);
+            }
             _visualSceneController.AddImageVisual(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.PixelSize.Height, 1);
             _visualSceneController.AddImageVisual(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.PixelSize.Width, 30, INTERFACE_LAYER);
 

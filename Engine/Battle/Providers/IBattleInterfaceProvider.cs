@@ -16,7 +16,8 @@ namespace Engine.Battle.Providers
         /// <summary>
         /// Фон поля боя.
         /// </summary>
-        Bitmap Battleground { get; }
+        /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
+        IReadOnlyList<Bitmap> Battleground { get; }
 
         /// <summary>
         /// Картинка правой панели с юнитами.

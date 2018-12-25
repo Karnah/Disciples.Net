@@ -108,9 +108,9 @@ namespace ResourceProvider
         /// <summary>
         /// Получить имена всех изображений в ресурсе.
         /// </summary>
-        public IReadOnlyList<string> GetAllImagesNames()
+        public IReadOnlyList<string> GetAllFilesNames()
         {
-            return _mqImages.Keys.ToList();
+            return _filesByName.Keys.ToList();
         }
 
 

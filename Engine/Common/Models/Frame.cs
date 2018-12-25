@@ -2,6 +2,9 @@
 
 namespace Engine.Common.Models
 {
+    /// <summary>
+    /// Информация об изображении.
+    /// </summary>
     public class Frame
     {
         public Frame(double width, double height, double offsetX, double offsetY, Bitmap bitmap)
@@ -15,27 +18,27 @@ namespace Engine.Common.Models
 
 
         /// <summary>
-        /// Ширина изображения
+        /// Ширина изображения.
         /// </summary>
         public double Width { get; }
 
         /// <summary>
-        /// Высота изображения
+        /// Высота изображения.
         /// </summary>
         public double Height { get; }
 
         /// <summary>
-        /// Дополнительное смещение по оси X (вправо)
+        /// Дополнительное смещение по оси X (вправо).
         /// </summary>
         public double OffsetX { get; }
 
         /// <summary>
-        /// Дополнительно смещение по оси Y (вниз)
+        /// Дополнительно смещение по оси Y (вниз).
         /// </summary>
         public double OffsetY { get; }
 
         /// <summary>
-        /// Изображение
+        /// Изображение.
         /// </summary>
         public Bitmap Bitmap { get; }
     }
