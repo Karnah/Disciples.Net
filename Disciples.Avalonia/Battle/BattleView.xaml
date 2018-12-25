@@ -1,0 +1,43 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Disciples.Avalonia.Battle;assembly=Disciples.Avalonia"
+             xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
+             xmlns:controls="clr-namespace:Disciples.Avalonia.Common.Controls"
+             xmlns:model="clr-namespace:Disciples.Engine.Common.Models;assembly=Disciples.Engine"
+             xmlns:vo="clr-namespace:Disciples.Engine.Common.VisualObjects;assembly=Disciples.Engine"
+             xmlns:views="clr-namespace:Disciples.Avalonia.Common.Views">
+    <UserControl.Resources>
+        <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
+        <c:BitmapToBrushConverter x:Key="BitmapToBrushConverter" />
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="ItemsControl > ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource DoubleScaleConverter}}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y, Converter={StaticResource DoubleScaleConverter}}" />
+            <Setter Property="ZIndex" Value="{Binding Layer}" />
+        </Style>
+    </UserControl.Styles>
+
+    <ItemsControl Items="{Binding MapVisual.Visuals}">
+        <ItemsControl.DataTemplates>
+            <DataTemplate DataType="{x:Type vo:ImageVisualObject}">
+                <Image Stretch="Fill"
+                        Source="{Binding Bitmap}"
+                        Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                        Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                        RenderTransform="{Binding Transform}" />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vo:TextVisualObject}">
+                <views:TextVisualObjectView TextVisualObject="{Binding }" />
+            </DataTemplate>
+        </ItemsControl.DataTemplates>
+
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <Canvas />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
+</UserControl>

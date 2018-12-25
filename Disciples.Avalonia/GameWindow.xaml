@@ -1,0 +1,14 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Disciples.Avalonia;assembly=Disciples.Avalonia"
+        xmlns:battle="clr-namespace:Disciples.Avalonia.Battle;assembly=Disciples.Avalonia"
+        xmlns:e="clr-namespace:Disciples.Engine;assembly=Disciples.Engine"
+        Icon="resm:Disciples.Avalonia.Assets.Icon.ico"
+        WindowState="Maximized" Background="Black" HasSystemDecorations="False" CanResize="False"
+        Title="Avalonia Disciples II">
+
+  <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
+        HorizontalAlignment="Center" VerticalAlignment="Center">
+    <battle:BattleView DataContext="{Binding ViewContext}" />
+  </Grid>
+</Window>
