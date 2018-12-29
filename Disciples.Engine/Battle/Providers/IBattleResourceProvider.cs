@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Avalonia.Media.Imaging;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Battle.Providers
@@ -26,6 +25,6 @@ namespace Disciples.Engine.Battle.Providers
         /// Получить случайный фон для поля боя.
         /// </summary>
         /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
-        IReadOnlyList<Bitmap> GetRandomBattleground();
+        IReadOnlyList<IBitmap> GetRandomBattleground();
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
-
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Controllers;
@@ -11,7 +8,8 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Engine.Implementation.Controllers
 {
@@ -19,21 +17,24 @@ namespace Disciples.Engine.Implementation.Controllers
     public class VisualSceneController : IVisualSceneController
     {
         private readonly IGame _game;
-        private readonly IMapVisual _mapVisual;
+        private readonly IScene _scene;
         private readonly ITextProvider _textProvider;
+        private readonly ISceneObjectFactory _sceneObjectFactory;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
 
         public VisualSceneController(
             IGame game,
-            IMapVisual mapVisual,
+            IScene scene,
             ITextProvider textProvider,
+            ISceneObjectFactory sceneObjectFactory,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             IBattleInterfaceProvider battleInterfaceProvider)
         {
             _game = game;
-            _mapVisual = mapVisual;
+            _scene = scene;
             _textProvider = textProvider;
+            _sceneObjectFactory = sceneObjectFactory;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _battleInterfaceProvider = battleInterfaceProvider;
         }
@@ -42,7 +43,7 @@ namespace Disciples.Engine.Implementation.Controllers
         /// <inheritdoc />
         public AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
         {
-            var animation = new AnimationObject(_mapVisual, frames, x, y, layer, repeat);
+            var animation = new AnimationObject(this, frames, x, y, layer, repeat);
             _game.CreateObject(animation);
 
             return animation;
@@ -55,91 +56,93 @@ namespace Disciples.Engine.Implementation.Controllers
         }
 
         /// <inheritdoc />
-        public ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
+        public ButtonObject AddButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
-            var button = new ButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey);
+            var button = new ButtonObject(this, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(button);
 
             return button;
         }
 
         /// <inheritdoc />
-        public ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
+        public ToggleButtonObject AddToggleButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
-            var toggleButton = new ToggleButtonObject(_mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey);
+            var toggleButton = new ToggleButtonObject(this, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(toggleButton);
 
             return toggleButton;
         }
 
         /// <inheritdoc />
-        public ImageVisualObject AddImageVisual(Bitmap bitmap, double x, double y, int layer)
+        public IImageSceneObject AddImage(int layer)
         {
-            return AddImageVisual(bitmap, bitmap.PixelSize.Width, bitmap.PixelSize.Height, x, y, layer);
-        }
+            var imageVisual = _sceneObjectFactory.CreateImageSceneObject(layer);
 
-        /// <inheritdoc />
-        public ImageVisualObject AddImageVisual(Bitmap bitmap, double width, double height, double x, double y, int layer)
-        {
-            var imageVisual = new ImageVisualObject(layer) {
-                X = x,
-                Y = y,
-                Width = width,
-                Height = height,
-                Bitmap = bitmap
-            };
-
-            _mapVisual.AddVisual(imageVisual);
+            _scene.AddSceneObject(imageVisual);
             return imageVisual;
         }
 
         /// <inheritdoc />
-        public ImageVisualObject AddColorImageVisual(GameColor color, double width, double height, double x, double y, int layer)
+        public IImageSceneObject AddImage(IBitmap bitmap, double x, double y, int layer)
         {
-            return AddImageVisual(_battleInterfaceProvider.GetColorBitmap(color), width, height, x, y, layer);
+            return AddImage(bitmap, bitmap.Width, bitmap.Height, x, y, layer);
         }
 
         /// <inheritdoc />
-        public TextVisualObject AddTextVisual(string text, double fontSize, double x, double y, int layer, bool isBold = false)
+        public IImageSceneObject AddImage(IBitmap bitmap, double width, double height, double x, double y, int layer)
         {
-            return AddTextVisual(text, fontSize, x, y, layer, double.NaN, TextAlignment.Left, isBold);
+            var imageVisual = _sceneObjectFactory.CreateImageSceneObject(layer);
+            imageVisual.X = x;
+            imageVisual.Y = y;
+            imageVisual.Width = width;
+            imageVisual.Height = height;
+            imageVisual.Bitmap = bitmap;
+
+            _scene.AddSceneObject(imageVisual);
+            return imageVisual;
         }
 
         /// <inheritdoc />
-        public TextVisualObject AddTextVisual(string text, double fontSize, double x, double y, int layer, double width,
-            TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
+        public IImageSceneObject AddColorImage(GameColor color, double width, double height, double x, double y, int layer)
         {
-            var textVisual = new TextVisualObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor)
-            {
-                X = x,
-                Y = y
-            };
+            return AddImage(_battleInterfaceProvider.GetColorBitmap(color), width, height, x, y, layer);
+        }
 
-            _mapVisual.AddVisual(textVisual);
+        /// <inheritdoc />
+        public ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, bool isBold = false)
+        {
+            return AddText(text, fontSize, x, y, layer, double.NaN, TextAlignment.Left, isBold);
+        }
+
+        public ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
+            TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null)
+        {
+            var textVisual = _sceneObjectFactory.CreateTextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);
+            textVisual.X = x;
+            textVisual.Y = y;
+
+            _scene.AddSceneObject(textVisual);
             return textVisual;
         }
 
-        /// <inheritdoc />
-        public UnitInfoTextVisualObject AddUnitInfoTextVisualObject(Func<Unit, string> textGetter, double fontSize,
-            int x, int y, int layer, bool isBold = false)
-        {
-            var unitInfoTextVisual = new UnitInfoTextVisualObject(textGetter, fontSize, layer, isBold) {
-                X = x,
-                Y = y
-            };
-
-            _mapVisual.AddVisual(unitInfoTextVisual);
-            return unitInfoTextVisual;
-        }
 
 
         /// <inheritdoc />
         public BattleUnit AddBattleUnit(Unit unit, bool isAttacker)
         {
-            var battleUnit = new BattleUnit(_mapVisual, _battleUnitResourceProvider, unit, isAttacker);
+            var battleUnit = new BattleUnit(this, _battleUnitResourceProvider, unit, isAttacker);
             _game.CreateObject(battleUnit);
 
             return battleUnit;
+        }
+
+        /// <inheritdoc />
+        public BattleUnitInfoGameObject AddBattleUnitInfo(int x, int y, int layer)
+        {
+            var battleUnitInfoObject = new BattleUnitInfoGameObject(this, x, y, layer);
+            _game.CreateObject(battleUnitInfoObject);
+
+            return battleUnitInfoObject;
         }
 
         /// <inheritdoc />
@@ -163,12 +166,12 @@ namespace Disciples.Engine.Implementation.Controllers
 
 
         /// <inheritdoc />
-        public void RemoveVisualObject(VisualObject visualObject)
+        public void RemoveSceneObject(ISceneObject sceneObject)
         {
-            if (visualObject == null)
+            if (sceneObject == null)
                 return;
 
-            _mapVisual.RemoveVisual(visualObject);
+            _scene.RemoveSceneObject(sceneObject);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Models;
@@ -8,16 +9,19 @@ using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Battle.Components
 {
-    public class BattleUnitAnimationComponent : Component
+    /// <summary>
+    /// Компонент для создания анимации юнита.
+    /// </summary>
+    public class BattleUnitAnimationComponent : BaseComponent
     {
         private const int FRAME_CHANGE_SPEED = 75;
 
         private readonly BattleUnit _battleUnit;
-        private readonly IMapVisual _mapVisual;
+        private readonly IVisualSceneController _visualSceneController;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly string _unitId;
 
@@ -28,19 +32,20 @@ namespace Disciples.Engine.Battle.Components
         private IReadOnlyList<Frame> _unitFrames;
         private IReadOnlyList<Frame> _auraFrames;
 
-        private ImageVisualObject _shadowVisual;
-        private ImageVisualObject _unitVisual;
-        private ImageVisualObject _auraVisual;
+        private IImageSceneObject _shadowVisual;
+        private IImageSceneObject _unitVisual;
+        private IImageSceneObject _auraVisual;
 
 
+        /// <inheritdoc />
         public BattleUnitAnimationComponent(
             BattleUnit battleUnit,
-            IMapVisual mapVisual,
+            IVisualSceneController visualSceneController,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             string unitId) : base(battleUnit)
         {
             _battleUnit = battleUnit;
-            _mapVisual = mapVisual;
+            _visualSceneController = visualSceneController;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _unitId = unitId;
 
@@ -63,26 +68,40 @@ namespace Disciples.Engine.Battle.Components
         }
 
 
+        /// <summary>
+        /// Вся информация об анимации юнита.
+        /// </summary>
         public BattleUnitAnimation BattleUnitAnimation { get; private set; }
 
+        /// <summary>
+        /// Индекс текущего кадра в анимации.
+        /// </summary>
         public int FrameIndex { get; private set; }
 
+        /// <summary>
+        /// Количество кадров в анимации.
+        /// </summary>
         public int FramesCount { get; private set; }
 
+        /// <summary>
+        /// Слой, на котором располагается юнит.
+        /// </summary>
         public int Layer { get; }
 
 
+        /// <inheritdoc />
         public override void OnInitialize()
         {
             base.OnInitialize();
 
             BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleUnit.Direction);
 
-            // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно
+            // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно.
             FrameIndex = RandomGenerator.Next(BattleUnitAnimation.BattleUnitFrames[_battleUnit.Action].UnitFrames.Count);
             UpdateSource();
         }
 
+        /// <inheritdoc />
         public override void OnUpdate(long tickCount)
         {
             if (_battleUnit.Action != _action) {
@@ -97,7 +116,7 @@ namespace Disciples.Engine.Battle.Components
 
             ++FrameIndex;
             // todo Хреновая реализация контроллера анимации.
-            // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания и смерти
+            // Предполагается, что любая анимация будет выполняться только 1 раз, кроме анимации ожидания и смерти.
             if (FrameIndex >= FramesCount && _action != BattleAction.Waiting && _action != BattleAction.Dead) {
                 _battleUnit.Action = BattleAction.Waiting;
                 return;
@@ -112,7 +131,7 @@ namespace Disciples.Engine.Battle.Components
         }
 
 
-        private static void UpdateBitmap(ImageVisualObject imageVisual, IReadOnlyList<Frame> frames, int frameIndex)
+        private static void UpdateBitmap(IImageSceneObject imageVisual, IReadOnlyList<Frame> frames, int frameIndex)
         {
             if (imageVisual == null)
                 return;
@@ -140,20 +159,19 @@ namespace Disciples.Engine.Battle.Components
             FramesCount = _unitFrames.Count;
         }
 
-        private void UpdatePosition(ref ImageVisualObject imageVisual, IReadOnlyList<Frame> frames, int layer)
+        private void UpdatePosition(ref IImageSceneObject imageVisual, IReadOnlyList<Frame> frames, int layer)
         {
             if (frames == null) {
                 if (imageVisual != null) {
                     // todo Здесь происходит удаление.
                     // Возможно, просто достаточно перенести в невидимую область
-                    _mapVisual.RemoveVisual(imageVisual);
+                    _visualSceneController.RemoveSceneObject(imageVisual);
                     imageVisual = null;
                 }
             }
             else {
                 if (imageVisual == null) {
-                    imageVisual = new ImageVisualObject(layer);
-                    _mapVisual.AddVisual(imageVisual);
+                    imageVisual = _visualSceneController.AddImage(layer);
                 }
 
                 var frame = frames[FrameIndex];

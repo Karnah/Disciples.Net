@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Common\Disciples.Common.csproj" />
+    <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.ResourceProvider\Disciples.ResourceProvider.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
   </ItemGroup>

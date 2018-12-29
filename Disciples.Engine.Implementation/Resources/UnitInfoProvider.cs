@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 
-using Avalonia.Media.Imaging;
-
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.ResourceProvider;
 using Disciples.Engine.Implementation.Helpers;
+using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Engine.Implementation.Resources
 {
     public class UnitInfoProvider : IUnitInfoProvider
     {
         private readonly ITextProvider _textProvider;
+        private readonly IBitmapFactory _bitmapFactory;
         private readonly DataExtractor _dataExtractor;
         private readonly ImagesExtractor _facesExtractor;
         private readonly ImagesExtractor _portraitExtractor;
@@ -23,9 +23,10 @@ namespace Disciples.Engine.Implementation.Resources
         private SortedDictionary<string, Attack> _attacks;
         private SortedDictionary<string, UnitType> _units;
 
-        public UnitInfoProvider(ITextProvider textProvider)
+        public UnitInfoProvider(ITextProvider textProvider, IBitmapFactory bitmapFactory)
         {
             _textProvider = textProvider;
+            _bitmapFactory = bitmapFactory;
 
             _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
             _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
@@ -137,9 +138,9 @@ namespace Disciples.Engine.Implementation.Resources
 
             // Лицо юнита дополнительно обрабатывать не надо.
             // Кроме того, там есть проблемы с некоторым портретами, если их получать обычным путём.
-            var face = new Lazy<Bitmap>(() => _facesExtractor.GetFileContent($"{unitId}FACE").ToBitmap());
-            var battleFace = new Lazy<Bitmap>(() => _facesExtractor.GetImage($"{unitId}FACEB").ToBitmap());
-            var portrait = new Lazy<Bitmap>(() => _portraitExtractor.GetImage(unitId.ToUpper()).ToOriginalBitmap());
+            var face = new Lazy<IBitmap>(() => _bitmapFactory.FromByteArray(_facesExtractor.GetFileContent($"{unitId}FACE")));
+            var battleFace = new Lazy<IBitmap>(() => _bitmapFactory.FromRawToBitmap(_facesExtractor.GetImage($"{unitId}FACEB")));
+            var portrait = new Lazy<IBitmap>(() => _bitmapFactory.FromRawToOriginalBitmap(_portraitExtractor.GetImage(unitId.ToUpper())));
 
             var unit = new UnitType(
                 unitId,

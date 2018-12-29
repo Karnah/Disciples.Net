@@ -4,11 +4,13 @@
              xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
              xmlns:controls="clr-namespace:Disciples.Avalonia.Common.Controls"
              xmlns:model="clr-namespace:Disciples.Engine.Common.Models;assembly=Disciples.Engine"
-             xmlns:vo="clr-namespace:Disciples.Engine.Common.VisualObjects;assembly=Disciples.Engine"
-             xmlns:views="clr-namespace:Disciples.Avalonia.Common.Views">
+             xmlns:vo="clr-namespace:Disciples.Engine.Common.SceneObjects;assembly=Disciples.Engine">
     <UserControl.Resources>
         <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
         <c:BitmapToBrushConverter x:Key="BitmapToBrushConverter" />
+        <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
+        <c:GameColorToBrushConverter x:Key="GameColorToBrushConverter" />
+        <c:TextAlignmentConverter x:Key="TextAlignmentConverter" />
     </UserControl.Resources>
 
     <UserControl.Styles>
@@ -19,18 +21,25 @@
         </Style>
     </UserControl.Styles>
 
-    <ItemsControl Items="{Binding MapVisual.Visuals}">
+    <ItemsControl Items="{Binding Scene.SceneObjects}">
         <ItemsControl.DataTemplates>
-            <DataTemplate DataType="{x:Type vo:ImageVisualObject}">
+            <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
                 <Image Stretch="Fill"
-                        Source="{Binding Bitmap}"
-                        Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
-                        Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
-                        RenderTransform="{Binding Transform}" />
+                       Source="{Binding Bitmap.BitmapData}"
+                       Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                       Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                       RenderTransform="{Binding IsReflected, Converter={StaticResource ReflectedToRenderTransformConverter}}" />
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type vo:TextVisualObject}">
-                <views:TextVisualObjectView TextVisualObject="{Binding }" />
+            <DataTemplate DataType="{x:Type vo:ITextSceneObject}">
+                <TextBlock TextWrapping="Wrap"
+                           TextAlignment="{Binding TextAlignment, Converter={StaticResource TextAlignmentConverter}}"
+                           FontSize="{Binding FontSize, Converter={StaticResource DoubleScaleConverter}}"
+                           FontWeight="{Binding IsBold, Converter={StaticResource BoldFontConverter}}"
+                           Foreground="{Binding Foreground, Converter={StaticResource GameColorToBrushConverter}}"
+                           Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                           Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                           Text="{Binding Text}" />
             </DataTemplate>
         </ItemsControl.DataTemplates>
 

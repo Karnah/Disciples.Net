@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Avalonia.Media.Imaging;
+
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 
@@ -14,14 +14,14 @@ namespace Disciples.Engine.Common.GameObjects
         private bool _isChecked;
 
         public ToggleButtonObject(
-            IMapVisual mapVisual,
-            IDictionary<ButtonState, Bitmap> buttonStates,
+            IVisualSceneController visualSceneController,
+            IDictionary<ButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
             double y,
             int layer,
             KeyboardButton? hotkey = null)
-            : base(mapVisual, buttonStates, buttonPressedAction, x, y, layer, hotkey)
+            : base(visualSceneController, buttonStates, buttonPressedAction, x, y, layer, hotkey)
         {
             _isChecked = false;
         }

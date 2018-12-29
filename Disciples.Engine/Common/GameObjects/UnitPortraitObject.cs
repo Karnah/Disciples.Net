@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Media;
+
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
@@ -9,7 +9,7 @@ using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Common.GameObjects
 {
@@ -45,35 +45,35 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Картинка с портретом юнита.
         /// </summary>
-        private ImageVisualObject _unitPortrait;
+        private IImageSceneObject _unitPortrait;
         /// <summary>
         /// Изображение, отображающий полученный юнитом урон (красный прямоугольник поверх портрета).
         /// </summary>
-        private ImageVisualObject _unitDamageImage;
+        private IImageSceneObject _unitDamageImage;
         /// <summary>
         /// Иконка умершего юнита.
         /// </summary>
-        private ImageVisualObject _deathIcon;
+        private IImageSceneObject _deathIcon;
         /// <summary>
         /// Изображение, отображающий моментальный эффект.
         /// </summary>
-        private ImageVisualObject _momentalEffectImage;
+        private IImageSceneObject _momentalEffectImage;
         /// <summary>
         /// Изображение с текстом моментального эффекта.
         /// </summary>
-        private TextVisualObject _momentalEffectText;
+        private ITextSceneObject _momentalEffectText;
         /// <summary>
         /// Текст, отображающий текущее количество здоровья и максимальное.
         /// </summary>
-        private TextVisualObject _unitHitpoints;
+        private ITextSceneObject _unitHitpoints;
         /// <summary>
         /// Картинка-разделитель на панели для больших существ.
         /// </summary>
-        private ImageVisualObject _unitPanelSeparator;
+        private IImageSceneObject _unitPanelSeparator;
         /// <summary>
         /// Иконки эффектов, которые воздействуют на юнита.
         /// </summary>
-        private Dictionary<UnitBattleEffectType, ImageVisualObject> _battleEffectsIcons;
+        private Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsIcons;
         /// <summary>
         /// Количество ОЗ, которое было при предыдущей проверке.
         /// </summary>
@@ -96,10 +96,10 @@ namespace Disciples.Engine.Common.GameObjects
 
             Unit = unit;
 
-            Width = Unit.UnitType.Face.PixelSize.Width;
-            Height = Unit.UnitType.Face.PixelSize.Height;
+            Width = Unit.UnitType.Face.Width;
+            Height = Unit.UnitType.Face.Height;
 
-            _battleEffectsIcons = new Dictionary<UnitBattleEffectType, ImageVisualObject>();
+            _battleEffectsIcons = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
         }
 
 
@@ -117,17 +117,15 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _unitPortrait = _visualSceneController.AddImageVisual(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
-            if (_rightToLeft) {
-                _unitPortrait.Transform = new ScaleTransform(-1, 1);
-            }
+            _unitPortrait = _visualSceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
+            _unitPortrait.IsReflected = _rightToLeft;
 
-            _unitHitpoints = _visualSceneController.AddTextVisual(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
+            _unitHitpoints = _visualSceneController.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
             // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
             if (!Unit.UnitType.SizeSmall) {
-                _unitPanelSeparator = _visualSceneController.AddImageVisual(
+                _unitPanelSeparator = _visualSceneController.AddImage(
                     _battleInterfaceProvider.PanelSeparator,
-                    X + (Width - _battleInterfaceProvider.PanelSeparator.PixelSize.Width) / 2 - 1,
+                    X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
                     Y + Height - 1,
                     INTERFACE_LAYER);
             }
@@ -145,16 +143,16 @@ namespace Disciples.Engine.Common.GameObjects
         /// <inheritdoc />
         public override void Destroy()
         {
-            RemoveVisual(ref _unitPortrait);
-            RemoveVisual(ref _unitHitpoints);
-            RemoveVisual(ref _deathIcon);
-            RemoveVisual(ref _momentalEffectImage);
-            RemoveVisual(ref _momentalEffectText);
-            RemoveVisual(ref _unitDamageImage);
-            RemoveVisual(ref _unitPanelSeparator);
+            RemoveSceneObject(ref _unitPortrait);
+            RemoveSceneObject(ref _unitHitpoints);
+            RemoveSceneObject(ref _deathIcon);
+            RemoveSceneObject(ref _momentalEffectImage);
+            RemoveSceneObject(ref _momentalEffectText);
+            RemoveSceneObject(ref _unitDamageImage);
+            RemoveSceneObject(ref _unitPanelSeparator);
 
             foreach (var battleEffectsIcon in _battleEffectsIcons) {
-                _visualSceneController.RemoveVisualObject(battleEffectsIcon.Value);
+                _visualSceneController.RemoveSceneObject(battleEffectsIcon.Value);
             }
 
             base.Destroy();
@@ -176,18 +174,18 @@ namespace Disciples.Engine.Common.GameObjects
                 if (_deathIcon == null) {
                     // Картинку выравниваем по ширине.
                     var deathScull = _battleInterfaceProvider.DeathSkull;
-                    var widthOffset = (Width - deathScull.PixelSize.Width) / 2;
-                    _deathIcon = _visualSceneController.AddImageVisual(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y, INTERFACE_LAYER + 3);
+                    var widthOffset = (Width - deathScull.Width) / 2;
+                    _deathIcon = _visualSceneController.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y, INTERFACE_LAYER + 3);
                     _unitHitpoints.Text = $"0/{Unit.UnitType.HitPoints}";
 
-                    RemoveVisual(ref _unitDamageImage);
+                    RemoveSceneObject(ref _unitDamageImage);
                 }
             }
             else if (_lastUnitHitPoints != Unit.HitPoints) {
                 _lastUnitHitPoints = Unit.HitPoints;
                 _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.UnitType.HitPoints}";
 
-                RemoveVisual(ref _unitDamageImage);
+                RemoveSceneObject(ref _unitDamageImage);
 
                 var height = (1 - ((double)_lastUnitHitPoints / Unit.UnitType.HitPoints)) * Height;
                 if (height > 0) {
@@ -195,7 +193,7 @@ namespace Disciples.Engine.Common.GameObjects
                     var x = _unitPortrait.X;
                     var y = _unitPortrait.Y + (Height - height);
 
-                    _unitDamageImage = _visualSceneController.AddColorImageVisual(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                    _unitDamageImage = _visualSceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
                 }
             }
         }
@@ -213,10 +211,10 @@ namespace Disciples.Engine.Common.GameObjects
                     continue;
 
                 var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
-                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImageVisual(
+                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImage(
                     icon,
-                    X + (Width - icon.PixelSize.Width) / 2,
-                    Y + Height - icon.PixelSize.Height,
+                    X + (Width - icon.Width) / 2,
+                    Y + Height - icon.Height,
                     INTERFACE_LAYER + 4));
             }
 
@@ -226,7 +224,7 @@ namespace Disciples.Engine.Common.GameObjects
                 .ToList();
             foreach (var expiredEffect in expiredEffects) {
                 var effectIcon = _battleEffectsIcons[expiredEffect.Key];
-                _visualSceneController.RemoveVisualObject(effectIcon);
+                _visualSceneController.RemoveSceneObject(effectIcon);
                 _battleEffectsIcons.Remove(expiredEffect.Key);
             }
         }
@@ -244,8 +242,8 @@ namespace Disciples.Engine.Common.GameObjects
 
             // Обрабатываем действующий мгновенный эффект.
             if (Unit.Effects.MomentalEffectEnded) {
-                RemoveVisual(ref _momentalEffectImage);
-                RemoveVisual(ref _momentalEffectText);
+                RemoveSceneObject(ref _momentalEffectImage);
+                RemoveSceneObject(ref _momentalEffectText);
 
                 // Сбрасываем количество ХП, чтобы обновить рамку.
                 _lastUnitHitPoints = int.MaxValue;
@@ -289,31 +287,31 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Добавить на портрет изображение указанного цвета.
         /// </summary>
-        private ImageVisualObject AddColorImage(GameColor color)
+        private IImageSceneObject AddColorImage(GameColor color)
         {
             // Если мы добавляем изображение поверх портрета, то должны на время очистить изображение с % здоровья.
-            RemoveVisual(ref _unitDamageImage);
+            RemoveSceneObject(ref _unitDamageImage);
 
-            return _visualSceneController.AddColorImageVisual(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
+            return _visualSceneController.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
         }
 
         /// <summary>
         /// Добавить на портрет указанный текст.
         /// </summary>
-        private TextVisualObject AddText(string text)
+        private ITextSceneObject AddText(string text)
         {
-            return _visualSceneController.AddTextVisual(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: Colors.White);
+            return _visualSceneController.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
         }
 
         /// <summary>
         /// Удалить визуальный объект со сцены и очистить ссылку.
         /// </summary>
         /// <typeparam name="T">Тип объекта.</typeparam>
-        /// <param name="visualObject">Объект, который необходимо удалить.</param>
-        private void RemoveVisual<T>(ref T visualObject) where T : VisualObject
+        /// <param name="sceneObject">Объект, который необходимо удалить.</param>
+        private void RemoveSceneObject<T>(ref T sceneObject) where T : ISceneObject
         {
-            _visualSceneController.RemoveVisualObject(visualObject);
-            visualObject = null;
+            _visualSceneController.RemoveSceneObject(sceneObject);
+            sceneObject = default(T);
         }
     }
 }

@@ -4,7 +4,7 @@ using Disciples.Engine.Common.Models;
 namespace Disciples.Engine.Battle.Models
 {
     /// <summary>
-    /// Класс анимации, которая применяется к атакуемому юниту (например, удары магов или лечение целителей)
+    /// Класс анимации, которая применяется к атакуемому юниту (например, удары магов или лечение целителей).
     /// </summary>
     public class BattleUnitTargetAnimation
     {
@@ -16,12 +16,12 @@ namespace Disciples.Engine.Battle.Models
 
 
         /// <summary>
-        /// Анимация применяется к одному юниту, а не к площади
+        /// Анимация применяется к одному юниту, а не к площади.
         /// </summary>
         public bool IsSingle { get; }
 
         /// <summary>
-        /// Кадры анимации
+        /// Кадры анимации.
         /// </summary>
         public IReadOnlyList<Frame> Frames { get; }
     }

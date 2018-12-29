@@ -6,6 +6,16 @@
     public enum GameColor
     {
         /// <summary>
+        /// Черный.
+        /// </summary>
+        Black,
+
+        /// <summary>
+        /// Белый.
+        /// </summary>
+        White,
+
+        /// <summary>
         /// Красный.
         /// </summary>
         /// <remarks>Используется для отображения количества нанесённого урона юниту.</remarks>

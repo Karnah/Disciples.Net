@@ -44,7 +44,7 @@ namespace Disciples.Avalonia.Battle
 
         public BattleViewModel(
             IGame game,
-            IMapVisual mapVisual,
+            IScene scene,
             IAudioController audioController,
             IBattleAttackController battleAttackController,
             IBattleInterfaceController battleInterfaceController)
@@ -53,7 +53,7 @@ namespace Disciples.Avalonia.Battle
             _audioController = audioController;
             _battleAttackController = battleAttackController;
 
-            MapVisual = mapVisual;
+            Scene = scene;
             InterfaceController = battleInterfaceController;
 
             // todo Библиотека слишком долго грузит и декодирует данные.
@@ -74,7 +74,7 @@ namespace Disciples.Avalonia.Battle
         /// <summary>
         /// Все объекты, которые отрисовываются на сцене.
         /// </summary>
-        public IMapVisual MapVisual { get; }
+        public IScene Scene { get; }
 
         /// <summary>
         /// Юниты, которые находятся на сцене.

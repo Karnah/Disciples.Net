@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Disciples.Engine.Platform</name>
+    </assembly>
+    <members>
+        <member name="T:Disciples.Engine.Platform.Factories.IBitmapFactory">
+            <summary>
+            Фабрика для создания изображений.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.IBitmapFactory.FromByteArray(System.Byte[])">
+            <summary>
+            Загрузить изображение из массива байт.
+            </summary>
+            <param name="bitmapData">Массив байт (формат предположительно PNG).</param>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.IBitmapFactory.FromFile(System.String)">
+            <summary>
+            Загрузить изображение из файла.
+            </summary>
+            <param name="filePath">Путь до файла.</param>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.IBitmapFactory.FromRawBitmap(Disciples.ResourceProvider.Models.RawBitmap,Disciples.Engine.Platform.Models.Bounds)">
+            <summary>
+            Конвертировать изображение из сырых данных.
+            </summary>
+            <param name="rawBitmap">Сырая информация об изображении.</param>
+            <param name="bounds">Границы изображения.</param>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.IBitmapFactory.SaveToFile(Disciples.Engine.IBitmap,System.String)">
+            <summary>
+            Сохранить изображение в файл на диске.
+            </summary>
+            <param name="bitmap">Изображение, которое необходимо сохранить.</param>
+            <param name="filePath">Путь до файла.</param>
+            <remarks>
+            TODO Используется только для тестов и подготовки данных.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Factories.ISceneObjectFactory">
+            <summary>
+            Фабрика для создания объектов, которые отрисовываются на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateImageSceneObject(System.Int32)">
+            <summary>
+            Создать пустое изображение, которое отображается на сцене.
+            </summary>
+            <param name="layer">Слой, на котором изображение будет отображаться.</param>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Boolean)">
+            <summary>
+            Создать текст, который будет отображаться на сцене.
+            </summary>
+            <param name="text">Текст.</param>
+            <param name="fontSize">Размер шрифта.</param>
+            <param name="layer">Слой, на котором будет отображаться текст.</param>
+            <param name="isBold">Использовать жирный шрифт.</param>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Double,Disciples.Engine.Common.Enums.TextAlignment,System.Boolean,System.Nullable{Disciples.Engine.Common.Enums.GameColor})">
+            <summary>
+            Создать текст, который будет отображаться на сцене.
+            </summary>
+            <param name="text">Текст.</param>
+            <param name="fontSize">Размер шрифта.</param>
+            <param name="layer">Слой, на котором будет отображаться текст.</param>
+            <param name="width">Ширина пространства, занимаемого текстом.</param>
+            <param name="textAlignment">Выравнивание текста по ширине.</param>
+            <param name="isBold">Использовать жирный шрифт.</param>
+            <param name="foregroundColor">Цвет шрифта.</param>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Models.Bounds">
+            <summary>
+            Информация о границах.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Models.Bounds.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Bounds.MinRow">
+            <summary>
+            Минимальная строка.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Bounds.MaxRow">
+            <summary>
+            Максимальная строка.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Bounds.MinColumn">
+            <summary>
+            Минимальная колонка.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Bounds.MaxColumn">
+            <summary>
+            Максимальная колонка.
+            </summary>
+        </member>
+    </members>
+</doc>

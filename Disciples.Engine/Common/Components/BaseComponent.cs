@@ -1,15 +1,15 @@
 ﻿using System;
+
 using Disciples.Engine.Common.Exceptions;
 using Disciples.Engine.Common.GameObjects;
-using ReactiveUI;
 
 namespace Disciples.Engine.Common.Components
 {
-    public abstract class Component : ReactiveObject, IComponent
+    public abstract class BaseComponent : IComponent
     {
         protected readonly GameObject GameObject;
 
-        protected Component(GameObject gameObject)
+        protected BaseComponent(GameObject gameObject)
         {
             GameObject = gameObject;
         }

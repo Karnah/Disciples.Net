@@ -1,14 +1,10 @@
-﻿using ReactiveUI;
-
-namespace Disciples.Engine.Common.Models
+﻿namespace Disciples.Engine.Common.Models
 {
     /// <summary>
     /// Информация о конкретном юните.
     /// </summary>
-    public class Unit : ReactiveObject
+    public class Unit
     {
-        private int _hitPoints;
-
         public Unit(string id, UnitType unitType, Player player, int squadLinePosition, int squadFlankPosition)
         {
             Id = id;
@@ -71,10 +67,7 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Количество оставшихся очков здоровья.
         /// </summary>
-        public int HitPoints {
-            get => _hitPoints;
-            private set => this.RaiseAndSetIfChanged(ref _hitPoints, value);
-        }
+        public int HitPoints { get; set; }
 
         /// <summary>
         /// Максимальное количество очков здоровья.

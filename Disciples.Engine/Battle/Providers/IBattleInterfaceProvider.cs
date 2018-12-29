@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Avalonia.Media.Imaging;
+
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
@@ -15,74 +15,74 @@ namespace Disciples.Engine.Battle.Providers
         /// Фон поля боя.
         /// </summary>
         /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
-        IReadOnlyList<Bitmap> Battleground { get; }
+        IReadOnlyList<IBitmap> Battleground { get; }
 
         /// <summary>
         /// Картинка правой панели с юнитами.
         /// </summary>
-        Bitmap RightPanel { get; }
+        IBitmap RightPanel { get; }
 
         /// <summary>
         /// Картинка нижней панели.
         /// </summary>
-        Bitmap BottomPanel { get; }
+        IBitmap BottomPanel { get; }
 
         /// <summary>
         /// Картинка-разделитель для панели юнитов.
         /// </summary>
-        Bitmap PanelSeparator { get; }
+        IBitmap PanelSeparator { get; }
 
         /// <summary>
         /// Иконка умершего юнита.
         /// </summary>
-        Bitmap DeathSkull { get; }
+        IBitmap DeathSkull { get; }
 
         /// <summary>
         /// Задний фон для подробной информации о юните (раскрытый свиток).
         /// </summary>
-        Bitmap UnitInfoBackground { get; }
+        IBitmap UnitInfoBackground { get; }
 
         /// <summary>
         /// Иконки для эффектов, воздействующих на юнита.
         /// </summary>
-        IDictionary<UnitBattleEffectType, Bitmap> UnitBattleEffectsIcon { get; }
+        IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; }
 
 
         /// <summary>
         /// Иконки для кнопки переключения правой панели юнитов.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> ToggleRightButton { get; }
+        IDictionary<ButtonState, IBitmap> ToggleRightButton { get; }
 
         /// <summary>
         /// Иконки для кнопки защиты.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> DefendButton { get; }
+        IDictionary<ButtonState, IBitmap> DefendButton { get; }
 
         /// <summary>
         /// Иконки для кнопки отступления.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> RetreatButton { get; }
+        IDictionary<ButtonState, IBitmap> RetreatButton { get; }
 
         /// <summary>
         /// Иконки для кнопки ожидания.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> WaitButton { get; }
+        IDictionary<ButtonState, IBitmap> WaitButton { get; }
 
         /// <summary>
         /// Иконки для мгновенного завершения битвы.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> InstantResolveButton { get; }
+        IDictionary<ButtonState, IBitmap> InstantResolveButton { get; }
 
         /// <summary>
         /// Иконки для автоматической битвы.
         /// </summary>
-        IDictionary<ButtonState, Bitmap> AutoBattleButton { get; }
+        IDictionary<ButtonState, IBitmap> AutoBattleButton { get; }
 
 
         /// <summary>
         /// Получить изображение указанного цвета.
         /// </summary>
-        Bitmap GetColorBitmap(GameColor color);
+        IBitmap GetColorBitmap(GameColor color);
 
 
         /// <summary>

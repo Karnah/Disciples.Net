@@ -1,14 +1,13 @@
 ﻿using System;
-using Avalonia.Media.Imaging;
 using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models
 {
     public class UnitType
     {
-        private readonly Lazy<Bitmap> _face;
-        private readonly Lazy<Bitmap> _battleFace;
-        private readonly Lazy<Bitmap> _portrait;
+        private readonly Lazy<IBitmap> _face;
+        private readonly Lazy<IBitmap> _battleFace;
+        private readonly Lazy<IBitmap> _portrait;
 
         // todo перепилить под рефлектор.
         public UnitType(
@@ -40,9 +39,9 @@ namespace Disciples.Engine.Common.Models
             string upgradeBuilding,
             int xpNext,
             int deathAnimationId,
-            Lazy<Bitmap> face,
-            Lazy<Bitmap> battleFace,
-            Lazy<Bitmap> portrait)
+            Lazy<IBitmap> face,
+            Lazy<IBitmap> battleFace,
+            Lazy<IBitmap> portrait)
         {
             UnitTypeId = unitTypeId;
             UnitCategory = unitCategory;
@@ -222,16 +221,16 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Картинка лица юнита.
         /// </summary>
-        public Bitmap Face => _face.Value;
+        public IBitmap Face => _face.Value;
 
         /// <summary>
         /// Скруглённая картинка лица юнита, используется в битвах.
         /// </summary>
-        public Bitmap BattleFace => _battleFace.Value;
+        public IBitmap BattleFace => _battleFace.Value;
 
         /// <summary>
         /// Большой портрет юнита.
         /// </summary>
-        public Bitmap Portrait => _portrait.Value;
+        public IBitmap Portrait => _portrait.Value;
     }
 }

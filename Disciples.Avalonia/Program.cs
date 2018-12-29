@@ -7,6 +7,8 @@ using Unity;
 using Unity.Resolution;
 
 using Disciples.Avalonia.Battle;
+using Disciples.Avalonia.Platform.Controllers;
+using Disciples.Avalonia.Platform.Factories;
 using Disciples.Engine;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Controllers;
@@ -15,6 +17,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Controllers;
 using Disciples.Engine.Implementation.Resources;
+using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Avalonia
 {
@@ -78,6 +81,9 @@ namespace Disciples.Avalonia
             var logger = new Logger();
             Container.RegisterInstance<ILogger>(logger);
 
+            // Регистрируем фабрики.
+            Container.RegisterType<IBitmapFactory, BitmapFactory>();
+            Container.RegisterType<ISceneObjectFactory, SceneObjectFactory>();
 
             logger.Log("Start load TextProvider");
             var textProvider = Container.Resolve<TextProvider>();
@@ -111,7 +117,7 @@ namespace Disciples.Avalonia
             _game = Container.Resolve<Game>();
             Container.RegisterInstance<IGame>(_game);
 
-            Container.RegisterSingleton<IMapVisual, MapVisual>();
+            Container.RegisterSingleton<IScene, Scene>();
             Container.RegisterSingleton<IVisualSceneController, VisualSceneController>();
         }
 

@@ -6,8 +6,12 @@ using Avalonia.Media;
 
 namespace Disciples.Avalonia.Converters
 {
+    /// <summary>
+    /// Использовать жирный шрифт, если передано <see langword="true" />.
+    /// </summary>
     public class BoldFontConverter : IValueConverter
     {
+        /// <inheritdoc />
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool isBold) {
@@ -18,6 +22,7 @@ namespace Disciples.Avalonia.Converters
             return FontWeight.Normal;
         }
 
+        /// <inheritdoc />
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();

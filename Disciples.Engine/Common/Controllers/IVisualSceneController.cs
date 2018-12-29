@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
+
+using JetBrains.Annotations;
+
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
-using Disciples.Engine.Common.VisualObjects;
-using JetBrains.Annotations;
+using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Common.Controllers
 {
@@ -45,7 +45,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="y">Положение кнопки, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
         /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-        ButtonObject AddButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+        ButtonObject AddButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
         /// <summary>
         /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
@@ -56,7 +56,13 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="y">Положение кнопки, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
         /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-        ToggleButtonObject AddToggleButton(IDictionary<ButtonState, Bitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+        ToggleButtonObject AddToggleButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+
+        /// <summary>
+        /// Добавить пустое изображение на сцену.
+        /// </summary>
+        /// <param name="layer">Слой на котором будет отображаться изображение.</param>
+        IImageSceneObject AddImage(int layer);
 
         /// <summary>
         /// Добавить статичное изображение на сцену.
@@ -65,7 +71,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="x">Положение изображения, координата X.</param>
         /// <param name="y">Положение изображения, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-        ImageVisualObject AddImageVisual(Bitmap bitmap, double x, double y, int layer);
+        IImageSceneObject AddImage(IBitmap bitmap, double x, double y, int layer);
 
         /// <summary>
         /// Добавить статичное изображение указанных размеров на сцену.
@@ -76,7 +82,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="x">Положение изображения, координата X.</param>
         /// <param name="y">Положение изображения, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-        ImageVisualObject AddImageVisual(Bitmap bitmap, double width, double height, double x, double y, int layer);
+        IImageSceneObject AddImage(IBitmap bitmap, double width, double height, double x, double y, int layer);
 
         /// <summary>
         /// Добавить прямоугольник указанного цвета и размеров на сцену.
@@ -87,7 +93,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="x">Положение изображения, координата X.</param>
         /// <param name="y">Положение изображения, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-        ImageVisualObject AddColorImageVisual(GameColor color, double width, double height, double x, double y, int layer);
+        IImageSceneObject AddColorImage(GameColor color, double width, double height, double x, double y, int layer);
 
         /// <summary>
         /// Добавить текст на сцену.
@@ -98,7 +104,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="y">Положение текста, координата Y.</param>
         /// <param name="layer">Слой на котором будет отображаться текст.</param>
         /// <param name="isBold">Использовать жирный шрифт.</param>
-        TextVisualObject AddTextVisual(string text, double fontSize, double x, double y, int layer, bool isBold = false);
+        ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, bool isBold = false);
 
         /// <summary>
         /// Добавить текст на сцену.
@@ -112,20 +118,8 @@ namespace Disciples.Engine.Common.Controllers
         /// <param name="textAlignment">Выравнивание текста.</param>
         /// <param name="isBold">Использовать жирный шрифт.</param>
         /// <param name="foregroundColor">Цвет текста.</param>
-        TextVisualObject AddTextVisual(string text, double fontSize, double x, double y, int layer, double width,
-            TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null);
-
-        /// <summary>
-        /// Добавить текст с информацией о юните на сцену.
-        /// </summary>
-        /// <param name="textGetter">Функция, с помощью которой можно получить текст.</param>
-        /// <param name="fontSize">Размер шрифта.</param>
-        /// <param name="x">Положение текста, координата X.</param>
-        /// <param name="y">Положение текста, координата Y.</param>
-        /// <param name="layer">Слой на котором будет отображаться текст.</param>
-        /// <param name="isBold">Использовать жирный шрифт.</param>
-        UnitInfoTextVisualObject AddUnitInfoTextVisualObject(Func<Unit, string> textGetter, double fontSize,
-            int x, int y, int layer, bool isBold = false);
+        ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
+            TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null);
 
 
 
@@ -137,20 +131,26 @@ namespace Disciples.Engine.Common.Controllers
         BattleUnit AddBattleUnit(Unit unit, bool isAttacker);
 
         /// <summary>
+        /// Добавить текстовую информацию о юните на сцену битвы.
+        /// </summary>
+        /// <param name="x">Положение текста, координата X.</param>
+        /// <param name="y">Положение текста, координата Y.</param>
+        /// <param name="layer">Слой, на котором необходимо отображать текст.</param>
+        BattleUnitInfoGameObject AddBattleUnitInfo(int x, int y, int layer);
+
+        /// <summary>
         /// Добавить портрет юнита на сцену.
         /// </summary>
         /// <param name="unit">Юнит, чей портрет необходимо добавить.</param>
         /// <param name="rightToLeft">Указатель того, что юнит смотрит справа налево.</param>
         /// <param name="x">Положение портрета, координата X.</param>
         /// <param name="y">Положение портрета, координата Y.</param>
-        /// <returns></returns>
         UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y);
 
         /// <summary>
         /// Отобразить детальную информацию о юните.
         /// </summary>
         /// <param name="unit">Юнит, о котором необходимо вывести информацию.</param>
-        /// <returns></returns>
         DetailUnitInfoObject ShowDetailUnitInfo(Unit unit);
 
 
@@ -158,7 +158,7 @@ namespace Disciples.Engine.Common.Controllers
         /// <summary>
         /// Удалить указанный объект со сцены.
         /// </summary>
-        /// <param name="visualObject">Объект, который необходимо удалить.</param>
-        void RemoveVisualObject([CanBeNull]VisualObject visualObject);
+        /// <param name="sceneObject">Объект, который необходимо удалить.</param>
+        void RemoveSceneObject([CanBeNull]ISceneObject sceneObject);
     }
 }

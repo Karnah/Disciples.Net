@@ -8,6 +8,7 @@ using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Helpers;
+using Disciples.Engine.Platform.Factories;
 using Disciples.ResourceProvider;
 
 namespace Disciples.Engine.Implementation.Resources
@@ -26,14 +27,16 @@ namespace Disciples.Engine.Implementation.Resources
             "DEATH_ELF_S15"
         };
 
+        private readonly IBitmapFactory _bitmapFactory;
         private readonly IUnitInfoProvider _unitInfoProvider;
         private readonly IBattleResourceProvider _battleResourceProvider;
 
         private readonly SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations;
         private readonly ImagesExtractor _extractor;
 
-        public BattleUnitResourceProvider(IUnitInfoProvider unitInfoProvider, IBattleResourceProvider battleResourceProvider)
+        public BattleUnitResourceProvider(IBitmapFactory bitmapFactory, IUnitInfoProvider unitInfoProvider, IBattleResourceProvider battleResourceProvider)
         {
+            _bitmapFactory = bitmapFactory;
             _unitInfoProvider = unitInfoProvider;
             _battleResourceProvider = battleResourceProvider;
 
@@ -121,7 +124,7 @@ namespace Disciples.Engine.Implementation.Resources
         private IReadOnlyList<Frame> GetAnimationFrames(string fileName)
         {
             var images = _extractor.GetAnimationFrames(fileName);
-            return images?.ConvertToFrames();
+            return _bitmapFactory.ConvertToFrames(images);
         }
 
 

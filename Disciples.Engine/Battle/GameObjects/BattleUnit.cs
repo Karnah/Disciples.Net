@@ -22,8 +22,12 @@ namespace Disciples.Engine.Battle.GameObjects
         /// </summary>
         private const int BATTLE_UNIT_HEIGHT = 100;
 
-        public BattleUnit(IMapVisual mapVisual, IBattleUnitResourceProvider battleUnitResourceProvider, Unit unit, bool isAttacker)
-            : base(GetSceneUnitPosition(isAttacker, unit.SquadLinePosition, unit.SquadFlankPosition))
+        public BattleUnit(
+            IVisualSceneController visualSceneController,
+            IBattleUnitResourceProvider battleUnitResourceProvider,
+            Unit unit,
+            bool isAttacker
+            ) : base(GetSceneUnitPosition(isAttacker, unit.SquadLinePosition, unit.SquadFlankPosition))
         {
             Unit = unit;
             IsAttacker = isAttacker;
@@ -32,7 +36,7 @@ namespace Disciples.Engine.Battle.GameObjects
                 : BattleDirection.Defender;
             Action = BattleAction.Waiting;
 
-            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, mapVisual, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
+            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, visualSceneController, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
             this.Components = new IComponent[] { BattleUnitAnimationComponent };
 
             Width = BATTLE_UNIT_WIDTH;

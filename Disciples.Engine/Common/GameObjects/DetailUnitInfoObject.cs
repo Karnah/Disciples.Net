@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Avalonia.Media;
+
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Common.GameObjects
 {
@@ -40,12 +41,12 @@ namespace Disciples.Engine.Common.GameObjects
         private readonly IVisualSceneController _visualSceneController;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly ITextProvider _textProvider;
-        private readonly List<TextVisualObject> _unitInfo;
+        private readonly List<ITextSceneObject> _unitInfo;
 
-        private ImageVisualObject _unitInfoBackground;
-        private ImageVisualObject _unitPortret;
-        private TextVisualObject _unitName;
-        private TextVisualObject _unitDescription;
+        private IImageSceneObject _unitInfoBackground;
+        private IImageSceneObject _unitPortrait;
+        private ITextSceneObject _unitName;
+        private ITextSceneObject _unitDescription;
 
         /// <inheritdoc />
         public DetailUnitInfoObject(
@@ -58,10 +59,10 @@ namespace Disciples.Engine.Common.GameObjects
             _battleInterfaceProvider = battleInterfaceProvider;
             _textProvider = textProvider;
 
-            _unitInfo = new List<TextVisualObject>();
+            _unitInfo = new List<ITextSceneObject>();
 
-            X = ((double) GameInfo.OriginalWidth - _battleInterfaceProvider.UnitInfoBackground.PixelSize.Width) / 2;
-            Y = ((double) GameInfo.OriginalHeight - _battleInterfaceProvider.UnitInfoBackground.PixelSize.Height) / 2;
+            X = ((double) GameInfo.OriginalWidth - _battleInterfaceProvider.UnitInfoBackground.Width) / 2;
+            Y = ((double) GameInfo.OriginalHeight - _battleInterfaceProvider.UnitInfoBackground.Height) / 2;
 
             Unit = unit;
         }
@@ -81,18 +82,18 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _unitInfoBackground = _visualSceneController.AddImageVisual(
+            _unitInfoBackground = _visualSceneController.AddImage(
                 _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);
 
-            _unitPortret = _visualSceneController.AddImageVisual(
+            _unitPortrait = _visualSceneController.AddImage(
                 Unit.UnitType.Portrait,
                 X + 70,
                 Y + 10,
                 INTERFACE_LAYER + 1
             );
-            _unitName = _visualSceneController.AddTextVisual(
+            _unitName = _visualSceneController.AddText(
                 Unit.UnitType.Name, 11, X + 110, Y + 440, INTERFACE_LAYER + 1, 260, TextAlignment.Center, true);
-            _unitDescription = _visualSceneController.AddTextVisual(
+            _unitDescription = _visualSceneController.AddText(
                 Unit.UnitType.Description, 11, X + 110, Y + 440 + ROW_HEIGHT, INTERFACE_LAYER + 1, 260, TextAlignment.Left);
 
             _unitInfo.AddRange(GetUnitBaseInfo(UNIT_BASE_INFO_ID, 60, out var _));
@@ -106,9 +107,9 @@ namespace Disciples.Engine.Common.GameObjects
         /// <param name="textId">Идентификатор текста-паттерна в ресурсах.</param>
         /// <param name="verticalOffset">Расстояние по вертикали, с которого необходимо размещать текст.</param>
         /// <param name="endVerticalOffset">Расстояние до строки, где можно размещать текст ниже.</param>
-        private IReadOnlyList<TextVisualObject> GetUnitBaseInfo(string textId, int verticalOffset, out int endVerticalOffset)
+        private IReadOnlyList<ITextSceneObject> GetUnitBaseInfo(string textId, int verticalOffset, out int endVerticalOffset)
         {
-            var result = new List<TextVisualObject>();
+            var result = new List<ITextSceneObject>();
             var text = _textProvider.GetText(textId);
 
             endVerticalOffset = verticalOffset;
@@ -116,7 +117,7 @@ namespace Disciples.Engine.Common.GameObjects
             foreach (Match row in rows) {
                 var titlePattern = row.Groups["Title"].Value;
                 var title = ReplacePlaceholders(titlePattern.Trim());
-                var titleObject = _visualSceneController.AddTextVisual(
+                var titleObject = _visualSceneController.AddText(
                     title, 11, X + 400, Y + endVerticalOffset, INTERFACE_LAYER + 1, true);
                 result.Add(titleObject);
 
@@ -126,7 +127,7 @@ namespace Disciples.Engine.Common.GameObjects
                     ? valuePattern2
                     : valuePattern1;
                 var value = ReplacePlaceholders(valuePattern);
-                var valueObject = _visualSceneController.AddTextVisual(
+                var valueObject = _visualSceneController.AddText(
                     value, 11, X + 510, Y + endVerticalOffset, INTERFACE_LAYER + 1, 120, TextAlignment.Left);
                 result.Add(valueObject);
 
@@ -269,12 +270,12 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.Destroy();
 
-            _visualSceneController.RemoveVisualObject(_unitInfoBackground);
-            _visualSceneController.RemoveVisualObject(_unitPortret);
-            _visualSceneController.RemoveVisualObject(_unitName);
-            _visualSceneController.RemoveVisualObject(_unitDescription);
+            _visualSceneController.RemoveSceneObject(_unitInfoBackground);
+            _visualSceneController.RemoveSceneObject(_unitPortrait);
+            _visualSceneController.RemoveSceneObject(_unitName);
+            _visualSceneController.RemoveSceneObject(_unitDescription);
             foreach (var unitInfo in _unitInfo) {
-                _visualSceneController.RemoveVisualObject(unitInfo);
+                _visualSceneController.RemoveSceneObject(unitInfo);
             }
         }
     }

@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Avalonia.Media.Imaging;
-
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Helpers;
+using Disciples.Engine.Platform.Factories;
 using Disciples.ResourceProvider;
 using Disciples.ResourceProvider.Models;
 
@@ -18,15 +17,17 @@ namespace Disciples.Engine.Implementation.Resources
     public class BattleInterfaceProvider : IBattleInterfaceProvider
     {
         private readonly IBattleResourceProvider _battleResourceProvider;
+        private readonly IBitmapFactory _bitmapFactory;
         private readonly ImagesExtractor _extractor;
-        private readonly IDictionary<string, RowImage> _battleIcons;
+        private readonly IDictionary<string, RawBitmap> _battleIcons;
 
-        private Dictionary<GameColor, Bitmap> _gameColors;
+        private Dictionary<GameColor, IBitmap> _gameColors;
 
         /// <inheritdoc />
-        public BattleInterfaceProvider(IBattleResourceProvider battleResourceProvider)
+        public BattleInterfaceProvider(IBattleResourceProvider battleResourceProvider, IBitmapFactory bitmapFactory)
         {
             _battleResourceProvider = battleResourceProvider;
+            _bitmapFactory = bitmapFactory;
             _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.ff");
             _battleIcons = _extractor.GetImageParts("DLG_BATTLE_A.PNG");
 
@@ -40,77 +41,81 @@ namespace Disciples.Engine.Implementation.Resources
         private void LoadBitmaps()
         {
             Battleground = _battleResourceProvider.GetRandomBattleground();
-            RightPanel = _battleIcons["DLG_BATTLE_A_RUNITGROUP"].ToBitmap();
-            BottomPanel = _battleIcons["DLG_BATTLE_A_MAINCOMBATBG"].ToBitmap();
-            PanelSeparator = _battleIcons["DLG_BATTLE_A_SPLITLRG"].ToBitmap();
-            // todo Хоть убейте, не могу найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
-            DeathSkull = new Bitmap($"{Directory.GetCurrentDirectory()}\\Resources\\Common\\Skull.png");
-            UnitInfoBackground = _extractor.GetImage("_PG0500IX").ToBitmap();
+            RightPanel = _bitmapFactory.FromRawToBitmap(_battleIcons["DLG_BATTLE_A_RUNITGROUP"]);
+            BottomPanel = _bitmapFactory.FromRawToBitmap(_battleIcons["DLG_BATTLE_A_MAINCOMBATBG"]);
+            PanelSeparator = _bitmapFactory.FromRawToBitmap(_battleIcons["DLG_BATTLE_A_SPLITLRG"]);
+            // todo Не смог найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
+            DeathSkull = _bitmapFactory.FromFile(Path.Combine(Directory.GetCurrentDirectory(), "Resources\\Common\\Skull.png"));
+            UnitInfoBackground = _bitmapFactory.FromRawToBitmap(_extractor.GetImage("_PG0500IX"));
 
-            UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, Bitmap> {
+            UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap> {
                 { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap }
             };
 
-            ToggleRightButton = GetBattleBitmaps("TOGGLERIGHT");
-            DefendButton = GetBattleBitmaps("DEFEND");
-            RetreatButton = GetBattleBitmaps("RETREAT");
-            WaitButton = GetBattleBitmaps("WAIT");
-            InstantResolveButton = GetBattleBitmaps("INSTANTRESOLVE");
-            AutoBattleButton = GetBattleBitmaps("AUTOB");
+            ToggleRightButton = GetButtonBitmaps("TOGGLERIGHT");
+            DefendButton = GetButtonBitmaps("DEFEND");
+            RetreatButton = GetButtonBitmaps("RETREAT");
+            WaitButton = GetButtonBitmaps("WAIT");
+            InstantResolveButton = GetButtonBitmaps("INSTANTRESOLVE");
+            AutoBattleButton = GetButtonBitmaps("AUTOB");
         }
 
 
         /// <inheritdoc />
-        public IReadOnlyList<Bitmap> Battleground { get; private set; }
+        public IReadOnlyList<IBitmap> Battleground { get; private set; }
 
         /// <inheritdoc />
-        public Bitmap RightPanel { get; private set; }
+        public IBitmap RightPanel { get; private set; }
 
         /// <inheritdoc />
-        public Bitmap BottomPanel { get; private set; }
+        public IBitmap BottomPanel { get; private set; }
 
         /// <inheritdoc />
-        public Bitmap PanelSeparator { get; private set; }
+        public IBitmap PanelSeparator { get; private set; }
 
         /// <inheritdoc />
-        public Bitmap DeathSkull { get; private set; }
+        public IBitmap DeathSkull { get; private set; }
 
         /// <inheritdoc />
-        public Bitmap UnitInfoBackground { get; private set; }
+        public IBitmap UnitInfoBackground { get; private set; }
 
 
         /// <inheritdoc />
-        public IDictionary<UnitBattleEffectType, Bitmap> UnitBattleEffectsIcon { get; private set; }
+        public IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; private set; }
 
 
         #region Buttons
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> ToggleRightButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> ToggleRightButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> DefendButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> DefendButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> RetreatButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> RetreatButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> WaitButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> WaitButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> InstantResolveButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> InstantResolveButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, Bitmap> AutoBattleButton { get; private set; }
+        public IDictionary<ButtonState, IBitmap> AutoBattleButton { get; private set; }
 
 
-        private IDictionary<ButtonState, Bitmap> GetBattleBitmaps(string buttonName)
+        /// <summary>
+        /// Получить словарь с изображениями кнопки для каждого её состояния.
+        /// </summary>
+        /// <param name="buttonName">Имя кнопки.</param>
+        private IDictionary<ButtonState, IBitmap> GetButtonBitmaps(string buttonName)
         {
-            return new Dictionary<ButtonState, Bitmap> {
-                { ButtonState.Disabled, _battleIcons[$"DLG_BATTLE_A_{buttonName}_D"].ToBitmap() },
-                { ButtonState.Active, _battleIcons[$"DLG_BATTLE_A_{buttonName}_N"].ToBitmap() },
-                { ButtonState.Selected,_battleIcons[$"DLG_BATTLE_A_{buttonName}_H"].ToBitmap() },
-                { ButtonState.Pressed, _battleIcons[$"DLG_BATTLE_A_{buttonName}_C"].ToBitmap() }
+            return new Dictionary<ButtonState, IBitmap> {
+                { ButtonState.Disabled, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_D"]) },
+                { ButtonState.Active, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_N"]) },
+                { ButtonState.Selected,_bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_H"]) },
+                { ButtonState.Pressed, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_C"]) }
             };
         }
 
@@ -119,7 +124,7 @@ namespace Disciples.Engine.Implementation.Resources
         #region GameColors
 
         /// <inheritdoc />
-        public Bitmap GetColorBitmap(GameColor color)
+        public IBitmap GetColorBitmap(GameColor color)
         {
             return _gameColors[color];
         }
@@ -129,14 +134,14 @@ namespace Disciples.Engine.Implementation.Resources
         /// </summary>
         private void InitGameColors()
         {
-            var gameColors = new Dictionary<GameColor, Bitmap>();
+            var gameColors = new Dictionary<GameColor, IBitmap>();
 
             foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
                 var colorFilePath = $"Resources/Colors/{color}.png";
                 if (!File.Exists(colorFilePath))
                     gameColors.Add(color, null);
 
-                var bitmap = new Bitmap(colorFilePath);
+                var bitmap = _bitmapFactory.FromFile(colorFilePath);
                 gameColors.Add(color, bitmap);
             }
 
@@ -147,7 +152,7 @@ namespace Disciples.Engine.Implementation.Resources
         // Используем вариант с загрузкой.
         //private void InitGameColors()
         //{
-        //    var gameColors = new Dictionary<GameColor, Bitmap>();
+        //    var gameColors = new Dictionary<GameColor, IBitmap>();
 
         //    foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
         //        byte[] colorBytes = new byte[4];
@@ -166,24 +171,24 @@ namespace Disciples.Engine.Implementation.Resources
         //            case GameColor.Blue:
         //                colorBytes = new byte[] { 0, 0, 255, 128 };
         //                break;
+        //            case GameColor.Black:
+        //                colorBytes = new byte[] { 0, 0, 0, 255 };
+        //                break;
+        //            case GameColor.White:
+        //                colorBytes = new byte[] { 255, 255, 255, 255 };
+        //                break;
         //            default:
         //                throw new ArgumentOutOfRangeException();
         //        }
 
-        //        var bitmap = GetColorBitmap(colorBytes);
-        //        bitmap.Save($"Resources/Colors/{color}.png");
+        //        var rawBitmap = new RawBitmap(0, 1, 0, 1, 1, 1, colorBytes);
+        //        var bitmap = _bitmapFactory.FromRawToBitmap(rawBitmap);
         //        gameColors.Add(color, bitmap);
+
+        //        //_bitmapFactory.SaveToFile(bitmap, $"Resources/Colors/{color}.png");
         //    }
 
         //    _gameColors = gameColors;
-        //}
-
-        //private static Bitmap GetColorBitmap(byte[] colorBytes)
-        //{
-        //    var rowImage = new ResourceProvider.Models.RowImage(0, 1, 0, 1, 1, 1, colorBytes);
-        //    var bitmap = rowImage.ToBitmap();
-
-        //    return bitmap;
         //}
 
         #endregion

@@ -1,8 +1,7 @@
 ﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
-             xmlns:avalonia="clr-namespace:Disciples.Avalonia"
-             xmlns:views="clr-namespace:Disciples.Avalonia.Common.Views">
+             xmlns:avalonia="clr-namespace:Disciples.Avalonia">
   <Application.DataTemplates>
       <avalonia:ViewLocator />
   </Application.DataTemplates>
@@ -15,25 +14,5 @@
   <Application.Styles>
     <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default"/>
     <StyleInclude Source="resm:Avalonia.Themes.Default.Accents.BaseLight.xaml?assembly=Avalonia.Themes.Default"/>
-
-    <!-- bug Необходимо использовать TemplateBinding, но на данный момент он не позволяет писать VisualObject.Bitmap, только просто свойство -->
-    <Style Selector="views|TextVisualObjectView">
-      <Setter Property="Template">
-        <ControlTemplate>
-            <TextBlock TextWrapping="Wrap"
-                       FontWeight="{Binding TextVisualObject.IsBold, RelativeSource={RelativeSource Mode=TemplatedParent},
-                                                                     Converter={StaticResource BoldFontConverter}}"
-                       Foreground="{Binding TextVisualObject.Foreground, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                       Width="{Binding TextVisualObject.Width, RelativeSource={RelativeSource Mode=TemplatedParent},
-                                                               Converter={StaticResource DoubleScaleConverter}}"
-                       Height="{Binding TextVisualObject.Height, RelativeSource={RelativeSource Mode=TemplatedParent},
-                                                                 Converter={StaticResource DoubleScaleConverter}}"
-                       Text="{Binding TextVisualObject.Text, RelativeSource={RelativeSource Mode=TemplatedParent}}"
-                       FontSize="{Binding TextVisualObject.FontSize, RelativeSource={RelativeSource Mode=TemplatedParent},
-                                                                     Converter={StaticResource DoubleScaleConverter}}"
-                       TextAlignment="{Binding TextVisualObject.TextAlignment, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
-        </ControlTemplate>
-      </Setter>
-    </Style>
   </Application.Styles>
 </Application>

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Avalonia.Media;
-
 using Disciples.Engine.Battle.Contollers;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.GameObjects;
@@ -14,7 +12,7 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Extensions;
 
 namespace Disciples.Engine.Implementation.Controllers
@@ -34,10 +32,10 @@ namespace Disciples.Engine.Implementation.Controllers
         private readonly IBattleResourceProvider _battleResourceProvider;
 
         private IReadOnlyCollection<BattleUnit> _rightPanelUnits;
-        private ImageVisualObject _currentUnitFace;
-        private UnitInfoTextVisualObject _currentUnitText;
-        private ImageVisualObject _targetUnitFace;
-        private UnitInfoTextVisualObject _targetUnitText;
+        private IImageSceneObject _currentUnitFace;
+        private BattleUnitInfoGameObject _currentUnitTextInfoObject;
+        private IImageSceneObject _targetUnitFace;
+        private BattleUnitInfoGameObject _targetUnitTextInfoObject;
         private BattleUnit _targetUnitObject;
         private DetailUnitInfoObject _detailUnitInfoObject;
 
@@ -110,44 +108,34 @@ namespace Disciples.Engine.Implementation.Controllers
         private void InitializeMainInterface()
         {
             foreach (var battleground in _interfaceProvider.Battleground) {
-                _visualSceneController.AddImageVisual(battleground, 0, 0, 0);
+                _visualSceneController.AddImage(battleground, 0, 0, 0);
             }
-            _visualSceneController.AddImageVisual(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.PixelSize.Height, 1);
-            _visualSceneController.AddImageVisual(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.PixelSize.Width, 30, INTERFACE_LAYER);
+            _visualSceneController.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
+            _visualSceneController.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
 
             var currentUnitBattleFace = _attackController.CurrentUnitObject.Unit.UnitType.BattleFace;
-            _currentUnitFace = _visualSceneController.AddImageVisual(
+            _currentUnitFace = _visualSceneController.AddImage(
                 currentUnitBattleFace,
                 0,
-                GameInfo.OriginalHeight - currentUnitBattleFace.PixelSize.Height - 5,
+                GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
                 INTERFACE_LAYER + 1);
 
-            _currentUnitText = _visualSceneController.AddUnitInfoTextVisualObject(GetUnitNameAndHitPoints, 14, 190, 520, INTERFACE_LAYER + 1, true);
-            _currentUnitText.Unit = _attackController.CurrentUnitObject.Unit;
-            _currentUnitText.Width = 120;
-            _currentUnitText.Height = 40;
+            _currentUnitTextInfoObject = _visualSceneController.AddBattleUnitInfo(190, 520, INTERFACE_LAYER + 1);
+            _currentUnitTextInfoObject.Unit = _attackController.CurrentUnitObject.Unit;
 
 
             // Используем размеры лица текущего юнита, так как юнит-цель не инициализируются в начале боя.
-            _targetUnitFace = _visualSceneController.AddImageVisual(
+            _targetUnitFace = _visualSceneController.AddImage(
                 null,
-                currentUnitBattleFace.PixelSize.Width,
-                currentUnitBattleFace.PixelSize.Height,
-                GameInfo.OriginalWidth - currentUnitBattleFace.PixelSize.Width,
-                GameInfo.OriginalHeight - currentUnitBattleFace.PixelSize.Height - 5,
+                currentUnitBattleFace.Width,
+                currentUnitBattleFace.Height,
+                GameInfo.OriginalWidth - currentUnitBattleFace.Width,
+                GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
                 INTERFACE_LAYER + 1);
             // todo Добавить перегрузку в метод?
-            _targetUnitFace.Transform = new ScaleTransform(-1, 1);
+            _targetUnitFace.IsReflected = true;
 
-            _targetUnitText = _visualSceneController.AddUnitInfoTextVisualObject(GetUnitNameAndHitPoints, 14, 510, 520, INTERFACE_LAYER + 1, true);
-            _targetUnitText.Width = 120;
-            _targetUnitText.Height = 40;
-        }
-
-        private static string GetUnitNameAndHitPoints(Unit unit)
-        {
-            return $"{unit.UnitType.Name}{Environment.NewLine}" +
-                   $"ОЗ : {unit.HitPoints}/{unit.UnitType.HitPoints}";
+            _targetUnitTextInfoObject = _visualSceneController.AddBattleUnitInfo(510, 520, INTERFACE_LAYER + 1);
         }
 
 
@@ -196,7 +184,7 @@ namespace Disciples.Engine.Implementation.Controllers
 
             _targetUnitObject = targetUnitObject;
             _targetUnitFace.Bitmap = targetUnitObject.Unit.UnitType.BattleFace;
-            _targetUnitText.Unit = targetUnitObject.Unit;
+            _targetUnitTextInfoObject.Unit = targetUnitObject.Unit;
             _animateTarget = animateTarget;
 
             var isInterfaceActive = _attackController.BattleState == BattleState.WaitingAction ||
@@ -290,8 +278,8 @@ namespace Disciples.Engine.Implementation.Controllers
             if (_currentUnitFace != null)
                 _currentUnitFace.Bitmap = battleUnit.Unit.UnitType.BattleFace;
 
-            if (_currentUnitText != null)
-                _currentUnitText.Unit = battleUnit.Unit;
+            if (_currentUnitTextInfoObject != null)
+                _currentUnitTextInfoObject.Unit = battleUnit.Unit;
 
             if (_selectionAnimation != null)
                 DetachSelectedAnimation();

@@ -1,33 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Common.Components
 {
-    public class AnimationComponent : Component
+    /// <summary>
+    /// Компонент для создания анимации.
+    /// </summary>
+    public class AnimationComponent : BaseComponent
     {
         /// <summary>
         /// Промежуток времени в мс через которое происходит смена кадра в анимации.
         /// </summary>
         private const int FRAME_CHANGE_SPEED = 75;
 
-        private readonly IMapVisual _mapVisual;
+        private readonly IVisualSceneController _visualSceneController;
         private readonly IReadOnlyList<Frame> _frames;
         private readonly int _layer;
 
-        private ImageVisualObject _imageVisualObject;
+        private IImageSceneObject _animationFrame;
         private long _ticksCount = 0;
 
+        /// <inheritdoc />
         public AnimationComponent(
             GameObject gameObject,
-            IMapVisual mapVisual,
+            IVisualSceneController visualSceneController,
             IReadOnlyList<Frame> frames,
-            int layer) : base(gameObject)
+            int layer
+            ) : base(gameObject)
         {
-            _mapVisual = mapVisual;
+            _visualSceneController = visualSceneController;
             _frames = frames;
             _layer = layer;
         }
@@ -49,8 +55,7 @@ namespace Disciples.Engine.Common.Components
         {
             base.OnInitialize();
 
-            _imageVisualObject = new ImageVisualObject(_layer);
-            _mapVisual.AddVisual(_imageVisualObject);
+            _animationFrame = _visualSceneController.AddImage(_layer);
         }
 
         /// <inheritdoc />
@@ -66,31 +71,31 @@ namespace Disciples.Engine.Common.Components
 
             var frame = _frames[FrameIndex];
 
-            _imageVisualObject.Bitmap = frame.Bitmap;
+            _animationFrame.Bitmap = frame.Bitmap;
 
             var posX = GameObject.X + frame.OffsetX;
-            if (Math.Abs(_imageVisualObject.X - posX) > float.Epsilon) {
-                _imageVisualObject.X = posX;
+            if (Math.Abs(_animationFrame.X - posX) > float.Epsilon) {
+                _animationFrame.X = posX;
             }
 
             var posY = GameObject.Y + frame.OffsetY;
-            if (Math.Abs(_imageVisualObject.Y - posY) > float.Epsilon) {
-                _imageVisualObject.Y = posY;
+            if (Math.Abs(_animationFrame.Y - posY) > float.Epsilon) {
+                _animationFrame.Y = posY;
             }
 
-            if (Math.Abs(_imageVisualObject.Width - frame.Width) > float.Epsilon) {
-                _imageVisualObject.Width = frame.Width;
+            if (Math.Abs(_animationFrame.Width - frame.Width) > float.Epsilon) {
+                _animationFrame.Width = frame.Width;
             }
 
-            if (Math.Abs(_imageVisualObject.Height - frame.Height) > float.Epsilon) {
-                _imageVisualObject.Height = frame.Height;
+            if (Math.Abs(_animationFrame.Height - frame.Height) > float.Epsilon) {
+                _animationFrame.Height = frame.Height;
             }
         }
 
         /// <inheritdoc />
         public override void Destroy()
         {
-            _mapVisual.RemoveVisual(_imageVisualObject);
+            _visualSceneController.RemoveSceneObject(_animationFrame);
         }
     }
 }

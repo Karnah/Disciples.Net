@@ -1,13 +1,12 @@
-﻿using Avalonia.Media.Imaging;
-
-namespace Disciples.Engine.Common.Models
+﻿namespace Disciples.Engine.Common.Models
 {
     /// <summary>
     /// Информация об изображении.
     /// </summary>
     public class Frame
     {
-        public Frame(double width, double height, double offsetX, double offsetY, Bitmap bitmap)
+        /// <inheritdoc />
+        public Frame(double width, double height, double offsetX, double offsetY, IBitmap bitmap)
         {
             Width = width;
             Height = height;
@@ -40,6 +39,6 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Изображение.
         /// </summary>
-        public Bitmap Bitmap { get; }
+        public IBitmap Bitmap { get; }
     }
 }

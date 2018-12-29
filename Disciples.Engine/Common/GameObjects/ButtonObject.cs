@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
-using Avalonia.Media.Imaging;
+
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Common.VisualObjects;
+using Disciples.Engine.Common.SceneObjects;
+
 using Action = System.Action;
 
 namespace Disciples.Engine.Common.GameObjects
@@ -12,40 +13,33 @@ namespace Disciples.Engine.Common.GameObjects
     /// </summary>
     public class ButtonObject : GameObject
     {
-        private readonly IMapVisual _mapVisual;
-        private readonly IDictionary<ButtonState, Bitmap> _buttonStates;
+        private readonly IVisualSceneController _visualSceneController;
+        private readonly IDictionary<ButtonState, IBitmap> _buttonStates;
         private readonly Action _buttonPressedAction;
 
-        private ImageVisualObject _buttonVisualObject;
+        private IImageSceneObject _buttonVisualObject;
 
         public ButtonObject(
-            IMapVisual mapVisual,
-            IDictionary<ButtonState, Bitmap> buttonStates,
+            IVisualSceneController visualSceneController,
+            IDictionary<ButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
             double y,
             int layer,
-            KeyboardButton? hotkey = null)
-            : base(x, y)
+            KeyboardButton? hotkey = null
+            ) : base(x, y)
         {
-            _mapVisual = mapVisual;
+            _visualSceneController = visualSceneController;
             _buttonStates = buttonStates;
             _buttonPressedAction = buttonPressedAction;
 
             ButtonState = ButtonState.Disabled;
             Hotkey = hotkey;
+            Layer = layer;
 
             var bitmap = _buttonStates[ButtonState];
-            Width = bitmap.PixelSize.Width;
-            Height = bitmap.PixelSize.Height;
-
-            _buttonVisualObject = new ImageVisualObject(layer) {
-                Width = bitmap.PixelSize.Width,
-                Height = bitmap.PixelSize.Height,
-                X = X,
-                Y = Y,
-                Bitmap = bitmap
-            };
+            Width = bitmap.Width;
+            Height = bitmap.Height;
         }
 
 
@@ -59,6 +53,11 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public KeyboardButton? Hotkey { get; }
 
+        /// <summary>
+        /// Слой на котором располагается кнопка.
+        /// </summary>
+        public int Layer { get; }
+
         /// <inheritdoc />
         public override bool IsInteractive => true;
 
@@ -68,7 +67,7 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _mapVisual.AddVisual(_buttonVisualObject);
+            _buttonVisualObject = _visualSceneController.AddImage(_buttonStates[ButtonState], X, Y, Layer);
         }
 
         /// <inheritdoc />
@@ -76,7 +75,7 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.Destroy();
             
-            _mapVisual.RemoveVisual(_buttonVisualObject);
+            _visualSceneController.RemoveSceneObject(_buttonVisualObject);
             _buttonVisualObject = null;
         }
 

@@ -42,7 +42,7 @@ namespace Disciples.ResourceProvider
         // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
         // Например, G000UU8029HHITA1A00.
         // Ссылки на PNG нет, но в .ff файле какая-то информация есть.
-        public IReadOnlyCollection<RowImage> GetAnimationFrames(string name)
+        public IReadOnlyCollection<RawBitmap> GetAnimationFrames(string name)
         {
             if (_mqAnimations?.ContainsKey(name) != true)
                 return null;
@@ -59,12 +59,12 @@ namespace Disciples.ResourceProvider
         /// Элементы интерфейса располагаются на одной картинке.
         /// Данный метод позволяет получить их за один проход.
         /// </remarks>
-        public IDictionary<string, RowImage> GetImageParts(string name)
+        public IDictionary<string, RawBitmap> GetImageParts(string name)
         {
             if (_filesByName?.ContainsKey(name) != true)
                 return null;
 
-            var result = new Dictionary<string, RowImage>();
+            var result = new Dictionary<string, RawBitmap>();
             var baseFile = _filesByName[name];
             var baseImage = PrepareImage(baseFile);
             var parts = _mqImages.Select(i => i.Value).Where(i => i.FileId == baseFile.Id);
@@ -78,7 +78,7 @@ namespace Disciples.ResourceProvider
         /// <summary>
         /// Получить изображение по его имени.
         /// </summary>
-        public RowImage GetImage(string name)
+        public RawBitmap GetImage(string name)
         {
             // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям.
             if (_mqImages?.ContainsKey(name) == true) {
@@ -335,12 +335,12 @@ namespace Disciples.ResourceProvider
         /// </summary>
         /// <param name="animation">Информация об анимации.</param>
         /// <returns>Коллекция кадров анимации.</returns>
-        private IReadOnlyCollection<RowImage> GetAnimationFramesInternal(MqAnimation animation)
+        private IReadOnlyCollection<RawBitmap> GetAnimationFramesInternal(MqAnimation animation)
         {
-            var result = new List<RowImage>(animation.Frames.Count);
+            var result = new List<RawBitmap>(animation.Frames.Count);
             // Обычно анимация "нарезается" из одного базового изображения,
             // Однако это не всегда. Поэтому необходимо иметь возможность кэшировать несколько изображений.
-            var baseImages = new Dictionary<int, RowImage>();
+            var baseImages = new Dictionary<int, RawBitmap>();
 
             foreach (var frame in animation.Frames) {
                 var fileId = frame.FileId;
@@ -359,7 +359,7 @@ namespace Disciples.ResourceProvider
         /// </summary>
         /// <param name="baseImage">Базовое изображение.</param>
         /// <param name="mqImage">Информация о новом изображении.</param>
-        private static RowImage BuildImage(RowImage baseImage, MqImage mqImage)
+        private static RawBitmap BuildImage(RawBitmap baseImage, MqImage mqImage)
         {
             int minRow = int.MaxValue, maxRow = int.MinValue;
             int minColumn = int.MaxValue, maxColumn = int.MinValue;
@@ -380,7 +380,7 @@ namespace Disciples.ResourceProvider
                 maxColumn = Math.Max(maxColumn, framePart.SourceX + framePart.Width);
             }
 
-            return new RowImage(minRow, maxRow, minColumn, maxColumn, mqImage.Width, mqImage.Height, imageData);
+            return new RawBitmap(minRow, maxRow, minColumn, maxColumn, mqImage.Width, mqImage.Height, imageData);
         }
 
         /// <summary>
@@ -388,7 +388,7 @@ namespace Disciples.ResourceProvider
         /// </summary>
         /// <param name="file">Файл с изображением.</param>
         /// <returns>Сырые данные, которые содержат картинку в массиве RGBA.</returns>
-        private RowImage PrepareImage(File file)
+        private RawBitmap PrepareImage(File file)
         {
             MagickImage magickImage;
             try {
@@ -479,7 +479,7 @@ namespace Disciples.ResourceProvider
                 }
             }
 
-            return new RowImage(0, magickImage.Height, 0, magickImage.Width, magickImage.Width, magickImage.Height, pixels);
+            return new RawBitmap(0, magickImage.Height, 0, magickImage.Width, magickImage.Width, magickImage.Height, pixels);
         }
 
         /// <summary>

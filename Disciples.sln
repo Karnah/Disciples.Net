@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine", "Discipl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.ResourceProvider", "Disciples.ResourceProvider\Disciples.ResourceProvider.csproj", "{081F4FC9-4C43-4C37-B33B-25AF509D692C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Implementation", "Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Implementation", "Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Common", "Disciples.Common\Disciples.Common.csproj", "{672F5E77-50F0-49BD-8A6A-D93B5C59A660}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Engine.Platform", "Disciples.Engine.Platform\Disciples.Engine.Platform.csproj", "{B140D92D-D12B-4524-A330-EC46A7784E59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{672F5E77-50F0-49BD-8A6A-D93B5C59A660}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{672F5E77-50F0-49BD-8A6A-D93B5C59A660}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{672F5E77-50F0-49BD-8A6A-D93B5C59A660}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B140D92D-D12B-4524-A330-EC46A7784E59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B140D92D-D12B-4524-A330-EC46A7784E59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B140D92D-D12B-4524-A330-EC46A7784E59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B140D92D-D12B-4524-A330-EC46A7784E59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
