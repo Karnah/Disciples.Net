@@ -51,32 +51,32 @@ namespace Disciples.Engine.Battle.Providers
         /// <summary>
         /// Иконки для кнопки переключения правой панели юнитов.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> ToggleRightButton { get; }
+        IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; }
 
         /// <summary>
         /// Иконки для кнопки защиты.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> DefendButton { get; }
+        IDictionary<SceneButtonState, IBitmap> DefendButton { get; }
 
         /// <summary>
         /// Иконки для кнопки отступления.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> RetreatButton { get; }
+        IDictionary<SceneButtonState, IBitmap> RetreatButton { get; }
 
         /// <summary>
         /// Иконки для кнопки ожидания.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> WaitButton { get; }
+        IDictionary<SceneButtonState, IBitmap> WaitButton { get; }
 
         /// <summary>
         /// Иконки для мгновенного завершения битвы.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> InstantResolveButton { get; }
+        IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; }
 
         /// <summary>
         /// Иконки для автоматической битвы.
         /// </summary>
-        IDictionary<ButtonState, IBitmap> AutoBattleButton { get; }
+        IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; }
 
 
         /// <summary>

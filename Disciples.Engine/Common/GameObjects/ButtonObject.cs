@@ -14,14 +14,14 @@ namespace Disciples.Engine.Common.GameObjects
     public class ButtonObject : GameObject
     {
         private readonly IVisualSceneController _visualSceneController;
-        private readonly IDictionary<ButtonState, IBitmap> _buttonStates;
+        private readonly IDictionary<SceneButtonState, IBitmap> _buttonStates;
         private readonly Action _buttonPressedAction;
 
         private IImageSceneObject _buttonVisualObject;
 
         public ButtonObject(
             IVisualSceneController visualSceneController,
-            IDictionary<ButtonState, IBitmap> buttonStates,
+            IDictionary<SceneButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
             double y,
@@ -33,7 +33,7 @@ namespace Disciples.Engine.Common.GameObjects
             _buttonStates = buttonStates;
             _buttonPressedAction = buttonPressedAction;
 
-            ButtonState = ButtonState.Disabled;
+            ButtonState = SceneButtonState.Disabled;
             Hotkey = hotkey;
             Layer = layer;
 
@@ -46,7 +46,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Состояние кнопки.
         /// </summary>
-        public ButtonState ButtonState { get; protected set; }
+        public SceneButtonState ButtonState { get; protected set; }
 
         /// <summary>
         /// Горячая клавиша для кнопки.
@@ -85,7 +85,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public virtual void Activate()
         {
-            ButtonState = ButtonState.Active;
+            ButtonState = SceneButtonState.Active;
             UpdateButtonVisualObject();
         }
 
@@ -94,7 +94,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public virtual void Disable()
         {
-            ButtonState = ButtonState.Disabled;
+            ButtonState = SceneButtonState.Disabled;
             UpdateButtonVisualObject();
         }
 
@@ -104,10 +104,10 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public virtual void OnSelected()
         {
-            if (ButtonState == ButtonState.Disabled)
+            if (ButtonState == SceneButtonState.Disabled)
                 return;
 
-            ButtonState = ButtonState.Selected;
+            ButtonState = SceneButtonState.Selected;
             UpdateButtonVisualObject();
         }
 
@@ -116,10 +116,10 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public virtual void OnUnselected()
         {
-            if (ButtonState == ButtonState.Disabled)
+            if (ButtonState == SceneButtonState.Disabled)
                 return;
 
-            ButtonState = ButtonState.Active;
+            ButtonState = SceneButtonState.Active;
             UpdateButtonVisualObject();
         }
 
@@ -128,10 +128,10 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public virtual void OnPressed()
         {
-            if (ButtonState == ButtonState.Disabled)
+            if (ButtonState == SceneButtonState.Disabled)
                 return;
 
-            ButtonState = ButtonState.Pressed;
+            ButtonState = SceneButtonState.Pressed;
             UpdateButtonVisualObject();
         }
 
@@ -141,14 +141,14 @@ namespace Disciples.Engine.Common.GameObjects
         public virtual void OnReleased()
         {
             // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
-            if (ButtonState != ButtonState.Pressed)
+            if (ButtonState != SceneButtonState.Pressed)
                 return;
 
             OnButtonClicked();
 
             // Если после клика состояние кнопки не изменилось, то делаем её просто выделенной.
-            if (ButtonState == ButtonState.Pressed)
-                ButtonState = ButtonState.Selected;
+            if (ButtonState == SceneButtonState.Pressed)
+                ButtonState = SceneButtonState.Selected;
 
             UpdateButtonVisualObject();
         }

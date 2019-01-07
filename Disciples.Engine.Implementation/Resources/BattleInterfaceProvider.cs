@@ -87,35 +87,35 @@ namespace Disciples.Engine.Implementation.Resources
         #region Buttons
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> ToggleRightButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> DefendButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> RetreatButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> WaitButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> InstantResolveButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; }
 
         /// <inheritdoc />
-        public IDictionary<ButtonState, IBitmap> AutoBattleButton { get; private set; }
+        public IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; }
 
 
         /// <summary>
         /// Получить словарь с изображениями кнопки для каждого её состояния.
         /// </summary>
         /// <param name="buttonName">Имя кнопки.</param>
-        private IDictionary<ButtonState, IBitmap> GetButtonBitmaps(string buttonName)
+        private IDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(string buttonName)
         {
-            return new Dictionary<ButtonState, IBitmap> {
-                { ButtonState.Disabled, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_D"]) },
-                { ButtonState.Active, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_N"]) },
-                { ButtonState.Selected,_bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_H"]) },
-                { ButtonState.Pressed, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_C"]) }
+            return new Dictionary<SceneButtonState, IBitmap> {
+                { SceneButtonState.Disabled, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_D"]) },
+                { SceneButtonState.Active, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_N"]) },
+                { SceneButtonState.Selected, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_H"]) },
+                { SceneButtonState.Pressed, _bitmapFactory.FromRawToBitmap(_battleIcons[$"DLG_BATTLE_A_{buttonName}_C"]) }
             };
         }
 
@@ -138,8 +138,10 @@ namespace Disciples.Engine.Implementation.Resources
 
             foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
                 var colorFilePath = $"Resources/Colors/{color}.png";
-                if (!File.Exists(colorFilePath))
+                if (!File.Exists(colorFilePath)) {
                     gameColors.Add(color, null);
+                    continue;
+                }
 
                 var bitmap = _bitmapFactory.FromFile(colorFilePath);
                 gameColors.Add(color, bitmap);

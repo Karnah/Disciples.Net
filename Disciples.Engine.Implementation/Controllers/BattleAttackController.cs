@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Disciples.Common.Helpers;
-using Disciples.Engine.Battle.Contollers;
+using Disciples.Engine.Battle.Controllers;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Models;
@@ -78,25 +78,25 @@ namespace Disciples.Engine.Implementation.Controllers
                 var unitEffects = battleUnit.Unit.Effects;
                 unitEffects.OnTick(args.TicksCount);
 
-                if (unitEffects.CurrentMomentalEffect == null)
+                if (unitEffects.CurrentInstantaneousEffect == null)
                     continue;
 
                 // Обрабатываем начало эффекта.
-                if (unitEffects.MomentalEffectBegin) {
-                    OnUnitMomentalEffectBegin(battleUnit.Unit);
+                if (unitEffects.InstantaneousEffectBegin) {
+                    OnUnitInstantaneousEffectBegin(battleUnit.Unit);
                     continue;
                 }
 
                 // Обрабатываем завершение эффекта.
-                if (unitEffects.MomentalEffectEnded) {
-                    OnUnitMomentalEffectEnded(battleUnit.Unit);
+                if (unitEffects.InstantaneousEffectEnded) {
+                    OnUnitInstantaneousEffectEnded(battleUnit.Unit);
                     continue;
                 }
             }
 
             if (BattleState == BattleState.Delay) {
                 // Если остался хотя бы один действующий эффект, то не завершаем действие.
-                if (Units.Any(u => u.Unit.Effects.CurrentMomentalEffect != null))
+                if (Units.Any(u => u.Unit.Effects.CurrentInstantaneousEffect != null))
                     return;
 
                 // Сразу после завершения всех действий, мы не передаём ход дальше, а ждём немного времени.
@@ -158,7 +158,7 @@ namespace Disciples.Engine.Implementation.Controllers
                 // Проверяем меткость юнита.
                 var chanceAttack = RandomGenerator.Next(0, 100);
                 if (chanceAttack > curUnit.UnitType.FirstAttack.Accuracy) {
-                    unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Miss));
+                    unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Miss));
                     continue;
                 }
 
@@ -248,8 +248,8 @@ namespace Disciples.Engine.Implementation.Controllers
             // Если активных действий нет, заканчиваем.
             var isCurrentUnitWaiting = CurrentUnitObject.Action == BattleAction.Waiting;
             var isAllAnimationsEnded = _targetAnimations.All(ta => ta.IsDestroyed);
-            var isAllMomentalEffectsEnded = Units.All(u => u.Unit.Effects.CurrentMomentalEffect == null);
-            if (isCurrentUnitWaiting && isAllAnimationsEnded && isAllMomentalEffectsEnded) {
+            var isAllInstantaneousEffectsEnded = Units.All(u => u.Unit.Effects.CurrentInstantaneousEffect == null);
+            if (isCurrentUnitWaiting && isAllAnimationsEnded && isAllInstantaneousEffectsEnded) {
                 _targetAnimations = new List<AnimationObject>();
 
                 if (IsBattleEnd()) {
@@ -305,7 +305,7 @@ namespace Disciples.Engine.Implementation.Controllers
                     // Мы не можем нанести урон больше, чем осталось очков здоровья.
                     attackPower = Math.Min(attackPower, targetUnit.HitPoints);
 
-                    targetUnit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Damaged, attackPower));
+                    targetUnit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Damaged, attackPower));
                     break;
 
                 case AttackClass.Drain:
@@ -315,7 +315,7 @@ namespace Disciples.Engine.Implementation.Controllers
                     break;
 
                 case AttackClass.Heal:
-                    targetUnit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Healed, power));
+                    targetUnit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Healed, power));
                     break;
 
                 case AttackClass.Fear:
@@ -383,15 +383,15 @@ namespace Disciples.Engine.Implementation.Controllers
         /// Обработать начало моментального эффекта.
         /// </summary>
         /// <param name="unit">Юнит у которого начался моментальный эффект.</param>
-        private void OnUnitMomentalEffectBegin(Unit unit)
+        private void OnUnitInstantaneousEffectBegin(Unit unit)
         {
-            var currentMomentalEffect = unit.Effects.CurrentMomentalEffect;
-            switch (currentMomentalEffect.EffectType) {
-                case UnitMomentalEffectType.Damaged:
-                    unit.ChangeHitPoints(- currentMomentalEffect.Power.Value);
+            var currentInstantaneousEffect = unit.Effects.CurrentInstantaneousEffect;
+            switch (currentInstantaneousEffect.EffectType) {
+                case UnitInstantaneousEffectType.Damaged:
+                    unit.ChangeHitPoints(- currentInstantaneousEffect.Power.Value);
                     break;
-                case UnitMomentalEffectType.Healed:
-                    unit.ChangeHitPoints(currentMomentalEffect.Power.Value);
+                case UnitInstantaneousEffectType.Healed:
+                    unit.ChangeHitPoints(currentInstantaneousEffect.Power.Value);
                     break;
             }
         }
@@ -400,19 +400,19 @@ namespace Disciples.Engine.Implementation.Controllers
         /// Обработать завершение моментального эффекта.
         /// </summary>
         /// <param name="unit">Юнит у которого завершился моментальный эффект.</param>
-        private void OnUnitMomentalEffectEnded(Unit unit)
+        private void OnUnitInstantaneousEffectEnded(Unit unit)
         {
-            var currentMomentalEffect = unit.Effects.CurrentMomentalEffect;
-            switch (currentMomentalEffect.EffectType)
+            var currentInstantaneousEffect = unit.Effects.CurrentInstantaneousEffect;
+            switch (currentInstantaneousEffect.EffectType)
             {
-                case UnitMomentalEffectType.Defended:
+                case UnitInstantaneousEffectType.Defended:
                     // При защите юнита, который бьёт дважды, необходимо сразу передать ход следующему.
                     // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
                     IsSecondAttack = true;
 
                     unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
                     break;
-                case UnitMomentalEffectType.Waiting:
+                case UnitInstantaneousEffectType.Waiting:
                     // При ожидании юнита, который бьёт дважды, необходимо сразу передать ход следующему.
                     // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
                     IsSecondAttack = true;
@@ -582,7 +582,7 @@ namespace Disciples.Engine.Implementation.Controllers
         {
             UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Defend));
 
-            CurrentUnitObject.Unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Defended));
+            CurrentUnitObject.Unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Defended));
 
             BattleState = BattleState.Delay;
         }
@@ -591,7 +591,7 @@ namespace Disciples.Engine.Implementation.Controllers
         {
             UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Wait));
 
-            CurrentUnitObject.Unit.Effects.AddMomentalEffect(new UnitMomentalEffect(UnitMomentalEffectType.Waiting));
+            CurrentUnitObject.Unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Waiting));
             // todo Перебросить в конец очереди.
             BattleState = BattleState.Delay;
         }

@@ -50,7 +50,7 @@
         public int Height { get; }
 
         /// <summary>
-        /// Массив байт, содержащий пиксели в RGBA.
+        /// Массив байт, содержащий пиксели в BGRA.
         /// </summary>
         /// <remarks>Имеет размеры Width * Height * 4.</remarks>
         public byte[] Data { get; }

@@ -4,6 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace Disciples.Avalonia
 {
+    /// <summary>
+    /// Окно игры.
+    /// </summary>
     public class GameWindow : Window
     {
         public GameWindow(GameWindowViewModel viewModel)

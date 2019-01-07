@@ -387,7 +387,7 @@ namespace Disciples.ResourceProvider
         /// Извлечь изображение из файла и обработать его (заменить прозрачность и т.д.).
         /// </summary>
         /// <param name="file">Файл с изображением.</param>
-        /// <returns>Сырые данные, которые содержат картинку в массиве RGBA.</returns>
+        /// <returns>Сырые данные, которые содержат картинку в массиве BGRA.</returns>
         private RawBitmap PrepareImage(File file)
         {
             MagickImage magickImage;
@@ -411,33 +411,31 @@ namespace Disciples.ResourceProvider
                 for (int i = 0; i < 256; ++i) {
                     unchecked {
                         var color = magickImage.GetColormap(i);
-                        var index = ((byte) color.R << 16) + ((byte) color.G << 8) + (byte) color.B;
+                        var index = ((byte) color.B << 16) + ((byte) color.G << 8) + (byte) color.R;
 
                         colorMap[index] = (byte) i;
                     }
                 }
             }
 
-            var pixels = magickImage.GetPixels().ToByteArray(PixelMapping.RGBA);
+            var pixels = magickImage.GetPixels().ToByteArray("BGRA");
             var transparentColor = magickImage.GetColormap(0);
             if (transparentColor == null) {
                 transparentColor = MagickColor.FromRgb(255, 0, 255);
             }
 
-            unchecked
-            {
-                var tcRed = (byte) transparentColor.R;
-                var tcGreen = (byte) transparentColor.G;
+            unchecked {
                 var tcBlue = (byte) transparentColor.B;
+                var tcGreen = (byte) transparentColor.G;
+                var tcRed = (byte) transparentColor.R;
 
-                var atcRed = (byte)_additionalTransparentColor.R;
-                var atcGreen = (byte)_additionalTransparentColor.G;
-                var atcBlue = (byte)_additionalTransparentColor.B;
+                var atcBlue = (byte) _additionalTransparentColor.B;
+                var atcGreen = (byte) _additionalTransparentColor.G;
+                var atcRed = (byte) _additionalTransparentColor.R;
 
                 for (int i = 0; i < pixels.Length; i += 4) {
                     // Проверяем прозрачную область.
-                    if (pixels[i] == tcRed && pixels[i + 1] == tcGreen && pixels[i + 2] == tcBlue)
-                    {
+                    if (pixels[i] == tcBlue && pixels[i + 1] == tcGreen && pixels[i + 2] == tcRed) {
                         pixels[i] = 0;
                         pixels[i + 1] = 0;
                         pixels[i + 2] = 0;
@@ -448,8 +446,7 @@ namespace Disciples.ResourceProvider
 
                     // Проверяем прозрачную область с помощью альтернативной кисти.
                     // Так как иначе будут оставаться розовые пятна на правой панели с юнитами.
-                    if (pixels[i] == atcRed && pixels[i + 1] == atcGreen && pixels[i + 2] == atcBlue)
-                    {
+                    if (pixels[i] == atcBlue && pixels[i + 1] == atcGreen && pixels[i + 2] == atcRed) {
                         pixels[i] = 0;
                         pixels[i + 1] = 0;
                         pixels[i + 2] = 0;

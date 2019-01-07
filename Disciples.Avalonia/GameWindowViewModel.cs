@@ -1,15 +1,21 @@
-﻿using Disciples.Avalonia.ViewModels;
+﻿using Disciples.Engine.Common.Controllers;
 
 namespace Disciples.Avalonia
 {
-    public class GameWindowViewModel : ViewModelBase
+    /// <summary>
+    /// ViewModel для окна игры.
+    /// </summary>
+    public class GameWindowViewModel
     {
-        public GameWindowViewModel(PageViewModel viewContext)
+        /// <inheritdoc />
+        public GameWindowViewModel(IScene scene)
         {
-            ViewContext = viewContext;
+            Scene = scene;
         }
 
-
-        public PageViewModel ViewContext { get; }
+        /// <summary>
+        /// Все объекты, которые отрисовываются на сцене.
+        /// </summary>
+        public IScene Scene { get; }
     }
 }

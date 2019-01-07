@@ -56,7 +56,7 @@ namespace Disciples.Engine.Implementation.Controllers
         }
 
         /// <inheritdoc />
-        public ButtonObject AddButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
+        public ButtonObject AddButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
             var button = new ButtonObject(this, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(button);
@@ -65,7 +65,7 @@ namespace Disciples.Engine.Implementation.Controllers
         }
 
         /// <inheritdoc />
-        public ToggleButtonObject AddToggleButton(IDictionary<ButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
+        public ToggleButtonObject AddToggleButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
         {
             var toggleButton = new ToggleButtonObject(this, buttonStates, buttonPressedAction, x, y, layer, hotkey);
             _game.CreateObject(toggleButton);

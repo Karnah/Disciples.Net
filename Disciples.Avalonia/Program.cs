@@ -6,9 +6,6 @@ using Avalonia.Logging.Serilog;
 using Unity;
 using Unity.Resolution;
 
-using Disciples.Avalonia.Battle;
-using Disciples.Avalonia.Platform.Controllers;
-using Disciples.Avalonia.Platform.Factories;
 using Disciples.Engine;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Controllers;
@@ -18,6 +15,12 @@ using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Controllers;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.Engine.Platform.Managers;
+using Disciples.Avalonia.Controllers;
+using Disciples.Avalonia.Factories;
+using Disciples.Avalonia.Managers;
+
+using IInputManager = Disciples.Engine.Platform.Managers.IInputManager;
 
 namespace Disciples.Avalonia
 {
@@ -48,16 +51,10 @@ namespace Disciples.Avalonia
 
                 var battleInterfaceController = Container.Resolve<BattleInterfaceController>(
                     new ParameterOverride("battleAttackController", battleAttackController));
-
-                logger.Log("Create BattleViewModel");
-                var battleViewModel = Container.Resolve<BattleViewModel>(
-                    new ParameterOverride("battleAttackController", battleAttackController),
-                    new ParameterOverride("battleInterfaceController", battleInterfaceController));
-                logger.Log($"End create BattleViewModel{Environment.NewLine}");
-
+                battleInterfaceController.Initialize();
 
                 logger.Log("Create GameWindow");
-                var gw = new GameWindow(new GameWindowViewModel(battleViewModel));
+                var gw = Container.Resolve<GameWindow>();
                 gw.Closing += (sender, eventArgs) => { _game.Stop(); };
                 gw.ShowDialog();
                 logger.Log("Battle begin");
@@ -81,9 +78,15 @@ namespace Disciples.Avalonia
             var logger = new Logger();
             Container.RegisterInstance<ILogger>(logger);
 
+            // Регистрируем устройства ввода.
+            Container.RegisterSingleton<IInputManager, AvaloniaInputManager>();
+
+            // Регистрируем таймер.
+            Container.RegisterSingleton<IGameTimer, AvaloniaGameTimer>();
+
             // Регистрируем фабрики.
-            Container.RegisterType<IBitmapFactory, BitmapFactory>();
-            Container.RegisterType<ISceneObjectFactory, SceneObjectFactory>();
+            Container.RegisterType<IBitmapFactory, AvaloniaBitmapFactory>();
+            Container.RegisterType<ISceneObjectFactory, AvaloniaSceneObjectFactory>();
 
             logger.Log("Start load TextProvider");
             var textProvider = Container.Resolve<TextProvider>();
@@ -109,10 +112,6 @@ namespace Disciples.Avalonia
             var battleInterfaceProvider = Container.Resolve<BattleInterfaceProvider>();
             Container.RegisterInstance<IBattleInterfaceProvider>(battleInterfaceProvider);
             logger.Log($"End load BattleInterfaceProvider{Environment.NewLine}");
-
-
-            var audioPlaybackEngine = new AudioPlaybackEngine();
-            Container.RegisterInstance<IAudioController>(audioPlaybackEngine);
 
             _game = Container.Resolve<Game>();
             Container.RegisterInstance<IGame>(_game);
@@ -142,8 +141,8 @@ namespace Disciples.Avalonia
             var knight = unitInfoProvider.GetUnitType("g000uu0002");
             var u12 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 2);
 
-            var imperiaKnight = unitInfoProvider.GetUnitType("g000uu0003");
-            var u11 = new Unit(Guid.NewGuid().ToString(), imperiaKnight, player, 1, 1);
+            var imperialKnight = unitInfoProvider.GetUnitType("g000uu0003");
+            var u11 = new Unit(Guid.NewGuid().ToString(), imperialKnight, player, 1, 1);
 
             var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 0);
 

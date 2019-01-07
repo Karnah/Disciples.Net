@@ -2,10 +2,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
              xmlns:avalonia="clr-namespace:Disciples.Avalonia">
-  <Application.DataTemplates>
-      <avalonia:ViewLocator />
-  </Application.DataTemplates>
-
   <Application.Resources>
     <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
     <c:BoldFontConverter x:Key="BoldFontConverter" />

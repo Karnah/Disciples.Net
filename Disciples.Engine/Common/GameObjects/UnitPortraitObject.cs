@@ -57,11 +57,11 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Изображение, отображающий моментальный эффект.
         /// </summary>
-        private IImageSceneObject _momentalEffectImage;
+        private IImageSceneObject _instantaneousEffectImage;
         /// <summary>
         /// Изображение с текстом моментального эффекта.
         /// </summary>
-        private ITextSceneObject _momentalEffectText;
+        private ITextSceneObject _instantaneousEffectText;
         /// <summary>
         /// Текст, отображающий текущее количество здоровья и максимальное.
         /// </summary>
@@ -146,8 +146,8 @@ namespace Disciples.Engine.Common.GameObjects
             RemoveSceneObject(ref _unitPortrait);
             RemoveSceneObject(ref _unitHitpoints);
             RemoveSceneObject(ref _deathIcon);
-            RemoveSceneObject(ref _momentalEffectImage);
-            RemoveSceneObject(ref _momentalEffectText);
+            RemoveSceneObject(ref _instantaneousEffectImage);
+            RemoveSceneObject(ref _instantaneousEffectText);
             RemoveSceneObject(ref _unitDamageImage);
             RemoveSceneObject(ref _unitPanelSeparator);
 
@@ -164,10 +164,10 @@ namespace Disciples.Engine.Common.GameObjects
         private void UpdateUnitEffects()
         {
             ProcessBattleEffects();
-            ProcessMomentalEffects();
+            ProcessInstantaneousEffects();
 
             // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
-            if (Unit.Effects.CurrentMomentalEffect != null && !Unit.Effects.MomentalEffectEnded)
+            if (Unit.Effects.CurrentInstantaneousEffect != null && !Unit.Effects.InstantaneousEffectEnded)
                 return;
 
             if (Unit.IsDead) {
@@ -232,18 +232,18 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Обработать моментальные эффекты - обработать новые и завершенные.
         /// </summary>
-        private void ProcessMomentalEffects()
+        private void ProcessInstantaneousEffects()
         {
             // Обрабатываем новый мгновенный эффект.
-            if (Unit.Effects.MomentalEffectBegin) {
-                ProcessNewMomentalEffect(Unit.Effects.CurrentMomentalEffect);
+            if (Unit.Effects.InstantaneousEffectBegin) {
+                ProcessNewInstantaneousEffect(Unit.Effects.CurrentInstantaneousEffect);
                 return;
             }
 
             // Обрабатываем действующий мгновенный эффект.
-            if (Unit.Effects.MomentalEffectEnded) {
-                RemoveSceneObject(ref _momentalEffectImage);
-                RemoveSceneObject(ref _momentalEffectText);
+            if (Unit.Effects.InstantaneousEffectEnded) {
+                RemoveSceneObject(ref _instantaneousEffectImage);
+                RemoveSceneObject(ref _instantaneousEffectText);
 
                 // Сбрасываем количество ХП, чтобы обновить рамку.
                 _lastUnitHitPoints = int.MaxValue;
@@ -253,29 +253,29 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Обработать новый мгновенный эффект.
         /// </summary>
-        private void ProcessNewMomentalEffect(UnitMomentalEffect momentalEffect)
+        private void ProcessNewInstantaneousEffect(UnitInstantaneousEffect instantaneousEffect)
         {
-            switch (momentalEffect.EffectType) {
-                case UnitMomentalEffectType.Damaged:
-                    _momentalEffectImage = AddColorImage(GameColor.Red);
-                    _momentalEffectText = AddText($"-{momentalEffect.Power}");
+            switch (instantaneousEffect.EffectType) {
+                case UnitInstantaneousEffectType.Damaged:
+                    _instantaneousEffectImage = AddColorImage(GameColor.Red);
+                    _instantaneousEffectText = AddText($"-{instantaneousEffect.Power}");
                     break;
-                case UnitMomentalEffectType.Healed:
+                case UnitInstantaneousEffectType.Healed:
                     var hitPointsDiff = Unit.HitPoints - _lastUnitHitPoints;
                     if (hitPointsDiff > 0) {
-                        _momentalEffectImage = AddColorImage(GameColor.Blue);
-                        _momentalEffectText = AddText($"+{momentalEffect.Power}");
+                        _instantaneousEffectImage = AddColorImage(GameColor.Blue);
+                        _instantaneousEffectText = AddText($"+{instantaneousEffect.Power}");
                     }
                     break;
-                case UnitMomentalEffectType.Miss:
-                    _momentalEffectImage = AddColorImage(GameColor.Yellow);
-                    _momentalEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
+                case UnitInstantaneousEffectType.Miss:
+                    _instantaneousEffectImage = AddColorImage(GameColor.Yellow);
+                    _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
                     break;
-                case UnitMomentalEffectType.Defended:
-                    _momentalEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
+                case UnitInstantaneousEffectType.Defended:
+                    _instantaneousEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
                     break;
-                case UnitMomentalEffectType.Waiting:
-                    _momentalEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
+                case UnitInstantaneousEffectType.Waiting:
+                    _instantaneousEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

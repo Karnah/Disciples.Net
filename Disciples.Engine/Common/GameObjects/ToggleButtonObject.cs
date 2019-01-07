@@ -15,7 +15,7 @@ namespace Disciples.Engine.Common.GameObjects
 
         public ToggleButtonObject(
             IVisualSceneController visualSceneController,
-            IDictionary<ButtonState, IBitmap> buttonStates,
+            IDictionary<SceneButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
             double y,
@@ -39,7 +39,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// <inheritdoc />
         public override void OnSelected()
         {
-            if (ButtonState == ButtonState.Pressed && _isChecked)
+            if (ButtonState == SceneButtonState.Pressed && _isChecked)
                 return;
 
             base.OnSelected();
@@ -48,7 +48,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// <inheritdoc />
         public override void OnUnselected()
         {
-            if (ButtonState == ButtonState.Pressed && _isChecked)
+            if (ButtonState == SceneButtonState.Pressed && _isChecked)
                 return;
 
             base.OnUnselected();
@@ -58,11 +58,11 @@ namespace Disciples.Engine.Common.GameObjects
         public override void OnReleased()
         {
             // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
-            if (ButtonState != ButtonState.Pressed)
+            if (ButtonState != SceneButtonState.Pressed)
                 return;
 
             if (_isChecked)
-                ButtonState = ButtonState.Selected;
+                ButtonState = SceneButtonState.Selected;
 
             OnButtonClicked();
             UpdateButtonVisualObject();
@@ -82,13 +82,13 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         public void SetState(bool isChecked)
         {
-            if (ButtonState == ButtonState.Disabled || _isChecked == isChecked)
+            if (ButtonState == SceneButtonState.Disabled || _isChecked == isChecked)
                 return;
 
             _isChecked = isChecked;
             ButtonState = _isChecked
-                ? ButtonState.Pressed
-                : ButtonState.Active;
+                ? SceneButtonState.Pressed
+                : SceneButtonState.Active;
             UpdateButtonVisualObject();
         }
     }

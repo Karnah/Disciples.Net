@@ -9,11 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NAudio" Version="1.8.4" />
-    <PackageReference Include="NLayer.NAudioSupport" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Disciples.Common\Disciples.Common.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.ResourceProvider\Disciples.ResourceProvider.csproj" />

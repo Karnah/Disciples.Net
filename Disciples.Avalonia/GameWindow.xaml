@@ -1,14 +1,61 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Disciples.Avalonia;assembly=Disciples.Avalonia"
-        xmlns:battle="clr-namespace:Disciples.Avalonia.Battle;assembly=Disciples.Avalonia"
+        xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
+        xmlns:controls="clr-namespace:Disciples.Avalonia.Common.Controls"
+        xmlns:model="clr-namespace:Disciples.Engine.Common.Models;assembly=Disciples.Engine"
+        xmlns:vo="clr-namespace:Disciples.Engine.Common.SceneObjects;assembly=Disciples.Engine"
         xmlns:e="clr-namespace:Disciples.Engine;assembly=Disciples.Engine"
-        Icon="resm:Disciples.Avalonia.Assets.Icon.ico"
+        Icon="resm:Disciples.Avalonia.Icon.ico"
         WindowState="Maximized" Background="Black" HasSystemDecorations="False" CanResize="False"
         Title="Avalonia Disciples II">
 
-  <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
-        HorizontalAlignment="Center" VerticalAlignment="Center">
-    <battle:BattleView DataContext="{Binding ViewContext}" />
-  </Grid>
+    <Window.Resources>
+        <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
+        <c:BitmapToBrushConverter x:Key="BitmapToBrushConverter" />
+        <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
+        <c:GameColorToBrushConverter x:Key="GameColorToBrushConverter" />
+        <c:TextAlignmentConverter x:Key="TextAlignmentConverter" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="ItemsControl > ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource DoubleScaleConverter}}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y, Converter={StaticResource DoubleScaleConverter}}" />
+            <Setter Property="ZIndex" Value="{Binding Layer}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
+          HorizontalAlignment="Center" VerticalAlignment="Center">
+
+        <ItemsControl Items="{Binding Scene.SceneObjects}">
+            <ItemsControl.DataTemplates>
+                <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
+                    <Image Stretch="Fill"
+                           Source="{Binding Bitmap.BitmapData}"
+                           Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                           Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                           RenderTransform="{Binding IsReflected, Converter={StaticResource ReflectedToRenderTransformConverter}}" />
+                </DataTemplate>
+
+                <DataTemplate DataType="{x:Type vo:ITextSceneObject}">
+                    <TextBlock TextWrapping="Wrap"
+                               TextAlignment="{Binding TextAlignment, Converter={StaticResource TextAlignmentConverter}}"
+                               FontSize="{Binding FontSize, Converter={StaticResource DoubleScaleConverter}}"
+                               FontWeight="{Binding IsBold, Converter={StaticResource BoldFontConverter}}"
+                               Foreground="{Binding Foreground, Converter={StaticResource GameColorToBrushConverter}}"
+                               Width="{Binding Width, Converter={StaticResource DoubleScaleConverter}}"
+                               Height="{Binding Height, Converter={StaticResource DoubleScaleConverter}}"
+                               Text="{Binding Text}" />
+                </DataTemplate>
+            </ItemsControl.DataTemplates>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </Grid>
 </Window>

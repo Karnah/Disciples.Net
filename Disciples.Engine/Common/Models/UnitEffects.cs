@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Models;
 
@@ -14,7 +15,7 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Длительность моментального эффекта.
         /// </summary>
-        private const int MOMENTAL_EFFECT_DURATION = 1000;
+        private const int INSTANTANEOUS_EFFECT_DURATION = 1000;
 
         /// <summary>
         /// Эффекты, которые наложены и действуют на глобальной карте.
@@ -27,35 +28,35 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Мгновенные эффекты, типа лечения, промаха и т.д.
         /// </summary>
-        private readonly LinkedList<UnitMomentalEffect> _momentalEffects;
+        private readonly LinkedList<UnitInstantaneousEffect> _instantaneousEffects;
 
         /// <summary>
         /// Сколько осталось до конца моментального эффекта.
         /// </summary>
-        private long? _momentalEffectRemainDuration;
+        private long? _instantaneousEffectRemainDuration;
 
         public UnitEffects()
         {
             _globalEffects = new HashSet<object>();
             _battleEffects = new Dictionary<UnitBattleEffectType, UnitBattleEffect>();
-            _momentalEffects = new LinkedList<UnitMomentalEffect>();
+            _instantaneousEffects = new LinkedList<UnitInstantaneousEffect>();
         }
 
 
         /// <summary>
         /// Текущий мгновенный эффект, который воздействует на юнита.
         /// </summary>
-        public UnitMomentalEffect CurrentMomentalEffect => _momentalEffects.First?.Value;
+        public UnitInstantaneousEffect CurrentInstantaneousEffect => _instantaneousEffects.First?.Value;
 
         /// <summary>
         /// Указатель того, что моментальный эффект только начал действовать.
         /// </summary>
-        public bool MomentalEffectBegin => _momentalEffectRemainDuration == MOMENTAL_EFFECT_DURATION;
+        public bool InstantaneousEffectBegin => _instantaneousEffectRemainDuration == INSTANTANEOUS_EFFECT_DURATION;
 
         /// <summary>
         /// Указатель того, что моментальный эффект завершается.
         /// </summary>
-        public bool MomentalEffectEnded => _momentalEffectRemainDuration == 0;
+        public bool InstantaneousEffectEnded => _instantaneousEffectRemainDuration == 0;
 
 
         /// <summary>
@@ -86,9 +87,9 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Добавить моментальный эффект.
         /// </summary>
-        public void AddMomentalEffect(UnitMomentalEffect momentalEffect)
+        public void AddInstantaneousEffect(UnitInstantaneousEffect instantaneousEffect)
         {
-            _momentalEffects.AddLast(momentalEffect);
+            _instantaneousEffects.AddLast(instantaneousEffect);
         }
 
 
@@ -114,31 +115,31 @@ namespace Disciples.Engine.Common.Models
         /// </summary>
         public void OnTick(long ticksCount)
         {
-            if (!_momentalEffects.Any())
+            if (!_instantaneousEffects.Any())
                 return;
 
             // Если эффект только появился, запускаем таймер его действия.
-            if (_momentalEffectRemainDuration == null) {
-                _momentalEffectRemainDuration = MOMENTAL_EFFECT_DURATION;
+            if (_instantaneousEffectRemainDuration == null) {
+                _instantaneousEffectRemainDuration = INSTANTANEOUS_EFFECT_DURATION;
                 return;
             }
 
             // Обрабатываем завершение моментального эффекта.
-            if (_momentalEffectRemainDuration == 0) {
-                _momentalEffects.RemoveFirst();
+            if (_instantaneousEffectRemainDuration == 0) {
+                _instantaneousEffects.RemoveFirst();
 
                 // В очереди лежит еще один моментальный эффект, перезапускаем таймер.
-                if (CurrentMomentalEffect != null)
-                    _momentalEffectRemainDuration = MOMENTAL_EFFECT_DURATION;
+                if (CurrentInstantaneousEffect != null)
+                    _instantaneousEffectRemainDuration = INSTANTANEOUS_EFFECT_DURATION;
                 else
-                    _momentalEffectRemainDuration = null;
+                    _instantaneousEffectRemainDuration = null;
 
                 return;
             }
 
             // Уменьшаем оставшееся время действия эффекта.
-            _momentalEffectRemainDuration -= ticksCount;
-            _momentalEffectRemainDuration = Math.Max(_momentalEffectRemainDuration.Value, 0);
+            _instantaneousEffectRemainDuration -= ticksCount;
+            _instantaneousEffectRemainDuration = Math.Max(_instantaneousEffectRemainDuration.Value, 0);
         }
     }
 }

@@ -4,6 +4,72 @@
         <name>Disciples.Engine.Platform</name>
     </assembly>
     <members>
+        <member name="T:Disciples.Engine.Platform.Enums.ButtonState">
+            <summary>
+            Состояние кнопки.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Platform.Enums.ButtonState.Pressed">
+            <summary>
+            Кнопка была нажата.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Platform.Enums.ButtonState.Released">
+            <summary>
+            Кнопка была отпущена.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Enums.MouseButton">
+            <summary>
+            Кнопка мыши.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Platform.Enums.MouseButton.Left">
+            <summary>
+            Левая кнопка мыши.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Platform.Enums.MouseButton.Right">
+            <summary>
+            Правая кнопка мыши.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Events.KeyButtonEventArgs">
+            <summary>
+            Аргументы события изменения состояния кнопки клавиатуры.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Events.KeyButtonEventArgs.#ctor(Disciples.Engine.Common.Enums.KeyboardButton,Disciples.Engine.Platform.Enums.ButtonState)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Platform.Events.KeyButtonEventArgs.KeyboardButton">
+            <summary>
+            Кнопка, которая изменила свой состояние.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Events.KeyButtonEventArgs.ButtonState">
+            <summary>
+            Нажата или отпущена была кнопка.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Events.MouseButtonEventArgs">
+            <summary>
+            Аргументы события изменения состояния кнопок мыши.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Events.MouseButtonEventArgs.#ctor(Disciples.Engine.Platform.Enums.MouseButton,Disciples.Engine.Platform.Enums.ButtonState)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Platform.Events.MouseButtonEventArgs.MouseButton">
+            <summary>
+            Кнопка, которая изменила состояние.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Events.MouseButtonEventArgs.ButtonState">
+            <summary>
+            Нажата или отпущена была кнопка.
+            </summary>
+        </member>
         <member name="T:Disciples.Engine.Platform.Factories.IBitmapFactory">
             <summary>
             Фабрика для создания изображений.
@@ -70,6 +136,46 @@
             <param name="isBold">Использовать жирный шрифт.</param>
             <param name="foregroundColor">Цвет шрифта.</param>
         </member>
+        <member name="T:Disciples.Engine.Platform.Managers.IGameTimer">
+            <summary>
+            Игровой таймер.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Platform.Managers.IGameTimer.TimerTick">
+            <summary>
+            Событие срабатывания таймера.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Managers.IGameTimer.Start">
+            <summary>
+            Начать работу таймера.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Managers.IGameTimer.Stop">
+            <summary>
+            Остановить таймер.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Managers.IInputManager">
+            <summary>
+            Менеджер устройств ввода.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Managers.IInputManager.MousePosition">
+            <summary>
+            Положение курсора мыши.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Platform.Managers.IInputManager.MouseButtonEvent">
+            <summary>
+            Событие изменения состояния кнопки мыши.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Platform.Managers.IInputManager.KeyButtonEvent">
+            <summary>
+            Событие изменения состояния кнопки клавиатуры.
+            </summary>
+        </member>
         <member name="T:Disciples.Engine.Platform.Models.Bounds">
             <summary>
             Информация о границах.
@@ -96,6 +202,28 @@
         <member name="P:Disciples.Engine.Platform.Models.Bounds.MaxColumn">
             <summary>
             Максимальная колонка.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Platform.Models.Point">
+            <summary>
+            Координаты точки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Models.Point.#ctor(System.Double,System.Double)">
+            <summary>
+            Создать координаты точки.
+            </summary>
+            <param name="x">Координата X.</param>
+            <param name="y">Координата Y.</param>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Point.X">
+            <summary>
+            Координата X.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Platform.Models.Point.Y">
+            <summary>
+            Координата Y.
             </summary>
         </member>
     </members>
