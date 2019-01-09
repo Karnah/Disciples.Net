@@ -3,19 +3,23 @@ using System.Diagnostics;
 using System.Windows;
 
 using Unity;
-using Unity.Resolution;
 
-using Disciples.Engine;
+using Disciples.Engine.Base;
+using Disciples.Engine.Battle;
+using Disciples.Engine.Battle.Controllers;
+using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
-using Disciples.Engine.Implementation.Controllers;
-using Disciples.Engine.Implementation.Resources;
+using Disciples.Engine.Implementation.Battle;
+using Disciples.Engine.Implementation.Battle.Controllers;
+using Disciples.Engine.Implementation.Battle.Providers;
+using Disciples.Engine.Implementation.Common.Providers;
+using Disciples.Engine.Implementation.Loading;
+using Disciples.Engine.Loading;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
-using Disciples.WPF.Controllers;
 using Disciples.WPF.Factories;
 using Disciples.WPF.Managers;
 
@@ -25,7 +29,7 @@ namespace Disciples.WPF
     {
         private static UnityContainer Container;
 
-        private static Game _game;
+        private static GameController _gameController;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -40,34 +44,39 @@ namespace Disciples.WPF
 
                 var logger = Container.Resolve<ILogger>();
 
-                logger.Log("Create BattleAttackController");
-                var battleAttackController = Container.Resolve<BattleAttackController>(
-                    new ParameterOverride("attackSquad", CreateAttackingSquad()),
-                    new ParameterOverride("defendSquad", CreateDefendingSquad()));
-                logger.Log($"End create BattleAttackController{Environment.NewLine}");
-
-                var battleInterfaceController = Container.Resolve<BattleInterfaceController>(
-                    new ParameterOverride("battleAttackController", battleAttackController));
-                battleInterfaceController.Initialize();
-
                 logger.Log("Create GameWindow");
                 var gw = Container.Resolve<GameWindow>();
-                gw.Closing += (sender, eventArgs) => { _game.Stop(); };
+                gw.Closing += (sender, eventArgs) => { _gameController.Stop(); };
 
                 logger.Log("Battle begin");
                 logger.Log($"Loading time: {stopwatch.ElapsedMilliseconds / 1000.0} s.");
 
                 stopwatch.Stop();
 
-                _game.Start();
+                Container.Resolve<ITextProvider>().Load();
+                Container.Resolve<IUnitInfoProvider>().Load();
+
+                _gameController.Start();
+
+                // Сразу отображаем сцену загрузки.
+                var loadingSceneController = Container.Resolve<ILoadingSceneController>();
+                _gameController.ChangeScene(loadingSceneController, (object)null);
+
+                // Следующая сцена будет сцена битвы.
+                var battleSceneController = Container.Resolve<IBattleSceneController>();
+                _gameController.ChangeScene(battleSceneController, new BattleInitializeData(
+                    Container.Resolve<IBattleController>(),
+                    Container.Resolve<IBattleInterfaceController>(),
+                    CreateAttackingSquad(),
+                    CreateDefendingSquad()));
 
                 gw.ShowDialog();
             }
             catch (Exception exception) {
                 MessageBox.Show(exception.Message);
+                Shutdown();
             }
         }
-
 
         private static void CreateContainer()
         {
@@ -84,38 +93,23 @@ namespace Disciples.WPF
 
             // Регистрируем фабрики.
             Container.RegisterType<IBitmapFactory, WpfBitmapFactory>();
-            Container.RegisterType<ISceneObjectFactory, WpfSceneObjectFactory>();
+            Container.RegisterType<ISceneFactory, WpfSceneFactory>();
 
-            logger.Log("Start load TextProvider");
-            var textProvider = Container.Resolve<TextProvider>();
-            Container.RegisterInstance<ITextProvider>(textProvider);
-            logger.Log($"End load TextProvider{Environment.NewLine}");
+            _gameController = Container.Resolve<GameController>();
+            Container.RegisterInstance<IGameController>(_gameController);
 
-            logger.Log("Start load BattleResource");
-            var battleResourceProvider = Container.Resolve<BattleResourceProvider>();
-            Container.RegisterInstance<IBattleResourceProvider>(battleResourceProvider);
-            logger.Log($"End load BattleResource{Environment.NewLine}");
+            Container.RegisterSingleton<ITextProvider, TextProvider>();
+            Container.RegisterSingleton<IInterfaceProvider, InterfaceProvider>();
+            Container.RegisterSingleton<IUnitInfoProvider, UnitInfoProvider>();
 
-            logger.Log("Start load UnitInfo");
-            var unitInfoProvider = Container.Resolve<UnitInfoProvider>();
-            Container.RegisterInstance<IUnitInfoProvider>(unitInfoProvider);
-            logger.Log($"End load UnitInfo{Environment.NewLine}");
+            Container.RegisterSingleton<ILoadingSceneController, LoadingSceneController>();
 
-            logger.Log("Start load BattleUnitResource");
-            var battleUnitResourceProvider = Container.Resolve<BattleUnitResourceProvider>();
-            Container.RegisterInstance<IBattleUnitResourceProvider>(battleUnitResourceProvider);
-            logger.Log($"End load BattleUnitResource{Environment.NewLine}");
-
-            logger.Log("Start load BattleInterfaceProvider");
-            var battleInterfaceProvider = Container.Resolve<BattleInterfaceProvider>();
-            Container.RegisterInstance<IBattleInterfaceProvider>(battleInterfaceProvider);
-            logger.Log($"End load BattleInterfaceProvider{Environment.NewLine}");
-
-            _game = Container.Resolve<Game>();
-            Container.RegisterInstance<IGame>(_game);
-
-            Container.RegisterSingleton<IScene, Scene>();
-            Container.RegisterSingleton<IVisualSceneController, VisualSceneController>();
+            Container.RegisterSingleton<IBattleResourceProvider, BattleResourceProvider>();
+            Container.RegisterSingleton<IBattleInterfaceProvider, BattleInterfaceProvider>();
+            Container.RegisterSingleton<IBattleUnitResourceProvider, BattleUnitResourceProvider>();
+            Container.RegisterSingleton<IBattleController, BattleController>();
+            Container.RegisterSingleton<IBattleInterfaceController, BattleInterfaceController>();
+            Container.RegisterSingleton<IBattleSceneController, BattleSceneController>();
         }
 
 

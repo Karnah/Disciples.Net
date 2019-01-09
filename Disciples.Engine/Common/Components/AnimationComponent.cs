@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
@@ -18,7 +18,7 @@ namespace Disciples.Engine.Common.Components
         /// </summary>
         private const int FRAME_CHANGE_SPEED = 75;
 
-        private readonly IVisualSceneController _visualSceneController;
+        private readonly ISceneController _sceneController;
         private readonly IReadOnlyList<Frame> _frames;
         private readonly int _layer;
 
@@ -28,12 +28,12 @@ namespace Disciples.Engine.Common.Components
         /// <inheritdoc />
         public AnimationComponent(
             GameObject gameObject,
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IReadOnlyList<Frame> frames,
             int layer
             ) : base(gameObject)
         {
-            _visualSceneController = visualSceneController;
+            _sceneController = sceneController;
             _frames = frames;
             _layer = layer;
         }
@@ -55,7 +55,7 @@ namespace Disciples.Engine.Common.Components
         {
             base.OnInitialize();
 
-            _animationFrame = _visualSceneController.AddImage(_layer);
+            _animationFrame = _sceneController.AddImage(_layer);
         }
 
         /// <inheritdoc />
@@ -95,7 +95,7 @@ namespace Disciples.Engine.Common.Components
         /// <inheritdoc />
         public override void Destroy()
         {
-            _visualSceneController.RemoveSceneObject(_animationFrame);
+            _sceneController.RemoveSceneObject(_animationFrame);
         }
     }
 }

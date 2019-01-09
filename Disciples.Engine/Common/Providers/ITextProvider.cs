@@ -1,9 +1,11 @@
-﻿namespace Disciples.Engine.Common.Providers
+﻿using Disciples.Engine.Base;
+
+namespace Disciples.Engine.Common.Providers
 {
     /// <summary>
     /// Поставщик текста.
     /// </summary>
-    public interface ITextProvider
+    public interface ITextProvider : ISupportLoading
     {
         /// <summary>
         /// Получить текст по идентификатору.

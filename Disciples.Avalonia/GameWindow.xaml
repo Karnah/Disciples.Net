@@ -29,7 +29,7 @@
     <Grid Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
-        <ItemsControl Items="{Binding Scene.SceneObjects}">
+        <ItemsControl Items="{Binding SceneObjects}">
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
                     <Image Stretch="Fill"

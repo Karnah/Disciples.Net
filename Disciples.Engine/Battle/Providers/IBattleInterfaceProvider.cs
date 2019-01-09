@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
@@ -9,7 +10,7 @@ namespace Disciples.Engine.Battle.Providers
     /// <summary>
     /// Провайдер для основных изображений на поле битвы.
     /// </summary>
-    public interface IBattleInterfaceProvider
+    public interface IBattleInterfaceProvider : ISupportLoading
     {
         /// <summary>
         /// Фон поля боя.
@@ -77,12 +78,6 @@ namespace Disciples.Engine.Battle.Providers
         /// Иконки для автоматической битвы.
         /// </summary>
         IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; }
-
-
-        /// <summary>
-        /// Получить изображение указанного цвета.
-        /// </summary>
-        IBitmap GetColorBitmap(GameColor color);
 
 
         /// <summary>

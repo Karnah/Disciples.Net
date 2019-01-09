@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -13,14 +13,14 @@ namespace Disciples.Engine.Common.GameObjects
     /// </summary>
     public class ButtonObject : GameObject
     {
-        private readonly IVisualSceneController _visualSceneController;
+        private readonly ISceneController _sceneController;
         private readonly IDictionary<SceneButtonState, IBitmap> _buttonStates;
         private readonly Action _buttonPressedAction;
 
         private IImageSceneObject _buttonVisualObject;
 
         public ButtonObject(
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IDictionary<SceneButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
@@ -29,7 +29,7 @@ namespace Disciples.Engine.Common.GameObjects
             KeyboardButton? hotkey = null
             ) : base(x, y)
         {
-            _visualSceneController = visualSceneController;
+            _sceneController = sceneController;
             _buttonStates = buttonStates;
             _buttonPressedAction = buttonPressedAction;
 
@@ -67,7 +67,7 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _buttonVisualObject = _visualSceneController.AddImage(_buttonStates[ButtonState], X, Y, Layer);
+            _buttonVisualObject = _sceneController.AddImage(_buttonStates[ButtonState], X, Y, Layer);
         }
 
         /// <inheritdoc />
@@ -75,7 +75,7 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.Destroy();
             
-            _visualSceneController.RemoveSceneObject(_buttonVisualObject);
+            _sceneController.RemoveSceneObject(_buttonVisualObject);
             _buttonVisualObject = null;
         }
 

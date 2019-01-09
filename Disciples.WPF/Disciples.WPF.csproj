@@ -84,9 +84,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\Scene.cs" />
+    <Compile Include="Controllers\WpfSceneContainer.cs" />
     <Compile Include="Factories\WpfBitmapFactory.cs" />
-    <Compile Include="Factories\WpfSceneObjectFactory.cs" />
+    <Compile Include="Factories\WpfSceneFactory.cs" />
     <Compile Include="Models\WpfBitmap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

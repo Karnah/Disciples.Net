@@ -104,18 +104,23 @@
             TODO Используется только для тестов и подготовки данных.
             </remarks>
         </member>
-        <member name="T:Disciples.Engine.Platform.Factories.ISceneObjectFactory">
+        <member name="T:Disciples.Engine.Platform.Factories.ISceneFactory">
             <summary>
-            Фабрика для создания объектов, которые отрисовываются на сцене.
+            Фабрика для сцены и объектов на ней.
             </summary>
         </member>
-        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateImageSceneObject(System.Int32)">
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneFactory.CreateScene">
+            <summary>
+            Создать пустую сцену.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneFactory.CreateImageSceneObject(System.Int32)">
             <summary>
             Создать пустое изображение, которое отображается на сцене.
             </summary>
             <param name="layer">Слой, на котором изображение будет отображаться.</param>
         </member>
-        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Boolean)">
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Boolean)">
             <summary>
             Создать текст, который будет отображаться на сцене.
             </summary>
@@ -124,7 +129,7 @@
             <param name="layer">Слой, на котором будет отображаться текст.</param>
             <param name="isBold">Использовать жирный шрифт.</param>
         </member>
-        <member name="M:Disciples.Engine.Platform.Factories.ISceneObjectFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Double,Disciples.Engine.Common.Enums.TextAlignment,System.Boolean,System.Nullable{Disciples.Engine.Common.Enums.GameColor})">
+        <member name="M:Disciples.Engine.Platform.Factories.ISceneFactory.CreateTextSceneObject(System.String,System.Double,System.Int32,System.Double,Disciples.Engine.Common.Enums.TextAlignment,System.Boolean,System.Nullable{Disciples.Engine.Common.Enums.GameColor})">
             <summary>
             Создать текст, который будет отображаться на сцене.
             </summary>

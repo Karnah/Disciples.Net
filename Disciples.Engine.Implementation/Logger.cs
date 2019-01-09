@@ -1,4 +1,5 @@
 ﻿using System;
+using Disciples.Engine.Base;
 
 namespace Disciples.Engine.Implementation
 {

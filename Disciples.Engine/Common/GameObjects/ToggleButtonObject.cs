@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.GameObjects
@@ -14,14 +14,14 @@ namespace Disciples.Engine.Common.GameObjects
         private bool _isChecked;
 
         public ToggleButtonObject(
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IDictionary<SceneButtonState, IBitmap> buttonStates,
             Action buttonPressedAction,
             double x,
             double y,
             int layer,
             KeyboardButton? hotkey = null)
-            : base(visualSceneController, buttonStates, buttonPressedAction, x, y, layer, hotkey)
+            : base(sceneController, buttonStates, buttonPressedAction, x, y, layer, hotkey)
         {
             _isChecked = false;
         }

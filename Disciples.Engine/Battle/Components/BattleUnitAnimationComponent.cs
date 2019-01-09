@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Components;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -21,7 +21,7 @@ namespace Disciples.Engine.Battle.Components
         private const int FRAME_CHANGE_SPEED = 75;
 
         private readonly BattleUnit _battleUnit;
-        private readonly IVisualSceneController _visualSceneController;
+        private readonly ISceneController _sceneController;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
         private readonly string _unitId;
 
@@ -40,12 +40,12 @@ namespace Disciples.Engine.Battle.Components
         /// <inheritdoc />
         public BattleUnitAnimationComponent(
             BattleUnit battleUnit,
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             string unitId) : base(battleUnit)
         {
             _battleUnit = battleUnit;
-            _visualSceneController = visualSceneController;
+            _sceneController = sceneController;
             _battleUnitResourceProvider = battleUnitResourceProvider;
             _unitId = unitId;
 
@@ -165,13 +165,13 @@ namespace Disciples.Engine.Battle.Components
                 if (imageVisual != null) {
                     // todo Здесь происходит удаление.
                     // Возможно, просто достаточно перенести в невидимую область
-                    _visualSceneController.RemoveSceneObject(imageVisual);
+                    _sceneController.RemoveSceneObject(imageVisual);
                     imageVisual = null;
                 }
             }
             else {
                 if (imageVisual == null) {
-                    imageVisual = _visualSceneController.AddImage(layer);
+                    imageVisual = _sceneController.AddImage(layer);
                 }
 
                 var frame = frames[FrameIndex];

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Providers;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
@@ -38,7 +38,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         private const string UNIT_ATTACK_INFO_SECOND_PART_ID = "X005TA0788";
 
-        private readonly IVisualSceneController _visualSceneController;
+        private readonly ISceneController _sceneController;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly ITextProvider _textProvider;
         private readonly List<ITextSceneObject> _unitInfo;
@@ -50,19 +50,19 @@ namespace Disciples.Engine.Common.GameObjects
 
         /// <inheritdoc />
         public DetailUnitInfoObject(
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IBattleInterfaceProvider battleInterfaceProvider,
             ITextProvider textProvider,
             Unit unit)
         {
-            _visualSceneController = visualSceneController;
+            _sceneController = sceneController;
             _battleInterfaceProvider = battleInterfaceProvider;
             _textProvider = textProvider;
 
             _unitInfo = new List<ITextSceneObject>();
 
-            X = ((double) GameInfo.OriginalWidth - _battleInterfaceProvider.UnitInfoBackground.Width) / 2;
-            Y = ((double) GameInfo.OriginalHeight - _battleInterfaceProvider.UnitInfoBackground.Height) / 2;
+            X = (GameInfo.OriginalWidth - _battleInterfaceProvider.UnitInfoBackground.Width) / 2;
+            Y = (GameInfo.OriginalHeight - _battleInterfaceProvider.UnitInfoBackground.Height) / 2;
 
             Unit = unit;
         }
@@ -82,23 +82,23 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _unitInfoBackground = _visualSceneController.AddImage(
+            _unitInfoBackground = _sceneController.AddImage(
                 _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);
 
-            _unitPortrait = _visualSceneController.AddImage(
+            _unitPortrait = _sceneController.AddImage(
                 Unit.UnitType.Portrait,
                 X + 70,
                 Y + 10,
                 INTERFACE_LAYER + 1
             );
-            _unitName = _visualSceneController.AddText(
+            _unitName = _sceneController.AddText(
                 Unit.UnitType.Name, 11, X + 110, Y + 440, INTERFACE_LAYER + 1, 260, TextAlignment.Center, true);
-            _unitDescription = _visualSceneController.AddText(
+            _unitDescription = _sceneController.AddText(
                 Unit.UnitType.Description, 11, X + 110, Y + 440 + ROW_HEIGHT, INTERFACE_LAYER + 1, 260, TextAlignment.Left);
 
-            _unitInfo.AddRange(GetUnitBaseInfo(UNIT_BASE_INFO_ID, 60, out var _));
+            _unitInfo.AddRange(GetUnitBaseInfo(UNIT_BASE_INFO_ID, 60, out _));
             _unitInfo.AddRange(GetUnitBaseInfo(UNIT_ATTACK_INFO_FIRST_PART_ID, 200, out var endVerticalOffset));
-            _unitInfo.AddRange(GetUnitBaseInfo(UNIT_ATTACK_INFO_SECOND_PART_ID, endVerticalOffset, out var _));
+            _unitInfo.AddRange(GetUnitBaseInfo(UNIT_ATTACK_INFO_SECOND_PART_ID, endVerticalOffset, out _));
         }
 
         /// <summary>
@@ -117,8 +117,8 @@ namespace Disciples.Engine.Common.GameObjects
             foreach (Match row in rows) {
                 var titlePattern = row.Groups["Title"].Value;
                 var title = ReplacePlaceholders(titlePattern.Trim());
-                var titleObject = _visualSceneController.AddText(
-                    title, 11, X + 400, Y + endVerticalOffset, INTERFACE_LAYER + 1, true);
+                var titleObject = _sceneController.AddText(
+                    title, 11, X + 395, Y + endVerticalOffset, INTERFACE_LAYER + 1, true);
                 result.Add(titleObject);
 
                 var valuePattern1 = row.Groups["Value1"].Value;
@@ -127,8 +127,8 @@ namespace Disciples.Engine.Common.GameObjects
                     ? valuePattern2
                     : valuePattern1;
                 var value = ReplacePlaceholders(valuePattern);
-                var valueObject = _visualSceneController.AddText(
-                    value, 11, X + 510, Y + endVerticalOffset, INTERFACE_LAYER + 1, 120, TextAlignment.Left);
+                var valueObject = _sceneController.AddText(
+                    value, 11, X + 500, Y + endVerticalOffset, INTERFACE_LAYER + 1, 130, TextAlignment.Left);
                 result.Add(valueObject);
 
                 endVerticalOffset += ROW_HEIGHT;
@@ -270,12 +270,12 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.Destroy();
 
-            _visualSceneController.RemoveSceneObject(_unitInfoBackground);
-            _visualSceneController.RemoveSceneObject(_unitPortrait);
-            _visualSceneController.RemoveSceneObject(_unitName);
-            _visualSceneController.RemoveSceneObject(_unitDescription);
+            _sceneController.RemoveSceneObject(_unitInfoBackground);
+            _sceneController.RemoveSceneObject(_unitPortrait);
+            _sceneController.RemoveSceneObject(_unitName);
+            _sceneController.RemoveSceneObject(_unitDescription);
             foreach (var unitInfo in _unitInfo) {
-                _visualSceneController.RemoveSceneObject(unitInfo);
+                _sceneController.RemoveSceneObject(unitInfo);
             }
         }
     }

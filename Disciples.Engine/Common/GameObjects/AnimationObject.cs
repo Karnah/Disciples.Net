@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.GameObjects
@@ -12,7 +12,7 @@ namespace Disciples.Engine.Common.GameObjects
     public class AnimationObject : GameObject
     {
         public AnimationObject(
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IReadOnlyList<Frame> frames,
             double x,
             double y,
@@ -20,7 +20,7 @@ namespace Disciples.Engine.Common.GameObjects
             bool repeat = true
             ) : base(x, y)
         {
-            AnimationComponent = new AnimationComponent(this, visualSceneController, frames, layer);
+            AnimationComponent = new AnimationComponent(this, sceneController, frames, layer);
 
             Components = new IComponent[] {
                 AnimationComponent

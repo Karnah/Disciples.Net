@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Battle.Providers
@@ -6,7 +8,7 @@ namespace Disciples.Engine.Battle.Providers
     /// <summary>
     /// Поставщик ресурсов для сцены битвы.
     /// </summary>
-    public interface IBattleResourceProvider
+    public interface IBattleResourceProvider : ISupportLoading
     {
         /// <summary>
         /// Получить анимацию для сцены битвы.

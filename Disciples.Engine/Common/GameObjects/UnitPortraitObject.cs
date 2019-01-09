@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
@@ -38,7 +38,7 @@ namespace Disciples.Engine.Common.GameObjects
         private const string WAIT_TEXT_ID = "X008TA0020";
 
         private readonly ITextProvider _textProvider;
-        private readonly IVisualSceneController _visualSceneController;
+        private readonly ISceneController _sceneController;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly bool _rightToLeft;
 
@@ -82,7 +82,7 @@ namespace Disciples.Engine.Common.GameObjects
 
         public UnitPortraitObject(
             ITextProvider textProvider,
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IBattleInterfaceProvider battleInterfaceProvider,
             Unit unit,
             bool rightToLeft,
@@ -90,7 +90,7 @@ namespace Disciples.Engine.Common.GameObjects
             double y) : base(x, y)
         {
             _textProvider = textProvider;
-            _visualSceneController = visualSceneController;
+            _sceneController = sceneController;
             _battleInterfaceProvider = battleInterfaceProvider;
             _rightToLeft = rightToLeft;
 
@@ -117,13 +117,13 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
-            _unitPortrait = _visualSceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
+            _unitPortrait = _sceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
             _unitPortrait.IsReflected = _rightToLeft;
 
-            _unitHitpoints = _visualSceneController.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
+            _unitHitpoints = _sceneController.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
             // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
             if (!Unit.UnitType.SizeSmall) {
-                _unitPanelSeparator = _visualSceneController.AddImage(
+                _unitPanelSeparator = _sceneController.AddImage(
                     _battleInterfaceProvider.PanelSeparator,
                     X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
                     Y + Height - 1,
@@ -152,7 +152,7 @@ namespace Disciples.Engine.Common.GameObjects
             RemoveSceneObject(ref _unitPanelSeparator);
 
             foreach (var battleEffectsIcon in _battleEffectsIcons) {
-                _visualSceneController.RemoveSceneObject(battleEffectsIcon.Value);
+                _sceneController.RemoveSceneObject(battleEffectsIcon.Value);
             }
 
             base.Destroy();
@@ -175,7 +175,7 @@ namespace Disciples.Engine.Common.GameObjects
                     // Картинку выравниваем по ширине.
                     var deathScull = _battleInterfaceProvider.DeathSkull;
                     var widthOffset = (Width - deathScull.Width) / 2;
-                    _deathIcon = _visualSceneController.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y, INTERFACE_LAYER + 3);
+                    _deathIcon = _sceneController.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y, INTERFACE_LAYER + 3);
                     _unitHitpoints.Text = $"0/{Unit.UnitType.HitPoints}";
 
                     RemoveSceneObject(ref _unitDamageImage);
@@ -193,7 +193,7 @@ namespace Disciples.Engine.Common.GameObjects
                     var x = _unitPortrait.X;
                     var y = _unitPortrait.Y + (Height - height);
 
-                    _unitDamageImage = _visualSceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                    _unitDamageImage = _sceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
                 }
             }
         }
@@ -211,7 +211,7 @@ namespace Disciples.Engine.Common.GameObjects
                     continue;
 
                 var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
-                _battleEffectsIcons.Add(battleEffect.EffectType, _visualSceneController.AddImage(
+                _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
                     icon,
                     X + (Width - icon.Width) / 2,
                     Y + Height - icon.Height,
@@ -224,7 +224,7 @@ namespace Disciples.Engine.Common.GameObjects
                 .ToList();
             foreach (var expiredEffect in expiredEffects) {
                 var effectIcon = _battleEffectsIcons[expiredEffect.Key];
-                _visualSceneController.RemoveSceneObject(effectIcon);
+                _sceneController.RemoveSceneObject(effectIcon);
                 _battleEffectsIcons.Remove(expiredEffect.Key);
             }
         }
@@ -292,7 +292,7 @@ namespace Disciples.Engine.Common.GameObjects
             // Если мы добавляем изображение поверх портрета, то должны на время очистить изображение с % здоровья.
             RemoveSceneObject(ref _unitDamageImage);
 
-            return _visualSceneController.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
+            return _sceneController.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
         }
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// </summary>
         private ITextSceneObject AddText(string text)
         {
-            return _visualSceneController.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
+            return _sceneController.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
         }
 
         /// <summary>
@@ -310,7 +310,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// <param name="sceneObject">Объект, который необходимо удалить.</param>
         private void RemoveSceneObject<T>(ref T sceneObject) where T : ISceneObject
         {
-            _visualSceneController.RemoveSceneObject(sceneObject);
+            _sceneController.RemoveSceneObject(sceneObject);
             sceneObject = default(T);
         }
     }

@@ -15,7 +15,7 @@
     <Grid x:Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
-        <ItemsControl ItemsSource="{Binding Scene.SceneObjects}" IsTabStop="False">
+        <ItemsControl ItemsSource="{Binding SceneObjects}" IsTabStop="False">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas IsItemsHost="True" />

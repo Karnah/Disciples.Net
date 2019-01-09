@@ -1,8 +1,8 @@
-﻿using Disciples.Engine.Battle.Components;
+﻿using Disciples.Engine.Base;
+using Disciples.Engine.Battle.Components;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Components;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 
@@ -23,7 +23,7 @@ namespace Disciples.Engine.Battle.GameObjects
         private const int BATTLE_UNIT_HEIGHT = 100;
 
         public BattleUnit(
-            IVisualSceneController visualSceneController,
+            ISceneController sceneController,
             IBattleUnitResourceProvider battleUnitResourceProvider,
             Unit unit,
             bool isAttacker
@@ -36,7 +36,7 @@ namespace Disciples.Engine.Battle.GameObjects
                 : BattleDirection.Defender;
             Action = BattleAction.Waiting;
 
-            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, visualSceneController, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
+            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
             this.Components = new IComponent[] { BattleUnitAnimationComponent };
 
             Width = BATTLE_UNIT_WIDTH;

@@ -1,34 +1,11 @@
-﻿using Disciples.Engine.Battle.GameObjects;
-using Disciples.Engine.Common.Models;
+﻿using Disciples.Engine.Base;
 
 namespace Disciples.Engine.Battle.Controllers
 {
     /// <summary>
-    /// Класс для взаимодействия с интерфейсом пользователя.
+    /// Контроллер, который взаимодействует и управляет интерфейсом во время битвы.
     /// </summary>
-    public interface IBattleInterfaceController
+    public interface IBattleInterfaceController : ISupportLoading
     {
-        /// <summary>
-        /// Расположить все объекты интерфейса на сцене.
-        /// </summary>
-        void Initialize();
-
-        /// <summary>
-        /// Обновить цель.
-        /// </summary>
-        /// <param name="targetUnitObject">Юнит, на которого навели курсором.</param>
-        /// <param name="animateTarget">Необходимо ли выделить юнита с помощью анимации (красный крутящийся круг).</param>
-        void UpdateTargetUnit(BattleUnit targetUnitObject, bool animateTarget = true);
-
-        /// <summary>
-        /// Отобразить детальную информацию по указанному юниту.
-        /// </summary>
-        /// <param name="unit">Юнит, информацию о котором необходимо отобразить.</param>
-        void ShowDetailUnitInfo(Unit unit);
-
-        /// <summary>
-        /// Прекратить отображение детальной информации по юниту.
-        /// </summary>
-        void StopShowDetailUnitInfo();
     }
 }
