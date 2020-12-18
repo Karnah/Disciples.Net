@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using Disciples.Engine.Base;
-using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Common.Models;
@@ -14,11 +13,6 @@ namespace Disciples.Engine.Battle.Controllers
     /// </summary>
     public interface IBattleController : ISupportLoading<BattleSquadsData>
     {
-        /// <summary>
-        /// Текущее состояние битвы.
-        /// </summary>
-        BattleState BattleState { get; }
-
         /// <summary>
         /// Юнит, который сейчас ходит.
         /// </summary>

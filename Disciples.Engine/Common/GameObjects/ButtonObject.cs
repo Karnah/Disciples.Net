@@ -19,6 +19,7 @@ namespace Disciples.Engine.Common.GameObjects
 
         private IImageSceneObject _buttonVisualObject;
 
+        /// <inheritdoc />
         public ButtonObject(
             ISceneController sceneController,
             IDictionary<SceneButtonState, IBitmap> buttonStates,

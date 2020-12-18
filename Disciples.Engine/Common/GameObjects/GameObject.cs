@@ -9,17 +9,20 @@ namespace Disciples.Engine.Common.GameObjects
     /// </summary>
     public abstract class GameObject
     {
+        /// <inheritdoc />
         protected GameObject()
         {
             Components = new IComponent[0];
         }
 
+        /// <inheritdoc />
         protected GameObject(double x, double y) : this()
         {
             X = x;
             Y = y;
         }
 
+        /// <inheritdoc />
         protected GameObject((double X, double Y) position) : this(position.X, position.Y)
         {
         }

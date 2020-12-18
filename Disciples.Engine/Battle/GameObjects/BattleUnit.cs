@@ -1,4 +1,6 @@
-﻿using Disciples.Engine.Base;
+﻿using System;
+
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Components;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Providers;
@@ -22,6 +24,10 @@ namespace Disciples.Engine.Battle.GameObjects
         /// </summary>
         private const int BATTLE_UNIT_HEIGHT = 100;
 
+        private BattleDirection _direction;
+        private BattleAction _action;
+
+        /// <inheritdoc />
         public BattleUnit(
             ISceneController sceneController,
             IBattleUnitResourceProvider battleUnitResourceProvider,
@@ -36,8 +42,8 @@ namespace Disciples.Engine.Battle.GameObjects
                 : BattleDirection.Defender;
             Action = BattleAction.Waiting;
 
-            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
-            this.Components = new IComponent[] { BattleUnitAnimationComponent };
+            AnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider);
+            this.Components = new IComponent[] { AnimationComponent };
 
             Width = BATTLE_UNIT_WIDTH;
             Height = BATTLE_UNIT_HEIGHT;
@@ -50,7 +56,7 @@ namespace Disciples.Engine.Battle.GameObjects
         /// <summary>
         /// Компонент анимации юнита.
         /// </summary>
-        public BattleUnitAnimationComponent BattleUnitAnimationComponent { get; }
+        public BattleUnitAnimationComponent AnimationComponent { get; }
 
 
         /// <summary>
@@ -66,12 +72,30 @@ namespace Disciples.Engine.Battle.GameObjects
         /// <summary>
         /// Направление, куда смотрит юнит.
         /// </summary>
-        public BattleDirection Direction { get; set; }
+        public BattleDirection Direction {
+            get => _direction;
+            set {
+                _direction = value;
+                UnitStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
 
         /// <summary>
         /// Действие, которое выполняет юнит в данный момент.
         /// </summary>
-        public BattleAction Action { get; set; }
+        public BattleAction Action {
+            get => _action;
+            set {
+                _action = value;
+                UnitStateChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+
+        /// <summary>
+        /// Событие изменения состояния юнита.
+        /// </summary>
+        public event EventHandler UnitStateChanged;
 
 
         /// <summary>

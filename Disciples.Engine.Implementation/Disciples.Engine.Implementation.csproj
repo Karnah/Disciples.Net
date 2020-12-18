@@ -6,6 +6,9 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <DocumentationFile>C:\Users\Pinky\Source\Repos\Disciples.Net\Disciples.Engine.Implementation\Disciples.Engine.Implementation.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

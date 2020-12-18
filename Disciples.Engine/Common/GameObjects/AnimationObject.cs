@@ -11,6 +11,7 @@ namespace Disciples.Engine.Common.GameObjects
     /// </summary>
     public class AnimationObject : GameObject
     {
+        /// <inheritdoc />
         public AnimationObject(
             ISceneController sceneController,
             IReadOnlyList<Frame> frames,

@@ -33,6 +33,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         private readonly IBattleController _battleController;
         private readonly IBattleInterfaceProvider _interfaceProvider;
         private readonly IBattleResourceProvider _battleResourceProvider;
+        private readonly IBattleActionProvider _battleActionProvider;
 
         private IReadOnlyCollection<BattleUnit> _rightPanelUnits;
         private IImageSceneObject _currentUnitFace;
@@ -92,18 +93,21 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         private ButtonObject _instantResolveButton;
         private ToggleButtonObject _autoBattleButton;
 
+        /// <inheritdoc />
         public BattleInterfaceController(
             IGameController gameController,
             IBattleSceneController battleSceneController,
             IBattleController battleController,
             IBattleInterfaceProvider battleInterfaceProvider,
-            IBattleResourceProvider battleResourceProvider)
+            IBattleResourceProvider battleResourceProvider,
+            IBattleActionProvider battleActionProvider)
         {
             _gameController = gameController;
             _battleSceneController = battleSceneController;
             _battleController = battleController;
             _interfaceProvider = battleInterfaceProvider;
             _battleResourceProvider = battleResourceProvider;
+            _battleActionProvider = battleActionProvider;
         }
 
 
@@ -229,9 +233,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
             _targetUnitTextInfoObject.Unit = targetUnitObject.Unit;
             _animateTarget = animateTarget;
 
-            var isInterfaceActive = _battleController.BattleState == BattleState.WaitingAction ||
-                                    _battleController.BattleState == BattleState.BattleEnd;
-            if (animateTarget && isInterfaceActive)
+            if (animateTarget && _battleActionProvider.IsInterfaceActive)
                 SelectTargetUnits();
         }
 

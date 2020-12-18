@@ -21,6 +21,9 @@ namespace Disciples.Engine.Implementation.Base
             Unload(UnloadInternal);
         }
 
+        /// <summary>
+        /// Деинициализировать объект.
+        /// </summary>
         protected abstract void UnloadInternal();
 
         /// <summary>

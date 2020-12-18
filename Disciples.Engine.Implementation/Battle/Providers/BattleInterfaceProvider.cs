@@ -73,7 +73,10 @@ namespace Disciples.Engine.Implementation.Battle.Providers
             UnitInfoBackground = _interfaceProvider.GetImage("_PG0500IX");
 
             UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap> {
-                { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap }
+                { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
+                { UnitBattleEffectType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
+                { UnitBattleEffectType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
+                //{ UnitBattleEffectType.Blister, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
             };
 
             ToggleRightButton = GetButtonBitmaps(battleIcons, "TOGGLERIGHT");

@@ -66,11 +66,7 @@ namespace Disciples.Avalonia
 
                 // Следующая сцена будет сцена битвы.
                 var battleSceneController = Container.Resolve<IBattleSceneController>();
-                _gameController.ChangeScene(battleSceneController, new BattleInitializeData(
-                    Container.Resolve<IBattleController>(),
-                    Container.Resolve<IBattleInterfaceController>(),
-                    CreateAttackingSquad(),
-                    CreateDefendingSquad()));
+                _gameController.ChangeScene(battleSceneController, new BattleInitializeData(CreateAttackingSquad(), CreateDefendingSquad()));
 
                 app.Instance.Run(gw);
             }
@@ -83,7 +79,7 @@ namespace Disciples.Avalonia
         {
             Container = new UnityContainer();
 
-            var logger = new Logger();
+            var logger = new ConsoleLogger();
             Container.RegisterInstance<ILogger>(logger);
 
             // Регистрируем устройства ввода.
@@ -108,6 +104,7 @@ namespace Disciples.Avalonia
             Container.RegisterSingleton<IBattleResourceProvider, BattleResourceProvider>();
             Container.RegisterSingleton<IBattleInterfaceProvider, BattleInterfaceProvider>();
             Container.RegisterSingleton<IBattleUnitResourceProvider, BattleUnitResourceProvider>();
+            Container.RegisterSingleton<IBattleActionProvider, BattleActionProvider>();
             Container.RegisterSingleton<IBattleController, BattleController>();
             Container.RegisterSingleton<IBattleInterfaceController, BattleInterfaceController>();
             Container.RegisterSingleton<IBattleSceneController, BattleSceneController>();
@@ -123,9 +120,10 @@ namespace Disciples.Avalonia
             var mage = unitInfoProvider.GetUnitType("g000uu0010");
             var u02 = new Unit(Guid.NewGuid().ToString(), mage, player, 0, 2);
 
-            var wight = unitInfoProvider.GetUnitType("g000uu0178");
+            var assassin = unitInfoProvider.GetUnitType("g000uu0154");
+            //var wight = unitInfoProvider.GetUnitType("g000uu0178");
             //var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
-            var u01 = new Unit(Guid.NewGuid().ToString(), wight, player, 0, 1);
+            var u01 = new Unit(Guid.NewGuid().ToString(), assassin, player, 0, 1);
 
             var abbess = unitInfoProvider.GetUnitType("g000uu0017");
             var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, 0, 0);

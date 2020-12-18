@@ -90,9 +90,12 @@ namespace Disciples.Engine.Implementation.Battle.Providers
             }
 
             // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту.
+            var reverseDirection = direction == BattleDirection.Attacker
+                ? BattleDirection.Defender
+                : BattleDirection.Attacker;
             var singleTargetFrames =
                 // Анимация зависит от положения.
-                GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{ConvertDirection(direction)}00") ??
+                GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{ConvertDirection(reverseDirection)}00") ??
                 // Анимация симметрична.
                 GetAnimationFrames($"{unitId.ToUpper()}TUCHA1B00");
             BattleUnitTargetAnimation unitTargetAnimation = null;
@@ -156,7 +159,7 @@ namespace Disciples.Engine.Implementation.Battle.Providers
                     return "HMOV";
                 case BattleAction.TakingDamage:
                     return "HHIT";
-                case BattleAction.Paralized:
+                case BattleAction.Paralyzed:
                     return "STIL";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

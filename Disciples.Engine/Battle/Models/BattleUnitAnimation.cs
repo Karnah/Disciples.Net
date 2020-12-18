@@ -10,6 +10,7 @@ namespace Disciples.Engine.Battle.Models
     /// </summary>
     public class BattleUnitAnimation
     {
+        /// <inheritdoc />
         public BattleUnitAnimation(
             Dictionary<BattleAction, BattleUnitFrames> battleUnitFrames,
             BattleUnitTargetAnimation targetAnimation,

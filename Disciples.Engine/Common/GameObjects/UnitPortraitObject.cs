@@ -5,8 +5,10 @@ using System.Linq;
 using Disciples.Engine.Base;
 using Disciples.Engine.Battle.Enums;
 using Disciples.Engine.Battle.Models;
+using Disciples.Engine.Battle.Models.BattleActions;
 using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
@@ -39,6 +41,7 @@ namespace Disciples.Engine.Common.GameObjects
 
         private readonly ITextProvider _textProvider;
         private readonly ISceneController _sceneController;
+        private readonly IBattleActionProvider _battleActionProvider;
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly bool _rightToLeft;
 
@@ -49,7 +52,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Изображение, отображающий полученный юнитом урон (красный прямоугольник поверх портрета).
         /// </summary>
-        private IImageSceneObject _unitDamageImage;
+        private IImageSceneObject _unitDamageForeground;
         /// <summary>
         /// Иконка умершего юнита.
         /// </summary>
@@ -73,24 +76,32 @@ namespace Disciples.Engine.Common.GameObjects
         /// <summary>
         /// Иконки эффектов, которые воздействуют на юнита.
         /// </summary>
-        private Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsIcons;
+        private readonly Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsIcons;
+        /// <summary>
+        /// Передний фон эффектов, которые воздействуют на юнита.
+        /// </summary>
+        private readonly Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsForegrounds;
         /// <summary>
         /// Количество ОЗ, которое было при предыдущей проверке.
         /// </summary>
         private int _lastUnitHitPoints;
 
 
+        /// <inheritdoc />
         public UnitPortraitObject(
             ITextProvider textProvider,
             ISceneController sceneController,
+            IBattleActionProvider battleActionProvider,
             IBattleInterfaceProvider battleInterfaceProvider,
             Unit unit,
             bool rightToLeft,
             double x,
-            double y) : base(x, y)
+            double y
+            ) : base(x, y)
         {
             _textProvider = textProvider;
             _sceneController = sceneController;
+            _battleActionProvider = battleActionProvider;
             _battleInterfaceProvider = battleInterfaceProvider;
             _rightToLeft = rightToLeft;
 
@@ -100,6 +111,7 @@ namespace Disciples.Engine.Common.GameObjects
             Height = Unit.UnitType.Face.Height;
 
             _battleEffectsIcons = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
+            _battleEffectsForegrounds = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
         }
 
 
@@ -117,15 +129,21 @@ namespace Disciples.Engine.Common.GameObjects
         {
             base.OnInitialize();
 
+            _battleActionProvider.BattleActionBegin += OnBattleActionBegin;
+            _battleActionProvider.BattleActionEnd += OnBattleActionEnd;
+
             _unitPortrait = _sceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
             _unitPortrait.IsReflected = _rightToLeft;
 
             _unitHitpoints = _sceneController.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
             // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
+            // Дополнительно, его немного растягиваем, так как иначе остаётся зазор.
             if (!Unit.UnitType.SizeSmall) {
                 _unitPanelSeparator = _sceneController.AddImage(
                     _battleInterfaceProvider.PanelSeparator,
-                    X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
+                    _battleInterfaceProvider.PanelSeparator.Width + 2,
+                    _battleInterfaceProvider.PanelSeparator.Height,
+                    X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 2,
                     Y + Height - 1,
                     INTERFACE_LAYER);
             }
@@ -133,6 +151,7 @@ namespace Disciples.Engine.Common.GameObjects
             UpdateUnitEffects();
         }
 
+        /// <inheritdoc />
         public override void OnUpdate(long ticksCount)
         {
             base.OnUpdate(ticksCount);
@@ -143,19 +162,111 @@ namespace Disciples.Engine.Common.GameObjects
         /// <inheritdoc />
         public override void Destroy()
         {
+            _battleActionProvider.BattleActionBegin -= OnBattleActionBegin;
+            _battleActionProvider.BattleActionEnd -= OnBattleActionEnd;
+
             RemoveSceneObject(ref _unitPortrait);
             RemoveSceneObject(ref _unitHitpoints);
             RemoveSceneObject(ref _deathIcon);
             RemoveSceneObject(ref _instantaneousEffectImage);
             RemoveSceneObject(ref _instantaneousEffectText);
-            RemoveSceneObject(ref _unitDamageImage);
+            RemoveSceneObject(ref _unitDamageForeground);
             RemoveSceneObject(ref _unitPanelSeparator);
 
             foreach (var battleEffectsIcon in _battleEffectsIcons) {
                 _sceneController.RemoveSceneObject(battleEffectsIcon.Value);
             }
 
+            foreach (var battleEffectsForeground in _battleEffectsForegrounds) {
+                _sceneController.RemoveSceneObject(battleEffectsForeground.Value);
+            }
+
             base.Destroy();
+        }
+
+        /// <summary>
+        /// События начала действия.
+        /// </summary>
+        private void OnBattleActionBegin(object sender, BattleActionEventArgs e)
+        {
+            // BattleController получает это событие раньше и может вызвать уничтожение объекта.
+            // Несмотря на то, что в Destroy есть отписка, этот метод всё равно будет вызван.
+            // Поэтому здесь необходима эта проверка.
+            if (IsDestroyed)
+                return;
+
+            var touchAction = e.BattleAction as TouchUnitBattleAction;
+            if (touchAction == null)
+                return;
+
+            if (touchAction.TargetUnit.Unit != Unit)
+                return;
+
+            // Обрабатываем попадание в юнита.
+            if (touchAction is AttackUnitBattleAction attackUnitAction) {
+                switch (attackUnitAction.AttackClass) {
+                    case AttackClass.Damage:
+                        _instantaneousEffectImage = AddColorImage(GameColor.Red);
+                        _instantaneousEffectText = AddText($"-{attackUnitAction.Power}");
+                        break;
+                    case AttackClass.Heal:
+                        _instantaneousEffectImage = AddColorImage(GameColor.Blue);
+                        _instantaneousEffectText = AddText($"+{attackUnitAction.Power}");
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
+                return;
+            }
+
+            // Обрабатываем другие действия над юнитом.
+            switch (touchAction.TouchUnitActionType) {
+                case TouchUnitActionType.Miss:
+                    _instantaneousEffectImage = AddColorImage(GameColor.Yellow);
+                    _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
+                    break;
+                case TouchUnitActionType.Defend:
+                    _instantaneousEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
+                    break;
+                case TouchUnitActionType.Waiting:
+                    _instantaneousEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
+                    break;
+                case TouchUnitActionType.Death:
+                    break;
+                case TouchUnitActionType.Effect:
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        /// <summary>
+        /// Событие завершения действия.
+        /// </summary>
+        private void OnBattleActionEnd(object sender, BattleActionEventArgs e)
+        {
+            // BattleController получает это событие раньше и может вызвать уничтожение объекта.
+            // Несмотря на то, что в Destroy есть отписка, этот метод всё равно будет вызван.
+            // Поэтому здесь необходима эта проверка.
+            if (IsDestroyed)
+                return;
+
+            var touchAction = e.BattleAction as TouchUnitBattleAction;
+            if (touchAction == null)
+                return;
+
+            if (touchAction.TargetUnit.Unit != Unit)
+                return;
+
+            RemoveSceneObject(ref _instantaneousEffectImage);
+            RemoveSceneObject(ref _instantaneousEffectText);
+
+            // Сбрасываем количество ХП, чтобы обновить рамку.
+            _lastUnitHitPoints = int.MaxValue;
+            UpdateUnitEffects();
         }
 
         /// <summary>
@@ -164,10 +275,9 @@ namespace Disciples.Engine.Common.GameObjects
         private void UpdateUnitEffects()
         {
             ProcessBattleEffects();
-            ProcessInstantaneousEffects();
 
             // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
-            if (Unit.Effects.CurrentInstantaneousEffect != null && !Unit.Effects.InstantaneousEffectEnded)
+            if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
                 return;
 
             if (Unit.IsDead) {
@@ -178,14 +288,14 @@ namespace Disciples.Engine.Common.GameObjects
                     _deathIcon = _sceneController.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y, INTERFACE_LAYER + 3);
                     _unitHitpoints.Text = $"0/{Unit.UnitType.HitPoints}";
 
-                    RemoveSceneObject(ref _unitDamageImage);
+                    RemoveSceneObject(ref _unitDamageForeground);
                 }
             }
             else if (_lastUnitHitPoints != Unit.HitPoints) {
                 _lastUnitHitPoints = Unit.HitPoints;
                 _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.UnitType.HitPoints}";
 
-                RemoveSceneObject(ref _unitDamageImage);
+                RemoveSceneObject(ref _unitDamageForeground);
 
                 var height = (1 - ((double)_lastUnitHitPoints / Unit.UnitType.HitPoints)) * Height;
                 if (height > 0) {
@@ -193,7 +303,7 @@ namespace Disciples.Engine.Common.GameObjects
                     var x = _unitPortrait.X;
                     var y = _unitPortrait.Y + (Height - height);
 
-                    _unitDamageImage = _sceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                    _unitDamageForeground = _sceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
                 }
             }
         }
@@ -205,92 +315,71 @@ namespace Disciples.Engine.Common.GameObjects
         {
             var battleEffects = Unit.Effects.GetBattleEffects();
 
-            // Добавляем иконки новых эффектов.
-            foreach (var battleEffect in battleEffects) {
-                if (_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
-                    continue;
-
-                var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
-                _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
-                    icon,
-                    X + (Width - icon.Width) / 2,
-                    Y + Height - icon.Height,
-                    INTERFACE_LAYER + 4));
-            }
-
             // Удаляем иконки тех эффектов, действие которых закончилось.
             var expiredEffects = _battleEffectsIcons
                 .Where(bei => battleEffects.All(be => be.EffectType != bei.Key))
                 .ToList();
             foreach (var expiredEffect in expiredEffects) {
-                var effectIcon = _battleEffectsIcons[expiredEffect.Key];
-                _sceneController.RemoveSceneObject(effectIcon);
-                _battleEffectsIcons.Remove(expiredEffect.Key);
-            }
-        }
+                if (_battleEffectsIcons.TryGetValue(expiredEffect.Key, out var effectIcon)) {
+                    _sceneController.RemoveSceneObject(effectIcon);
+                    _battleEffectsIcons.Remove(expiredEffect.Key);
+                }
 
-        /// <summary>
-        /// Обработать моментальные эффекты - обработать новые и завершенные.
-        /// </summary>
-        private void ProcessInstantaneousEffects()
-        {
-            // Обрабатываем новый мгновенный эффект.
-            if (Unit.Effects.InstantaneousEffectBegin) {
-                ProcessNewInstantaneousEffect(Unit.Effects.CurrentInstantaneousEffect);
-                return;
+                if (_battleEffectsForegrounds.TryGetValue(expiredEffect.Key, out var effectForeground)) {
+                    _sceneController.RemoveSceneObject(effectForeground);
+                    _battleEffectsForegrounds.Remove(expiredEffect.Key);
+                }
             }
 
-            // Обрабатываем действующий мгновенный эффект.
-            if (Unit.Effects.InstantaneousEffectEnded) {
-                RemoveSceneObject(ref _instantaneousEffectImage);
-                RemoveSceneObject(ref _instantaneousEffectText);
+            // Добавляем иконки новых эффектов.
+            foreach (var battleEffect in battleEffects) {
+                if (!_battleEffectsIcons.ContainsKey(battleEffect.EffectType)) {
+                    var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
 
-                // Сбрасываем количество ХП, чтобы обновить рамку.
-                _lastUnitHitPoints = int.MaxValue;
-            }
-        }
-
-        /// <summary>
-        /// Обработать новый мгновенный эффект.
-        /// </summary>
-        private void ProcessNewInstantaneousEffect(UnitInstantaneousEffect instantaneousEffect)
-        {
-            switch (instantaneousEffect.EffectType) {
-                case UnitInstantaneousEffectType.Damaged:
-                    _instantaneousEffectImage = AddColorImage(GameColor.Red);
-                    _instantaneousEffectText = AddText($"-{instantaneousEffect.Power}");
-                    break;
-                case UnitInstantaneousEffectType.Healed:
-                    var hitPointsDiff = Unit.HitPoints - _lastUnitHitPoints;
-                    if (hitPointsDiff > 0) {
-                        _instantaneousEffectImage = AddColorImage(GameColor.Blue);
-                        _instantaneousEffectText = AddText($"+{instantaneousEffect.Power}");
+                    // Иконку "Защиты" располагаем по центру.
+                    if (battleEffect.EffectType == UnitBattleEffectType.Defend) {
+                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
+                            icon,
+                            X + (Width - icon.Width) / 2,
+                            Y + Height - icon.Height,
+                            INTERFACE_LAYER + 4));
                     }
-                    break;
-                case UnitInstantaneousEffectType.Miss:
-                    _instantaneousEffectImage = AddColorImage(GameColor.Yellow);
-                    _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
-                    break;
-                case UnitInstantaneousEffectType.Defended:
-                    _instantaneousEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
-                    break;
-                case UnitInstantaneousEffectType.Waiting:
-                    _instantaneousEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                    else {
+                        // Иконки остальных эффектов располагаются справа.
+                        var iconsCount = _battleEffectsIcons.Keys
+                            .Where(be => be != UnitBattleEffectType.Defend)
+                            .GroupBy(be => be)
+                            .Count();
+                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
+                            icon,
+                            X + Width - icon.Width,
+                            Y + Height - icon.Height * (iconsCount + 1),
+                            INTERFACE_LAYER + 4));
+                    }
+                }
 
-            _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
+                // Добавляем фон, связанный с воздействием эффекта яда и заморозки.
+                // todo Ожог?
+                if (!_battleEffectsForegrounds.ContainsKey(battleEffect.EffectType)) {
+                    if (battleEffect.EffectType == UnitBattleEffectType.Poison)
+                    {
+                        _battleEffectsForegrounds.Add(battleEffect.EffectType, AddColorImage(GameColor.Green, false));
+                    }
+                    else if (battleEffect.EffectType == UnitBattleEffectType.Frostbite) {
+                        _battleEffectsForegrounds.Add(battleEffect.EffectType, AddColorImage(GameColor.Blue, false));
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Добавить на портрет изображение указанного цвета.
         /// </summary>
-        private IImageSceneObject AddColorImage(GameColor color)
+        private IImageSceneObject AddColorImage(GameColor color, bool removeDamageImage = true)
         {
-            // Если мы добавляем изображение поверх портрета, то должны на время очистить изображение с % здоровья.
-            RemoveSceneObject(ref _unitDamageImage);
+            // Если мы добавляем изображение поверх портрета, то в некоторых случаях должны на время очистить изображение с % здоровья.
+            if (removeDamageImage)
+                RemoveSceneObject(ref _unitDamageForeground);
 
             return _sceneController.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
         }

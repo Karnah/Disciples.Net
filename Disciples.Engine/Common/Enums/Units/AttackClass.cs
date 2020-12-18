@@ -71,7 +71,7 @@
         DrainOverflow = 15,
 
         /// <summary>
-        /// todo Очищение?
+        /// Снятие негативных эффектов.
         /// </summary>
         Cure = 16,
 

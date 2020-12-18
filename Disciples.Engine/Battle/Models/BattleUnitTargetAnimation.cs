@@ -8,6 +8,7 @@ namespace Disciples.Engine.Battle.Models
     /// </summary>
     public class BattleUnitTargetAnimation
     {
+        /// <inheritdoc />
         public BattleUnitTargetAnimation(bool isSingle, IReadOnlyList<Frame> frames)
         {
             IsSingle = isSingle;

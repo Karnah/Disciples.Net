@@ -13,6 +13,7 @@ namespace Disciples.Engine.Common.GameObjects
     {
         private bool _isChecked;
 
+        /// <inheritdoc />
         public ToggleButtonObject(
             ISceneController sceneController,
             IDictionary<SceneButtonState, IBitmap> buttonStates,

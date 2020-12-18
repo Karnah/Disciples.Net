@@ -25,6 +25,7 @@ namespace Disciples.Engine.Implementation.Common.Providers
         private SortedDictionary<string, Attack> _attacks;
         private SortedDictionary<string, UnitType> _units;
 
+        /// <inheritdoc />
         public UnitInfoProvider(ITextProvider textProvider, IBitmapFactory bitmapFactory)
         {
             _textProvider = textProvider;

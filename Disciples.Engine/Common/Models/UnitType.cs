@@ -3,6 +3,9 @@ using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models
 {
+    /// <summary>
+    /// Информация о типе юнита.
+    /// </summary>
     public class UnitType
     {
         private readonly Lazy<IBitmap> _face;
@@ -10,6 +13,7 @@ namespace Disciples.Engine.Common.Models
         private readonly Lazy<IBitmap> _portrait;
 
         // todo перепилить под рефлектор.
+        /// <inheritdoc />
         public UnitType(
             string unitTypeId,
             UnitCategory unitCategory,

@@ -13,6 +13,7 @@ namespace Disciples.Engine.Implementation.Loading
     {
         private IImageSceneObject _loadingSceneObject;
 
+        /// <inheritdoc />
         public LoadingSceneController(
             IGameController gameController,
             ISceneFactory sceneFactory,

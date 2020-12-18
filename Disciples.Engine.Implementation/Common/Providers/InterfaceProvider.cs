@@ -96,22 +96,26 @@ namespace Disciples.Engine.Implementation.Common.Providers
         //{
         //    var gameColors = new Dictionary<GameColor, IBitmap>();
 
-        //    foreach (GameColor color in Enum.GetValues(typeof(GameColor))) {
+        //    foreach (GameColor color in Enum.GetValues(typeof(GameColor)))
+        //    {
         //        byte[] colorBytes = new byte[4];
 
-        //        switch (color) {
+        //        switch (color)
+        //        {
         //            case GameColor.Red:
-        //                colorBytes = new byte[] { 255, 0, 0, 128 };
+        //                colorBytes = new byte[] { 0, 0, 255, 128 };
         //                break;
         //            case GameColor.Gray:
+        //                colorBytes = new byte[] { 169, 169, 169, 128 };
         //                break;
         //            case GameColor.Green:
+        //                colorBytes = new byte[] { 0, 85, 85, 128 };
         //                break;
         //            case GameColor.Yellow:
-        //                colorBytes = new byte[] { 255, 255, 0, 128 };
+        //                colorBytes = new byte[] { 0, 255, 255, 128 };
         //                break;
         //            case GameColor.Blue:
-        //                colorBytes = new byte[] { 0, 0, 255, 128 };
+        //                colorBytes = new byte[] { 255, 0, 0, 128 };
         //                break;
         //            case GameColor.Black:
         //                colorBytes = new byte[] { 0, 0, 0, 255 };
@@ -127,7 +131,7 @@ namespace Disciples.Engine.Implementation.Common.Providers
         //        var bitmap = _bitmapFactory.FromRawToBitmap(rawBitmap);
         //        gameColors.Add(color, bitmap);
 
-        //        //_bitmapFactory.SaveToFile(bitmap, $"Resources/Colors/{color}.png");
+        //        _bitmapFactory.SaveToFile(bitmap, $"Resources/Colors/{color}.png");
         //    }
 
         //    _gameColors = gameColors;

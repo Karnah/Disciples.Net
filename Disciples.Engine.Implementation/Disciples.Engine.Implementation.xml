@@ -1,0 +1,988 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Disciples.Engine.Implementation</name>
+    </assembly>
+    <members>
+        <member name="T:Disciples.Engine.Implementation.Base.BaseSceneController`1">
+            <inheritdoc cref="T:Disciples.Engine.Base.ISceneController" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.#ctor(Disciples.Engine.Base.IGameController,Disciples.Engine.Platform.Factories.ISceneFactory,Disciples.Engine.Common.Providers.IInterfaceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSceneController`1.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSceneController`1.GameController">
+            <summary>
+            Контроллер игры.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSceneController`1.SceneContainer">
+            <summary>
+            Контейнер с объектами на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSceneController`1.SceneFactory">
+            <summary>
+            Фабрика для создания объектов на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSceneController`1.InterfaceProvider">
+            <summary>
+            Поставщик ресурсов для интерфейса.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.LoadInternal(Disciples.Engine.Common.Controllers.ISceneContainer,`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddAnimation(System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Double,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddButton(System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddToggleButton(System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddImage(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddImage(Disciples.Engine.IBitmap,System.Double,System.Double,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddImage(Disciples.Engine.IBitmap,System.Double,System.Double,System.Double,System.Double,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddColorImage(Disciples.Engine.Common.Enums.GameColor,System.Double,System.Double,System.Double,System.Double,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddText(System.String,System.Double,System.Double,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.AddText(System.String,System.Double,System.Double,System.Double,System.Int32,System.Double,Disciples.Engine.Common.Enums.TextAlignment,System.Boolean,System.Nullable{Disciples.Engine.Common.Enums.GameColor})">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSceneController`1.RemoveSceneObject(Disciples.Engine.Common.SceneObjects.ISceneObject)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Base.BaseSupportLoading">
+            <summary>
+            Базовый класс для объектов, которые поддерживают инициализацию без параметров.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading.Load">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading.LoadInternal">
+            <summary>
+            Инициализировать объект.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Base.BaseSupportLoading`1">
+            <summary>
+            Базовый класс для объектов, которые поддерживают инициализацию с одним параметром.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading`1.Load(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading`1.LoadInternal(`0)">
+            <summary>
+            Инициализировать объект.
+            </summary>
+            <param name="data">Данные для инициализации.</param>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Base.BaseSupportLoading`2">
+            <summary>
+            Базовый класс для объектов, которые поддерживают инициализацию с двумя параметрами.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading`2.Load(`0,`1)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportLoading`2.LoadInternal(`0,`1)">
+            <summary>
+            Инициализировать объект.
+            </summary>
+            <param name="data1">Первый параметр для инициализации.</param>
+            <param name="data2">Второй параметр для инициализации.</param>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Base.BaseSupportUnloading">
+            <summary>
+            Базовый класс для объектов, поддерживающих инициализацию и деинициализацию.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSupportUnloading.IsLoaded">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Base.BaseSupportUnloading.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportUnloading.Unload">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportUnloading.UnloadInternal">
+            <summary>
+            Деинициализировать объект.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportUnloading.Load(System.Action)">
+            <summary>
+            Инициализировать объект.
+            </summary>
+            <param name="loadAction">Метод для инициализации.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Base.BaseSupportUnloading.Unload(System.Action)">
+            <summary>
+            Деинициализировать объект.
+            </summary>
+            <param name="unloadAction">Метод для инициализации.</param>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.BattleSceneController">
+            <inheritdoc cref="T:Disciples.Engine.Battle.IBattleSceneController" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.#ctor(Disciples.Engine.Base.IGameController,Disciples.Engine.Platform.Factories.ISceneFactory,Disciples.Engine.Common.Providers.IInterfaceProvider,Disciples.Engine.Common.Providers.ITextProvider,Disciples.Engine.Common.Providers.IUnitInfoProvider,System.Lazy{Disciples.Engine.Battle.Providers.IBattleResourceProvider},System.Lazy{Disciples.Engine.Battle.Providers.IBattleInterfaceProvider},System.Lazy{Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider},System.Lazy{Disciples.Engine.Battle.Providers.IBattleActionProvider},System.Lazy{Disciples.Engine.Battle.Controllers.IBattleController},System.Lazy{Disciples.Engine.Battle.Controllers.IBattleInterfaceController})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.BattleSceneController.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.LoadInternal(Disciples.Engine.Common.Controllers.ISceneContainer,Disciples.Engine.Battle.Models.BattleInitializeData)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.AddBattleUnit(Disciples.Engine.Common.Models.Unit,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.AddBattleUnitInfo(System.Int32,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.AddUnitPortrait(Disciples.Engine.Common.Models.Unit,System.Boolean,System.Double,System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.BattleSceneController.ShowDetailUnitInfo(Disciples.Engine.Common.Models.Unit)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Controllers.BattleController">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Controllers.IBattleController" />
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController.INITIATIVE_RANGE">
+            <summary>
+            Разброс инициативы при вычислении очередности.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController.ATTACK_RANGE">
+            <summary>
+            Разброс атаки при ударе.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController.ABOVE_ALL_UNITS_LAYER">
+            <summary>
+            Слой, который перекрывает всех юнитов.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController.ACTION_DELAY">
+            <summary>
+            Задержка после завершения всех действий, прежде чем ход перейдёт к следующему юниту.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController._units">
+            <summary>
+            Список всех юнитов.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleController._turnOrder">
+            <summary>
+            Очередность хода юнитов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.#ctor(Disciples.Engine.Battle.IBattleSceneController,Disciples.Engine.Battle.Providers.IBattleActionProvider)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Controllers.BattleController.CurrentUnitObject">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Controllers.BattleController.IsSecondAttack">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Controllers.BattleController.Units">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Controllers.BattleController.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.Battle.Controllers.BattleController.UnitActionBegin">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.Battle.Controllers.BattleController.UnitActionEnded">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.Battle.Controllers.BattleController.BattleEnded">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.GetUnitObject(Disciples.Engine.Common.Models.Unit)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.CanAttack(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.AttackUnit(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.Defend">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.Wait">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.LoadInternal(Disciples.Engine.Battle.Models.BattleSquadsData)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.ArrangeUnits(Disciples.Engine.Common.Models.Squad,Disciples.Engine.Common.Models.Squad)">
+            <summary>
+            Расставить юнитов по позициям.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.OnBattleActionBegin(System.Object,Disciples.Engine.Battle.Models.BattleActionEventArgs)">
+            <summary>
+            Обработать начала действия на поле боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.OnBattleActionEnd(System.Object,Disciples.Engine.Battle.Models.BattleActionEventArgs)">
+            <summary>
+            Обработать завершение действия на поле боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.OnFirstAttackAction(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Обработать событие того, что необходимо рассчитать урон, который нанёс юнит.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.ProcessAttack(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Battle.GameObjects.BattleUnit,System.Boolean,System.Nullable{System.Int32})">
+            <summary>
+            Обработать действие одного юнита на другого.
+            </summary>
+            <param name="attackingUnitObject">Юнит, который воздействует.</param>
+            <param name="targetUnitObject">Юнит, на которого воздействует.</param>
+            <param name="isFirstAttack">Используется базовая атака или вторичная.</param>
+            <param name="externalPower">Уже рассчитанная сила.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.StartNewRound">
+            <summary>
+            Начать новый раунд.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.NextTurn">
+            <summary>
+            Передать ход следующему юниту.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.IsBattleEnd">
+            <summary>
+            Проверить, был ли уничтожен один из отрядов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.GetUnitSquad(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Получить весь отряд указанного юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.IsFirstLineEmpty(System.Collections.Generic.IReadOnlyCollection{Disciples.Engine.Battle.GameObjects.BattleUnit})">
+            <summary>
+            Проверить, свободна ли первая линия в отряде.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.CanAttackOnFlank(System.Int32,System.Int32,System.Int32,System.Collections.Generic.IReadOnlyCollection{Disciples.Engine.Battle.GameObjects.BattleUnit})">
+            <summary>
+            Проверить, можно ли атаковать цель в зависимости от расположения на фланге.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.IsPlaceEmpty(System.Collections.Generic.IReadOnlyCollection{Disciples.Engine.Battle.GameObjects.BattleUnit},System.Int32,System.Int32)">
+            <summary>
+            Проверить, свободна ли клетка на арене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleController.AttackClassToEffectType(Disciples.Engine.Common.Enums.Units.AttackClass)">
+            <summary>
+            Получить тип эффекта в зависимости от типа атаки.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Controllers.IBattleInterfaceController" />
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.INTERFACE_LAYER">
+            <summary>
+            Слой для расположения интерфейса.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._isAnimating">
+            <summary>
+            Позволяет заблокировать действия пользователя на время анимации.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._isUnitInfoShowing">
+            <summary>
+            Отображается ли подробная информация о юните в данный момент.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._pressedObject">
+            <summary>
+            Объект, над которым была зажата кнопка мыши.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._selectionAnimation">
+            <summary>
+            Игровой объект, отрисовывающий на текущем юните анимацию выделения.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._targetAnimations">
+            <summary>
+            Игровые объекты, которые отрисовывают анимации цели на юнитах-целях.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._animateTarget">
+            <summary>
+            Необходимо ли отрисовывать анимации цели на юнитах.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._rightPanelUnitPortraits">
+            <summary>
+            Объекты портретов на правой панели.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._rightUnitsPanelSquadDirection">
+            <summary>
+            Отряд, который в данный момент отображается на правой панели.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._isRightUnitPanelReflected">
+            <summary>
+            Изменено ли отображение юнитов на панели.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController._unitPanelAnimations">
+            <summary>
+            Анимации-рамки, которые отрисовываются на панели с юнитами.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.#ctor(Disciples.Engine.Base.IGameController,Disciples.Engine.Battle.IBattleSceneController,Disciples.Engine.Battle.Controllers.IBattleController,Disciples.Engine.Battle.Providers.IBattleInterfaceProvider,Disciples.Engine.Battle.Providers.IBattleResourceProvider,Disciples.Engine.Battle.Providers.IBattleActionProvider)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.InitializeMainInterface">
+            <summary>
+            Разместить на сцене изображение поля боя и панелей, текст на панелях.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.InitializeButtons">
+            <summary>
+            Разместить на сцене кнопки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.UpdateTargetUnit(Disciples.Engine.Battle.GameObjects.BattleUnit,System.Boolean)">
+            <summary>
+            Обновить цель.
+            </summary>
+            <param name="targetUnitObject">Юнит, на которого навели курсором.</param>
+            <param name="animateTarget">Необходимо ли выделить юнита с помощью анимации (красный крутящийся круг).</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.ShowDetailUnitInfo(Disciples.Engine.Common.Models.Unit)">
+            <summary>
+            Отобразить детальную информацию по указанному юниту.
+            </summary>
+            <param name="unit">Юнит, информацию о котором необходимо отобразить.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.StopShowDetailUnitInfo">
+            <summary>
+            Прекратить отображение детальной информации по юниту.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.OnGameObjectAction(System.Object,Disciples.Engine.Models.GameObjectActionEventArgs)">
+            <summary>
+            Обработчик события воздействия с игровым объектом (наведение, клик мышью и т.д.).
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectSelected(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработчик события, что игровой объект был выбран.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectUnselected(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработчик события, что с игрового объекта был смещён фокус.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectPressed(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработчик события, что на объект нажали мышью.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectClicked(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработчик события клика на игровом объекта.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectRightButtonPressed(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработать событие того, что на игровой объект нажали ПКМ.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GameObjectRightButtonReleased(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Обработать событие того, что на игровой объект нажали ПКМ.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.AttachSelectedAnimation(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Отобразить анимацию выделения на текущем юните.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.DetachSelectedAnimation">
+            <summary>
+            Скрыть анимацию выделения на текущем юните.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.SelectTargetUnits">
+            <summary>
+            Отобразить анимацию выделения цели исходя из типа атаки текущего юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.AttachTargetAnimations(Disciples.Engine.Battle.GameObjects.BattleUnit[])">
+            <summary>
+            Отобразить анимацию выделения цели на указанных юнитах.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.DetachTargetAnimations">
+            <summary>
+            Скрыть анимации выделения цели на всех юнитах.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.CheckRightPanelReflection">
+            <summary>
+            Установить какой отряд должен отображаться на правой панели.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.ReflectRightUnitsPanel">
+            <summary>
+            Поменять отряд, который отображается на правой панели с юнитам.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.InitializeUnitsOnRightPanel">
+            <summary>
+            Определить юнитов, которые будут отображаться на панели.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.GetRightUnitPanelPosition(System.Int32,System.Int32,Disciples.Engine.Battle.Enums.BattleDirection)">
+            <summary>
+            Получить координаты на сцене для портрета юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.InitializeAnimationsOnRightUnitsPanel">
+            <summary>
+            Разместить анимации, которые показывают какие юниты доступны для атаки, на правой панели.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.CleanAnimationsOnRightUnitsPanel">
+            <summary>
+            Очистить все анимации на панели юнитов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.ActivateButtons(Disciples.Engine.Common.GameObjects.ButtonObject[])">
+            <summary>
+            Активировать указанные кнопки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Controllers.BattleInterfaceController.DisableButtons(Disciples.Engine.Common.GameObjects.ButtonObject[])">
+            <summary>
+            Деактивировать указанные кнопки.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Providers.IBattleActionProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.#ctor(Disciples.Engine.Base.IGameController)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.IsInterfaceActive">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.BattleActions">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.BattleActionBegin">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.BattleActionEnd">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.RegisterBattleAction(Disciples.Engine.Battle.Models.BattleActions.IBattleAction)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleActionProvider.CheckActionsState(System.Object,Disciples.Engine.Models.SceneUpdatingEventArgs)">
+            <summary>
+            Проверить состояние всех действий.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.#ctor(Disciples.Engine.Platform.Factories.IBitmapFactory,Disciples.Engine.Common.Providers.IInterfaceProvider,Disciples.Engine.Battle.Providers.IBattleResourceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.LoadBitmaps">
+            <summary>
+            Инициализировать картинки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.Battleground">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.RightPanel">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BottomPanel">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.PanelSeparator">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.DeathSkull">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.UnitInfoBackground">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.UnitBattleEffectsIcon">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.ToggleRightButton">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.DefendButton">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.RetreatButton">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.WaitButton">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.InstantResolveButton">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.AutoBattleButton">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetButtonBitmaps(System.Collections.Generic.IReadOnlyDictionary{System.String,Disciples.Engine.IBitmap},System.String)">
+            <summary>
+            Получить словарь с изображениями кнопки для каждого её состояния.
+            </summary>
+            <param name="battleIcons">Иконки битвы.</param>
+            <param name="buttonName">Имя кнопки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetUnitAttackBorder(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetFieldAttackBorder">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetAttackBorder(Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize)">
+            <summary>
+            Извлечь из ресурсов рамку атаки.
+            </summary>
+            <param name="battleBorderSize">Размер рамки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetUnitSelectionBorder(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetSelectionBorder(Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize)">
+            <summary>
+            Извлечь из ресурсов рамку выделения текущего юнита.
+            </summary>
+            <param name="battleBorderSize">Размер рамки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetUnitHealBorder(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetFieldHealBorder">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetHealBorder(Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize)">
+            <summary>
+            Извлечь из ресурсов рамку исцеления.
+            </summary>
+            <param name="battleBorderSize">Размер рамки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.GetBattleBorderTypeSuffix(Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize)">
+            <summary>
+            Получить часть названия файла по размеру рамки.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize">
+            <summary>
+            Размер рамки на панели с юнитами.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize.SmallUnit">
+            <summary>
+            Рамка занимает одну клетку.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize.LargeUnit">
+            <summary>
+            Рамка занимает две клетки.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.Battle.Providers.BattleInterfaceProvider.BattleBorderSize.Field">
+            <summary>
+            Рамка занимает всю панель целиком.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Providers.IBattleResourceProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.#ctor(Disciples.Engine.Platform.Factories.IBitmapFactory)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.GetBattleAnimation(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.ExtractAnimationFrames(System.String)">
+            <summary>
+            Извлечь кадры анимации из ресурсов.
+            </summary>
+            <param name="animationName">Имя анимации в ресурсах игры.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.GetBattleFrame(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleResourceProvider.GetRandomBattleground">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider">
+            <inheritdoc cref="T:Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider.#ctor(Disciples.Engine.Platform.Factories.IBitmapFactory,Disciples.Engine.Common.Providers.IUnitInfoProvider,Disciples.Engine.Battle.Providers.IBattleResourceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Battle.Providers.BattleUnitResourceProvider.GetBattleUnitAnimation(System.String,Disciples.Engine.Battle.Enums.BattleDirection)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider">
+            <inheritdoc cref="T:Disciples.Engine.Common.Providers.IInterfaceProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.#ctor(Disciples.Engine.Platform.Factories.IBitmapFactory)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.GetImage(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.GetImageParts(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.GetColorBitmap(Disciples.Engine.Common.Enums.GameColor)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.InterfaceProvider.InitGameColors">
+            <summary>
+            Инициализировать цвета приложения.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Common.Providers.TextProvider">
+            <inheritdoc cref="T:Disciples.Engine.Common.Providers.ITextProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Common.Providers.TextProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.GetText(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.LoadResourceText(System.String,System.String)">
+            <summary>
+            Загрузить текстовую информацию из ресурсов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.TextProvider.DestroyTag(System.String)">
+            <summary>
+            Удалить все специфичные теги.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Common.Providers.TextProvider.ResourceText">
+            <summary>
+            Информация о тексте в файле ресурсов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Common.Providers.TextProvider.ResourceText.TextId">
+            <summary>
+            Идентификатор текста.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Common.Providers.TextProvider.ResourceText.Text">
+            <summary>
+            Текст.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider">
+            <inheritdoc cref="T:Disciples.Engine.Common.Providers.IUnitInfoProvider" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.#ctor(Disciples.Engine.Common.Providers.ITextProvider,Disciples.Engine.Platform.Factories.IBitmapFactory)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.OneTimeLoading">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.GetUnitType(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.LoadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.LoadAttacks">
+            <summary>
+            Загрузить информацию о типах атаки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.LoadUnitTypes">
+            <summary>
+            Загрузить информацию о юнитах.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.ExtractAttack(System.Data.DataRow)">
+            <summary>
+            Извлечь из строки информацию об атаке.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Common.Providers.UnitInfoProvider.ExtractUnitType(System.Data.DataRow)">
+            <summary>
+            Извлечь из строки информацию о юните.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.ConsoleLogger">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.ConsoleLogger.Log(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Extensions.BitmapExtensions">
+            <summary>
+            Набор методов расширения для работы с изображениями.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Extensions.BitmapExtensions.FromRawToBitmap(Disciples.Engine.Platform.Factories.IBitmapFactory,Disciples.ResourceProvider.Models.RawBitmap,Disciples.Engine.Platform.Models.Bounds)">
+            <summary>
+            Конвертировать изображение из сырых данных в битмап.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Extensions.BitmapExtensions.FromRawToOriginalBitmap(Disciples.Engine.Platform.Factories.IBitmapFactory,Disciples.ResourceProvider.Models.RawBitmap)">
+            <summary>
+            Конвертировать изображение из сырых данных в битмап, сохраняя исходные размеры.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Extensions.BitmapExtensions.ConvertToFrames(Disciples.Engine.Platform.Factories.IBitmapFactory,System.Collections.Generic.IReadOnlyCollection{Disciples.ResourceProvider.Models.RawBitmap})">
+            <summary>
+            Получить конечные кадры анимации из сырых данных.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Extensions.DataRowExtensions">
+            <summary>
+            Методы расширения для работы со строкой таблицы.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Extensions.DataRowExtensions.GetClass``1(System.Data.DataRow,System.String)">
+            <summary>
+            Извлечь значение из строки и превратить объект указанного типа.
+            </summary>
+            <typeparam name="T">Тип.</typeparam>
+            <param name="dataRow">Строка, из которой необходимо извлечь данные.</param>
+            <param name="columnName">Имя колонки в строке.</param>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Extensions.DataRowExtensions.GetStruct``1(System.Data.DataRow,System.String)">
+            <summary>
+            Извлечь значение из строки и превратить объект указанного типа.
+            </summary>
+            <typeparam name="T">Тип.</typeparam>
+            <param name="dataRow">Строка, из которой необходимо извлечь данные.</param>
+            <param name="columnName">Имя колонки в строке.</param>
+        </member>
+        <member name="T:Disciples.Engine.Implementation.GameController">
+            <inheritdoc />
+        </member>
+        <member name="F:Disciples.Engine.Implementation.GameController._selectedGameObject">
+            <summary>
+            Объект, который в данный момент выделен курсором.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.GameController._isLeftMouseButtonPressed">
+            <summary>
+            Нажата ли ЛКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.GameController._isLeftMouseButtonReleased">
+            <summary>
+            Была ли отпущена ЛКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.GameController._isRightMouseButtonPressed">
+            <summary>
+            Нажата ли ПКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Implementation.GameController._isRightMouseButtonReleased">
+            <summary>
+            Была ли отпущена ПКМ.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.#ctor(Disciples.Engine.Platform.Managers.IGameTimer,Disciples.Engine.Base.ILogger,Disciples.Engine.Platform.Managers.IInputManager,Disciples.Engine.Platform.Factories.ISceneFactory)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.GameController.GameObjects">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Implementation.GameController.CurrentSceneContainer">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.GameController.SceneChanged">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.GameController.SceneEndUpdating">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.GameController.SceneRedraw">
+            <inheritdoc />
+        </member>
+        <member name="E:Disciples.Engine.Implementation.GameController.GameObjectAction">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.Start">
+            <summary>
+            Запустить внутренний таймер, который обновляет объекты на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.Stop">
+            <summary>
+            Остановить внутренний таймер, который обновляет объекты на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.UpdateScene(System.Object,System.EventArgs)">
+            <summary>
+            Обновить состояние сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.ProcessCursorEvents">
+            <summary>
+            Обработать все события курсора, которые произошли с момента последнего обновления сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.OnMouseStateChanged(System.Object,Disciples.Engine.Platform.Events.MouseButtonEventArgs)">
+            <summary>
+            Обработать событие от курсора.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.OnKeyStateChanged(System.Object,Disciples.Engine.Platform.Events.KeyButtonEventArgs)">
+            <summary>
+            Обработать событие от клавиатуры.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.CreateObject(Disciples.Engine.Common.GameObjects.GameObject)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.DestroyObject(Disciples.Engine.Common.GameObjects.GameObject)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.GameController.ChangeScene``2(``0,``1)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Loading.LoadingSceneController">
+            <inheritdoc cref="T:Disciples.Engine.Loading.ILoadingSceneController" />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Loading.LoadingSceneController.#ctor(Disciples.Engine.Base.IGameController,Disciples.Engine.Platform.Factories.ISceneFactory,Disciples.Engine.Common.Providers.IInterfaceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Loading.LoadingSceneController.LoadInternal(Disciples.Engine.Common.Controllers.ISceneContainer,System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Loading.LoadingSceneController.UnloadInternal">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Implementation.Logger">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Implementation.Logger.Log(System.String)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

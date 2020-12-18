@@ -13,6 +13,9 @@ namespace Disciples.Engine.Implementation.Base
             Load(LoadInternal);
         }
 
+        /// <summary>
+        /// Инициализировать объект.
+        /// </summary>
         protected abstract void LoadInternal();
     }
 }

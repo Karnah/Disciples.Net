@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using System;
+using Disciples.Engine.Base;
 using Disciples.Engine.Battle;
 using Disciples.Engine.Battle.Controllers;
 using Disciples.Engine.Battle.GameObjects;
@@ -19,12 +20,12 @@ namespace Disciples.Engine.Implementation.Battle
         private readonly ITextProvider _textProvider;
         private readonly IUnitInfoProvider _unitInfoProvider;
 
-        private readonly IBattleResourceProvider _battleResourceProvider;
-        private readonly IBattleInterfaceProvider _battleInterfaceProvider;
-        private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
-
-        private IBattleController _battleController;
-        private IBattleInterfaceController _battleInterfaceController;
+        private readonly Lazy<IBattleResourceProvider> _battleResourceProvider;
+        private readonly Lazy<IBattleInterfaceProvider> _battleInterfaceProvider;
+        private readonly Lazy<IBattleUnitResourceProvider> _battleUnitResourceProvider;
+        private readonly Lazy<IBattleActionProvider> _battleActionProvider;
+        private readonly Lazy<IBattleController> _battleController;
+        private readonly Lazy<IBattleInterfaceController> _battleInterfaceController;
 
         /// <inheritdoc />
         public BattleSceneController(
@@ -33,9 +34,12 @@ namespace Disciples.Engine.Implementation.Battle
             IInterfaceProvider interfaceProvider,
             ITextProvider textProvider,
             IUnitInfoProvider unitInfoProvider,
-            IBattleResourceProvider battleResourceProvider,
-            IBattleInterfaceProvider battleInterfaceProvider,
-            IBattleUnitResourceProvider battleUnitResourceProvider
+            Lazy<IBattleResourceProvider> battleResourceProvider,
+            Lazy<IBattleInterfaceProvider> battleInterfaceProvider,
+            Lazy<IBattleUnitResourceProvider> battleUnitResourceProvider,
+            Lazy<IBattleActionProvider> battleActionProvider,
+            Lazy<IBattleController> battleController,
+            Lazy<IBattleInterfaceController> battleInterfaceController
             ) : base(gameController, sceneFactory, interfaceProvider)
         {
             _textProvider = textProvider;
@@ -43,6 +47,9 @@ namespace Disciples.Engine.Implementation.Battle
             _battleResourceProvider = battleResourceProvider;
             _battleInterfaceProvider = battleInterfaceProvider;
             _battleUnitResourceProvider = battleUnitResourceProvider;
+            _battleActionProvider = battleActionProvider;
+            _battleController = battleController;
+            _battleInterfaceController = battleInterfaceController;
         }
 
 
@@ -58,15 +65,13 @@ namespace Disciples.Engine.Implementation.Battle
             _textProvider.Load();
             _unitInfoProvider.Load();
 
-            _battleResourceProvider.Load();
-            _battleInterfaceProvider.Load();
-            _battleUnitResourceProvider.Load();
+            _battleResourceProvider.Value.Load();
+            _battleInterfaceProvider.Value.Load();
+            _battleUnitResourceProvider.Value.Load();
+            _battleActionProvider.Value.Load();
 
-            _battleController = data.BattleController;
-            _battleInterfaceController = data.BattleInterfaceController;
-
-            _battleController.Load(new BattleSquadsData(data.AttackSquad, data.DefendSquad));
-            _battleInterfaceController.Load();
+            _battleController.Value.Load(new BattleSquadsData(data.AttackSquad, data.DefendSquad));
+            _battleInterfaceController.Value.Load();
         }
 
         /// <inheritdoc />
@@ -77,11 +82,12 @@ namespace Disciples.Engine.Implementation.Battle
             var components = new ISupportUnloading[] {
                 _textProvider,
                 _unitInfoProvider,
-                _battleResourceProvider,
-                _battleInterfaceProvider,
-                _battleUnitResourceProvider,
-                _battleController,
-                _battleInterfaceController
+                _battleResourceProvider.Value,
+                _battleInterfaceProvider.Value,
+                _battleUnitResourceProvider.Value,
+                _battleActionProvider.Value,
+                _battleController.Value,
+                _battleInterfaceController.Value
             };
 
             // Деинициализируем те компоненты, которые существует в рамках одной сцены.
@@ -97,7 +103,7 @@ namespace Disciples.Engine.Implementation.Battle
         /// <inheritdoc />
         public BattleUnit AddBattleUnit(Unit unit, bool isAttacker)
         {
-            var battleUnit = new BattleUnit(this, _battleUnitResourceProvider, unit, isAttacker);
+            var battleUnit = new BattleUnit(this, _battleUnitResourceProvider.Value, unit, isAttacker);
             GameController.CreateObject(battleUnit);
 
             return battleUnit;
@@ -115,7 +121,7 @@ namespace Disciples.Engine.Implementation.Battle
         /// <inheritdoc />
         public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
         {
-            var unitPortrait = new UnitPortraitObject(_textProvider, this, _battleInterfaceProvider, unit, rightToLeft, x, y);
+            var unitPortrait = new UnitPortraitObject(_textProvider, this, _battleActionProvider.Value, _battleInterfaceProvider.Value, unit, rightToLeft, x, y);
             GameController.CreateObject(unitPortrait);
 
             return unitPortrait;
@@ -124,7 +130,7 @@ namespace Disciples.Engine.Implementation.Battle
         /// <inheritdoc />
         public DetailUnitInfoObject ShowDetailUnitInfo(Unit unit)
         {
-            var detailUnitInfoObject = new DetailUnitInfoObject(this, _battleInterfaceProvider, _textProvider, unit);
+            var detailUnitInfoObject = new DetailUnitInfoObject(this, _battleInterfaceProvider.Value, _textProvider, unit);
             GameController.CreateObject(detailUnitInfoObject);
 
             return detailUnitInfoObject;

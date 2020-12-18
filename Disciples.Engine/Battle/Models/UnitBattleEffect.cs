@@ -7,10 +7,19 @@ namespace Disciples.Engine.Battle.Models
     /// </summary>
     public class UnitBattleEffect
     {
+        /// <inheritdoc />
         public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration)
         {
             EffectType = effectType;
             RoundDuration = roundDuration;
+        }
+
+        /// <inheritdoc />
+        public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration, int? power)
+        {
+            EffectType = effectType;
+            RoundDuration = roundDuration;
+            Power = power;
         }
 
 
@@ -23,5 +32,10 @@ namespace Disciples.Engine.Battle.Models
         /// Длительность эффекта в раундах.
         /// </summary>
         public int RoundDuration { get; set; }
+
+        /// <summary>
+        /// Сила эффекта.
+        /// </summary>
+        public int? Power { get; }
     }
 }

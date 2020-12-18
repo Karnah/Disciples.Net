@@ -150,8 +150,8 @@ namespace Disciples.Engine.Implementation
             var selectedGameObject = GameObjects
                 .OrderBy(go => go.Y)
                 .FirstOrDefault(go => go.IsInteractive &&
-                                      go.X * GameInfo.Scale <= mousePosition.X && mousePosition.X < (go.X + go.Width) * GameInfo.Scale &&
-                                      go.Y * GameInfo.Scale <= mousePosition.Y && mousePosition.Y < (go.Y + go.Height) * GameInfo.Scale);
+                                      go.X <= mousePosition.X && mousePosition.X < go.X + go.Width &&
+                                      go.Y <= mousePosition.Y && mousePosition.Y < go.Y + go.Height);
 
             // Если изменился выбранный объект, то отправляем события снятия выделения/выделения.
             if (selectedGameObject != _selectedGameObject)

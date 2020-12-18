@@ -133,10 +133,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ReactiveUI.Fody">
-      <Version>9.5.1</Version>
+      <Version>9.13.1</Version>
     </PackageReference>
     <PackageReference Include="ReactiveUI.WPF">
-      <Version>9.5.1</Version>
+      <Version>9.13.1</Version>
     </PackageReference>
     <PackageReference Include="Unity">
       <Version>5.8.13</Version>

@@ -5,6 +5,7 @@
     /// </summary>
     public class Unit
     {
+        /// <inheritdoc />
         public Unit(string id, UnitType unitType, Player player, int squadLinePosition, int squadFlankPosition)
         {
             Id = id;
@@ -125,7 +126,8 @@
         /// Базовое значение точности первой атаки.
         /// todo Рассчитывать, зависит от уровня.
         /// </summary>
-        public int BaseFirstAttackAccuracy => UnitType.FirstAttack.Accuracy;
+        public int BaseFirstAttackAccuracy => 100;
+        //public int BaseFirstAttackAccuracy => UnitType.FirstAttack.Accuracy;
 
         /// <summary>
         /// Модификатор точности первой атаки.
@@ -145,7 +147,8 @@
         /// <remarks>
         /// На вторую атаку модификаторы не распространяются.
         /// </remarks>
-        public int? SecondAttackAccuracy => UnitType.SecondAttack?.Accuracy;
+        public int? SecondAttackAccuracy => 100;
+        //public int? SecondAttackAccuracy => UnitType.SecondAttack?.Accuracy;
 
         /// <summary>
         /// Базовая инициатива.
@@ -172,24 +175,5 @@
         /// Эффекты, воздействующие на юнита.
         /// </summary>
         public UnitEffects Effects { get; }
-
-
-        /// <summary>
-        /// Изменить текущее количество очков здоровья у юнита.
-        /// </summary>
-        /// <param name="value">На какое количество необходимо изменить.</param>
-        public void ChangeHitPoints(int value)
-        {
-            var hitpoints = HitPoints + value;
-            if (hitpoints > UnitType.HitPoints) {
-                HitPoints = UnitType.HitPoints;
-            }
-            else if (hitpoints < 0) {
-                HitPoints = 0;
-            }
-            else {
-                HitPoints = hitpoints;
-            }
-        }
     }
 }

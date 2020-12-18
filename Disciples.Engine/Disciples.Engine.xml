@@ -1,0 +1,3151 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Disciples.Engine</name>
+    </assembly>
+    <members>
+        <member name="T:Disciples.Engine.Base.IGameController">
+            <summary>
+            Контроллер игры.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Base.IGameController.GameObjects">
+            <summary>
+            Все объекты, размещённые на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Base.IGameController.CurrentSceneContainer">
+            <summary>
+            Контейнер объектов для текущей сцены.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Base.IGameController.SceneChanged">
+            <summary>
+            Событие смены текущей сцены.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Base.IGameController.SceneEndUpdating">
+            <summary>
+            Событие, которое возникает после того, как сцена была обновлена.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Base.IGameController.SceneRedraw">
+            <summary>
+            Событие возникает после того, как вся логика была выполнена и можно перерисовать сцену.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Base.IGameController.GameObjectAction">
+            <summary>
+            Событие действия над игровым объектом.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.IGameController.CreateObject(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Инициализировать новый объект и разместить его на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.IGameController.DestroyObject(Disciples.Engine.Common.GameObjects.GameObject)">
+            <summary>
+            Убрать объект со сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.IGameController.ChangeScene``2(``0,``1)">
+            <summary>
+            Поменять сцену.
+            </summary>
+            <typeparam name="TSceneController">Тип контроллера новой сцены.</typeparam>
+            <typeparam name="TData">Тип параметров инициализации новой сцены.</typeparam>
+            <param name="sceneController">Контроллер новой сцены.</param>
+            <param name="data">Данные для инициализации новой сцены.</param>
+        </member>
+        <member name="T:Disciples.Engine.Base.ILogger">
+            <summary>
+            Менеджер для журнала.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ILogger.Log(System.String)">
+            <summary>
+            Добавить сообщение в журнал.
+            </summary>
+            <param name="message">Сообщение.</param>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISceneController">
+            <summary>
+            Базовый интерфейс для контроллера сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddAnimation(System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Double,System.Double,System.Int32,System.Boolean)">
+            <summary>
+            Добавить анимацию на сцену.
+            </summary>
+            <param name="frames">Кадры анимации.</param>
+            <param name="x">Положение анимации, координата X.</param>
+            <param name="y">Положение анимации, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться анимация.</param>
+            <param name="repeat"><value>false</value>, если необходимо уничтожить объект после того, как анимация будет завершена.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddButton(System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <summary>
+            Добавить кнопку на сцену.
+            </summary>
+            <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
+            <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
+            <param name="x">Положение кнопки, координата X.</param>
+            <param name="y">Положение кнопки, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться кнопка.</param>
+            <param name="hotkey">Горячая клавиша для кнопки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddToggleButton(System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <summary>
+            Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
+            </summary>
+            <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
+            <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
+            <param name="x">Положение кнопки, координата X.</param>
+            <param name="y">Положение кнопки, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться кнопка.</param>
+            <param name="hotkey">Горячая клавиша для кнопки.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddImage(System.Int32)">
+            <summary>
+            Добавить пустое изображение на сцену.
+            </summary>
+            <param name="layer">Слой на котором будет отображаться изображение.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddImage(Disciples.Engine.IBitmap,System.Double,System.Double,System.Int32)">
+            <summary>
+            Добавить статичное изображение на сцену.
+            </summary>
+            <param name="bitmap">Изображение.</param>
+            <param name="x">Положение изображения, координата X.</param>
+            <param name="y">Положение изображения, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться изображение.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddImage(Disciples.Engine.IBitmap,System.Double,System.Double,System.Double,System.Double,System.Int32)">
+            <summary>
+            Добавить статичное изображение указанных размеров на сцену.
+            </summary>
+            <param name="bitmap">Изображение.</param>
+            <param name="width">Ширина изображения.</param>
+            <param name="height">Высота изображения.</param>
+            <param name="x">Положение изображения, координата X.</param>
+            <param name="y">Положение изображения, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться изображение.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddColorImage(Disciples.Engine.Common.Enums.GameColor,System.Double,System.Double,System.Double,System.Double,System.Int32)">
+            <summary>
+            Добавить прямоугольник указанного цвета и размеров на сцену.
+            </summary>
+            <param name="color">Цвет изображения.</param>
+            <param name="width">Ширина изображения.</param>
+            <param name="height">Высота изображения.</param>
+            <param name="x">Положение изображения, координата X.</param>
+            <param name="y">Положение изображения, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться изображение.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddText(System.String,System.Double,System.Double,System.Double,System.Int32,System.Boolean)">
+            <summary>
+            Добавить текст на сцену.
+            </summary>
+            <param name="text">Текст.</param>
+            <param name="fontSize">Размер шрифта.</param>
+            <param name="x">Положение тексте, координата X.</param>
+            <param name="y">Положение текста, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться текст.</param>
+            <param name="isBold">Использовать жирный шрифт.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.AddText(System.String,System.Double,System.Double,System.Double,System.Int32,System.Double,Disciples.Engine.Common.Enums.TextAlignment,System.Boolean,System.Nullable{Disciples.Engine.Common.Enums.GameColor})">
+            <summary>
+            Добавить текст на сцену.
+            </summary>
+            <param name="text">Текст.</param>
+            <param name="fontSize">Размер шрифта.</param>
+            <param name="x">Положение тексте, координата X.</param>
+            <param name="y">Положение текста, координата Y.</param>
+            <param name="layer">Слой на котором будет отображаться текст.</param>
+            <param name="width">Ширина текста.</param>
+            <param name="textAlignment">Выравнивание текста.</param>
+            <param name="isBold">Использовать жирный шрифт.</param>
+            <param name="foregroundColor">Цвет текста.</param>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISceneController.RemoveSceneObject(Disciples.Engine.Common.SceneObjects.ISceneObject)">
+            <summary>
+            Удалить указанный объект со сцены.
+            </summary>
+            <param name="sceneObject">Объект, который необходимо удалить.</param>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISceneController`1">
+            <summary>
+            Расширенный класс для контроллера сцены, поддерживающий инициализацию.
+            </summary>
+            <typeparam name="TData">Тип параметров инициализации.</typeparam>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISupportLoading">
+            <summary>
+            Интерфейс для обозначения тех объектов, которые поддерживают инициализацию без параметров.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISupportLoading.Load">
+            <summary>
+            Инициализировать объект.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISupportLoading`1">
+            <summary>
+            Интерфейс для обозначения тех объектов, которые поддерживают инициализацию с одним параметром.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISupportLoading`1.Load(`0)">
+            <summary>
+            Инициализировать объект.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISupportLoading`2">
+            <summary>
+            Интерфейс для обозначения тех объектов, которые поддерживают инициализацию с двумя параметрами.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISupportLoading`2.Load(`0,`1)">
+            <summary>
+            Инициализировать объект.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Base.ISupportUnloading">
+            <summary>
+            Интерфейс для обозначения тех объектов, которые поддерживают деинициализацию.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Base.ISupportUnloading.IsLoaded">
+            <summary>
+            Был ли инициализирован объект.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Base.ISupportUnloading.OneTimeLoading">
+            <summary>
+            Обозначение того, что объект инициализируется один раз и не деинициализируется при смене сцен.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Base.ISupportUnloading.Unload">
+            <summary>
+            Очистить занимаемые объектом ресурсы.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent">
+            <summary>
+            Компонент для создания анимации юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._action">
+            <summary>
+            Анимация какого действия отображается в данный момент.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._shadowFrames">
+            <summary>
+            Кадры анимации тени юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._unitFrames">
+            <summary>
+            Кадры анимации юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._auraFrames">
+            <summary>
+            Кадры анимации ауры юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._shadowAnimationHost">
+            <summary>
+            Изображение, которые отрисовывает кадры анимации тени юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._unitAnimationHost">
+            <summary>
+            Изображение, которые отрисовывает кадры анимации юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent._auraAnimationHost">
+            <summary>
+            Изображение, которые отрисовывает кадры анимации ауры юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Base.ISceneController,Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.GetLayer(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Вычислить на каком слое располагается юнит визуально.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.BattleUnitAnimation">
+            <summary>
+            Вся информация об анимации юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.OnAnimationFrameChange">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.GetAnimationHosts">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.OnUnitStateChanged(System.Object,System.EventArgs)">
+            <summary>
+            Обработать событие изменения состояния юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Components.BattleUnitAnimationComponent.UpdateSource(System.Int32)">
+            <summary>
+            Обновить анимацию юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Controllers.IBattleController">
+            <summary>
+            Класс для мониторинга и управлением состояния битвы.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Controllers.IBattleController.CurrentUnitObject">
+            <summary>
+            Юнит, который сейчас ходит.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Controllers.IBattleController.IsSecondAttack">
+            <summary>
+            Признак того, что юнит атакует второй раз за текущий ход.
+            </summary>
+            <remarks>Актуально только для юнитов, которые бьют дважды за ход.</remarks>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Controllers.IBattleController.Units">
+            <summary>
+            Все юниты.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.Controllers.IBattleController.UnitActionBegin">
+            <summary>
+            Событие возникает, когда юнит начинает действие.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.Controllers.IBattleController.UnitActionEnded">
+            <summary>
+            Событие возникает, когда следующий юнит готов к ходу.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.Controllers.IBattleController.BattleEnded">
+            <summary>
+            Событие возникает, когда один из отрядов полностью уничтожен.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Controllers.IBattleController.GetUnitObject(Disciples.Engine.Common.Models.Unit)">
+            <summary>
+            Получить игровой объект юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Controllers.IBattleController.CanAttack(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Проверить на возможность атаки юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Controllers.IBattleController.AttackUnit(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Атаковать выбранного юнита.
+            </summary>
+            <param name="targetUnitGameObject">Юнит, являющийся целью.</param>
+            <returns>True, если атака возможна, false если невозможно атаковать.</returns>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Controllers.IBattleController.Defend">
+            <summary>
+            Защититься на этом ходу.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Controllers.IBattleController.Wait">
+            <summary>
+            Подождать.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Controllers.IBattleInterfaceController">
+            <summary>
+            Контроллер, который взаимодействует и управляет интерфейсом во время битвы.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.BattleAction">
+            <summary>
+            Состояние юнита на поле боя.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleAction.Waiting">
+            <summary>
+            Юнит ожидает.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleAction.Attacking">
+            <summary>
+            Юнит атакует.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleAction.TakingDamage">
+            <summary>
+            Юнит получает удар.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleAction.Paralyzed">
+            <summary>
+            Юнит парализован.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleAction.Dead">
+            <summary>
+            Юнит убит.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.BattleDirection">
+            <summary>
+            Направление юнита на поле боя.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleDirection.Attacker">
+            <summary>
+            Юнит направлен лицом к игроку.
+            </summary>
+            <remarks>Все юниты в атакующем отряде в начале боя направлены лицом к игроку.</remarks>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleDirection.Defender">
+            <summary>
+            Юнит направлен спиной к игроку.
+            </summary>
+            <remarks>Все юниты в защищающемся отряде в начале боя направлены спиной к игроку.</remarks>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.BattleState">
+            <summary>
+            Состояние сражения.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleState.WaitingAction">
+            <summary>
+            Ожидание действия от игрока.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleState.Delay">
+            <summary>
+            Задержка после того, как пользователь совершил действие.
+            </summary>
+            <remarks>Используется при ожидании и защите, чтобы ход не переходил слишком быстро.</remarks>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleState.AfterTouch">
+            <summary>
+            Юнит замахивается для удара.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleState.BeforeTouch">
+            <summary>
+            Юнит уже ударил.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.BattleState.BattleEnd">
+            <summary>
+            Сражение завершено.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.TouchUnitActionType">
+            <summary>
+            Тип воздействия на юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Attack">
+            <summary>
+            Попадание атаки в этого юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Miss">
+            <summary>
+            Промах.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Defend">
+            <summary>
+            Защита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Waiting">
+            <summary>
+            Ожидание.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Death">
+            <summary>
+            Смерть.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.TouchUnitActionType.Effect">
+            <summary>
+            Наложение эффекта.
+            </summary>
+            <remarks>
+            Отравления, усиления, проклятия и т.д.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.UnitActionType">
+            <summary>
+            Тип действия юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitActionType.Attack">
+            <summary>
+            Атака.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitActionType.Defend">
+            <summary>
+            Защита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitActionType.Wait">
+            <summary>
+            Ожидание.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.UnitBattleEffectType">
+            <summary>
+            Тип эффекта, наложенного на юнита во время битвы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitBattleEffectType.Defend">
+            <summary>
+            Защита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitBattleEffectType.Poison">
+            <summary>
+            Отравление.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitBattleEffectType.Frostbite">
+            <summary>
+            Обморожение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitBattleEffectType.Blister">
+            <summary>
+            Ожог.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType">
+            <summary>
+            Тип моментального эффекта, который произошел с юнитом.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType.Damaged">
+            <summary>
+            Юнит получил повреждения.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType.Healed">
+            <summary>
+            Юнит был исцелён.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType.Miss">
+            <summary>
+            По юниту промахнулись.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType.Defended">
+            <summary>
+            Юнит защитился.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType.Waiting">
+            <summary>
+            Юнит ждёт.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.GameObjects.BattleUnit">
+            <summary>
+            Игровой объект юнита во время сражения.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.GameObjects.BattleUnit.BATTLE_UNIT_WIDTH">
+            <summary>
+            Ширина юнита на сцене.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.GameObjects.BattleUnit.BATTLE_UNIT_HEIGHT">
+            <summary>
+            Высота юнита на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.GameObjects.BattleUnit.#ctor(Disciples.Engine.Base.ISceneController,Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider,Disciples.Engine.Common.Models.Unit,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.AnimationComponent">
+            <summary>
+            Компонент анимации юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.Unit">
+            <summary>
+            Информация о юните.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.IsAttacker">
+            <summary>
+            Принадлежит ли юнит атакующему отряду.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.Direction">
+            <summary>
+            Направление, куда смотрит юнит.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnit.Action">
+            <summary>
+            Действие, которое выполняет юнит в данный момент.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.GameObjects.BattleUnit.UnitStateChanged">
+            <summary>
+            Событие изменения состояния юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.GameObjects.BattleUnit.GetSceneUnitPosition(System.Boolean,System.Double,System.Double)">
+            <summary>
+            Рассчитать позицию юнита на сцене.
+            </summary>
+            <param name="isAttacker">Находится ли юнит в атакующем отряде.</param>
+            <param name="line">Линия, на которой располагается юнит.</param>
+            <param name="flank">Позиция на которой находится юнит (центр, правый и левый фланги).</param>
+        </member>
+        <member name="T:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject">
+            <summary>
+            Игровой объект, который выводит текстовую информацию о юните.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject.#ctor(Disciples.Engine.Base.ISceneController,System.Double,System.Double,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject.Unit">
+            <summary>
+            Юнит, информация о котором отображается.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject.OnUpdate(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.GameObjects.BattleUnitInfoGameObject.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Battle.IBattleSceneController">
+            <summary>
+            Сцена битвы двух отрядов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.IBattleSceneController.AddBattleUnit(Disciples.Engine.Common.Models.Unit,System.Boolean)">
+            <summary>
+            Добавить юнита на сцену битвы.
+            </summary>
+            <param name="unit">Юнит.</param>
+            <param name="isAttacker">Является ли юнит атакующим.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.IBattleSceneController.AddBattleUnitInfo(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Добавить текстовую информацию о юните на сцену битвы.
+            </summary>
+            <param name="x">Положение текста, координата X.</param>
+            <param name="y">Положение текста, координата Y.</param>
+            <param name="layer">Слой, на котором необходимо отображать текст.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.IBattleSceneController.AddUnitPortrait(Disciples.Engine.Common.Models.Unit,System.Boolean,System.Double,System.Double)">
+            <summary>
+            Добавить портрет юнита на сцену.
+            </summary>
+            <param name="unit">Юнит, чей портрет необходимо добавить.</param>
+            <param name="rightToLeft">Указатель того, что юнит смотрит справа налево.</param>
+            <param name="x">Положение портрета, координата X.</param>
+            <param name="y">Положение портрета, координата Y.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.IBattleSceneController.ShowDetailUnitInfo(Disciples.Engine.Common.Models.Unit)">
+            <summary>
+            Отобразить детальную информацию о юните.
+            </summary>
+            <param name="unit">Юнит, о котором необходимо вывести информацию.</param>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActionEventArgs">
+            <summary>
+            Аргументы события начала или завершения действия.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActionEventArgs.#ctor(Disciples.Engine.Battle.Models.BattleActions.IBattleAction)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActionEventArgs.BattleAction">
+            <summary>
+            Действие.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction">
+            <summary>
+            Действие, продолжительность которого зависит от кадра анимации.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction.#ctor(Disciples.Engine.Common.Components.BaseAnimationComponent,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction.#ctor(Disciples.Engine.Common.Components.BaseAnimationComponent)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction.IsEnded">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction.AnimationComponent">
+            <summary>
+            Компонент анимации от которого зависит продолжительность.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.AnimationBattleAction.EndFrameIndex">
+            <summary>
+            Номер кадра анимации на котором завершится действие.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.AttackUnitBattleAction">
+            <summary>
+            Атака юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.AttackUnitBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,System.Int32,Disciples.Engine.Common.Enums.Units.AttackClass)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.AttackUnitBattleAction.Power">
+            <summary>
+            Сила воздействия.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.AttackUnitBattleAction.AttackClass">
+            <summary>
+            Тип атаки.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.BaseTimerBattleAction">
+            <summary>
+            Базовое действие, продолжительность которого зависит от времени.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.BaseTimerBattleAction.#ctor(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.BaseTimerBattleAction.IsEnded">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.BaseTimerBattleAction.UpdateTime(System.Int64)">
+            <summary>
+            Обновить счетчик прошедшего времени.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.DelayAction">
+            <summary>
+            Задержка.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.DelayAction.#ctor(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction">
+            <summary>
+            Наложение эффекта на юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Common.Enums.Units.AttackClass)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Common.Enums.Units.AttackClass,System.Int32,System.Nullable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction.AttackClass">
+            <summary>
+            Атака из-за которой был наложен эффект.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction.RoundDuration">
+            <summary>
+            Продолжительность эффекта в раундах.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.EffectUnitBattleAction.Power">
+            <summary>
+            Сила эффекта.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.FirstAttackBattleAction">
+            <summary>
+            Действие атаки одного юнита на другого.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.FirstAttackBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.FirstAttackBattleAction.Attacker">
+            <summary>
+            Юнит, который атаковал.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.FirstAttackBattleAction.Target">
+            <summary>
+            Юнит, который являлся целью атаки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.FirstAttackBattleAction.CalculateEndFrameIndex(Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <summary>
+            Вычислить индекс завершения анимации.
+            </summary>
+            <remarks>
+            Этот метод нужен только потому, что я не смог найти связь между анимациями и моментом нанесения удара.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.IBattleAction">
+            <summary>
+            Действие на поле боя.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.IBattleAction.IsEnded">
+            <summary>
+            Было ли завершено действие.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction">
+            <summary>
+            Действие второй атаки юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Battle.GameObjects.BattleUnit)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Battle.GameObjects.BattleUnit,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction.Attacker">
+            <summary>
+            Юнит, который атаковал.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction.Target">
+            <summary>
+            Юнит, который являлся целью атаки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.SecondAttackBattleAction.Power">
+            <summary>
+            Сила атаки.
+            </summary>
+            <remarks>
+            Нужна в тех случаях, когда сила зависит от первой атаки. Например, если восстанавливаем здоровье за счёт урона.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.TouchUnitBattleAction">
+            <summary>
+            Воздействие на юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Battle.Models.BattleActions.TouchUnitBattleAction.TOUCH_UNIT_ACTION_DURATION">
+            <summary>
+            Продолжительность воздействия
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleActions.TouchUnitBattleAction.#ctor(Disciples.Engine.Battle.GameObjects.BattleUnit,Disciples.Engine.Battle.Enums.TouchUnitActionType)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.TouchUnitBattleAction.TargetUnit">
+            <summary>
+            Цель воздействия.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.TouchUnitBattleAction.TouchUnitActionType">
+            <summary>
+            Тип воздействия на юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleActions.WaitAction">
+            <summary>
+            Действие, которое завершается тогда, когда завершены все прочие действия.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleActions.WaitAction.IsEnded">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleInitializeData">
+            <summary>
+            Параметры, необходимые для инициализации сцены боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleInitializeData.#ctor(Disciples.Engine.Common.Models.Squad,Disciples.Engine.Common.Models.Squad)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleInitializeData.AttackSquad">
+            <summary>
+            Атакующий отряд.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleInitializeData.DefendSquad">
+            <summary>
+            Защищающийся отряд.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleSquadsData">
+            <summary>
+            Параметры, необходимые для инициализации сцены боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleSquadsData.#ctor(Disciples.Engine.Common.Models.Squad,Disciples.Engine.Common.Models.Squad)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleSquadsData.AttackSquad">
+            <summary>
+            Атакующий отряд.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleSquadsData.DefendSquad">
+            <summary>
+            Защищающийся отряд.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleUnitAnimation">
+            <summary>
+            Вся информация об анимации юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleUnitAnimation.#ctor(System.Collections.Generic.Dictionary{Disciples.Engine.Battle.Enums.BattleAction,Disciples.Engine.Battle.Models.BattleUnitFrames},Disciples.Engine.Battle.Models.BattleUnitTargetAnimation,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitAnimation.BattleUnitFrames">
+            <summary>
+            Кадры анимации для каждого состояния юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitAnimation.TargetAnimation">
+            <summary>
+            Информации об анимации, которая применяются в юниту-цели.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitAnimation.DeathFrames">
+            <summary>
+            Анимация смерти юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleUnitFrames">
+            <summary>
+            Кадры для анимации юнита во время битвы.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleUnitFrames.#ctor(System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitFrames.ShadowFrames">
+            <summary>
+            Кадры для анимации тени.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitFrames.UnitFrames">
+            <summary>
+            Кадры для анимации самого юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitFrames.AuraFrames">
+            <summary>
+            Кадры для анимации ауры юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.BattleUnitTargetAnimation">
+            <summary>
+            Класс анимации, которая применяется к атакуемому юниту (например, удары магов или лечение целителей).
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.BattleUnitTargetAnimation.#ctor(System.Boolean,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitTargetAnimation.IsSingle">
+            <summary>
+            Анимация применяется к одному юниту, а не к площади.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.BattleUnitTargetAnimation.Frames">
+            <summary>
+            Кадры анимации.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.UnitActionBeginEventArgs">
+            <summary>
+            Аргументы события действия юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitActionBeginEventArgs.#ctor(Disciples.Engine.Battle.Enums.UnitActionType)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitActionBeginEventArgs.UnitActionType">
+            <summary>
+            Тип действия юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.UnitBattleEffect">
+            <summary>
+            Эффект, наложенный на юнита во время схватки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitBattleEffect.#ctor(Disciples.Engine.Battle.Enums.UnitBattleEffectType,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitBattleEffect.#ctor(Disciples.Engine.Battle.Enums.UnitBattleEffectType,System.Int32,System.Nullable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitBattleEffect.EffectType">
+            <summary>
+            Тип эффекта, оказываемого на юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitBattleEffect.RoundDuration">
+            <summary>
+            Длительность эффекта в раундах.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitBattleEffect.Power">
+            <summary>
+            Сила эффекта.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Models.UnitInstantaneousEffect">
+            <summary>
+            Мгновенный эффект, произошедший с юнитом.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.#ctor(Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.#ctor(Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.#ctor(Disciples.Engine.Battle.Enums.UnitInstantaneousEffectType,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.EffectType">
+            <summary>
+            Тип моментального эффекта, который произошел с юнитом.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.Power">
+            <summary>
+            Сила эффекта.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Models.UnitInstantaneousEffect.Duration">
+            <summary>
+            Продолжительность эффекта.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Providers.IBattleActionProvider">
+            <summary>
+            Шина событий действий на поле боя.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleActionProvider.IsInterfaceActive">
+            <summary>
+            Проверить, что не существуют ли действия, блокирующие команды пользователя.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleActionProvider.BattleActions">
+            <summary>
+            Действия на поле боя.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.Providers.IBattleActionProvider.BattleActionBegin">
+            <summary>
+            Событие начала действия.
+            </summary>
+        </member>
+        <member name="E:Disciples.Engine.Battle.Providers.IBattleActionProvider.BattleActionEnd">
+            <summary>
+            Событие завершения действия.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleActionProvider.RegisterBattleAction(Disciples.Engine.Battle.Models.BattleActions.IBattleAction)">
+            <summary>
+            Зарегистрировать новое действие на поле битвы.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider">
+            <summary>
+            Провайдер для основных изображений на поле битвы.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.Battleground">
+            <summary>
+            Фон поля боя.
+            </summary>
+            <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.RightPanel">
+            <summary>
+            Картинка правой панели с юнитами.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.BottomPanel">
+            <summary>
+            Картинка нижней панели.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.PanelSeparator">
+            <summary>
+            Картинка-разделитель для панели юнитов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.DeathSkull">
+            <summary>
+            Иконка умершего юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.UnitInfoBackground">
+            <summary>
+            Задний фон для подробной информации о юните (раскрытый свиток).
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.UnitBattleEffectsIcon">
+            <summary>
+            Иконки для эффектов, воздействующих на юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.ToggleRightButton">
+            <summary>
+            Иконки для кнопки переключения правой панели юнитов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.DefendButton">
+            <summary>
+            Иконки для кнопки защиты.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.RetreatButton">
+            <summary>
+            Иконки для кнопки отступления.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.WaitButton">
+            <summary>
+            Иконки для кнопки ожидания.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.InstantResolveButton">
+            <summary>
+            Иконки для мгновенного завершения битвы.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.AutoBattleButton">
+            <summary>
+            Иконки для автоматической битвы.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.GetUnitAttackBorder(System.Boolean)">
+            <summary>
+            Получить анимацию рамки для юнита, которого можно атаковать.
+            </summary>
+            <param name="sizeSmall">Юнит занимает только одну клетку.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.GetFieldAttackBorder">
+            <summary>
+            Получить анимацию рамки атаки для юнита, который атакует всё поле боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.GetUnitSelectionBorder(System.Boolean)">
+            <summary>
+            Получить анимацию рамки для юнита, который ходит в данный момент.
+            </summary>
+            <param name="sizeSmall">Юнит занимает только одну клетку.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.GetUnitHealBorder(System.Boolean)">
+            <summary>
+            Получить анимацию исцеления для юнита, на которого можно наложить эффект.
+            </summary>
+            <param name="sizeSmall">Юнит занимает только одну клетку.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleInterfaceProvider.GetFieldHealBorder">
+            <summary>
+            Получить анимацию рамки исцеления для юнита, который накладывает эффект на всё поле боя.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Providers.IBattleResourceProvider">
+            <summary>
+            Поставщик ресурсов для сцены битвы.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleResourceProvider.GetBattleAnimation(System.String)">
+            <summary>
+            Получить анимацию для сцены битвы.
+            </summary>
+            <param name="animationName">Имя анимации.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleResourceProvider.GetBattleFrame(System.String)">
+            <summary>
+            Получить изображение для сцены битвы.
+            </summary>
+            <param name="frameName">Имя изображения.</param>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleResourceProvider.GetRandomBattleground">
+            <summary>
+            Получить случайный фон для поля боя.
+            </summary>
+            <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
+        </member>
+        <member name="T:Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider">
+            <summary>
+            Поставщик ресурсов для юнитов на поле боя.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Battle.Providers.IBattleUnitResourceProvider.GetBattleUnitAnimation(System.String,Disciples.Engine.Battle.Enums.BattleDirection)">
+            <summary>
+            Получить набор анимаций юнита.
+            </summary>
+            <param name="unitId">Идентификатор типа юнита.</param>
+            <param name="direction">Направление положения юнита.</param>
+        </member>
+        <member name="T:Disciples.Engine.Common.Components.AnimationComponent">
+            <summary>
+            Компонент для создания анимации.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.AnimationComponent.#ctor(Disciples.Engine.Common.GameObjects.GameObject,Disciples.Engine.Base.ISceneController,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.AnimationComponent.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.AnimationComponent.OnAnimationFrameChange">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.AnimationComponent.GetAnimationHosts">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Common.Components.BaseAnimationComponent">
+            <summary>
+            Базовый компонент для анимаций.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Components.BaseAnimationComponent.FRAME_CHANGE_SPEED">
+            <summary>
+            Промежуток времени в мс через которое происходит смена кадра в анимации.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.#ctor(Disciples.Engine.Common.GameObjects.GameObject,Disciples.Engine.Base.ISceneController,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Components.BaseAnimationComponent.FrameIndex">
+            <summary>
+            Текущий кадр анимации.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Components.BaseAnimationComponent.FramesCount">
+            <summary>
+            Количество кадров в анимации.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Components.BaseAnimationComponent.Layer">
+            <summary>
+            Слой, на котором располагается анимация.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Components.BaseAnimationComponent.SceneController">
+            <summary>
+            Контроллер сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.OnUpdate(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.OnAnimationFrameChange">
+            <summary>
+            Обработать событие того, что изменился кадр анимации.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.GetAnimationHosts">
+            <summary>
+            Получить список всех изображений для уничтожения.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.UpdateFrame(Disciples.Engine.Common.SceneObjects.IImageSceneObject,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame})">
+            <summary>
+            Обновить кадр анимации.
+            </summary>
+            <param name="animationHost">Изображение, которое которое отрисовывает кадры анимации.</param>
+            <param name="frames">Кадры анимации.</param>
+            <remarks>
+            В отличие от <see cref="M:Disciples.Engine.Common.Components.BaseAnimationComponent.UpdatePosition(Disciples.Engine.Common.SceneObjects.IImageSceneObject@,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Nullable{System.Int32})" /> не проверяет изменение положения и размеров.
+            Предполагается, что внутри одной анимации кадры имеют одинаковые размеры и смещение.
+            </remarks>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseAnimationComponent.UpdatePosition(Disciples.Engine.Common.SceneObjects.IImageSceneObject@,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Nullable{System.Int32})">
+            <summary>
+            Обновить позицию изображения на сцене.
+            </summary>
+            <param name="animationHost">Изображение, которое которое отрисовывает кадры анимации.</param>
+            <param name="frames">Кадры анимации.</param>
+            <param name="layer">Слой, на котором необходимо располагать анимацию.</param>
+            <remarks>
+            Необходимо использовать, когда изменилась анимация.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Common.Components.BaseComponent">
+            <summary>
+            Базовый класс для компонентов игровых объектов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.#ctor(Disciples.Engine.Common.GameObjects.GameObject)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Components.BaseComponent.GameObject">
+            <summary>
+            Игровой объект, который содержит данный компонент.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.OnUpdate(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.GetComponent``1">
+            <summary>
+            Получить компонент указанного типа.
+            </summary>
+            <typeparam name="TComponent">Тип искомого компонента.</typeparam>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.BaseComponent.GetComponent(System.Type)">
+            <summary>
+            Получить компонент указанного типа.
+            </summary>
+            <param name="componentType">Тип искомого компонента.</param>
+        </member>
+        <member name="T:Disciples.Engine.Common.Components.IComponent">
+            <summary>
+            Представляет базовый интерфейс для всех компонентов игровых объектов
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.IComponent.OnInitialize">
+            <summary>
+            Инициализация компонента
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.IComponent.OnUpdate(System.Int64)">
+            <summary>
+            Обновить состояние компонента
+            </summary>
+            <param name="tickCount">Количество милисекунд, которое прошло с предыдущего вызова</param>
+        </member>
+        <member name="M:Disciples.Engine.Common.Components.IComponent.Destroy">
+            <summary>
+            Очистить ресурсы, используемые компонентом
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Controllers.IAudioController">
+            <summary>
+            Контроллер музыки и звуков.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Controllers.IAudioController.PlayBackground(System.String)">
+            <summary>
+            Играть зацикленную фоновую музыку.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Controllers.IAudioController.PlaySound(System.String)">
+            <summary>
+            Проиграть звук.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Controllers.ISceneContainer">
+            <summary>
+            Контейнер объектов на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Controllers.ISceneContainer.SceneObjects">
+            <summary>
+            Список всех объектов на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Controllers.ISceneContainer.AddSceneObject(Disciples.Engine.Common.SceneObjects.ISceneObject)">
+            <summary>
+            Добавить объект на сцену.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Controllers.ISceneContainer.RemoveSceneObject(Disciples.Engine.Common.SceneObjects.ISceneObject)">
+            <summary>
+            Удалить объект со сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Controllers.ISceneContainer.UpdateContainer">
+            <summary>
+            Обновить список всех объектов на сцене.
+            </summary>
+            <remarks>
+            Используется, чтобы создавать/удалять объекты за один проход, а не каждый раз при вызове метода.
+            </remarks>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.GameColor">
+            <summary>
+            Цвет.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Black">
+            <summary>
+            Черный.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.White">
+            <summary>
+            Белый.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Red">
+            <summary>
+            Красный.
+            </summary>
+            <remarks>Используется для отображения количества нанесённого урона юниту.</remarks>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Yellow">
+            <summary>
+            Желтый.
+            </summary>
+            <remarks>Используется для отображения промаха.</remarks>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Blue">
+            <summary>
+            Синий.
+            </summary>
+            <remarks>Используется для отображения исцеления.</remarks>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Gray">
+            <summary>
+            Серый.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.GameColor.Green">
+            <summary>
+            Зелёный.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.KeyboardButton">
+            <summary>
+            Клавиша клавиатуры.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.W">
+            <summary>
+            Клавиша "W" (Ц).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.A">
+            <summary>
+            Клавиша "A" (Ф).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.S">
+            <summary>
+            Клавиша "S" (Ы).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.D">
+            <summary>
+            Клавиша "D" (В).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.R">
+            <summary>
+            Клавиша "R" (К).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.I">
+            <summary>
+            Клавиша "I" (Ш).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.P">
+            <summary>
+            Клавиша "P" (З).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.KeyboardButton.Tab">
+            <summary>
+            Клавиша "Tab".
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.SceneButtonState">
+            <summary>
+            Состояние кнопки на сцене.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.SceneButtonState.Active">
+            <summary>
+            Активна.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.SceneButtonState.Disabled">
+            <summary>
+            Невозможно выбрать.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.SceneButtonState.Selected">
+            <summary>
+            Курсор располагается над кнопкой.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.SceneButtonState.Pressed">
+            <summary>
+            Кнопка нажата.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.TextAlignment">
+            <summary>
+            Выравнивание текста.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.TextAlignment.Left">
+            <summary>
+            По левому краю.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.TextAlignment.Right">
+            <summary>
+            По правому краю.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.TextAlignment.Center">
+            <summary>
+            По центру.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.AttackClass">
+            <summary>
+            Тип того, что делает атака юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Damage">
+            <summary>
+            Повреждение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Drain">
+            <summary>
+            Истощение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Paralyze">
+            <summary>
+            Паралич.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Heal">
+            <summary>
+            Исцеление.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Fear">
+            <summary>
+            Страх.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.BoostDamage">
+            <summary>
+            Увеличение урона.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Petrify">
+            <summary>
+            Окаменение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.LowerDamage">
+            <summary>
+            Снижение повреждения.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.LowerInitiative">
+            <summary>
+            Снижение инициативы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Poison">
+            <summary>
+            Отравление.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Frostbite">
+            <summary>
+            Обморожение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Revive">
+            <summary>
+            Воскрешение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.DrainOverflow">
+            <summary>
+            Выпить жизненную силу.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Cure">
+            <summary>
+            Снятие негативных эффектов.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Summon">
+            <summary>
+            Призыв.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.DrainLevel">
+            <summary>
+            Понизить уровень.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.GiveAttack">
+            <summary>
+            todo Передать атаку?
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Doppelganger">
+            <summary>
+            Передать жизненную силу.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.TransformSelf">
+            <summary>
+            Превратить себя.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.TransformOther">
+            <summary>
+            Превратить другого.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Blister">
+            <summary>
+            Ожог.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.BestowWards">
+            <summary>
+            Даровать защиту от стихий.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackClass.Shatter">
+            <summary>
+            Разбить броню.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.AttackSource">
+            <summary>
+            Источник атаки юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Weapon">
+            <summary>
+            Оружие.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Mind">
+            <summary>
+            Разум.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Life">
+            <summary>
+            Жизнь.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Death">
+            <summary>
+            Смерть.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Fire">
+            <summary>
+            Огонь.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Water">
+            <summary>
+            Вода.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Earth">
+            <summary>
+            Земля.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.AttackSource.Air">
+            <summary>
+            Воздух.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.Race">
+            <summary>
+            Расы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Human">
+            <summary>
+            Защитники Империи.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Undead">
+            <summary>
+            Орды Нежити.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Heretic">
+            <summary>
+            Легионы Проклятых.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Dwarf">
+            <summary>
+            Горные Кланы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Neutral">
+            <summary>
+            Нейтралы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Race.Elf">
+            <summary>
+            Эльфийский Союз.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.Reach">
+            <summary>
+            Юниты, которые являются целями.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Reach.All">
+            <summary>
+            Все юниты.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Reach.Any">
+            <summary>
+            Любой юнит.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Reach.Adjacent">
+            <summary>
+            Ближайший.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.Subrace">
+            <summary>
+            Подрасы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Custom">
+            <summary>
+            Общая.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Human">
+            <summary>
+            Защитники Империи.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Undead">
+            <summary>
+            Орды Нежити.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Heretic">
+            <summary>
+            Легионы проклятых.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Dwarf">
+            <summary>
+            Горные Кланы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Neutral">
+            <summary>
+            Нейтралы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralHuman">
+            <summary>
+            Нейтральные люди.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralElf">
+            <summary>
+            Нейтральные эльфы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralGreenSkin">
+            <summary>
+            Нейтральные зеленокожие (орки).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralDragon">
+            <summary>
+            Нейтральные драконы.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralMarsh">
+            <summary>
+            Нейтральные болотные жители.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralWater">
+            <summary>
+            Нейтральные водяные жители.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralBarbarian">
+            <summary>
+            Нейтральные варвары.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.NeutralWolf">
+            <summary>
+            Нейтральные волки.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.Subrace.Elf">
+            <summary>
+            Эльфийский Союз.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.UnitBranch">
+            <summary>
+            Ветка юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Fighter">
+            <summary>
+            Боец ближнего боя.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Archer">
+            <summary>
+            Стрелок.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Mage">
+            <summary>
+            Маг.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Special">
+            <summary>
+            Специальный юнит.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Sideshow">
+            <summary>
+            todo
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Hero">
+            <summary>
+            Герой.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Noble">
+            <summary>
+            Благородный.
+            todo Уточнить, что это значит.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitBranch.Summon">
+            <summary>
+            Вызванный юнит.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Enums.Units.UnitCategory">
+            <summary>
+            Категория юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Soldier">
+            <summary>
+            Солдат.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Noble">
+            <summary>
+            Благородный.
+            todo Уточнить, что это значит.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Leader">
+            <summary>
+            Лидер.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Summon">
+            <summary>
+            Вызванный юнит.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Illusion">
+            <summary>
+            Иллюзия.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.NeutralLeader">
+            <summary>
+            Нейтральный лидер.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.NeutralSoldier">
+            <summary>
+            Нейтральный солдат.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Enums.Units.UnitCategory.Guardian">
+            <summary>
+            Защитник.
+            todo столицы?
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Exceptions.ComponentNotFoundException">
+            <summary>
+            Исключение о том, что компонент игрового объекта не найден.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Exceptions.ComponentNotFoundException.#ctor(System.Type)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.AnimationObject">
+            <summary>
+            Игровой объект анимации.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.AnimationObject.#ctor(Disciples.Engine.Base.ISceneController,System.Collections.Generic.IReadOnlyList{Disciples.Engine.Common.Models.Frame},System.Double,System.Double,System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.AnimationObject.AnimationComponent">
+            <summary>
+            Компонент анимации.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.AnimationObject.Repeat">
+            <summary>
+            Зациклена ли анимация.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.AnimationObject.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.AnimationObject.OnUpdate(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.ButtonObject">
+            <summary>
+            Класс для кнопки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.#ctor(Disciples.Engine.Base.ISceneController,System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.ButtonObject.ButtonState">
+            <summary>
+            Состояние кнопки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.ButtonObject.Hotkey">
+            <summary>
+            Горячая клавиша для кнопки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.ButtonObject.Layer">
+            <summary>
+            Слой на котором располагается кнопка.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.ButtonObject.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.Activate">
+            <summary>
+            Сделать кнопку доступной для нажатия.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.Disable">
+            <summary>
+            Запретить нажатия на кнопку.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnSelected">
+            <summary>
+            Обработка события наведения курсора на кнопку.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnUnselected">
+            <summary>
+            Обработка события перемещения курсора с кнопки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnPressed">
+            <summary>
+            Обработка события нажатия на кнопку.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnReleased">
+            <summary>
+            Обработка события клика на кнопку (мышь отпустили).
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.UpdateButtonVisualObject">
+            <summary>
+            Обновить внешний вид кнопки на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ButtonObject.OnButtonClicked">
+            <summary>
+            Обработать событие нажатия на кнопку.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject">
+            <summary>
+            Объект, который выводит на сцену детальную информацию о юните.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.INTERFACE_LAYER">
+            <summary>
+            Слой, на котором располагается информация о юните.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.ROW_HEIGHT">
+            <summary>
+            Высота строк.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.UNIT_BASE_INFO_ID">
+            <summary>
+            Идентификатор в ресурсах с текстом основной информации о юните.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.UNIT_ATTACK_INFO_FIRST_PART_ID">
+            <summary>
+            Идентификатор в ресурсах с первой частью текста информации об атаке юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.UNIT_ATTACK_INFO_SECOND_PART_ID">
+            <summary>
+            Идентификатор в ресурсах со второй частью текста информации об атаке юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.#ctor(Disciples.Engine.Base.ISceneController,Disciples.Engine.Battle.Providers.IBattleInterfaceProvider,Disciples.Engine.Common.Providers.ITextProvider,Disciples.Engine.Common.Models.Unit)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.Unit">
+            <summary>
+            Юнит, о котором выводится информация.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetUnitBaseInfo(System.String,System.Int32,System.Int32@)">
+            <summary>
+            Получить информацию о юните в виде объектов на сцене.
+            </summary>
+            <param name="textId">Идентификатор текста-паттерна в ресурсах.</param>
+            <param name="verticalOffset">Расстояние по вертикали, с которого необходимо размещать текст.</param>
+            <param name="endVerticalOffset">Расстояние до строки, где можно размещать текст ниже.</param>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetValueWithModifier(System.Int32,System.Int32)">
+            <summary>
+            Получить строковое значение характеристики и её модификатора.
+            </summary>
+            <param name="value">Значение характеристики.</param>
+            <param name="modifier">Модификатор характеристики.</param>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetUnitEffectTitle">
+            <summary>
+            Получить наименование класса атаки юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetAttackSourceTitle(Disciples.Engine.Common.Enums.Units.AttackSource)">
+            <summary>
+            Получить наименование источники атаки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetReachTitle">
+            <summary>
+            Получить наименование, каких юнитов относительного своего расположения можно атаковать.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.GetReachCount">
+            <summary>
+            Получить количество целей для атаки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.DetailUnitInfoObject.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.GameObject">
+            <summary>
+            Объект, который располагается на сцене.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.#ctor(System.Double,System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.#ctor(System.ValueTuple{System.Double,System.Double})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.X">
+            <summary>
+            Положение объекта на сцене, координата X.
+            </summary>
+            <remarks>Отсчёт идёт справа налево.</remarks>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.Y">
+            <summary>
+            Положение объекта на сцене, координата Y.
+            </summary>
+            <remarks>Отсчёт идет сверху вниз.</remarks>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.Width">
+            <summary>
+            Ширина объекта на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.Height">
+            <summary>
+            Высота объекта на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.IsInteractive">
+            <summary>
+            Возможно ли наведение/выбор объекта курсором.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.Components">
+            <summary>
+            Компоненты из которых состоит объект.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.IsInitialized">
+            <summary>
+            Был ли объект инициализирован.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.GameObject.IsDestroyed">
+            <summary>
+            Был ли объект удалён со сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.OnInitialize">
+            <summary>
+            Обработать событие инициализации игрового объекта.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.OnUpdate(System.Int64)">
+            <summary>
+            Обработать событие обновление объекта.
+            </summary>
+            <param name="ticksCount">Количество тиков, которое прошло со времени предыдущего обновления.</param>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.GameObject.Destroy">
+            <summary>
+            Уничтожить объект.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.ToggleButtonObject">
+            <summary>
+            Класс для "залипающей кнопки". То есть кнопка остаётся нажатой до тех пор, пока на неё не кликнут еще раз.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.#ctor(Disciples.Engine.Base.ISceneController,System.Collections.Generic.IDictionary{Disciples.Engine.Common.Enums.SceneButtonState,Disciples.Engine.IBitmap},System.Action,System.Double,System.Double,System.Int32,System.Nullable{Disciples.Engine.Common.Enums.KeyboardButton})">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.Disable">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.OnSelected">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.OnUnselected">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.OnReleased">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.OnButtonClicked">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.ToggleButtonObject.SetState(System.Boolean)">
+            <summary>
+            Установить новое состояние кнопки.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.GameObjects.UnitPortraitObject">
+            <summary>
+            Потрет юнита с его состоянием.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject.INTERFACE_LAYER">
+            <summary>
+            Слой для расположения интерфейса.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject.MISS_TEXT_ID">
+            <summary>
+            Идентификатор в ресурсах с текстом "Промах".
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject.DEFEND_TEXT_ID">
+            <summary>
+            Идентификатор в ресурсах с текстом "Защита".
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject.WAIT_TEXT_ID">
+            <summary>
+            Идентификатор в ресурсах с текстом "Ждать".
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._unitPortrait">
+            <summary>
+            Картинка с портретом юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._unitDamageForeground">
+            <summary>
+            Изображение, отображающий полученный юнитом урон (красный прямоугольник поверх портрета).
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._deathIcon">
+            <summary>
+            Иконка умершего юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._instantaneousEffectImage">
+            <summary>
+            Изображение, отображающий моментальный эффект.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._instantaneousEffectText">
+            <summary>
+            Изображение с текстом моментального эффекта.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._unitHitpoints">
+            <summary>
+            Текст, отображающий текущее количество здоровья и максимальное.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._unitPanelSeparator">
+            <summary>
+            Картинка-разделитель на панели для больших существ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._battleEffectsIcons">
+            <summary>
+            Иконки эффектов, которые воздействуют на юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._battleEffectsForegrounds">
+            <summary>
+            Передний фон эффектов, которые воздействуют на юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.GameObjects.UnitPortraitObject._lastUnitHitPoints">
+            <summary>
+            Количество ОЗ, которое было при предыдущей проверке.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.#ctor(Disciples.Engine.Common.Providers.ITextProvider,Disciples.Engine.Base.ISceneController,Disciples.Engine.Battle.Providers.IBattleActionProvider,Disciples.Engine.Battle.Providers.IBattleInterfaceProvider,Disciples.Engine.Common.Models.Unit,System.Boolean,System.Double,System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.UnitPortraitObject.IsInteractive">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.GameObjects.UnitPortraitObject.Unit">
+            <summary>
+            Юнит.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.OnInitialize">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.OnUpdate(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.Destroy">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.OnBattleActionBegin(System.Object,Disciples.Engine.Battle.Models.BattleActionEventArgs)">
+            <summary>
+            События начала действия.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.OnBattleActionEnd(System.Object,Disciples.Engine.Battle.Models.BattleActionEventArgs)">
+            <summary>
+            Событие завершения действия.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.UpdateUnitEffects">
+            <summary>
+            Обновить состояние юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.ProcessBattleEffects">
+            <summary>
+            Обработать эффекты битвы - добавить новые и удалить старые.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.AddColorImage(Disciples.Engine.Common.Enums.GameColor,System.Boolean)">
+            <summary>
+            Добавить на портрет изображение указанного цвета.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.AddText(System.String)">
+            <summary>
+            Добавить на портрет указанный текст.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.GameObjects.UnitPortraitObject.RemoveSceneObject``1(``0@)">
+            <summary>
+            Удалить визуальный объект со сцены и очистить ссылку.
+            </summary>
+            <typeparam name="T">Тип объекта.</typeparam>
+            <param name="sceneObject">Объект, который необходимо удалить.</param>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.Attack">
+            <summary>
+            Информация об атаке юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.Attack.#ctor(System.String,System.String,System.String,System.Int32,Disciples.Engine.Common.Enums.Units.AttackSource,Disciples.Engine.Common.Enums.Units.AttackClass,System.Int32,Disciples.Engine.Common.Enums.Units.Reach,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.AttackId">
+            <summary>
+            Идентификатор атаки
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.Name">
+            <summary>
+            Имя
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.Description">
+            <summary>
+            Описание
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.Initiative">
+            <summary>
+            Инициатива
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.AttackSource">
+            <summary>
+            Тип атаки
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.AttackClass">
+            <summary>
+            Класс атаки
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.Accuracy">
+            <summary>
+            Точность
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.Reach">
+            <summary>
+            Достижимость целей для атаки
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.HealPower">
+            <summary>
+            Сила исцеления
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Attack.DamagePower">
+            <summary>
+            Наносимый урон
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.Frame">
+            <summary>
+            Информация об изображении.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.Frame.#ctor(System.Double,System.Double,System.Double,System.Double,Disciples.Engine.IBitmap)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Frame.Width">
+            <summary>
+            Ширина изображения.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Frame.Height">
+            <summary>
+            Высота изображения.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Frame.OffsetX">
+            <summary>
+            Дополнительное смещение по оси X (вправо).
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Frame.OffsetY">
+            <summary>
+            Дополнительно смещение по оси Y (вниз).
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Frame.Bitmap">
+            <summary>
+            Изображение.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.Player">
+            <summary>
+            Игрок.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.Player.#ctor(System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Player.Id">
+            <summary>
+            Уникальный идентификатор игрока.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Player.IsAI">
+            <summary>
+            Управляется ли игрок компьютером (ИИ).
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.Squad">
+            <summary>
+            Отряд юнитов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.Squad.#ctor(Disciples.Engine.Common.Models.Unit[])">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Squad.Units">
+            <summary>
+            Юниты в отряде.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.Unit">
+            <summary>
+            Информация о конкретном юните.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.Unit.#ctor(System.String,Disciples.Engine.Common.Models.UnitType,Disciples.Engine.Common.Models.Player,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Id">
+            <summary>
+            Уникальный идентификатор юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.UnitType">
+            <summary>
+            Тип юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Player">
+            <summary>
+            Игрок, который управляет юнитом.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.SquadLinePosition">
+            <summary>
+            На какой линии располагается юнит в отряде.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.SquadFlankPosition">
+            <summary>
+            На какой позиции находится юнит в отряде.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Name">
+            <summary>
+            Имя юнита.
+            todo Герои могут иметь собственные имена.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Level">
+            <summary>
+            Уровень юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Experience">
+            <summary>
+            Накопленный за уровень опыт.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.HitPoints">
+            <summary>
+            Количество оставшихся очков здоровья.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.MaxHitPoints">
+            <summary>
+            Максимальное количество очков здоровья.
+            todo Рассчитывать, зависит от уровня и эффектов типа эликсира.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.BaseArmor">
+            <summary>
+            Базовая броня юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.ArmorModifier">
+            <summary>
+            Модификатор брони.
+            todo Рассчитывать, зависит от эффектов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Armor">
+            <summary>
+            Текущая броня юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.BaseFirstAttackPower">
+            <summary>
+            Базовое значение силы первой атаки.
+            todo Рассчитывать, зависит от уровня.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.FirstAttackPowerModifier">
+            <summary>
+            Модификатор значения силы первой атаки.
+            todo Рассчитывать, зависит от эффектов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.FirstAttackPower">
+            <summary>
+            Текущее значение силы первой атаки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.SecondAttackPower">
+            <summary>
+            Базовое значение силы второй атаки.
+            todo Рассчитывать, зависит от уровня.
+            </summary>
+            <remarks>
+            На вторую атаку модификаторы не распространяются.
+            </remarks>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.BaseFirstAttackAccuracy">
+            <summary>
+            Базовое значение точности первой атаки.
+            todo Рассчитывать, зависит от уровня.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.FirstAttackAccuracyModifier">
+            <summary>
+            Модификатор точности первой атаки.
+            todo Рассчитывать, зависит эффектов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.FirstAttackAccuracy">
+            <summary>
+            Текущее значение точность первой атаки.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.SecondAttackAccuracy">
+            <summary>
+            Значение точности второй атаки.
+            todo Рассчитывать, зависит от уровня.
+            </summary>
+            <remarks>
+            На вторую атаку модификаторы не распространяются.
+            </remarks>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.BaseInitiative">
+            <summary>
+            Базовая инициатива.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.InitiativeModifier">
+            <summary>
+            Модификатор инициативы.
+            todo Рассчитывать, зависит от эффектов.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Initiative">
+            <summary>
+            Текущее значение инициативы.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.IsDead">
+            <summary>
+            Мёртв ли юнит.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.Unit.Effects">
+            <summary>
+            Эффекты, воздействующие на юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.UnitEffects">
+            <summary>
+            Эффекты, которые действуют на юнита.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Models.UnitEffects._globalEffects">
+            <summary>
+            Эффекты, которые наложены и действуют на глобальной карте.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Common.Models.UnitEffects._battleEffects">
+            <summary>
+            Эффекты, которые наложены и действуют во время схватки.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitEffects.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitEffects.AddBattleEffect(Disciples.Engine.Battle.Models.UnitBattleEffect)">
+            <summary>
+            Добавить эффект в схватке.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitEffects.ExistsBattleEffect(Disciples.Engine.Battle.Enums.UnitBattleEffectType)">
+            <summary>
+            Проверить, что на юнита наложен эффект указанного типа.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitEffects.GetBattleEffects">
+            <summary>
+            Получить эффекты, воздействующие на юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitEffects.OnUnitTurn">
+            <summary>
+            Уменьшить длительность всех эффектов в схватке на единицу.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Models.UnitType">
+            <summary>
+            Информация о типе юнита.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Models.UnitType.#ctor(System.String,Disciples.Engine.Common.Enums.Units.UnitCategory,System.Int32,Disciples.Engine.Common.Models.UnitType,System.String,Disciples.Engine.Common.Enums.Units.Subrace,Disciples.Engine.Common.Enums.Units.UnitBranch,System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.String,Disciples.Engine.Common.Models.Attack,Disciples.Engine.Common.Models.Attack,System.Boolean,System.Int32,Disciples.Engine.Common.Models.UnitType,System.Int32,System.Int32,System.String,System.String,System.String,System.Int32,System.String,System.Int32,System.Int32,System.Lazy{Disciples.Engine.IBitmap},System.Lazy{Disciples.Engine.IBitmap},System.Lazy{Disciples.Engine.IBitmap})">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.UnitTypeId">
+            <summary>
+            Идентификатор типа юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.UnitCategory">
+            <summary>
+            Категория юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Level">
+            <summary>
+            Базовый уровень юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.PrevUnitType">
+            <summary>
+            Предыдущий тип юнита в иерархии.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Race">
+            <summary>
+            todo Раса юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Subrace">
+            <summary>
+            Подраса юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Branch">
+            <summary>
+            Ветвь юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.SizeSmall">
+            <summary>
+            Занимает ли юнит одну клетку. Занимает две клетки, если false.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.IsMale">
+            <summary>
+            Является ли юнит мужчиной.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.EnrollCost">
+            <summary>
+            todo Определяет стоимость найма юнита в столице.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.EnrollBuilding">
+            <summary>
+            todo Определяет здание, позволяющее нанимать юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Name">
+            <summary>
+            Имя типа юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Description">
+            <summary>
+            Описание тип юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Abil">
+            <summary>
+            todo
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.FirstAttack">
+            <summary>
+            Основная атака.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.SecondAttack">
+            <summary>
+            Дополнительная атака.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.AttackTwice">
+            <summary>
+            Атакует ли юнит дважды.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.HitPoints">
+            <summary>
+            Количество жизней.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.BaseUnit">
+            <summary>
+            Базовый юнит для юнита-героя.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Armor">
+            <summary>
+            Базовая защита юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Regen">
+            <summary>
+            Базовое восстановления % жизней за ход.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.ReviveCost">
+            <summary>
+            todo Стоимость возрождения юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.HealCost">
+            <summary>
+            todo Стоимость восстановления здоровья.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.TrainingCost">
+            <summary>
+            todo Стоимость обучения юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.XpKilled">
+            <summary>
+            Количество опыта за убийство юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.UpgradeBuilding">
+            <summary>
+            Здание, которое позволяет тренировать данный тип юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.XpNext">
+            <summary>
+            Количество опыта, необходимо для получения следующего уровня.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.DeathAnimationId">
+            <summary>
+            Анимация, которая отображается при смерти юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Face">
+            <summary>
+            Картинка лица юнита.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.BattleFace">
+            <summary>
+            Скруглённая картинка лица юнита, используется в битвах.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.Models.UnitType.Portrait">
+            <summary>
+            Большой портрет юнита.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Providers.IInterfaceProvider">
+            <summary>
+            Базовый поставщик ресурсов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Providers.IInterfaceProvider.GetImage(System.String)">
+            <summary>
+            Получить изображение по имени.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Providers.IInterfaceProvider.GetImageParts(System.String)">
+            <summary>
+            Получить части из которых состоит изображение.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Providers.IInterfaceProvider.GetColorBitmap(Disciples.Engine.Common.Enums.GameColor)">
+            <summary>
+            Получить изображение указанного цвета.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Providers.ITextProvider">
+            <summary>
+            Поставщик текста.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Providers.ITextProvider.GetText(System.String)">
+            <summary>
+            Получить текст по идентификатору.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.Providers.IUnitInfoProvider">
+            <summary>
+            Поставщик информации о типах юнитов.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.Providers.IUnitInfoProvider.GetUnitType(System.String)">
+            <summary>
+            Получить информацию о типе юнита по идентификатору.
+            </summary>
+            <param name="unitTypeId">Идентификатор типа юнита.</param>
+        </member>
+        <member name="T:Disciples.Engine.Common.SceneObjects.IImageSceneObject">
+            <summary>
+            Изображение, которое отображается на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.IImageSceneObject.Bitmap">
+            <summary>
+            Изображение, отображаемое на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.IImageSceneObject.IsReflected">
+            <summary>
+            Необходимо ли развернуть изображение.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.SceneObjects.ISceneObject">
+            <summary>
+            Объект, который отрисовывается на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ISceneObject.X">
+            <summary>
+            Координата X объекта (справа - налево).
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ISceneObject.Y">
+            <summary>
+            Координата Y объекта (сверху - вниз).
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ISceneObject.Width">
+            <summary>
+            Ширина объекта.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ISceneObject.Height">
+            <summary>
+            Высота объекта.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ISceneObject.Layer">
+            <summary>
+            Слой на котором располагается объект на экране.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Common.SceneObjects.ISceneObject.Destroy">
+            <summary>
+            Очистить занимаемые объектом ресурсы.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Common.SceneObjects.ITextSceneObject">
+            <summary>
+            Игровой объект, который отображает текст на сцене.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ITextSceneObject.Text">
+            <summary>
+            Текст, который необходимо отобразить.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ITextSceneObject.FontSize">
+            <summary>
+            Размер шрифта.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ITextSceneObject.IsBold">
+            <summary>
+            Жирный ли шрифт.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ITextSceneObject.TextAlignment">
+            <summary>
+            Выравнивание текста по ширине.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Common.SceneObjects.ITextSceneObject.Foreground">
+            <summary>
+            Цвет текста.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Extensions.UnitExtensions">
+            <summary>
+            Набор методов для упрощения работы с юнитами.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Extensions.UnitExtensions.HasAllyAbility(Disciples.Engine.Common.Models.Unit)">
+            <summary>
+            Проверить, что атака юнита может быть направлена на союзников.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Extensions.UnitExtensions.HasEnemyAbility(Disciples.Engine.Common.Models.Unit)">
+            <summary>
+            Проверить, что атака юнита может быть направлена на врагов.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.GameInfo">
+            <summary>
+            Информация об игре.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GameInfo.OriginalWidth">
+            <summary>
+            Оригинальная ширина экрана.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GameInfo.OriginalHeight">
+            <summary>
+            Оригинальная высота экрана.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.GameInfo.Width">
+            <summary>
+            Текущая ширина экрана.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.GameInfo.Height">
+            <summary>
+            Текущая высота экрана.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.GameInfo.Scale">
+            <summary>
+            Масштаб экрана относительного базового разрешения.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.GlobalMap.Enums.Direction">
+            <summary>
+            Направление, куда направлен объект.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.Southwest">
+            <summary>
+            На юго-запад ↙.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.West">
+            <summary>
+            На запад ←.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.Northwest">
+            <summary>
+            На северо-запад ↖.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.North">
+            <summary>
+            На север ↑.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.Northeast">
+            <summary>
+            На северо-восток ↗.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.East">
+            <summary>
+            На восток →.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.Southeast">
+            <summary>
+            На юго-восток ↘.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.GlobalMap.Enums.Direction.South">
+            <summary>
+            На юг ↓.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.IBitmap">
+            <summary>
+            Изображение.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.IBitmap.Width">
+            <summary>
+            Ширина изображения.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.IBitmap.Height">
+            <summary>
+            Высота изображения.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.IBitmap.BitmapData">
+            <summary>
+            Внутренний объект, содержащий информацию об изображении.
+            </summary>
+            <remarks>Тип зависит от используемой платформы - Avalonia, WPF и т.д.</remarks>
+        </member>
+        <member name="T:Disciples.Engine.Loading.ILoadingSceneController">
+            <summary>
+            Сцена загрузки приложения.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Models.GameObjectActionEventArgs">
+            <summary>
+            Аргументы события действия над игровым объектом.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Models.GameObjectActionEventArgs.#ctor(Disciples.Engine.Models.GameObjectActionType,Disciples.Engine.Common.GameObjects.GameObject)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Models.GameObjectActionEventArgs.ActionType">
+            <summary>
+            Тип действия над игровым объектом.
+            </summary>
+        </member>
+        <member name="P:Disciples.Engine.Models.GameObjectActionEventArgs.GameObject">
+            <summary>
+            Игровой объект над которым было совершено действие.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Models.GameObjectActionType">
+            <summary>
+            Тип действия на игровым объектом.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.Selected">
+            <summary>
+            Объект был выбран.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.Unselected">
+            <summary>
+            С объекта было снято выделение.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.LeftButtonPressed">
+            <summary>
+            Была нажата ЛКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.LeftButtonReleased">
+            <summary>
+            Была отпущена ЛКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.RightButtonPressed">
+            <summary>
+            Была нажата ПКМ.
+            </summary>
+        </member>
+        <member name="F:Disciples.Engine.Models.GameObjectActionType.RightButtonReleased">
+            <summary>
+            Была отпущена ПКМ.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.Models.SceneUpdatingEventArgs">
+            <summary>
+            Аргументы событий, связанных с перерисовкой сцены.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.Models.SceneUpdatingEventArgs.#ctor(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="P:Disciples.Engine.Models.SceneUpdatingEventArgs.TicksCount">
+            <summary>
+            Количество тиков, которое прошло с момента предыдущего вызова.
+            </summary>
+        </member>
+        <member name="T:Disciples.Engine.RandomGenerator">
+            <summary>
+            Генератор случайных чисел.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.RandomGenerator.Next">
+            <summary>
+            Получить следующее случайное целое число.
+            </summary>
+        </member>
+        <member name="M:Disciples.Engine.RandomGenerator.Next(System.Int32)">
+            <summary>
+            Получить следующее случайное целое число, ограниченное сверху.
+            </summary>
+            <param name="max">Верхняя граница случайного числа.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Disciples.Engine.RandomGenerator.Next(System.Int32,System.Int32)">
+            <summary>
+            Получить следующее случайное целое число, ограниченное сверху и снизу.
+            </summary>
+            <param name="min">Нижняя граница случайного числа.</param>
+            <param name="max">Верхняя граница случайного числа.</param>
+        </member>
+    </members>
+</doc>

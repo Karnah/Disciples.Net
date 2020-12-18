@@ -1,7 +1,11 @@
 ﻿namespace Disciples.Engine.Common.Models
 {
+    /// <summary>
+    /// Игрок.
+    /// </summary>
     public class Player
     {
+        /// <inheritdoc />
         public Player(int id, bool isAi)
         {
             Id = id;
@@ -10,12 +14,12 @@
 
 
         /// <summary>
-        /// Уникальный идентификатор игрока
+        /// Уникальный идентификатор игрока.
         /// </summary>
         public int Id { get; }
 
         /// <summary>
-        /// Управляется ли игрок компьютером (ИИ)
+        /// Управляется ли игрок компьютером (ИИ).
         /// </summary>
         public bool IsAI { get; }
     }

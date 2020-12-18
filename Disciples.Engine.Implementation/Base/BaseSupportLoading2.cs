@@ -13,6 +13,11 @@ namespace Disciples.Engine.Implementation.Base
             Load(() => LoadInternal(data1, data2));
         }
 
-        protected abstract void LoadInternal(TData1 data1, TData2 data);
+        /// <summary>
+        /// Инициализировать объект.
+        /// </summary>
+        /// <param name="data1">Первый параметр для инициализации.</param>
+        /// <param name="data2">Второй параметр для инициализации.</param>
+        protected abstract void LoadInternal(TData1 data1, TData2 data2);
     }
 }

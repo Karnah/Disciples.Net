@@ -2,8 +2,12 @@
 
 namespace Disciples.Engine.Common.Models
 {
+    /// <summary>
+    /// Информация об атаке юнита.
+    /// </summary>
     public class Attack
     {
+        /// <inheritdoc />
         public Attack(
             string attackId,
             string name,
