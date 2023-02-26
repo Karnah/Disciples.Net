@@ -9,9 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.9.2" />
-    <PackageReference Include="NDbfReader" Version="2.3.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="12.3.0" />
+    <PackageReference Include="NDbfReader" Version="2.4.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

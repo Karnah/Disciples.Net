@@ -3,7 +3,7 @@
 using Disciples.Engine;
 using Disciples.Engine.Common.SceneObjects;
 
-namespace Disciples.Avalonia.SceneObjects.SceneObjects
+namespace Disciples.Avalonia.SceneObjects
 {
     /// <inheritdoc cref="IImageSceneObject" />
     public class ImageSceneObject : BaseSceneObject, IImageSceneObject
@@ -17,13 +17,15 @@ namespace Disciples.Avalonia.SceneObjects.SceneObjects
 
 
         /// <inheritdoc />
-        public IBitmap Bitmap {
+        public IBitmap Bitmap
+        {
             get => _bitmap;
             set => this.RaiseAndSetIfChanged(ref _bitmap, value);
         }
 
         /// <inheritdoc />
-        public bool IsReflected {
+        public bool IsReflected
+        {
             get => _isReflected;
             set => this.RaiseAndSetIfChanged(ref _isReflected, value);
         }

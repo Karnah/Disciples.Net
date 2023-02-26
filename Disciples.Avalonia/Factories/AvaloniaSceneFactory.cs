@@ -1,5 +1,5 @@
 ﻿using Disciples.Avalonia.Controllers;
-using Disciples.Avalonia.SceneObjects.SceneObjects;
+using Disciples.Avalonia.SceneObjects;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;

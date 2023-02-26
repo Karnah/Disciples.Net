@@ -1,7 +1,7 @@
 ﻿using ReactiveUI;
 using Disciples.Engine.Common.SceneObjects;
 
-namespace Disciples.Avalonia.SceneObjects.SceneObjects
+namespace Disciples.Avalonia.SceneObjects
 {
     /// <inheritdoc cref="ISceneObject" />
     public abstract class BaseSceneObject : ReactiveObject, ISceneObject
@@ -19,25 +19,29 @@ namespace Disciples.Avalonia.SceneObjects.SceneObjects
 
 
         /// <inheritdoc />
-        public double X {
+        public double X
+        {
             get => _x;
             set => this.RaiseAndSetIfChanged(ref _x, value);
         }
 
         /// <inheritdoc />
-        public double Y {
+        public double Y
+        {
             get => _y;
             set => this.RaiseAndSetIfChanged(ref _y, value);
         }
 
         /// <inheritdoc />
-        public double Width {
+        public double Width
+        {
             get => _width;
             set => this.RaiseAndSetIfChanged(ref _width, value);
         }
 
         /// <inheritdoc />
-        public double Height {
+        public double Height
+        {
             get => _height;
             set => this.RaiseAndSetIfChanged(ref _height, value);
         }

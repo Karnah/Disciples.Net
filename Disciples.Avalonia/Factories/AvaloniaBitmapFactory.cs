@@ -59,8 +59,9 @@ namespace Disciples.Avalonia.Factories
 
             var width = bounds.MaxColumn - bounds.MinColumn;
             var height = bounds.MaxRow - bounds.MinRow;
+            var dpi = new Vector(96, 96); 
 
-            var bitmap = new WriteableBitmap(new PixelSize(width, height), new Vector(), PixelFormat.Bgra8888);
+            var bitmap = new WriteableBitmap(new PixelSize(width, height), dpi, PixelFormat.Bgra8888, AlphaFormat.Unpremul);
             using (var l = bitmap.Lock()) {
                 // Размер строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
                 var stride = width << 2;

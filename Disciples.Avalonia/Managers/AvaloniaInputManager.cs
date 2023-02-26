@@ -25,7 +25,7 @@ namespace Disciples.Avalonia.Managers
         /// </summary>
         public AvaloniaInputManager()
         {
-            Application.Current.InputManager.PostProcess.OfType<RawMouseEventArgs>().Subscribe(OnMouseStateChanged);
+            Application.Current.InputManager.PostProcess.OfType<RawPointerEventArgs>().Subscribe(OnMouseStateChanged);
             Application.Current.InputManager.PostProcess.OfType<RawKeyEventArgs>().Subscribe(OnKeyStateChanged);
         }
 
@@ -44,11 +44,11 @@ namespace Disciples.Avalonia.Managers
         /// <summary>
         /// Обработать событие от курсора.
         /// </summary>
-        private void OnMouseStateChanged(RawMouseEventArgs args)
+        private void OnMouseStateChanged(RawPointerEventArgs args)
         {
             switch (args.Type)
             {
-                case RawMouseEventType.Move:
+                case RawPointerEventType.Move:
                     // Один раз рассчитываем смещение игрового поля относительно левого края экрана.
                     // Предполагаем, что поле выровнено по центру экрана.
                     if (_screenOffset == null)
@@ -63,19 +63,19 @@ namespace Disciples.Avalonia.Managers
 
                     break;
 
-                case RawMouseEventType.LeftButtonDown:
+                case RawPointerEventType.LeftButtonDown:
                     MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left, ButtonState.Pressed));
                     break;
 
-                case RawMouseEventType.LeftButtonUp:
+                case RawPointerEventType.LeftButtonUp:
                     MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left, ButtonState.Released));
                     break;
 
-                case RawMouseEventType.RightButtonDown:
+                case RawPointerEventType.RightButtonDown:
                     MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Right, ButtonState.Pressed));
                     break;
 
-                case RawMouseEventType.RightButtonUp:
+                case RawPointerEventType.RightButtonUp:
                     MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Right, ButtonState.Released));
                     break;
             }
@@ -87,7 +87,7 @@ namespace Disciples.Avalonia.Managers
         private void OnKeyStateChanged(RawKeyEventArgs args)
         {
             // Если были какие-то модификаторы, то игнорируем.
-            if (args.Modifiers != InputModifiers.None)
+            if (args.Modifiers != RawInputModifiers.None)
                 return;
 
             var keyboardButton = ToKeyboardButton(args.Key);

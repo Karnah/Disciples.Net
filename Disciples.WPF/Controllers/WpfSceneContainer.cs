@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-
-using ReactiveUI.Legacy;
-
+using DynamicData;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -14,14 +13,14 @@ namespace Disciples.WPF.Controllers
     /// <inheritdoc />
     public class WpfSceneContainer : ISceneContainer
     {
-        private readonly ReactiveList<ISceneObject> _visuals;
+        private readonly ObservableCollection<ISceneObject> _visuals;
         private readonly IList<ISceneObject> _addVisualBuffer;
         private readonly IList<ISceneObject> _removeVisualBuffer;
 
         /// <inheritdoc />
         public WpfSceneContainer()
         {
-            _visuals = new ReactiveList<ISceneObject>();
+            _visuals = new ObservableCollection<ISceneObject>();
             _addVisualBuffer = new List<ISceneObject>();
             _removeVisualBuffer = new List<ISceneObject>();
         }
@@ -52,7 +51,7 @@ namespace Disciples.WPF.Controllers
         public void UpdateContainer()
         {
             if (_removeVisualBuffer.Any()) {
-                _visuals.RemoveAll(_removeVisualBuffer);
+                _visuals.RemoveMany(_removeVisualBuffer);
 
                 foreach (var visualObject in _removeVisualBuffer) {
                     visualObject.Destroy();

@@ -410,7 +410,7 @@ namespace Disciples.ResourceProvider
                 // Но такое чувство, что есть более четкая зависимость.
                 for (int i = 0; i < 256; ++i) {
                     unchecked {
-                        var color = magickImage.GetColormap(i);
+                        var color = magickImage.GetColormapColor(i);
                         var index = ((byte) color.B << 16) + ((byte) color.G << 8) + (byte) color.R;
 
                         colorMap[index] = (byte) i;
@@ -419,7 +419,7 @@ namespace Disciples.ResourceProvider
             }
 
             var pixels = magickImage.GetPixels().ToByteArray("BGRA");
-            var transparentColor = magickImage.GetColormap(0);
+            var transparentColor = magickImage.GetColormapColor(0);
             if (transparentColor == null) {
                 transparentColor = MagickColor.FromRgb(255, 0, 255);
             }

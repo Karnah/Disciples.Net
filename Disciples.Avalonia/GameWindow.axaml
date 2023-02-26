@@ -1,20 +1,26 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:Disciples.Avalonia;assembly=Disciples.Avalonia"
-        xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
-        xmlns:controls="clr-namespace:Disciples.Avalonia.Common.Controls"
-        xmlns:model="clr-namespace:Disciples.Engine.Common.Models;assembly=Disciples.Engine"
-        xmlns:vo="clr-namespace:Disciples.Engine.Common.SceneObjects;assembly=Disciples.Engine"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:Disciples.Avalonia.Converters"
         xmlns:e="clr-namespace:Disciples.Engine;assembly=Disciples.Engine"
-        Icon="resm:Disciples.Avalonia.Icon.ico"
-        WindowState="Maximized" Background="Black" HasSystemDecorations="False" CanResize="False"
+        xmlns:vo="clr-namespace:Disciples.Engine.Common.SceneObjects;assembly=Disciples.Engine"
+        xmlns:local="clr-namespace:Disciples.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Disciples.Avalonia.GameWindow"
+        WindowState="Maximized" Background="Black" SystemDecorations="None" CanResize="False"
         Title="Avalonia Disciples II">
+
+    <Design.DataContext>
+        <local:GameWindowViewModel />
+    </Design.DataContext>
 
     <Window.Resources>
         <c:BitmapToBrushConverter x:Key="BitmapToBrushConverter" />
         <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
         <c:GameColorToBrushConverter x:Key="GameColorToBrushConverter" />
         <c:TextAlignmentConverter x:Key="TextAlignmentConverter" />
+        <c:BoldFontConverter x:Key="BoldFontConverter" />
     </Window.Resources>
 
     <Window.Styles>
@@ -29,6 +35,12 @@
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
         <ItemsControl Items="{Binding SceneObjects}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
                     <Image Stretch="Fill"
@@ -49,12 +61,6 @@
                                Text="{Binding Text}" />
                 </DataTemplate>
             </ItemsControl.DataTemplates>
-
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
         </ItemsControl>
     </Grid>
 </Window>

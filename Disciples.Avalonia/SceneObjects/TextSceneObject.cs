@@ -3,7 +3,7 @@
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 
-namespace Disciples.Avalonia.SceneObjects.SceneObjects
+namespace Disciples.Avalonia.SceneObjects
 {
     /// <inheritdoc cref="ITextSceneObject" />
     public class TextSceneObject : BaseSceneObject, ITextSceneObject
@@ -36,7 +36,8 @@ namespace Disciples.Avalonia.SceneObjects.SceneObjects
 
 
         /// <inheritdoc />
-        public string Text {
+        public string Text
+        {
             get => _text;
             set => this.RaiseAndSetIfChanged(ref _text, value);
         }

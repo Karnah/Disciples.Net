@@ -14,7 +14,7 @@ namespace Disciples.Avalonia
     public class GameWindowViewModel : ReactiveObject
     {
         private readonly IGameController _gameController;
-        private IReadOnlyList<ISceneObject> _sceneObjects;
+        private IReadOnlyList<ISceneObject>? _sceneObjects;
 
         /// <inheritdoc />
         public GameWindowViewModel(IGameController gameController)
@@ -29,7 +29,7 @@ namespace Disciples.Avalonia
         /// <summary>
         /// Объекты, которые отображаются на сцене.
         /// </summary>
-        public IReadOnlyList<ISceneObject> SceneObjects {
+        public IReadOnlyList<ISceneObject>? SceneObjects {
             get => _sceneObjects;
             private set => this.RaiseAndSetIfChanged(ref _sceneObjects, value);
         }
@@ -38,7 +38,7 @@ namespace Disciples.Avalonia
         /// <summary>
         /// Обработать событие изменения сцены.
         /// </summary>
-        private void OnSceneChanged(object sender, EventArgs e)
+        private void OnSceneChanged(object? sender, EventArgs e)
         {
             SceneObjects = _gameController.CurrentSceneContainer?.SceneObjects;
         }

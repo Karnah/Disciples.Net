@@ -1,24 +1,22 @@
-п»їusing System;
+using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Disciples.Engine;
+using DryIoc;
 
 namespace Disciples.Avalonia
 {
-    /// <summary>
-    /// РћРєРЅРѕ РёРіСЂС‹.
-    /// </summary>
-    public class GameWindow : Window
+    public partial class GameWindow : Window
     {
-        public GameWindow(GameWindowViewModel viewModel)
+        public GameWindow()
         {
-            this.DataContext = viewModel;
+            DataContext = ((App)Application.Current!).Container.Resolve<GameWindowViewModel>();
 
             Activated += OnActivated;
 
             InitializeComponent();
+
 #if DEBUG
             this.AttachDevTools();
             Renderer.DrawFps = true;
@@ -26,13 +24,13 @@ namespace Disciples.Avalonia
         }
 
         /// <summary>
-        /// РћР±СЂР°Р±РѕС‚Р°С‚СЊ СЃРѕР±С‹С‚РёРµ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РѕРєРЅР°.
+        /// Обработать событие отображения окна.
         /// </summary>
-        private void OnActivated(object sender, EventArgs e)
+        private void OnActivated(object? sender, EventArgs e)
         {
             var screen = this.Screens.ScreenFromVisual(this);
 
-            // Р Р°СЃСЃС‡РёС‚С‹РІР°РµРј СЂРµР°Р»СЊРЅС‹Рµ СЂР°Р·РјРµСЂ СЌРєСЂР°РЅР° Рё РїСЂРѕРїРѕСЂС†РёРѕРЅР°Р»СЊРЅРѕ СЂР°СЃС‚СЏРіРёРІР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ.
+            // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
             var scale = Math.Min(screen.WorkingArea.Width / GameInfo.OriginalWidth, screen.WorkingArea.Height / GameInfo.OriginalHeight);
 
             var field = this.Find<Grid>("Field");
@@ -41,11 +39,6 @@ namespace Disciples.Avalonia
             GameInfo.Width = scale * GameInfo.OriginalWidth;
             GameInfo.Height = scale * GameInfo.OriginalHeight;
             GameInfo.Scale = scale;
-        }
-
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
         }
     }
 }

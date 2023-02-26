@@ -1,12 +1,15 @@
-п»їusing System;
 using System.Diagnostics;
-using System.Windows;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
+using DryIoc;
+using Disciples.Avalonia.Factories;
+using Disciples.Avalonia.Managers;
 using Disciples.Engine.Base;
 using Disciples.Engine.Battle;
 using Disciples.Engine.Battle.Controllers;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Battle;
@@ -17,66 +20,73 @@ using Disciples.Engine.Implementation.Loading;
 using Disciples.Engine.Loading;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
-using Disciples.WPF.Factories;
-using Disciples.WPF.Managers;
-using DryIoc;
+using Disciples.Engine.Common.Models;
+using System;
 
-namespace Disciples.WPF
+namespace Disciples.Avalonia
 {
     public partial class App : Application
     {
-        private static IContainer Container;
+        private GameController _gameController = null!;
 
-        private static GameController _gameController;
+        /// <summary>
+        /// IoC контейнер.
+        /// </summary>
+        public IContainer Container { get; private set; } = null!;
 
-        protected override void OnStartup(StartupEventArgs e)
+        /// <inheritdoc />
+        public override void Initialize()
         {
-            base.OnStartup(e);
+            Container = CreateContainer();
+            _gameController = Container.Resolve<GameController>();
 
-            try
-            {
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
-
-                Container = CreateContainer();
-                _gameController = Container.Resolve<GameController>();
-
-                var logger = Container.Resolve<ILogger>();
-
-                logger.Log("Create GameWindow");
-                var gw = Container.Resolve<GameWindow>();
-                gw.Closing += (sender, eventArgs) => { _gameController.Stop(); };
-
-                logger.Log("Battle begin");
-                logger.Log($"Loading time: {stopwatch.ElapsedMilliseconds / 1000.0} s.");
-
-                stopwatch.Stop();
-
-                Container.Resolve<ITextProvider>().Load();
-                Container.Resolve<IUnitInfoProvider>().Load();
-
-                _gameController.Start();
-
-                // РЎСЂР°Р·Сѓ РѕС‚РѕР±СЂР°Р¶Р°РµРј СЃС†РµРЅСѓ Р·Р°РіСЂСѓР·РєРё.
-                var loadingSceneController = Container.Resolve<ILoadingSceneController>();
-                _gameController.ChangeScene(loadingSceneController, (object)null);
-
-                // РЎР»РµРґСѓСЋС‰Р°СЏ СЃС†РµРЅР° Р±СѓРґРµС‚ СЃС†РµРЅР° Р±РёС‚РІС‹.
-                var battleSceneController = Container.Resolve<IBattleSceneController>();
-                _gameController.ChangeScene(battleSceneController, new BattleInitializeData(
-                    Container.Resolve<IBattleController>(),
-                    Container.Resolve<IBattleInterfaceController>(),
-                    CreateAttackingSquad(),
-                    CreateDefendingSquad()));
-
-                gw.ShowDialog();
-            }
-            catch (Exception exception) {
-                MessageBox.Show(exception.Message);
-                Shutdown();
-            }
+            AvaloniaXamlLoader.Load(this);
         }
 
+        /// <inheritdoc />
+        public override void OnFrameworkInitializationCompleted()
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var logger = Container.Resolve<ILogger>();
+
+            logger.Log("Create GameWindow");
+
+
+            var gameWindow = new GameWindow();
+            gameWindow.Closing += (sender, eventArgs) => { _gameController.Stop(); };
+
+            ((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!).MainWindow = gameWindow;
+            base.OnFrameworkInitializationCompleted();
+
+
+            logger.Log("Battle begin");
+            logger.Log($"Loading time: {stopwatch.ElapsedMilliseconds / 1000.0} s.");
+
+            stopwatch.Stop();
+
+            Container.Resolve<ITextProvider>().Load();
+            Container.Resolve<IUnitInfoProvider>().Load();
+
+            _gameController.Start();
+
+            // Сразу отображаем сцену загрузки.
+            var loadingSceneController = Container.Resolve<ILoadingSceneController>();
+            _gameController.ChangeScene(loadingSceneController, (object)null);
+
+            // Следующая сцена будет сцена битвы.
+            var battleSceneController = Container.Resolve<IBattleSceneController>();
+            _gameController.ChangeScene(battleSceneController, new BattleInitializeData(
+                Container.Resolve<IBattleController>(),
+                Container.Resolve<IBattleInterfaceController>(),
+                CreateAttackingSquad(Container),
+                CreateDefendingSquad(Container)));
+        }
+
+        /// <summary>
+        /// Зарегистрировать все зависимости.
+        /// </summary>
         private static IContainer CreateContainer()
         {
             var container = new Container();
@@ -84,15 +94,15 @@ namespace Disciples.WPF
             var logger = new Logger();
             container.RegisterInstance<ILogger>(logger);
 
-            // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј СѓСЃС‚СЂРѕР№СЃС‚РІР° РІРІРѕРґР°.
-            container.Register<IInputManager, WpfInputManager>(Reuse.Singleton);
+            // Регистрируем устройства ввода.
+            container.Register<IInputManager, AvaloniaInputManager>(Reuse.Singleton);
 
-            // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј С‚Р°Р№РјРµСЂ.
-            container.Register<IGameTimer, WpfGameTimer>(Reuse.Singleton);
+            // Регистрируем таймер.
+            container.Register<IGameTimer, AvaloniaGameTimer>(Reuse.Singleton);
 
-            // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј С„Р°Р±СЂРёРєРё.
-            container.Register<IBitmapFactory, WpfBitmapFactory>();
-            container.Register<ISceneFactory, WpfSceneFactory>();
+            // Регистрируем фабрики.
+            container.Register<IBitmapFactory, AvaloniaBitmapFactory>();
+            container.Register<ISceneFactory, AvaloniaSceneFactory>();
 
             container.RegisterMany<GameController>(Reuse.Singleton);
 
@@ -109,17 +119,18 @@ namespace Disciples.WPF
             container.Register<IBattleInterfaceController, BattleInterfaceController>(Reuse.Singleton);
             container.Register<IBattleSceneController, BattleSceneController>(Reuse.Singleton);
 
-            // Р РµРіРёСЃС‚СЂРёСЂСѓРµРј View Рё ViewModel.
-            container.Register<GameWindow>();
+            // Регистрация ViewModel.
             container.Register<GameWindowViewModel>();
 
             return container;
         }
 
-
-        public static Squad CreateAttackingSquad()
+        /// <summary>
+        /// Создать нападающий отряд.
+        /// </summary>
+        public static Squad CreateAttackingSquad(IContainer container)
         {
-            var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+            var unitInfoProvider = container.Resolve<IUnitInfoProvider>();
             var player = new Player(0, false);
 
 
@@ -143,12 +154,15 @@ namespace Disciples.WPF
             var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 0);
 
 
-            return new Squad(new[] { u02, u01, u00, u12, u11, u10 });
+            return new Squad(new []{ u02, u01, u00, u12, u11, u10});
         }
 
-        public static Squad CreateDefendingSquad()
+        /// <summary>
+        /// Создать защищающийся отряд.
+        /// </summary>
+        public static Squad CreateDefendingSquad(IContainer container)
         {
-            var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+            var unitInfoProvider = container.Resolve<IUnitInfoProvider>();
             var player = new Player(0, false);
 
 
@@ -169,7 +183,7 @@ namespace Disciples.WPF
             var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, player, 0, 0);
 
 
-            return new Squad(new[] { u12, u11, u10, u02, u01 });
+            return new Squad(new []{ u12, u11, u10, u02, u01});
         }
     }
 }
