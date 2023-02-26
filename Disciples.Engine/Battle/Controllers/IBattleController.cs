@@ -12,7 +12,7 @@ namespace Disciples.Engine.Battle.Controllers
     /// <summary>
     /// Класс для мониторинга и управлением состояния битвы.
     /// </summary>
-    public interface IBattleController : ISupportLoading<BattleSquadsData>
+    public interface IBattleController : ISupportLoadingWithParameters<BattleSquadsData>
     {
         /// <summary>
         /// Текущее состояние битвы.

@@ -46,7 +46,7 @@ namespace Disciples.Engine.Implementation.Battle.Providers
 
 
         /// <inheritdoc />
-        public override bool OneTimeLoading => false;
+        public override bool IsSharedBetweenScenes => false;
 
 
         /// <inheritdoc />

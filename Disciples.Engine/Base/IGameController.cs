@@ -60,10 +60,11 @@ namespace Disciples.Engine.Base
         /// Поменять сцену.
         /// </summary>
         /// <typeparam name="TSceneController">Тип контроллера новой сцены.</typeparam>
-        /// <typeparam name="TData">Тип параметров инициализации новой сцены.</typeparam>
+        /// <typeparam name="TSceneParameters">Тип параметров инициализации новой сцены.</typeparam>
         /// <param name="sceneController">Контроллер новой сцены.</param>
         /// <param name="data">Данные для инициализации новой сцены.</param>
-        void ChangeScene<TSceneController, TData>(TSceneController sceneController, TData data)
-            where TSceneController : ISceneController<TData>;
+        void ChangeScene<TSceneController, TSceneParameters>(TSceneController sceneController, TSceneParameters data)
+            where TSceneController : IScene<TSceneParameters>
+            where TSceneParameters : SceneParameters;
     }
 }

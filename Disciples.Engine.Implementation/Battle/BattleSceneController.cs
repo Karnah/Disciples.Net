@@ -14,7 +14,7 @@ using Disciples.Engine.Platform.Factories;
 namespace Disciples.Engine.Implementation.Battle
 {
     /// <inheritdoc cref="IBattleSceneController" />
-    public class BattleSceneController : BaseSceneController<BattleInitializeData>, IBattleSceneController
+    public class BattleSceneController : BaseSceneController<BattleSceneParameters>, IBattleSceneController
     {
         private readonly ITextProvider _textProvider;
         private readonly IUnitInfoProvider _unitInfoProvider;
@@ -47,13 +47,23 @@ namespace Disciples.Engine.Implementation.Battle
 
 
         /// <inheritdoc />
-        public override bool OneTimeLoading => false;
-
+        public override bool IsSharedBetweenScenes => false;
 
         /// <inheritdoc />
-        protected override void LoadInternal(ISceneContainer sceneContainer, BattleInitializeData data)
+        public override void InitializeParameters(ISceneContainer sceneContainer, BattleSceneParameters parameters)
         {
-            base.LoadInternal(sceneContainer, data);
+            base.InitializeParameters(sceneContainer, parameters);
+
+            _battleController = parameters.BattleController;
+            _battleController.InitializeParameters(new BattleSquadsData(parameters.AttackSquad, parameters.DefendSquad));
+
+            _battleInterfaceController = parameters.BattleInterfaceController;
+        }
+
+        /// <inheritdoc />
+        protected override void LoadInternal()
+        {
+            base.LoadInternal();
 
             _textProvider.Load();
             _unitInfoProvider.Load();
@@ -62,10 +72,7 @@ namespace Disciples.Engine.Implementation.Battle
             _battleInterfaceProvider.Load();
             _battleUnitResourceProvider.Load();
 
-            _battleController = data.BattleController;
-            _battleInterfaceController = data.BattleInterfaceController;
-
-            _battleController.Load(new BattleSquadsData(data.AttackSquad, data.DefendSquad));
+            _battleController.Load();
             _battleInterfaceController.Load();
         }
 
@@ -74,7 +81,7 @@ namespace Disciples.Engine.Implementation.Battle
         {
             base.UnloadInternal();
 
-            var components = new ISupportUnloading[] {
+            var components = new ISupportLoading[] {
                 _textProvider,
                 _unitInfoProvider,
                 _battleResourceProvider,
@@ -86,7 +93,7 @@ namespace Disciples.Engine.Implementation.Battle
 
             // Деинициализируем те компоненты, которые существует в рамках одной сцены.
             foreach (var component in components) {
-                if (component.OneTimeLoading)
+                if (component.IsSharedBetweenScenes)
                     continue;
 
                 component.Unload();

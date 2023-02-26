@@ -37,7 +37,7 @@ namespace Disciples.Engine.Implementation.Common.Providers
 
 
         /// <inheritdoc />
-        public override bool OneTimeLoading => true;
+        public override bool IsSharedBetweenScenes => true;
 
 
         /// <inheritdoc />

@@ -1,16 +1,21 @@
 ﻿using Disciples.Engine.Base;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Loading;
+using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Engine.Implementation.Loading
 {
     /// <inheritdoc cref="ILoadingSceneController" />
-    public class LoadingSceneController : BaseSceneController<object>, ILoadingSceneController
+    public class LoadingSceneController : BaseSceneController<SceneParameters>, ILoadingSceneController
     {
+        /// <summary>
+        /// Наименование картинки, которая содержит фон загрузки.
+        /// </summary>
+        private const string LOADING_IMAGE_NAME = "LOADING";
+
         private IImageSceneObject _loadingSceneObject;
 
         public LoadingSceneController(
@@ -22,11 +27,11 @@ namespace Disciples.Engine.Implementation.Loading
 
 
         /// <inheritdoc />
-        protected override void LoadInternal(ISceneContainer sceneContainer, object data)
+        protected override void LoadInternal()
         {
-            base.LoadInternal(sceneContainer, data);
+            base.LoadInternal();
 
-            var loadingImage = InterfaceProvider.GetImage("LOADING");
+            var loadingImage = InterfaceProvider.GetImage(LOADING_IMAGE_NAME);
             _loadingSceneObject = AddImage(loadingImage, 0, 0, 0);
         }
 

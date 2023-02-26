@@ -1,15 +1,16 @@
 ﻿using Disciples.Engine.Battle.Controllers;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Battle.Models
 {
     /// <summary>
     /// Параметры, необходимые для инициализации сцены боя.
     /// </summary>
-    public class BattleInitializeData
+    public class BattleSceneParameters : SceneParameters
     {
         /// <inheritdoc />
-        public BattleInitializeData(
+        public BattleSceneParameters(
             IBattleController battleController,
             IBattleInterfaceController battleInterfaceController,
             Squad attackSquad,

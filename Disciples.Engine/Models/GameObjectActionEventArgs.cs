@@ -1,13 +1,16 @@
-﻿using Disciples.Engine.Common.GameObjects;
+﻿using System;
+using Disciples.Engine.Common.GameObjects;
 
 namespace Disciples.Engine.Models
 {
     /// <summary>
     /// Аргументы события действия над игровым объектом.
     /// </summary>
-    public class GameObjectActionEventArgs
+    public class GameObjectActionEventArgs : EventArgs
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Создать объект типа <see cref="GameObjectActionEventArgs" />.
+        /// </summary>
         public GameObjectActionEventArgs(GameObjectActionType actionType, GameObject gameObject)
         {
             ActionType = actionType;

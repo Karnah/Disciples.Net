@@ -19,7 +19,7 @@ using Disciples.Engine.Models;
 namespace Disciples.Engine.Implementation.Battle.Controllers
 {
     /// <inheritdoc cref="IBattleController" />
-    public class BattleController : BaseSupportLoading<BattleSquadsData>, IBattleController
+    public class BattleController : BaseSupportLoading, IBattleController
     {
         /// <summary>
         /// Разброс инициативы при вычислении очередности.
@@ -41,6 +41,9 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
 
         private readonly IGameController _gameController;
         private readonly IBattleSceneController _battleSceneController;
+
+        private Squad _attackSquad;
+        private Squad _defendSquad;
 
         private List<BattleUnit> _units;
         private List<AnimationObject> _targetAnimations;
@@ -67,13 +70,20 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
 
 
         /// <inheritdoc />
-        public override bool OneTimeLoading => false;
+        public override bool IsSharedBetweenScenes => false;
 
 
         /// <inheritdoc />
-        protected override void LoadInternal(BattleSquadsData data)
+        public void InitializeParameters(BattleSquadsData parameters)
         {
-            ArrangeUnits(data.AttackSquad, data.DefendSquad);
+            _attackSquad = parameters.AttackSquad;
+            _defendSquad = parameters.DefendSquad;
+        }
+
+        /// <inheritdoc />
+        protected override void LoadInternal()
+        {
+            ArrangeUnits();
             StartNewRound();
 
             _gameController.SceneEndUpdating += OnUpdate;
@@ -476,15 +486,15 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <summary>
         /// Расставить юнитов по позициям.
         /// </summary>
-        private void ArrangeUnits(Squad attackSquad, Squad defendSquad)
+        private void ArrangeUnits()
         {
             _units = new List<BattleUnit>();
 
-            foreach (var attackSquadUnit in attackSquad.Units) {
+            foreach (var attackSquadUnit in _attackSquad.Units) {
                 _units.Add(_battleSceneController.AddBattleUnit(attackSquadUnit, true));
             }
 
-            foreach (var defendSquadUnit in defendSquad.Units) {
+            foreach (var defendSquadUnit in _defendSquad.Units) {
                 _units.Add(_battleSceneController.AddBattleUnit(defendSquadUnit, false));
             }
         }

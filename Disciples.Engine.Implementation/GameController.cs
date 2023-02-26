@@ -29,7 +29,7 @@ namespace Disciples.Engine.Implementation
 
         private long _ticks;
         private Stopwatch _stopwatch;
-        private ISupportUnloading _currentSceneController;
+        private ISupportLoading _currentSceneController;
 
         /// <summary>
         /// Объект, который в данный момент выделен курсором.
@@ -265,7 +265,8 @@ namespace Disciples.Engine.Implementation
 
         /// <inheritdoc />
         public async void ChangeScene<TSceneController, TData>(TSceneController sceneController, TData data)
-            where TSceneController : ISceneController<TData>
+            where TSceneController : IScene<TData>
+            where TData : SceneParameters
         {
             _currentSceneController?.Unload();
 
@@ -273,7 +274,9 @@ namespace Disciples.Engine.Implementation
 
             var sceneContainer = _sceneFactory.CreateScene();
 
-            await Task.Run(() => sceneController.Load(sceneContainer, data));
+            sceneController.InitializeParameters(sceneContainer, data);
+
+            await Task.Run(sceneController.Load);
 
             _currentSceneController = sceneController;
 

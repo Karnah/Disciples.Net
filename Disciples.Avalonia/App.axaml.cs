@@ -22,6 +22,7 @@ using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
 using Disciples.Engine.Common.Models;
 using System;
+using Disciples.Engine.Models;
 
 namespace Disciples.Avalonia
 {
@@ -73,11 +74,11 @@ namespace Disciples.Avalonia
 
             // Сразу отображаем сцену загрузки.
             var loadingSceneController = Container.Resolve<ILoadingSceneController>();
-            _gameController.ChangeScene(loadingSceneController, (object)null);
+            _gameController.ChangeScene(loadingSceneController, SceneParameters.Empty);
 
             // Следующая сцена будет сцена битвы.
             var battleSceneController = Container.Resolve<IBattleSceneController>();
-            _gameController.ChangeScene(battleSceneController, new BattleInitializeData(
+            _gameController.ChangeScene(battleSceneController, new BattleSceneParameters(
                 Container.Resolve<IBattleController>(),
                 Container.Resolve<IBattleInterfaceController>(),
                 CreateAttackingSquad(Container),

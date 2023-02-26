@@ -8,12 +8,14 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Engine.Implementation.Base
 {
     /// <inheritdoc cref="ISceneController" />
-    public abstract class BaseSceneController<TData> : BaseSupportLoading<ISceneContainer, TData>, ISceneController<TData>
+    public abstract class BaseSceneController<TSceneParameters> : BaseSupportLoading, ISceneController, IScene<TSceneParameters>
+        where TSceneParameters : SceneParameters
     {
         /// <inheritdoc />
         protected BaseSceneController(IGameController gameController, ISceneFactory sceneFactory, IInterfaceProvider interfaceProvider)
@@ -25,7 +27,7 @@ namespace Disciples.Engine.Implementation.Base
 
 
         /// <inheritdoc />
-        public override bool OneTimeLoading => false;
+        public override bool IsSharedBetweenScenes => false;
 
         /// <summary>
         /// Контроллер игры.
@@ -49,17 +51,21 @@ namespace Disciples.Engine.Implementation.Base
 
 
         /// <inheritdoc />
-        protected override void LoadInternal(ISceneContainer sceneContainer, TData data)
+        public virtual void InitializeParameters(ISceneContainer sceneContainer, TSceneParameters parameters)
         {
             SceneContainer = sceneContainer;
+        }
 
+        /// <inheritdoc />
+        protected override void LoadInternal()
+        {
             InterfaceProvider.Load();
         }
 
         /// <inheritdoc />
         protected override void UnloadInternal()
         {
-            if (!InterfaceProvider.OneTimeLoading)
+            if (!InterfaceProvider.IsSharedBetweenScenes)
                 InterfaceProvider.Unload();
         }
 
