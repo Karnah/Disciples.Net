@@ -13,6 +13,10 @@ namespace Disciples.WPF.Models
         /// <inheritdoc />
         public WpfBitmap(ImageSource imageSource)
         {
+            if (imageSource == null) {
+
+            }
+
             _imageSource = imageSource;
         }
 

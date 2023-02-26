@@ -16,6 +16,11 @@
         public static double Height { get; } = 1080;
 
 
+        public static double OffsetX = (1920 - Width) / 2;
+
+        public static double OffsetY = (1080 - Height) / 2;
+
+
         public static double Scale { get; } = (double) Height / OriginalHeight;
     }
 }
