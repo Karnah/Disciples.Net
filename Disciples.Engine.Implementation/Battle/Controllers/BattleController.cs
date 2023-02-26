@@ -81,33 +81,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         }
 
         /// <inheritdoc />
-        protected override void LoadInternal()
-        {
-            ArrangeUnits();
-            StartNewRound();
-
-            _gameController.SceneEndUpdating += OnUpdate;
-        }
-
-        /// <inheritdoc />
-        protected override void UnloadInternal()
-        {
-            _gameController.SceneEndUpdating -= OnUpdate;
-
-
-            // Уничтожаем анимации, если они еще по какой-то причине действуют.
-            foreach (var targetAnimation in _targetAnimations) {
-                targetAnimation.Destroy();
-            }
-
-            // Уничтожаем объекты юнитов.
-            foreach (var battleUnit in Units) {
-                battleUnit.Destroy();
-            }
-        }
-
-
-        private void OnUpdate(object sender, SceneUpdatingEventArgs args)
+        public void UpdateSceneState(long ticksCount)
         {
             if (BattleState == BattleState.WaitingAction || BattleState == BattleState.BattleEnd)
                 return;
@@ -115,7 +89,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
             // Обрабатываем моментальные эффекты.
             foreach (var battleUnit in Units) {
                 var unitEffects = battleUnit.Unit.Effects;
-                unitEffects.OnTick(args.TicksCount);
+                unitEffects.OnTick(ticksCount);
 
                 if (unitEffects.CurrentInstantaneousEffect == null)
                     continue;
@@ -146,7 +120,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
 
                 // Продолжаем ожидание.
                 if (_delayTime > 0) {
-                    _delayTime -= args.TicksCount;
+                    _delayTime -= ticksCount;
                     return;
                 }
 
@@ -175,6 +149,27 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
             if (BattleState == BattleState.AfterTouch) {
                 AfterTouch();
                 return;
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void LoadInternal()
+        {
+            ArrangeUnits();
+            StartNewRound();
+        }
+
+        /// <inheritdoc />
+        protected override void UnloadInternal()
+        {
+            // Уничтожаем анимации, если они еще по какой-то причине действуют.
+            foreach (var targetAnimation in _targetAnimations) {
+                targetAnimation.Destroy();
+            }
+
+            // Уничтожаем объекты юнитов.
+            foreach (var battleUnit in Units) {
+                battleUnit.Destroy();
             }
         }
 
@@ -539,6 +534,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         }
 
 
+        /// <inheritdoc />
         public BattleUnit GetUnitObject(Unit unit)
         {
             return Units.First(u => u.Unit == unit);

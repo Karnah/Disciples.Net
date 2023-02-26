@@ -78,9 +78,9 @@ namespace Disciples.Engine.Common.GameObjects
 
 
         /// <inheritdoc />
-        public override void OnInitialize()
+        public override void Initialize()
         {
-            base.OnInitialize();
+            base.Initialize();
 
             _unitInfoBackground = _sceneController.AddImage(
                 _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);

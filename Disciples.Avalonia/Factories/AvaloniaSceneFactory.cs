@@ -11,7 +11,7 @@ namespace Disciples.Avalonia.Factories
     public class AvaloniaSceneFactory : ISceneFactory
     {
         /// <inheritdoc />
-        public ISceneContainer CreateScene()
+        public ISceneContainer CreateSceneContainer()
         {
             return new AvaloniaSceneContainer();
         }

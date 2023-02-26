@@ -4,11 +4,11 @@ using Disciples.Engine.Battle.Controllers;
 using Disciples.Engine.Battle.GameObjects;
 using Disciples.Engine.Battle.Models;
 using Disciples.Engine.Battle.Providers;
-using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Engine.Implementation.Battle
@@ -47,17 +47,30 @@ namespace Disciples.Engine.Implementation.Battle
 
 
         /// <inheritdoc />
-        public override bool IsSharedBetweenScenes => false;
-
-        /// <inheritdoc />
-        public override void InitializeParameters(ISceneContainer sceneContainer, BattleSceneParameters parameters)
+        public override void InitializeParameters(BattleSceneParameters parameters)
         {
-            base.InitializeParameters(sceneContainer, parameters);
+            base.InitializeParameters(parameters);
 
             _battleController = parameters.BattleController;
             _battleController.InitializeParameters(new BattleSquadsData(parameters.AttackSquad, parameters.DefendSquad));
 
             _battleInterfaceController = parameters.BattleInterfaceController;
+        }
+
+        /// <inheritdoc />
+        public override void BeforeSceneUpdate(UpdateSceneData data)
+        {
+            base.BeforeSceneUpdate(data);
+
+            _battleInterfaceController.ProcessInputDeviceEvents(data.InputDeviceEvents);
+        }
+
+        /// <inheritdoc />
+        public override void AfterSceneUpdate(UpdateSceneData data)
+        {
+            base.AfterSceneUpdate(data);
+
+            _battleController.UpdateSceneState(data.TicksCount);
         }
 
         /// <inheritdoc />

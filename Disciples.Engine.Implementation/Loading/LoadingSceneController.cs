@@ -16,8 +16,11 @@ namespace Disciples.Engine.Implementation.Loading
         /// </summary>
         private const string LOADING_IMAGE_NAME = "LOADING";
 
-        private IImageSceneObject _loadingSceneObject;
+        private IImageSceneObject? _loadingSceneObject;
 
+        /// <summary>
+        /// Создать объект сцены загрузки.
+        /// </summary>
         public LoadingSceneController(
             IGameController gameController,
             ISceneFactory sceneFactory,

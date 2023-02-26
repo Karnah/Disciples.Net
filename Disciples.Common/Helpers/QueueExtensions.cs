@@ -11,7 +11,7 @@ namespace Disciples.Common.Helpers
         /// <summary>
         /// Извлечь элемент из очереди, если она не пустая.
         /// </summary>
-        public static bool TryDequeue<TItem>(this Queue<TItem> queue, out TItem value)
+        public static bool TryDequeue<TItem>(this Queue<TItem> queue, out TItem? value)
         {
             value = default(TItem);
 

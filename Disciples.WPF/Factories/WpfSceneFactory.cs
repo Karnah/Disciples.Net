@@ -11,7 +11,7 @@ namespace Disciples.WPF.Factories
     public class WpfSceneFactory : ISceneFactory
     {
         /// <inheritdoc />
-        public ISceneContainer CreateScene()
+        public ISceneContainer CreateSceneContainer()
         {
             return new WpfSceneContainer();
         }

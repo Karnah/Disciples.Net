@@ -11,7 +11,7 @@ namespace Disciples.Engine.Common.GameObjects
     {
         protected GameObject()
         {
-            Components = new IComponent[0];
+            Components = Array.Empty<IComponent>();
         }
 
         protected GameObject(double x, double y) : this()
@@ -70,9 +70,9 @@ namespace Disciples.Engine.Common.GameObjects
 
 
         /// <summary>
-        /// Обработать событие инициализации игрового объекта.
+        /// Инициализировать игровой объект.
         /// </summary>
-        public virtual void OnInitialize()
+        public virtual void Initialize()
         {
             if (IsInitialized)
                 throw new InvalidOperationException("Game object already initialized");
@@ -88,7 +88,7 @@ namespace Disciples.Engine.Common.GameObjects
         /// Обработать событие обновление объекта.
         /// </summary>
         /// <param name="ticksCount">Количество тиков, которое прошло со времени предыдущего обновления.</param>
-        public virtual void OnUpdate(long ticksCount)
+        public virtual void Update(long ticksCount)
         {
             foreach (var component in Components) {
                 component.Update(ticksCount);

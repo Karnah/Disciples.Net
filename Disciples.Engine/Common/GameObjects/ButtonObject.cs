@@ -63,9 +63,9 @@ namespace Disciples.Engine.Common.GameObjects
 
 
         /// <inheritdoc />
-        public override void OnInitialize()
+        public override void Initialize()
         {
-            base.OnInitialize();
+            base.Initialize();
 
             _buttonVisualObject = _sceneController.AddImage(_buttonStates[ButtonState], X, Y, Layer);
         }

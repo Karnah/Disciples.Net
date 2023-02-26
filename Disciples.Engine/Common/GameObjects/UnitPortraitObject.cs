@@ -113,9 +113,9 @@ namespace Disciples.Engine.Common.GameObjects
 
 
         /// <inheritdoc />
-        public override void OnInitialize()
+        public override void Initialize()
         {
-            base.OnInitialize();
+            base.Initialize();
 
             _unitPortrait = _sceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
             _unitPortrait.IsReflected = _rightToLeft;
@@ -133,9 +133,9 @@ namespace Disciples.Engine.Common.GameObjects
             UpdateUnitEffects();
         }
 
-        public override void OnUpdate(long ticksCount)
+        public override void Update(long ticksCount)
         {
-            base.OnUpdate(ticksCount);
+            base.Update(ticksCount);
 
             UpdateUnitEffects();
         }

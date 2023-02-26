@@ -10,9 +10,9 @@ namespace Disciples.Engine.Platform.Factories
     public interface ISceneFactory
     {
         /// <summary>
-        /// Создать пустую сцену.
+        /// Создать пустой контейнер для объектов сцены.
         /// </summary>
-        ISceneContainer CreateScene();
+        ISceneContainer CreateSceneContainer();
 
 
         /// <summary>

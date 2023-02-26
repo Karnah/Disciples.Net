@@ -20,29 +20,13 @@ namespace Disciples.Engine.Base
         /// <summary>
         /// Контейнер объектов для текущей сцены.
         /// </summary>
-        ISceneContainer CurrentSceneContainer { get; }
+        ISceneContainer? CurrentSceneContainer { get; }
 
 
         /// <summary>
         /// Событие смены текущей сцены.
         /// </summary>
         event EventHandler SceneChanged;
-
-        /// <summary>
-        /// Событие, которое возникает после того, как сцена была обновлена.
-        /// </summary>
-        event EventHandler<SceneUpdatingEventArgs> SceneEndUpdating;
-
-        // Сделано, так как EventHandler не поддерживает приоритет в вызове, а делать на Action не хочется.
-        /// <summary>
-        /// Событие возникает после того, как вся логика была выполнена и можно перерисовать сцену.
-        /// </summary>
-        event EventHandler<SceneUpdatingEventArgs> SceneRedraw;
-
-        /// <summary>
-        /// Событие действия над игровым объектом.
-        /// </summary>
-        event EventHandler<GameObjectActionEventArgs> GameObjectAction;
 
 
         /// <summary>
@@ -64,7 +48,7 @@ namespace Disciples.Engine.Base
         /// <param name="sceneController">Контроллер новой сцены.</param>
         /// <param name="data">Данные для инициализации новой сцены.</param>
         void ChangeScene<TSceneController, TSceneParameters>(TSceneController sceneController, TSceneParameters data)
-            where TSceneController : IScene<TSceneParameters>
+            where TSceneController : IScene, ISupportLoadingWithParameters<TSceneParameters>
             where TSceneParameters : SceneParameters;
     }
 }

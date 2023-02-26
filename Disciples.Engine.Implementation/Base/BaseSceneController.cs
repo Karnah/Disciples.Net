@@ -14,7 +14,7 @@ using Disciples.Engine.Platform.Factories;
 namespace Disciples.Engine.Implementation.Base
 {
     /// <inheritdoc cref="ISceneController" />
-    public abstract class BaseSceneController<TSceneParameters> : BaseSupportLoading, ISceneController, IScene<TSceneParameters>
+    public abstract class BaseSceneController<TSceneParameters> : BaseSupportLoading, ISceneController, IScene, ISupportLoadingWithParameters<TSceneParameters>
         where TSceneParameters : SceneParameters
     {
         /// <inheritdoc />
@@ -27,17 +27,15 @@ namespace Disciples.Engine.Implementation.Base
 
 
         /// <inheritdoc />
-        public override bool IsSharedBetweenScenes => false;
+        public ISceneContainer SceneContainer { get; private set; }
+
+        /// <inheritdoc />
+        public sealed override bool IsSharedBetweenScenes => false;
 
         /// <summary>
         /// Контроллер игры.
         /// </summary>
         protected IGameController GameController { get; }
-
-        /// <summary>
-        /// Контейнер с объектами на сцене.
-        /// </summary>
-        protected ISceneContainer SceneContainer { get; private set; }
 
         /// <summary>
         /// Фабрика для создания объектов на сцене.
@@ -51,14 +49,24 @@ namespace Disciples.Engine.Implementation.Base
 
 
         /// <inheritdoc />
-        public virtual void InitializeParameters(ISceneContainer sceneContainer, TSceneParameters parameters)
+        public virtual void InitializeParameters(TSceneParameters parameters)
         {
-            SceneContainer = sceneContainer;
+        }
+
+        /// <inheritdoc />
+        public virtual void BeforeSceneUpdate(UpdateSceneData data)
+        {
+        }
+
+        /// <inheritdoc />
+        public virtual void AfterSceneUpdate(UpdateSceneData data)
+        {
         }
 
         /// <inheritdoc />
         protected override void LoadInternal()
         {
+            SceneContainer = SceneFactory.CreateSceneContainer();
             InterfaceProvider.Load();
         }
 
@@ -152,7 +160,7 @@ namespace Disciples.Engine.Implementation.Base
 
 
         /// <inheritdoc />
-        public void RemoveSceneObject(ISceneObject sceneObject)
+        public void RemoveSceneObject(ISceneObject? sceneObject)
         {
             if (sceneObject == null)
                 return;

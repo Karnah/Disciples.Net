@@ -8,10 +8,10 @@ using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
+using Disciples.Engine.Enums;
 using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
-using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
 
 namespace Disciples.Engine.Implementation
@@ -22,45 +22,34 @@ namespace Disciples.Engine.Implementation
         private readonly IGameTimer _gameTimer;
         private readonly ILogger _logger;
         private readonly IInputManager _inputManager;
-        private readonly ISceneFactory _sceneFactory;
         private readonly LinkedList<GameObject> _gameObjects;
 
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
+        private readonly Stopwatch _stopwatch = new();
 
         private long _ticks;
-        private Stopwatch _stopwatch;
-        private ISupportLoading _currentSceneController;
+        private IScene? _currentScene;
 
         /// <summary>
         /// Объект, который в данный момент выделен курсором.
         /// </summary>
-        private GameObject _selectedGameObject;
+        private GameObject? _selectedGameObject;
         /// <summary>
-        /// Нажата ли ЛКМ.
+        /// События от устройств ввода.
         /// </summary>
-        private bool _isLeftMouseButtonPressed;
-        /// <summary>
-        /// Была ли отпущена ЛКМ.
-        /// </summary>
-        private bool _isLeftMouseButtonReleased;
-        /// <summary>
-        /// Нажата ли ПКМ.
-        /// </summary>
-        private bool _isRightMouseButtonPressed;
-        /// <summary>
-        /// Была ли отпущена ПКМ.
-        /// </summary>
-        private bool _isRightMouseButtonReleased;
+        private readonly List<InputDeviceEvent> _inputDeviceEvents;
 
-        /// <inheritdoc />
-        public GameController(IGameTimer gameTimer, ILogger logger, IInputManager inputManager, ISceneFactory sceneFactory)
+        /// <summary>
+        /// Создать объект типа <see cref="GameController" />.
+        /// </summary>
+        public GameController(IGameTimer gameTimer, ILogger logger, IInputManager inputManager)
         {
             _gameTimer = gameTimer;
             _logger = logger;
             _inputManager = inputManager;
-            _sceneFactory = sceneFactory;
 
             _gameObjects = new LinkedList<GameObject>();
+            _inputDeviceEvents = new();
         }
 
 
@@ -68,20 +57,11 @@ namespace Disciples.Engine.Implementation
         public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
 
         /// <inheritdoc />
-        public ISceneContainer CurrentSceneContainer { get; private set; }
+        public ISceneContainer? CurrentSceneContainer => _currentScene?.SceneContainer;
 
 
         /// <inheritdoc />
-        public event EventHandler SceneChanged;
-
-        /// <inheritdoc />
-        public event EventHandler<SceneUpdatingEventArgs> SceneEndUpdating;
-
-        /// <inheritdoc />
-        public event EventHandler<SceneUpdatingEventArgs> SceneRedraw;
-
-        /// <inheritdoc />
-        public event EventHandler<GameObjectActionEventArgs> GameObjectAction;
+        public event EventHandler? SceneChanged;
 
 
         /// <summary>
@@ -89,15 +69,11 @@ namespace Disciples.Engine.Implementation
         /// </summary>
         public void Start()
         {
-            _stopwatch = new Stopwatch();
-            _stopwatch.Start();
+            _stopwatch.Restart();
             _ticks = _stopwatch.ElapsedMilliseconds;
 
             _gameTimer.TimerTick += UpdateScene;
             _gameTimer.Start();
-
-            // Перед началом боя обновляем сцену, чтобы все объекты успели отрисоваться на старте.
-            SceneRedraw?.Invoke(this, new SceneUpdatingEventArgs(0));
 
             // Подписываемся на события перемещения курсора и нажатия кнопок.
             _inputManager.MouseButtonEvent += OnMouseStateChanged;
@@ -109,8 +85,7 @@ namespace Disciples.Engine.Implementation
         /// </summary>
         public void Stop()
         {
-            _stopwatch?.Stop();
-            _stopwatch = null;
+            _stopwatch.Stop();
 
             _gameTimer.Stop();
             _gameTimer.TimerTick -= UpdateScene;
@@ -127,24 +102,29 @@ namespace Disciples.Engine.Implementation
                 _ticks = ticks;
 
                 try {
-                    ProcessCursorEvents();
-                    UpdateGameObjects(ticksCount);
+                    CheckInputDeviceSelection();
 
-                    SceneEndUpdating?.Invoke(this, new SceneUpdatingEventArgs(ticksCount));
-                    SceneRedraw?.Invoke(this, new SceneUpdatingEventArgs(ticksCount));
+                    var data = new UpdateSceneData(ticksCount, _inputDeviceEvents);
+
+                    _currentScene?.BeforeSceneUpdate(data);
+                    UpdateGameObjects(ticksCount);
+                    _currentScene?.AfterSceneUpdate(data);
 
                     CurrentSceneContainer?.UpdateContainer();
                 }
                 catch (Exception e) {
                     _logger.Log(e.ToString());
                 }
+                finally {
+                    _inputDeviceEvents.Clear();
+                }
             }
         }
 
         /// <summary>
-        /// Обработать все события курсора, которые произошли с момента последнего обновления сцены.
+        /// Проверить, если было изменение выделенного объекта.
         /// </summary>
-        private void ProcessCursorEvents()
+        private void CheckInputDeviceSelection()
         {
             var mousePosition = _inputManager.MousePosition;
             var selectedGameObject = GameObjects
@@ -153,40 +133,17 @@ namespace Disciples.Engine.Implementation
                                       go.X <= mousePosition.X && mousePosition.X < (go.X + go.Width) &&
                                       go.Y <= mousePosition.Y && mousePosition.Y < (go.Y + go.Height));
 
-            // Если изменился выбранный объект, то отправляем события снятия выделения/выделения.
-            if (selectedGameObject != _selectedGameObject)
-            {
-                if (_selectedGameObject != null)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Unselected, _selectedGameObject));
+            // Если объект не менялся, то ничего делать не нужно.
+            if (selectedGameObject == _selectedGameObject)
+                return;
 
-                if (selectedGameObject != null)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.Selected, selectedGameObject));
-
-                _selectedGameObject = selectedGameObject;
-            }
-
-            // Обрабатываем события нажатия ЛКМ и ПКМ.
             if (_selectedGameObject != null)
-            {
-                if (_isRightMouseButtonPressed)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.RightButtonPressed, _selectedGameObject));
+                _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Selection, InputDeviceActionState.Deactivated, _selectedGameObject));
 
-                if (_isLeftMouseButtonPressed)
-                    GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonPressed, _selectedGameObject));
-            }
+            if (selectedGameObject != null)
+                _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Selection, InputDeviceActionState.Activated, selectedGameObject));
 
-            // Обрабатываем события того, что ПКМ или ЛКМ были отпущены.
-            if (_isRightMouseButtonReleased)
-                GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.RightButtonReleased, _selectedGameObject));
-
-            if (_isLeftMouseButtonReleased)
-                GameObjectAction?.Invoke(this, new GameObjectActionEventArgs(GameObjectActionType.LeftButtonReleased, _selectedGameObject));
-
-
-            _isLeftMouseButtonPressed = false;
-            _isLeftMouseButtonReleased = false;
-            _isRightMouseButtonPressed = false;
-            _isRightMouseButtonReleased = false;
+            _selectedGameObject = selectedGameObject;
         }
 
         private void UpdateGameObjects(long ticksCount)
@@ -199,7 +156,7 @@ namespace Disciples.Engine.Implementation
                     _gameObjects.Remove(gameObjectNode);
                 }
                 else {
-                    gameObject.OnUpdate(ticksCount);
+                    gameObject.Update(ticksCount);
                 }
 
                 gameObjectNode = nextNode;
@@ -211,23 +168,14 @@ namespace Disciples.Engine.Implementation
         /// </summary>
         private void OnMouseStateChanged(object sender, MouseButtonEventArgs args)
         {
-            if (args.MouseButton == MouseButton.Left) {
-                if (args.ButtonState == ButtonState.Pressed)
-                    _isLeftMouseButtonPressed = true;
-                else
-                    _isLeftMouseButtonReleased = true;
+            var actionType = args.MouseButton == MouseButton.Left
+                ? InputDeviceActionType.MouseLeft
+                : InputDeviceActionType.MouseRight;
+            var actionState = args.ButtonState == ButtonState.Pressed
+                ? InputDeviceActionState.Activated
+                : InputDeviceActionState.Deactivated;
 
-                return;
-            }
-
-            if (args.MouseButton == MouseButton.Right) {
-                if (args.ButtonState == ButtonState.Pressed)
-                    _isRightMouseButtonPressed = true;
-                else
-                    _isRightMouseButtonReleased = true;
-
-                return;
-            }
+            _inputDeviceEvents.Add(new InputDeviceEvent(actionType, actionState, _selectedGameObject));
         }
 
         /// <summary>
@@ -243,14 +191,14 @@ namespace Disciples.Engine.Implementation
             if (button == null || button.ButtonState == SceneButtonState.Disabled)
                 return;
 
-            button.OnButtonClicked();
+            _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.UiButton, InputDeviceActionState.Activated, button));
         }
 
         /// <inheritdoc />
         public void CreateObject(GameObject gameObject)
         {
             lock (_lock) {
-                gameObject.OnInitialize();
+                gameObject.Initialize();
                 _gameObjects.AddLast(gameObject);
             }
         }
@@ -265,23 +213,20 @@ namespace Disciples.Engine.Implementation
 
         /// <inheritdoc />
         public async void ChangeScene<TSceneController, TData>(TSceneController sceneController, TData data)
-            where TSceneController : IScene<TData>
+            where TSceneController : IScene, ISupportLoadingWithParameters<TData>
             where TData : SceneParameters
         {
-            _currentSceneController?.Unload();
+            _currentScene?.Unload();
 
             // todo сцена "подождите, идёт загрузка"?
 
-            var sceneContainer = _sceneFactory.CreateScene();
-
-            sceneController.InitializeParameters(sceneContainer, data);
+            sceneController.InitializeParameters(data);
 
             await Task.Run(sceneController.Load);
 
-            _currentSceneController = sceneController;
+            _currentScene = sceneController;
 
-            CurrentSceneContainer = sceneContainer;
-            CurrentSceneContainer.UpdateContainer();
+            CurrentSceneContainer!.UpdateContainer();
 
             SceneChanged?.Invoke(this, EventArgs.Empty);
         }

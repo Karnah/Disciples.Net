@@ -38,9 +38,9 @@ namespace Disciples.Engine.Battle.GameObjects
         public override bool IsInteractive => false;
 
         /// <inheritdoc />
-        public override void OnUpdate(long ticksCount)
+        public override void Update(long ticksCount)
         {
-            base.OnUpdate(ticksCount);
+            base.Update(ticksCount);
 
             // Удаляем текст со сцены.
             if (Unit == null) {

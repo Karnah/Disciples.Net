@@ -6,13 +6,21 @@ namespace Disciples.Engine.Base
     /// <summary>
     /// Объект сцены.
     /// </summary>
-    /// <typeparam name="TSceneParameters">Параметры для инициализации сцены.</typeparam>
-    public interface IScene<in TSceneParameters> : ISupportLoading
-        where TSceneParameters : SceneParameters
+    public interface IScene : ISupportLoading
     {
         /// <summary>
-        /// Инициализировать параметры сцены.
+        /// Контейнер объектов сцены.
         /// </summary>
-        public void InitializeParameters(ISceneContainer sceneContainer, TSceneParameters parameters);
+        ISceneContainer SceneContainer { get; }
+
+        /// <summary>
+        /// Выполнить действия перед обновлением объектов на сцене.
+        /// </summary>
+        void BeforeSceneUpdate(UpdateSceneData data);
+
+        /// <summary>
+        /// Выполнить действия после обновления объектов на сцене.
+        /// </summary>
+        void AfterSceneUpdate(UpdateSceneData data);
     }
 }

@@ -9,7 +9,7 @@ namespace Disciples.Engine.Battle
     /// <summary>
     /// Сцена битвы двух отрядов.
     /// </summary>
-    public interface IBattleSceneController : ISceneController, IScene<BattleSceneParameters>
+    public interface IBattleSceneController : ISceneController, IScene, ISupportLoadingWithParameters<BattleSceneParameters>
     {
         /// <summary>
         /// Добавить юнита на сцену битвы.

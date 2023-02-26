@@ -26,7 +26,7 @@ namespace Disciples.Engine.Platform.Factories
         /// </summary>
         /// <param name="rawBitmap">Сырая информация об изображении.</param>
         /// <param name="bounds">Границы изображения.</param>
-        Frame FromRawBitmap(RawBitmap rawBitmap, Bounds bounds = null);
+        Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null);
 
 
         /// <summary>

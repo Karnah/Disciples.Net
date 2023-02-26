@@ -14,6 +14,7 @@ using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Enums;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
@@ -110,12 +111,17 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <inheritdoc />
         public override bool IsSharedBetweenScenes => false;
 
+        /// <inheritdoc />
+        public void ProcessInputDeviceEvents(IReadOnlyList<InputDeviceEvent> events)
+        {
+            foreach (var inputDeviceEvent in events) {
+                ProcessInputDeviceEvent(inputDeviceEvent);
+            }
+        }
 
         /// <inheritdoc />
         protected override void LoadInternal()
         {
-            _gameController.GameObjectAction += OnGameObjectAction;
-
             _battleController.UnitActionBegin += OnUnitActionBegin;
             _battleController.UnitActionEnded += OnUnitActionEnded;
             _battleController.BattleEnded += OnBattleEnded;
@@ -131,8 +137,6 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <inheritdoc />
         protected override void UnloadInternal()
         {
-            _gameController.GameObjectAction -= OnGameObjectAction;
-
             _battleController.UnitActionBegin -= OnUnitActionBegin;
             _battleController.UnitActionEnded -= OnUnitActionEnded;
             _battleController.BattleEnded -= OnBattleEnded;
@@ -258,13 +262,17 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         #region Interaction
 
         /// <summary>
-        /// Обработчик события воздействия с игровым объектом (наведение, клик мышью и т.д.).
+        /// Обработать событие воздействия с игровым объектом (наведение, клик мышью и т.д.).
         /// </summary>
-        private void OnGameObjectAction(object o, GameObjectActionEventArgs args)
+        private void ProcessInputDeviceEvent(InputDeviceEvent inputDeviceEvent)
         {
+            var actionType = inputDeviceEvent.ActionType;
+            var actionState = inputDeviceEvent.ActionState;
+            var gameObject = inputDeviceEvent.GameObject;
+
             // Если отпустили ПКМ, то прекращаем отображать информацию о юните.
-            if (args.ActionType == GameObjectActionType.RightButtonReleased) {
-                GameObjectRightButtonReleased(args.GameObject);
+            if (actionType == InputDeviceActionType.MouseRight && actionState == InputDeviceActionState.Deactivated) {
+                GameObjectRightButtonReleased(gameObject);
                 return;
             }
 
@@ -273,31 +281,35 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
                 return;
             }
 
-            switch (args.ActionType) {
-                case GameObjectActionType.Selected:
-                    GameObjectSelected(args.GameObject);
+            switch (actionType) {
+                case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Activated:
+                    GameObjectSelected(gameObject);
                     break;
-                case GameObjectActionType.Unselected:
-                    GameObjectUnselected(args.GameObject);
+                case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Deactivated:
+                    GameObjectUnselected(gameObject);
                     break;
-                case GameObjectActionType.LeftButtonPressed:
-                    GameObjectPressed(args.GameObject);
+
+                case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Activated:
+                    GameObjectPressed(gameObject);
                     break;
-                case GameObjectActionType.LeftButtonReleased:
-                    GameObjectClicked(args.GameObject);
+                case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Deactivated:
+                    GameObjectClicked(gameObject);
                     break;
-                case GameObjectActionType.RightButtonPressed:
-                    GameObjectRightButtonPressed(args.GameObject);
+
+                case InputDeviceActionType.MouseRight when actionState == InputDeviceActionState.Activated:
+                    GameObjectRightButtonPressed(gameObject);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+
+                case InputDeviceActionType.UiButton when actionState == InputDeviceActionState.Activated:
+                    GameObjectPressed(gameObject);
+                    break;
             }
         }
 
         /// <summary>
         /// Обработчик события, что игровой объект был выбран.
         /// </summary>
-        private void GameObjectSelected(GameObject gameObject)
+        private void GameObjectSelected(GameObject? gameObject)
         {
             if (gameObject is BattleUnit battleUnit) {
                 // Если выбрали кости юнита, то не нужно менять портрет.
@@ -318,7 +330,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <summary>
         /// Обработчик события, что с игрового объекта был смещён фокус.
         /// </summary>
-        private void GameObjectUnselected(GameObject gameObject)
+        private void GameObjectUnselected(GameObject? gameObject)
         {
             if (gameObject is BattleUnit) {
                 UpdateTargetUnit(null);
@@ -331,8 +343,11 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <summary>
         /// Обработчик события, что на объект нажали мышью.
         /// </summary>
-        private void GameObjectPressed(GameObject gameObject)
+        private void GameObjectPressed(GameObject? gameObject)
         {
+            if (gameObject == null)
+                return;
+
             _pressedObject = gameObject;
 
             if (gameObject is ButtonObject button) {
@@ -372,7 +387,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// </summary>
         private void GameObjectRightButtonPressed(GameObject gameObject)
         {
-            Unit unit = null;
+            Unit? unit = null;
 
             if (gameObject is BattleUnit battleUnit) {
                 unit = battleUnit.Unit;
@@ -397,7 +412,7 @@ namespace Disciples.Engine.Implementation.Battle.Controllers
         /// <summary>
         /// Обработать событие того, что на игровой объект нажали ПКМ.
         /// </summary>
-        private void GameObjectRightButtonReleased(GameObject gameObject)
+        private void GameObjectRightButtonReleased(GameObject? gameObject)
         {
             if (!_isUnitInfoShowing)
                 return;

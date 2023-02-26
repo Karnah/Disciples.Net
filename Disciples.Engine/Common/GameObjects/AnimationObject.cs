@@ -46,7 +46,7 @@ namespace Disciples.Engine.Common.GameObjects
 
 
         /// <inheritdoc />
-        public override void OnUpdate(long ticksCount)
+        public override void Update(long ticksCount)
         {
             // Если анимация не зациклена, то объект уничтожает сам себя.
             // Такая проверка ужасна, так как можно переписать анимацию так, чтобы пропускались фреймы, но сейчас это работает.
@@ -55,7 +55,7 @@ namespace Disciples.Engine.Common.GameObjects
                 return;
             }
 
-            base.OnUpdate(ticksCount);
+            base.Update(ticksCount);
         }
     }
 }

@@ -53,6 +53,12 @@ namespace Disciples.Engine.Battle.Controllers
 
 
         /// <summary>
+        /// Обновить состояние объектов на сцене.
+        /// </summary>
+        public void UpdateSceneState(long ticksCount);
+
+
+        /// <summary>
         /// Получить игровой объект юнита.
         /// </summary>
         BattleUnit GetUnitObject(Unit unit);

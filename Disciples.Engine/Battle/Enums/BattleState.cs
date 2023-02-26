@@ -19,12 +19,12 @@
         /// <summary>
         /// Юнит замахивается для удара.
         /// </summary>
-        AfterTouch,
+        BeforeTouch,
 
         /// <summary>
         /// Юнит уже ударил.
         /// </summary>
-        BeforeTouch,
+        AfterTouch,
 
         /// <summary>
         /// Сражение завершено.
