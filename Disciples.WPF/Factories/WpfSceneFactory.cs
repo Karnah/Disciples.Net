@@ -13,7 +13,8 @@ namespace Disciples.WPF.Factories
         /// <inheritdoc />
         public ISceneContainer CreateScene()
         {
-            return new WpfSceneContainer();
+            return (ISceneContainer) App.Current.MainWindow;
+            // return new WpfSceneContainer();
         }
 
 

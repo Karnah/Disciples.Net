@@ -57,6 +57,7 @@
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Compile Include="Controls\ImageHost.cs" />
     <Compile Include="Converters\BaseValueConverterExtension.cs" />
     <Compile Include="Converters\BoldFontConverter.cs" />
     <Compile Include="Converters\DoubleScaleConverter.cs" />
