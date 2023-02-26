@@ -156,7 +156,7 @@ namespace Disciples.Engine.Implementation.Battle.Providers
                     return "HMOV";
                 case BattleAction.TakingDamage:
                     return "HHIT";
-                case BattleAction.Paralized:
+                case BattleAction.Paralyzed:
                     return "STIL";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);

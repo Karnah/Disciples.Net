@@ -78,7 +78,7 @@ namespace Disciples.Engine.Common.GameObjects
                 throw new InvalidOperationException("Game object already initialized");
 
             foreach (var component in Components) {
-                component.OnInitialize();
+                component.Initialize();
             }
 
             IsInitialized = true;
@@ -91,7 +91,7 @@ namespace Disciples.Engine.Common.GameObjects
         public virtual void OnUpdate(long ticksCount)
         {
             foreach (var component in Components) {
-                component.OnUpdate(ticksCount);
+                component.Update(ticksCount);
             }
         }
 

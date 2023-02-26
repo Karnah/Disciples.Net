@@ -10,6 +10,9 @@ namespace Disciples.Engine.Battle.Models
     /// </summary>
     public class BattleUnitAnimation
     {
+        /// <summary>
+        /// Создать объект типа <see cref="BattleUnitAnimation" />.
+        /// </summary>
         public BattleUnitAnimation(
             Dictionary<BattleAction, BattleUnitFrames> battleUnitFrames,
             BattleUnitTargetAnimation targetAnimation,

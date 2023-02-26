@@ -90,9 +90,9 @@ namespace Disciples.Engine.Battle.Components
 
 
         /// <inheritdoc />
-        public override void OnInitialize()
+        public override void Initialize()
         {
-            base.OnInitialize();
+            base.Initialize();
 
             BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_unitId, _battleUnit.Direction);
 
@@ -102,7 +102,7 @@ namespace Disciples.Engine.Battle.Components
         }
 
         /// <inheritdoc />
-        public override void OnUpdate(long tickCount)
+        public override void Update(long tickCount)
         {
             if (_battleUnit.Action != _action) {
                 FrameIndex = 0;

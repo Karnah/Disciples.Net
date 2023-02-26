@@ -15,11 +15,11 @@ namespace Disciples.Engine.Common.Components
         }
 
 
-        public virtual void OnInitialize()
+        public virtual void Initialize()
         {
         }
 
-        public virtual void OnUpdate(long tickCount)
+        public virtual void Update(long tickCount)
         {
         }
 

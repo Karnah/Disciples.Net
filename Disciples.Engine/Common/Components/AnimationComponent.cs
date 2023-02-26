@@ -51,20 +51,20 @@ namespace Disciples.Engine.Common.Components
 
 
         /// <inheritdoc />
-        public override void OnInitialize()
+        public override void Initialize()
         {
-            base.OnInitialize();
+            base.Initialize();
 
             _animationFrame = _sceneController.AddImage(_layer);
         }
 
         /// <inheritdoc />
-        public override void OnUpdate(long tickCount)
+        public override void Update(long tickCount)
         {
             _ticksCount += tickCount;
             if (_ticksCount < FRAME_CHANGE_SPEED)
                 return;
-            
+
             ++FrameIndex;
             FrameIndex %= _frames.Count;
             _ticksCount %= FRAME_CHANGE_SPEED;
