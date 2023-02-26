@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Reactive.Linq;
-
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
-
+using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
@@ -21,7 +20,9 @@ namespace Disciples.Avalonia.Managers
     {
         private Point? _screenOffset;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Создать объект типа <see cref="AvaloniaInputManager" />.
+        /// </summary>
         public AvaloniaInputManager()
         {
             Application.Current.InputManager.PostProcess.OfType<RawMouseEventArgs>().Subscribe(OnMouseStateChanged);
@@ -49,15 +50,17 @@ namespace Disciples.Avalonia.Managers
             {
                 case RawMouseEventType.Move:
                     // Один раз рассчитываем смещение игрового поля относительно левого края экрана.
-                    // todo Возможно стоит запоминать только Grid, если размеры экрана будут меняться.
+                    // Предполагаем, что поле выровнено по центру экрана.
                     if (_screenOffset == null)
                     {
-                        var window = args.Root as GameWindow;
-                        var field = window.Find<Grid>("Field");
-                        _screenOffset = new Point((int)field.Bounds.X, (int)field.Bounds.Y);
+                        var window = (Window)args.Root;
+                        _screenOffset = new Point((window.Width - GameInfo.Width) / 2, (window.Height - GameInfo.Height) / 2);
                     }
 
-                    MousePosition = new Point((int)(args.Position.X - _screenOffset?.X), (int)(args.Position.Y - _screenOffset?.Y));
+                    MousePosition = new Point(
+                        (int)(args.Position.X - _screenOffset?.X) / GameInfo.Scale,
+                        (int)(args.Position.Y - _screenOffset?.Y) / GameInfo.Scale);
+
                     break;
 
                 case RawMouseEventType.LeftButtonDown:

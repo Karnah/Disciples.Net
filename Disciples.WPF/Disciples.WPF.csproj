@@ -59,7 +59,6 @@
     </ApplicationDefinition>
     <Compile Include="Converters\BaseValueConverterExtension.cs" />
     <Compile Include="Converters\BoldFontConverter.cs" />
-    <Compile Include="Converters\DoubleScaleConverter.cs" />
     <Compile Include="Converters\GameColorToBrushConverter.cs" />
     <Compile Include="Converters\ReflectedToRenderTransformConverter.cs" />
     <Compile Include="Converters\TextAlignmentConverter.cs" />

@@ -1,21 +1,35 @@
 ﻿namespace Disciples.Engine
 {
+    /// <summary>
+    /// Информация об игре.
+    /// </summary>
     public static class GameInfo
     {
-        public const int OriginalWidth = 800;
+        /// <summary>
+        /// Оригинальная ширина экрана.
+        /// </summary>
+        public const double OriginalWidth = 800;
 
-        public const int OriginalHeight = 600;
-
-
-        //public static int Width { get; } = OriginalWidth;
-
-        //public static int Height { get; } = OriginalHeight;
-
-        public static double Width { get; } = 1440;
-
-        public static double Height { get; } = 1080;
+        /// <summary>
+        /// Оригинальная высота экрана.
+        /// </summary>
+        public const double OriginalHeight = 600;
 
 
-        public static double Scale { get; } = (double) Height / OriginalHeight;
+        /// <summary>
+        /// Текущая ширина экрана.
+        /// </summary>
+        public static double Width { get; set; } = 1440;
+
+        /// <summary>
+        /// Текущая высота экрана.
+        /// </summary>
+        public static double Height { get; set; } = 1080;
+
+
+        /// <summary>
+        /// Масштаб экрана относительного базового разрешения.
+        /// </summary>
+        public static double Scale { get; set; } = Height / OriginalHeight;
     }
 }

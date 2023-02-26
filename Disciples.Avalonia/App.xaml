@@ -3,7 +3,6 @@
              xmlns:c="clr-namespace:Disciples.Avalonia.Converters;assembly=Disciples.Avalonia"
              xmlns:avalonia="clr-namespace:Disciples.Avalonia">
   <Application.Resources>
-    <c:DoubleScaleConverter x:Key="DoubleScaleConverter" />
     <c:BoldFontConverter x:Key="BoldFontConverter" />
   </Application.Resources>
 

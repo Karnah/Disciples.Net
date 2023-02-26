@@ -12,7 +12,7 @@
         d:DataContext="{d:DesignInstance local:GameWindowViewModel}"
         Title="WPF Disciples II" WindowStyle="None" WindowState="Maximized" Background="Black">
 
-    <Grid x:Name="Field" Width="{x:Static e:GameInfo.Width}" Height="{x:Static e:GameInfo.Height}"
+    <Grid x:Name="Field" Width="{x:Static e:GameInfo.OriginalWidth}" Height="{x:Static e:GameInfo.OriginalHeight}"
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
         <ItemsControl ItemsSource="{Binding SceneObjects}" IsTabStop="False">
@@ -24,8 +24,8 @@
 
             <ItemsControl.ItemContainerStyle>
                 <Style TargetType="ContentPresenter" d:DataContext="{d:DesignInstance so:ISceneObject}">
-                    <Setter Property="Canvas.Left" Value="{Binding X, Converter={c:DoubleScaleConverter}}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Y, Converter={c:DoubleScaleConverter}}" />
+                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
                     <Setter Property="Canvas.ZIndex"  Value="{Binding Layer}" />
                 </Style>
             </ItemsControl.ItemContainerStyle>
@@ -35,8 +35,8 @@
                     <dts:SceneObjectTemplateSelector.ImageTemplate>
                         <DataTemplate DataType="{x:Type so:IImageSceneObject}">
                             <Image Stretch="Fill"
-                                   Width="{Binding Width, Converter={c:DoubleScaleConverter}}"
-                                   Height="{Binding Height, Converter={c:DoubleScaleConverter}}"
+                                   Width="{Binding Width}"
+                                   Height="{Binding Height}"
                                    Source="{Binding Bitmap.BitmapData}"
                                    RenderTransformOrigin="0.5,0.5"
                                    RenderTransform="{Binding IsReflected, Converter={c:ReflectedToRenderTransformConverter}}" />
@@ -47,11 +47,11 @@
                         <DataTemplate DataType="{x:Type so:ITextSceneObject}">
                             <TextBlock TextWrapping="Wrap"
                                        TextAlignment="{Binding TextAlignment, Converter={c:TextAlignmentConverter}}"
-                                       FontSize="{Binding FontSize, Converter={c:DoubleScaleConverter}}"
+                                       FontSize="{Binding FontSize}"
                                        FontWeight="{Binding IsBold, Converter={c:BoldFontConverter}}"
                                        Foreground="{Binding Foreground, Converter={c:GameColorToBrushConverter}}"
-                                       Width="{Binding Width, Converter={c:DoubleScaleConverter}}"
-                                       Height="{Binding Height, Converter={c:DoubleScaleConverter}}"
+                                       Width="{Binding Width}"
+                                       Height="{Binding Height}"
                                        Text="{Binding Text}" />
                         </DataTemplate>
                     </dts:SceneObjectTemplateSelector.TextTemplate>
