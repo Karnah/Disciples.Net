@@ -1,16 +1,12 @@
 ﻿using ReactiveUI;
 using Disciples.Engine.Common.SceneObjects;
+using ReactiveUI.Fody.Helpers;
 
 namespace Disciples.Avalonia.SceneObjects
 {
     /// <inheritdoc cref="ISceneObject" />
     public abstract class BaseSceneObject : ReactiveObject, ISceneObject
     {
-        private double _x;
-        private double _y;
-        private double _width;
-        private double _height;
-
         /// <inheritdoc />
         protected BaseSceneObject(int layer)
         {
@@ -19,32 +15,20 @@ namespace Disciples.Avalonia.SceneObjects
 
 
         /// <inheritdoc />
-        public double X
-        {
-            get => _x;
-            set => this.RaiseAndSetIfChanged(ref _x, value);
-        }
+        [Reactive]
+        public double X { get; set; }
 
         /// <inheritdoc />
-        public double Y
-        {
-            get => _y;
-            set => this.RaiseAndSetIfChanged(ref _y, value);
-        }
+        [Reactive]
+        public double Y { get; set; }
 
         /// <inheritdoc />
-        public double Width
-        {
-            get => _width;
-            set => this.RaiseAndSetIfChanged(ref _width, value);
-        }
+        [Reactive]
+        public double Width { get; set; }
 
         /// <inheritdoc />
-        public double Height
-        {
-            get => _height;
-            set => this.RaiseAndSetIfChanged(ref _height, value);
-        }
+        [Reactive]
+        public double Height { get; set; }
 
         /// <inheritdoc />
         public int Layer { get; }

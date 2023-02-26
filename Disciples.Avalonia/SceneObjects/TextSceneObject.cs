@@ -1,15 +1,12 @@
-﻿using ReactiveUI;
-
-using Disciples.Engine.Common.Enums;
+﻿using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
+using ReactiveUI.Fody.Helpers;
 
 namespace Disciples.Avalonia.SceneObjects
 {
     /// <inheritdoc cref="ITextSceneObject" />
     public class TextSceneObject : BaseSceneObject, ITextSceneObject
     {
-        private string _text;
-
         /// <inheritdoc />
         public TextSceneObject(string text, double fontSize, int layer, bool isBold = false)
             : this(text, fontSize, layer, double.NaN, TextAlignment.Left, isBold)
@@ -36,11 +33,8 @@ namespace Disciples.Avalonia.SceneObjects
 
 
         /// <inheritdoc />
-        public string Text
-        {
-            get => _text;
-            set => this.RaiseAndSetIfChanged(ref _text, value);
-        }
+        [Reactive]
+        public string Text { get; set; }
 
         /// <inheritdoc />
         public double FontSize { get; }

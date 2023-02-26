@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using ReactiveUI;
-
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.SceneObjects;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace Disciples.Avalonia
 {
@@ -14,7 +13,6 @@ namespace Disciples.Avalonia
     public class GameWindowViewModel : ReactiveObject
     {
         private readonly IGameController _gameController;
-        private IReadOnlyList<ISceneObject>? _sceneObjects;
 
         /// <inheritdoc />
         public GameWindowViewModel(IGameController gameController)
@@ -29,10 +27,8 @@ namespace Disciples.Avalonia
         /// <summary>
         /// Объекты, которые отображаются на сцене.
         /// </summary>
-        public IReadOnlyList<ISceneObject>? SceneObjects {
-            get => _sceneObjects;
-            private set => this.RaiseAndSetIfChanged(ref _sceneObjects, value);
-        }
+        [Reactive]
+        public IReadOnlyList<ISceneObject>? SceneObjects { get; private set; }
 
 
         /// <summary>
