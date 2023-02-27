@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Disciples.Engine.Battle.Enums;
-using Disciples.Engine.Battle.Models;
+using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.Models
 {

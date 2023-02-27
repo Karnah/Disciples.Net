@@ -2,24 +2,14 @@
 using System.Diagnostics;
 using System.Windows;
 using Disciples.Engine.Base;
-using Disciples.Engine.Battle;
-using Disciples.Engine.Battle.Controllers;
-using Disciples.Engine.Battle.Models;
-using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
-using Disciples.Engine.Implementation.Battle;
-using Disciples.Engine.Implementation.Battle.Controllers;
-using Disciples.Engine.Implementation.Battle.Providers;
-using Disciples.Engine.Implementation.Common.Providers;
-using Disciples.Engine.Implementation.Loading;
-using Disciples.Engine.Loading;
 using Disciples.Engine.Models;
-using Disciples.Engine.Platform.Factories;
-using Disciples.Engine.Platform.Managers;
-using Disciples.WPF.Factories;
-using Disciples.WPF.Managers;
+using Disciples.Scene.Battle;
+using Disciples.Scene.Battle.Controllers;
+using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Loading;
 using DryIoc;
 
 namespace Disciples.WPF
@@ -59,11 +49,11 @@ namespace Disciples.WPF
                 _gameController.Start();
 
                 // Сразу отображаем сцену загрузки.
-                var loadingSceneController = Container.Resolve<ILoadingSceneController>();
+                var loadingSceneController = Container.Resolve<LoadingScene>();
                 _gameController.ChangeScene(loadingSceneController, SceneParameters.Empty);
 
                 // Следующая сцена будет сцена битвы.
-                var battleSceneController = Container.Resolve<IBattleSceneController>();
+                var battleSceneController = Container.Resolve<BattleScene>();
                 _gameController.ChangeScene(battleSceneController, new BattleSceneParameters(
                     Container.Resolve<IBattleController>(),
                     Container.Resolve<IBattleInterfaceController>(),
@@ -78,41 +68,24 @@ namespace Disciples.WPF
             }
         }
 
+        /// <summary>
+        /// Создать IoC контейнер.
+        /// </summary>
         private static IContainer CreateContainer()
         {
             var container = new Container();
+            var modules = new IGameModule[]
+            {
+                new CommonModule(),
+                new BattleSceneModule(),
+                new LoadingSceneModule(),
+                new WpfModule()
+            };
 
-            var logger = new Logger();
-            container.RegisterInstance<ILogger>(logger);
-
-            // Регистрируем устройства ввода.
-            container.Register<IInputManager, WpfInputManager>(Reuse.Singleton);
-
-            // Регистрируем таймер.
-            container.Register<IGameTimer, WpfGameTimer>(Reuse.Singleton);
-
-            // Регистрируем фабрики.
-            container.Register<IBitmapFactory, WpfBitmapFactory>();
-            container.Register<ISceneFactory, WpfSceneFactory>();
-
-            container.RegisterMany<GameController>(Reuse.Singleton);
-
-            container.Register<ITextProvider, TextProvider>(Reuse.Singleton);
-            container.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);
-            container.Register<IUnitInfoProvider, UnitInfoProvider>(Reuse.Singleton);
-
-            container.Register<ILoadingSceneController, LoadingSceneController>(Reuse.Singleton);
-
-            container.Register<IBattleResourceProvider, BattleResourceProvider>(Reuse.Singleton);
-            container.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(Reuse.Singleton);
-            container.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(Reuse.Singleton);
-            container.Register<IBattleController, BattleController>(Reuse.Singleton);
-            container.Register<IBattleInterfaceController, BattleInterfaceController>(Reuse.Singleton);
-            container.Register<IBattleSceneController, BattleSceneController>(Reuse.Singleton);
-
-            // Регистрируем View и ViewModel.
-            container.Register<GameWindow>();
-            container.Register<GameWindowViewModel>();
+            foreach (var gameModule in modules)
+            {
+                gameModule.Initialize(container);
+            }
 
             return container;
         }

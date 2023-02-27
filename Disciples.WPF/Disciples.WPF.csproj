@@ -15,7 +15,7 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DryIoc" Version="5.3.3" />
+    <PackageReference Include="DryIoc.dll" Version="5.3.3" />
     <PackageReference Include="ReactiveUI.Fody" Version="18.4.22" />
     <PackageReference Include="ReactiveUI.WPF" Version="18.4.22" />
   </ItemGroup>
@@ -23,5 +23,7 @@
     <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
+    <ProjectReference Include="..\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
+    <ProjectReference Include="..\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
   </ItemGroup>
 </Project>

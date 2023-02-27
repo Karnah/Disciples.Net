@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Disciples.Engine.Base;
-using Disciples.Engine.Battle.Enums;
-using Disciples.Engine.Battle.Models;
-using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;

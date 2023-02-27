@@ -1,28 +1,18 @@
+using System;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using DryIoc;
-using Disciples.Avalonia.Factories;
-using Disciples.Avalonia.Managers;
 using Disciples.Engine.Base;
-using Disciples.Engine.Battle;
-using Disciples.Engine.Battle.Controllers;
-using Disciples.Engine.Battle.Models;
-using Disciples.Engine.Battle.Providers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
-using Disciples.Engine.Implementation.Battle;
-using Disciples.Engine.Implementation.Battle.Controllers;
-using Disciples.Engine.Implementation.Battle.Providers;
-using Disciples.Engine.Implementation.Common.Providers;
-using Disciples.Engine.Implementation.Loading;
-using Disciples.Engine.Loading;
-using Disciples.Engine.Platform.Factories;
-using Disciples.Engine.Platform.Managers;
 using Disciples.Engine.Common.Models;
-using System;
 using Disciples.Engine.Models;
+using Disciples.Scene.Battle;
+using Disciples.Scene.Battle.Controllers;
+using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Loading;
 
 namespace Disciples.Avalonia
 {
@@ -73,11 +63,11 @@ namespace Disciples.Avalonia
             _gameController.Start();
 
             // Сразу отображаем сцену загрузки.
-            var loadingSceneController = Container.Resolve<ILoadingSceneController>();
+            var loadingSceneController = Container.Resolve<LoadingScene>();
             _gameController.ChangeScene(loadingSceneController, SceneParameters.Empty);
 
             // Следующая сцена будет сцена битвы.
-            var battleSceneController = Container.Resolve<IBattleSceneController>();
+            var battleSceneController = Container.Resolve<BattleScene>();
             _gameController.ChangeScene(battleSceneController, new BattleSceneParameters(
                 Container.Resolve<IBattleController>(),
                 Container.Resolve<IBattleInterfaceController>(),
@@ -86,42 +76,23 @@ namespace Disciples.Avalonia
         }
 
         /// <summary>
-        /// Зарегистрировать все зависимости.
+        /// Создать IoC контейнер.
         /// </summary>
         private static IContainer CreateContainer()
         {
             var container = new Container();
+            var modules = new IGameModule[]
+            {
+                new CommonModule(),
+                new BattleSceneModule(),
+                new LoadingSceneModule(),
+                new AvaloniaModule()
+            };
 
-            var logger = new Logger();
-            container.RegisterInstance<ILogger>(logger);
-
-            // Регистрируем устройства ввода.
-            container.Register<IInputManager, AvaloniaInputManager>(Reuse.Singleton);
-
-            // Регистрируем таймер.
-            container.Register<IGameTimer, AvaloniaGameTimer>(Reuse.Singleton);
-
-            // Регистрируем фабрики.
-            container.Register<IBitmapFactory, AvaloniaBitmapFactory>();
-            container.Register<ISceneFactory, AvaloniaSceneFactory>();
-
-            container.RegisterMany<GameController>(Reuse.Singleton);
-
-            container.Register<ITextProvider, TextProvider>(Reuse.Singleton);
-            container.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);
-            container.Register<IUnitInfoProvider, UnitInfoProvider>(Reuse.Singleton);
-
-            container.Register<ILoadingSceneController, LoadingSceneController>(Reuse.Singleton);
-
-            container.Register<IBattleResourceProvider, BattleResourceProvider>(Reuse.Singleton);
-            container.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(Reuse.Singleton);
-            container.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(Reuse.Singleton);
-            container.Register<IBattleController, BattleController>(Reuse.Singleton);
-            container.Register<IBattleInterfaceController, BattleInterfaceController>(Reuse.Singleton);
-            container.Register<IBattleSceneController, BattleSceneController>(Reuse.Singleton);
-
-            // Регистрация ViewModel.
-            container.Register<GameWindowViewModel>();
+            foreach (var gameModule in modules)
+            {
+                gameModule.Initialize(container);
+            }
 
             return container;
         }
