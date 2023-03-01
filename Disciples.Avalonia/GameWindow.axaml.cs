@@ -30,6 +30,11 @@ namespace Disciples.Avalonia
         {
             var screen = this.Screens.ScreenFromVisual(this);
 
+            // Если окно открыть и тут же закрыть, screen будет null.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (screen == null)
+                return;
+
             // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
             var scale = Math.Min(screen.WorkingArea.Width / GameInfo.OriginalWidth, screen.WorkingArea.Height / GameInfo.OriginalHeight);
 

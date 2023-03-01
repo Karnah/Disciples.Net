@@ -40,8 +40,8 @@ namespace Disciples.Engine.Implementation.Extensions
         /// </summary>
         public static IReadOnlyList<Frame> ConvertToFrames(this IBitmapFactory bitmapFactory, IReadOnlyCollection<RawBitmap> images)
         {
-            if (images == null)
-                return null;
+            if (images.Count == 0)
+                return Array.Empty<Frame>();
 
             var result = new List<Frame>(images.Count);
 

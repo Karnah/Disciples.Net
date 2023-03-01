@@ -91,7 +91,7 @@ namespace Disciples.Scene.Battle.Providers
                 GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{ConvertDirection(direction)}00") ??
                 // Анимация симметрична.
                 GetAnimationFrames($"{unitId.ToUpper()}TUCHA1B00");
-            BattleUnitTargetAnimation unitTargetAnimation = null;
+            BattleUnitTargetAnimation? unitTargetAnimation = null;
             if (singleTargetFrames != null) {
                 unitTargetAnimation = new BattleUnitTargetAnimation(true, singleTargetFrames);
             }
@@ -129,6 +129,8 @@ namespace Disciples.Scene.Battle.Providers
 
             var unitImagesName = $"{unitId.ToUpper()}{ConvertAction(action)}A1{ConvertDirection(direction)}00";
             var unitFrames = GetAnimationFrames(unitImagesName);
+            if (unitFrames == null)
+                throw new ArgumentException($"Отсутствует анимация для юнита: {unitImagesName}");
 
             var auraImagesName = $"{unitId.ToUpper()}{ConvertAction(action)}A2{ConvertDirection(direction)}00";
             var auraFrames = GetAnimationFrames(auraImagesName);
@@ -136,9 +138,12 @@ namespace Disciples.Scene.Battle.Providers
             return new BattleUnitFrames(shadowFrames, unitFrames, auraFrames);
         }
 
-        private IReadOnlyList<Frame> GetAnimationFrames(string fileName)
+        private IReadOnlyList<Frame>? GetAnimationFrames(string fileName)
         {
             var images = _extractor.GetAnimationFrames(fileName);
+            if (images == null)
+                return null;
+
             return _bitmapFactory.ConvertToFrames(images);
         }
 

@@ -13,7 +13,7 @@ namespace Disciples.Engine.Extensions
         /// </summary>
         public static bool HasAllyAbility(this Unit unit)
         {
-            var attackClass = unit.UnitType.FirstAttack.AttackClass;
+            var attackClass = unit.UnitType.MainAttack.AttackClass;
             if (attackClass == AttackClass.Heal ||
                 attackClass == AttackClass.BoostDamage ||
                 attackClass == AttackClass.Revive ||
@@ -31,7 +31,7 @@ namespace Disciples.Engine.Extensions
         /// </summary>
         public static bool HasEnemyAbility(this Unit unit)
         {
-            var attackClass = unit.UnitType.FirstAttack.AttackClass;
+            var attackClass = unit.UnitType.MainAttack.AttackClass;
             if (attackClass == AttackClass.Damage ||
                 attackClass == AttackClass.Drain ||
                 attackClass == AttackClass.Paralyze ||

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using JetBrains.Annotations;
-
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -115,6 +112,6 @@ namespace Disciples.Engine.Base
         /// Удалить указанный объект со сцены.
         /// </summary>
         /// <param name="sceneObject">Объект, который необходимо удалить.</param>
-        void RemoveSceneObject([CanBeNull]ISceneObject sceneObject);
+        void RemoveSceneObject(ISceneObject? sceneObject);
     }
 }

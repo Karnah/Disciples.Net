@@ -1,5 +1,5 @@
 ﻿using Disciples.Engine.Base;
-using Disciples.Engine.Models;
+using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Controllers
 {
@@ -9,8 +9,13 @@ namespace Disciples.Scene.Battle.Controllers
     public interface IBattleInterfaceController : ISupportLoading
     {
         /// <summary>
-        /// Обработать события от устройств ввода.
+        /// Обработать события перед обновлением сцены.
         /// </summary>
-        void ProcessInputDeviceEvents(IReadOnlyList<InputDeviceEvent> events);
+        void BeforeSceneUpdate(BattleUpdateContext context);
+
+        /// <summary>
+        /// Обработать завершение обновлении сцены.
+        /// </summary>
+        void AfterSceneUpdate(BattleUpdateContext context);
     }
 }

@@ -95,9 +95,9 @@
         /// Базовое значение силы первой атаки.
         /// todo Рассчитывать, зависит от уровня.
         /// </summary>
-        public int BaseFirstAttackPower => UnitType.FirstAttack.HealPower > 0
-            ? UnitType.FirstAttack.HealPower
-            : UnitType.FirstAttack.DamagePower;
+        public int BaseFirstAttackPower => UnitType.MainAttack.HealPower > 0
+            ? UnitType.MainAttack.HealPower
+            : UnitType.MainAttack.DamagePower;
 
         /// <summary>
         /// Модификатор значения силы первой атаки.
@@ -117,15 +117,15 @@
         /// <remarks>
         /// На вторую атаку модификаторы не распространяются.
         /// </remarks>
-        public int? SecondAttackPower => UnitType.SecondAttack?.HealPower > 0
-            ? UnitType.SecondAttack?.HealPower
-            : UnitType.SecondAttack?.DamagePower;
+        public int? SecondAttackPower => UnitType.SecondaryAttack?.HealPower > 0
+            ? UnitType.SecondaryAttack?.HealPower
+            : UnitType.SecondaryAttack?.DamagePower;
 
         /// <summary>
         /// Базовое значение точности первой атаки.
         /// todo Рассчитывать, зависит от уровня.
         /// </summary>
-        public int BaseFirstAttackAccuracy => UnitType.FirstAttack.Accuracy;
+        public int BaseFirstAttackAccuracy => UnitType.MainAttack.Accuracy;
 
         /// <summary>
         /// Модификатор точности первой атаки.
@@ -136,7 +136,7 @@
         /// <summary>
         /// Текущее значение точность первой атаки.
         /// </summary>
-        public int FirstAttackAccuracy => BaseFirstAttackAccuracy + FirstAttackAccuracyModifier;
+        public int MainAttackAccuracy => BaseFirstAttackAccuracy + FirstAttackAccuracyModifier;
 
         /// <summary>
         /// Значение точности второй атаки.
@@ -145,12 +145,12 @@
         /// <remarks>
         /// На вторую атаку модификаторы не распространяются.
         /// </remarks>
-        public int? SecondAttackAccuracy => UnitType.SecondAttack?.Accuracy;
+        public int? SecondaryAttackAccuracy => UnitType.SecondaryAttack?.Accuracy;
 
         /// <summary>
         /// Базовая инициатива.
         /// </summary>
-        public int BaseInitiative => UnitType.FirstAttack.Initiative;
+        public int BaseInitiative => UnitType.MainAttack.Initiative;
 
         /// <summary>
         /// Модификатор инициативы.

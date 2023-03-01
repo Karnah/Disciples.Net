@@ -96,12 +96,14 @@ namespace Disciples.Engine.Implementation
         /// </summary>
         private void UpdateScene(object sender, EventArgs args)
         {
-            lock (_lock) {
+            lock (_lock)
+            {
                 var ticks = _stopwatch.ElapsedMilliseconds;
                 var ticksCount = ticks - _ticks;
                 _ticks = ticks;
 
-                try {
+                try
+                {
                     CheckInputDeviceSelection();
 
                     var data = new UpdateSceneData(ticksCount, _inputDeviceEvents);
@@ -112,10 +114,12 @@ namespace Disciples.Engine.Implementation
 
                     CurrentSceneContainer?.UpdateContainer();
                 }
-                catch (Exception e) {
-                    _logger.Log(e.ToString());
+                catch (Exception e)
+                {
+                    _logger.LogError("Ошибка в цикле", e);
                 }
-                finally {
+                finally
+                {
                     _inputDeviceEvents.Clear();
                 }
             }

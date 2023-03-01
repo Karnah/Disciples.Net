@@ -24,6 +24,8 @@ namespace Disciples.Scene.Battle
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
 
+        private BattleUpdateContext _battleUpdateContext = new();
+
         private IBattleController _battleController;
         private IBattleInterfaceController _battleInterfaceController;
 
@@ -63,7 +65,10 @@ namespace Disciples.Scene.Battle
         {
             base.BeforeSceneUpdate(data);
 
-            _battleInterfaceController.ProcessInputDeviceEvents(data.InputDeviceEvents);
+            _battleUpdateContext.BeforeSceneUpdate(data);
+
+            _battleInterfaceController.BeforeSceneUpdate(_battleUpdateContext);
+            _battleController.BeforeSceneUpdate(_battleUpdateContext);
         }
 
         /// <inheritdoc />
@@ -71,7 +76,9 @@ namespace Disciples.Scene.Battle
         {
             base.AfterSceneUpdate(data);
 
-            _battleController.UpdateSceneState(data.TicksCount);
+            _battleController.AfterSceneUpdate(_battleUpdateContext);
+            _battleInterfaceController.AfterSceneUpdate(_battleUpdateContext);
+            _battleUpdateContext.AfterSceneUpdate();
         }
 
         /// <inheritdoc />
@@ -112,6 +119,8 @@ namespace Disciples.Scene.Battle
 
                 component.Unload();
             }
+
+            _battleUpdateContext = new BattleUpdateContext();
         }
 
 

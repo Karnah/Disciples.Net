@@ -14,6 +14,7 @@ namespace Disciples.Scene.Battle
         /// <inheritdoc />
         public void Initialize(IRegistrator containerRegistrator)
         {
+            containerRegistrator.Register<BattleProcessor>(Reuse.Singleton);
             containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(Reuse.Singleton);
             containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(Reuse.Singleton);
             containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(Reuse.Singleton);

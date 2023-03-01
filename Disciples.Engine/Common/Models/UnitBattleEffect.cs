@@ -7,12 +7,24 @@ namespace Disciples.Engine.Common.Models
     /// </summary>
     public class UnitBattleEffect
     {
+        /// <summary>
+        /// Создать объект типа <see cref="UnitBattleEffect" />.
+        /// </summary>
         public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration)
         {
             EffectType = effectType;
             RoundDuration = roundDuration;
         }
 
+        /// <summary>
+        /// Создать объект типа <see cref="UnitBattleEffect" />.
+        /// </summary>
+        public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration, int? power)
+        {
+            EffectType = effectType;
+            RoundDuration = roundDuration;
+            Power = power;
+        }
 
         /// <summary>
         /// Тип эффекта, оказываемого на юнита.
@@ -23,5 +35,10 @@ namespace Disciples.Engine.Common.Models
         /// Длительность эффекта в раундах.
         /// </summary>
         public int RoundDuration { get; set; }
+
+        /// <summary>
+        /// Сила эффекта.
+        /// </summary>
+        public int? Power { get; }
     }
 }

@@ -1,23 +1,40 @@
-﻿namespace Disciples.Scene.Battle.Enums
+﻿namespace Disciples.Scene.Battle.Enums;
+
+/// <summary>
+/// Действие, которое совершает юнит.
+/// </summary>
+public enum UnitActionType
 {
     /// <summary>
-    /// Тип действия юнита.
+    /// Попадание атаки в этого юнита.
     /// </summary>
-    public enum UnitActionType
-    {
-        /// <summary>
-        /// Атака.
-        /// </summary>
-        Attack,
+    GetHit,
 
-        /// <summary>
-        /// Защита.
-        /// </summary>
-        Defend,
+    /// <summary>
+    /// Юнит уклонился от атаки (промах атакующего).
+    /// </summary>
+    Dodge,
 
-        /// <summary>
-        /// Ожидание.
-        /// </summary>
-        Wait
-    }
+    /// <summary>
+    /// Защита.
+    /// </summary>
+    Defend,
+
+    /// <summary>
+    /// Ожидание.
+    /// </summary>
+    Waiting,
+
+    /// <summary>
+    /// Юнит умирает.
+    /// </summary>
+    Dying,
+
+    /// <summary>
+    /// Наложение эффекта.
+    /// </summary>
+    /// <remarks>
+    /// Отравления, усиления, проклятия и т.д.
+    /// </remarks>
+    UnderEffect
 }

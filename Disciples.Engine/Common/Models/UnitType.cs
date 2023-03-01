@@ -25,9 +25,9 @@ namespace Disciples.Engine.Common.Models
             string name,
             string description,
             string abil,
-            Attack firstAttack,
-            Attack secondAttack,
-            bool attackTwice,
+            Attack mainAttack,
+            Attack secondaryAttack,
+            bool isAttackTwice,
             int hitPoints,
             UnitType baseUnit,
             int armor,
@@ -57,9 +57,9 @@ namespace Disciples.Engine.Common.Models
             Name = name;
             Description = description;
             Abil = abil;
-            FirstAttack = firstAttack;
-            SecondAttack = secondAttack;
-            AttackTwice = attackTwice;
+            MainAttack = mainAttack;
+            SecondaryAttack = secondaryAttack;
+            IsAttackTwice = isAttackTwice;
             HitPoints = hitPoints;
             BaseUnit = baseUnit;
             Armor = armor;
@@ -150,17 +150,17 @@ namespace Disciples.Engine.Common.Models
         /// <summary>
         /// Основная атака.
         /// </summary>
-        public Attack FirstAttack { get; }
+        public Attack MainAttack { get; }
 
         /// <summary>
         /// Дополнительная атака.
         /// </summary>
-        public Attack SecondAttack { get; }
+        public Attack? SecondaryAttack { get; }
 
         /// <summary>
         /// Атакует ли юнит дважды.
         /// </summary>
-        public bool AttackTwice { get; }
+        public bool IsAttackTwice { get; }
 
         /// <summary>
         /// Количество жизней.

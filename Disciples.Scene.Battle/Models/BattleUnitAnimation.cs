@@ -13,7 +13,7 @@ namespace Disciples.Scene.Battle.Models
         /// </summary>
         public BattleUnitAnimation(
             Dictionary<BattleAction, BattleUnitFrames> battleUnitFrames,
-            BattleUnitTargetAnimation targetAnimation,
+            BattleUnitTargetAnimation? targetAnimation,
             IReadOnlyList<Frame> deathFrames)
         {
             BattleUnitFrames = battleUnitFrames;
@@ -30,7 +30,7 @@ namespace Disciples.Scene.Battle.Models
         /// <summary>
         /// Информации об анимации, которая применяются в юниту-цели.
         /// </summary>
-        public BattleUnitTargetAnimation TargetAnimation { get; }
+        public BattleUnitTargetAnimation? TargetAnimation { get; }
 
         /// <summary>
         /// Анимация смерти юнита.

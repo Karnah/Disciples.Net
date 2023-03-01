@@ -42,7 +42,7 @@ namespace Disciples.ResourceProvider
         // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
         // Например, G000UU8029HHITA1A00.
         // Ссылки на PNG нет, но в .ff файле какая-то информация есть.
-        public IReadOnlyCollection<RawBitmap> GetAnimationFrames(string name)
+        public IReadOnlyCollection<RawBitmap>? GetAnimationFrames(string name)
         {
             if (_mqAnimations?.ContainsKey(name) != true)
                 return null;

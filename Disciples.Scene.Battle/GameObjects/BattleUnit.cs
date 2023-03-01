@@ -36,8 +36,8 @@ namespace Disciples.Scene.Battle.GameObjects
                 : BattleDirection.Defender;
             Action = BattleAction.Waiting;
 
-            BattleUnitAnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider, unit.UnitType.UnitTypeId);
-            this.Components = new IComponent[] { BattleUnitAnimationComponent };
+            AnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider);
+            this.Components = new IComponent[] { AnimationComponent };
 
             Width = BATTLE_UNIT_WIDTH;
             Height = BATTLE_UNIT_HEIGHT;
@@ -50,7 +50,7 @@ namespace Disciples.Scene.Battle.GameObjects
         /// <summary>
         /// Компонент анимации юнита.
         /// </summary>
-        public BattleUnitAnimationComponent BattleUnitAnimationComponent { get; }
+        public BattleUnitAnimationComponent AnimationComponent { get; }
 
 
         /// <summary>

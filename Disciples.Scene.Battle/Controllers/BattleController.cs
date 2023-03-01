@@ -1,14 +1,13 @@
 ﻿using Disciples.Engine;
-using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Models.BattleActions;
 
 namespace Disciples.Scene.Battle.Controllers
 {
@@ -20,52 +19,42 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private const int INITIATIVE_RANGE = 5;
         /// <summary>
-        /// Разброс атаки при ударе.
-        /// </summary>
-        private const int ATTACK_RANGE = 5;
-        /// <summary>
         /// Слой, который перекрывает всех юнитов.
         /// </summary>
         private const int ABOVE_ALL_UNITS_LAYER = 100 * 4;
-        /// <summary>
-        /// Задержка после завершения всех действий, прежде чем ход перейдёт к следующему юниту.
-        /// </summary>
-        private const long ACTION_DELAY = 250;
 
-
-        private readonly IGameController _gameController;
         private readonly IBattleSceneController _battleSceneController;
+        private readonly BattleProcessor _battleProcessor;
 
         private Squad _attackSquad;
         private Squad _defendSquad;
 
         private List<BattleUnit> _units;
-        private List<AnimationObject> _targetAnimations;
-        private IReadOnlyCollection<BattleUnit> _targetUnits;
-
 
         /// <summary>
         /// Очередность хода юнитов.
         /// </summary>
         private Queue<BattleUnit> _turnOrder;
+
         /// <summary>
-        /// Задержка, которая необходима, чтобы завершились все эффекты после удара/действия.
+        /// Создать объект типа <see cref="BattleController" />.
         /// </summary>
-        private long? _delayTime;
-
-        /// <inheritdoc />
-        public BattleController(IGameController gameController, IBattleSceneController battleSceneController)
+        public BattleController(IBattleSceneController battleSceneController, BattleProcessor battleProcessor)
         {
-            _gameController = gameController;
             _battleSceneController = battleSceneController;
-
-            _targetAnimations = new List<AnimationObject>();
+            _battleProcessor = battleProcessor;
         }
-
 
         /// <inheritdoc />
         public override bool IsSharedBetweenScenes => false;
 
+        public BattleUnit CurrentUnitObject { get; private set; }
+
+        /// <inheritdoc />
+        public bool IsSecondAttack { get; private set; }
+
+        /// <inheritdoc />
+        public IReadOnlyList<BattleUnit> Units => _units;
 
         /// <inheritdoc />
         public void InitializeParameters(BattleSquadsData parameters)
@@ -75,74 +64,37 @@ namespace Disciples.Scene.Battle.Controllers
         }
 
         /// <inheritdoc />
-        public void UpdateSceneState(long ticksCount)
+        public void BeforeSceneUpdate(BattleUpdateContext context)
         {
-            if (BattleState == BattleState.WaitingAction || BattleState == BattleState.BattleEnd)
-                return;
+            // ProcessBeginAction может добавлять новые действия в NewActions,
+            // Поэтому вызываем ToList().
+            // TODO Подумать над уменьшением выделения памяти.
+            foreach (var newBattleAction in context.NewActions.ToList())
+            {
+                ProcessBeginAction(context, newBattleAction);
+            }
+        }
 
-            // Обрабатываем моментальные эффекты.
-            foreach (var battleUnit in Units) {
-                var unitEffects = battleUnit.Unit.Effects;
-                unitEffects.OnTick(ticksCount);
-
-                if (unitEffects.CurrentInstantaneousEffect == null)
-                    continue;
-
-                // Обрабатываем начало эффекта.
-                if (unitEffects.InstantaneousEffectBegin) {
-                    OnUnitInstantaneousEffectBegin(battleUnit.Unit);
-                    continue;
-                }
-
-                // Обрабатываем завершение эффекта.
-                if (unitEffects.InstantaneousEffectEnded) {
-                    OnUnitInstantaneousEffectEnded(battleUnit.Unit);
-                    continue;
-                }
+        /// <inheritdoc />
+        public void AfterSceneUpdate(BattleUpdateContext context)
+        {
+            foreach (var completedAction in context.CompletedActions)
+            {
+                ProcessCompletedBattleAction(context, completedAction);
             }
 
-            if (BattleState == BattleState.Delay) {
-                // Если остался хотя бы один действующий эффект, то не завершаем действие.
-                if (Units.Any(u => u.Unit.Effects.CurrentInstantaneousEffect != null))
-                    return;
-
-                // Сразу после завершения всех действий, мы не передаём ход дальше, а ждём немного времени.
-                if (_delayTime == null) {
-                    _delayTime = ACTION_DELAY;
+            // Если последние действия завершились в этом обновлении,
+            // Значит атака закончилась и нужно начинать новый ход.
+            if (context.IsAllActionsCompletedThisUpdate)
+            {
+                // Перед тем, как отдать ход следующему юниту мы должны подождать немного времени.
+                if (!context.CompletedActions.OfType<DelayLastBattleAction>().Any())
+                {
+                    context.AddNewAction(new DelayLastBattleAction());
                     return;
                 }
 
-                // Продолжаем ожидание.
-                if (_delayTime > 0) {
-                    _delayTime -= ticksCount;
-                    return;
-                }
-
-                _delayTime = null;
-
-                // Если юнит может атаковать дважды, и сейчас атаковал в первый раз, то не передаём ход дальше.
-                if (CurrentUnitObject.Unit.UnitType.AttackTwice && IsSecondAttack == false) {
-                    IsSecondAttack = true;
-                }
-                else {
-                    IsSecondAttack = false;
-                    NextTurn();
-                }
-
-                BattleState = BattleState.WaitingAction;
-                UnitActionEnded?.Invoke(this, EventArgs.Empty);
-
-                return;
-            }
-
-            if (BattleState == BattleState.BeforeTouch) {
-                BeforeTouch();
-                return;
-            }
-
-            if (BattleState == BattleState.AfterTouch) {
-                AfterTouch();
-                return;
+                NextTurn(context);
             }
         }
 
@@ -156,321 +108,12 @@ namespace Disciples.Scene.Battle.Controllers
         /// <inheritdoc />
         protected override void UnloadInternal()
         {
-            // Уничтожаем анимации, если они еще по какой-то причине действуют.
-            foreach (var targetAnimation in _targetAnimations) {
-                targetAnimation.Destroy();
-            }
-
             // Уничтожаем объекты юнитов.
-            foreach (var battleUnit in Units) {
+            foreach (var battleUnit in Units)
+            {
                 battleUnit.Destroy();
             }
         }
-
-        /// <summary>
-        /// Проверить, что анимация текущего юнита дошла да крайней точки и юнит готов вернуться в начальное положение.
-        /// Если это произошло, то пересчитываем урон и добавляем на сцену анимации атаки.
-        /// </summary>
-        private void BeforeTouch()
-        {
-            var curUnitAnimation = CurrentUnitObject.BattleUnitAnimationComponent;
-            var curUnit = CurrentUnitObject.Unit;
-
-            // todo Нужно научиться определять на каком фрейме происходит удар.
-            if (curUnitAnimation.FramesCount - curUnitAnimation.FrameIndex > 12)
-                return;
-
-            foreach (var targetUnit in _targetUnits) {
-                var unit = targetUnit.Unit;
-
-                // Проверяем меткость юнита.
-                var chanceAttack = RandomGenerator.Next(0, 100);
-                if (chanceAttack > curUnit.UnitType.FirstAttack.Accuracy) {
-                    unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Miss));
-                    continue;
-                }
-
-                ProcessAttack(CurrentUnitObject, targetUnit, true);
-
-                // Если есть анимация, применяемая к юниту, то добавляем её на сцену.
-                if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == true) {
-                    var targetAnimation = _battleSceneController.AddAnimation(
-                        curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
-                        targetUnit.X,
-                        targetUnit.Y,
-                        targetUnit.BattleUnitAnimationComponent.Layer + 2,
-                        false);
-                    _targetAnimations.Add(targetAnimation);
-                }
-            }
-
-            // Если есть анимация, применяемая на площадь, то добавляем её на сцену.
-            if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == false) {
-                // Центр анимации будет приходиться на середину между первым и вторым рядом.
-                var isTargetAttacker = _targetUnits.First().IsAttacker;
-                var (x, y) = BattleUnit.GetSceneUnitPosition(isTargetAttacker, 0.5, 1);
-
-                var areaAnimation = _battleSceneController.AddAnimation(
-                    curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
-                    x,
-                    y,
-                    ABOVE_ALL_UNITS_LAYER,
-                    false);
-                _targetAnimations.Add(areaAnimation);
-            }
-
-            BattleState = BattleState.AfterTouch;
-        }
-
-        /// <summary>
-        /// Удалить со сцены завершившиеся анимации.
-        /// Завершить атаку, если все анимации завершились.
-        /// </summary>
-        private void AfterTouch()
-        {
-            var curUnitAnimation = CurrentUnitObject.BattleUnitAnimationComponent;
-
-            // Переводим юнита в ожидание если его анимация закончилась.
-            if (CurrentUnitObject.Action == BattleAction.Attacking &&
-                curUnitAnimation.FrameIndex == curUnitAnimation.FramesCount - 1) {
-                CurrentUnitObject.Action = BattleAction.Waiting;
-            }
-
-            // Обрабатываем конец анимации получения повреждений для юнитов.
-            foreach (var targetUnitObject in _targetUnits) {
-                var tarUnit = targetUnitObject.Unit;
-                var tarUnitAnim = targetUnitObject.BattleUnitAnimationComponent;
-
-                if (targetUnitObject.Action == BattleAction.TakingDamage &&
-                    tarUnitAnim.FrameIndex == tarUnitAnim.FramesCount - 1) {
-
-                    targetUnitObject.Action = BattleAction.Waiting;
-
-                    // В начале просто добавляем анимацию смерти юнита.
-                    // Только спустя несколько тиков он превратится в кучку костей.
-                    if (tarUnit.HitPoints == 0) {
-                        tarUnit.IsDead = true;
-
-                        var deathAnimation = _battleSceneController.AddAnimation(
-                            targetUnitObject.BattleUnitAnimationComponent.BattleUnitAnimation.DeathFrames,
-                            targetUnitObject.X,
-                            targetUnitObject.Y,
-                            targetUnitObject.BattleUnitAnimationComponent.Layer + 2,
-                            false);
-
-                        _targetAnimations.Add(deathAnimation);
-                    }
-
-                    continue;
-                }
-
-                // Отображаем мертвого юнита как кости на сцене.
-                if (tarUnit.IsDead &&
-                    targetUnitObject.Action == BattleAction.Waiting &&
-                    tarUnitAnim.FrameIndex == tarUnitAnim.FramesCount / 2) {
-                    targetUnitObject.Action = BattleAction.Dead;
-                }
-            }
-
-
-            // Если активных действий нет, заканчиваем.
-            var isCurrentUnitWaiting = CurrentUnitObject.Action == BattleAction.Waiting;
-            var isAllAnimationsEnded = _targetAnimations.All(ta => ta.IsDestroyed);
-            var isAllInstantaneousEffectsEnded = Units.All(u => u.Unit.Effects.CurrentInstantaneousEffect == null);
-            if (isCurrentUnitWaiting && isAllAnimationsEnded && isAllInstantaneousEffectsEnded) {
-                _targetAnimations = new List<AnimationObject>();
-
-                if (IsBattleEnd()) {
-                    // todo Добавить что-то более подходящее
-                    Console.WriteLine("Battle end");
-
-                    BattleState = BattleState.BattleEnd;
-                    BattleEnded?.Invoke(this, EventArgs.Empty);
-
-                    return;
-                }
-
-                BattleState = BattleState.Delay;
-            }
-        }
-
-        /// <summary>
-        /// Обработать действие одного юнита на другого.
-        /// </summary>
-        /// <param name="attackingUnitObject">Юнит, который воздействует.</param>
-        /// <param name="targetUnitObject">Юнит, на которого воздействует.</param>
-        /// <param name="isFirstAttack">Используется базовая атака или вторичная.</param>
-        private static void ProcessAttack(BattleUnit attackingUnitObject, BattleUnit targetUnitObject, bool isFirstAttack)
-        {
-            var attackingUnit = attackingUnitObject.Unit;
-            var targetUnit = targetUnitObject.Unit;
-
-            var power = isFirstAttack
-                ? attackingUnit.FirstAttackPower
-                : attackingUnit.SecondAttackPower.Value;
-            var attack = isFirstAttack
-                ? attackingUnit.UnitType.FirstAttack
-                : attackingUnit.UnitType.SecondAttack;
-
-            // todo Сразу обработать иммунитет + сопротивления. Также вернуть результат.
-            // Вторая атака не будет действовать, если первая упёрлась в иммунитет.
-
-            switch (attack.AttackClass) {
-                case AttackClass.Damage:
-                    targetUnitObject.Action = BattleAction.TakingDamage;
-
-                    // todo Максимальное значение атаки - 250/300/400.
-                    var attackPower = power + RandomGenerator.Next(ATTACK_RANGE);
-
-                    // Уменьшаем входящий урон в зависимости от защиты.
-                    attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
-
-                    // Если юнит защитился, то урон уменьшается в два раза.
-                    if (targetUnit.Effects.ExistsBattleEffect(UnitBattleEffectType.Defend)) {
-                        attackPower /= 2;
-                    }
-
-                    // Мы не можем нанести урон больше, чем осталось очков здоровья.
-                    attackPower = Math.Min(attackPower, targetUnit.HitPoints);
-
-                    targetUnit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Damaged, attackPower));
-                    break;
-
-                case AttackClass.Drain:
-                    break;
-
-                case AttackClass.Paralyze:
-                    break;
-
-                case AttackClass.Heal:
-                    targetUnit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Healed, power));
-                    break;
-
-                case AttackClass.Fear:
-                    break;
-
-                case AttackClass.BoostDamage:
-                    break;
-
-                case AttackClass.Petrify:
-                    break;
-
-                case AttackClass.LowerDamage:
-                    break;
-
-                case AttackClass.LowerInitiative:
-                    break;
-
-                case AttackClass.Poison:
-                    break;
-
-                case AttackClass.Frostbite:
-                    break;
-
-                case AttackClass.Revive:
-                    break;
-
-                case AttackClass.DrainOverflow:
-                    break;
-
-                case AttackClass.Cure:
-                    break;
-
-                case AttackClass.Summon:
-                    break;
-
-                case AttackClass.DrainLevel:
-                    break;
-
-                case AttackClass.GiveAttack:
-                    break;
-
-                case AttackClass.Doppelganger:
-                    break;
-
-                case AttackClass.TransformSelf:
-                    break;
-
-                case AttackClass.TransformOther:
-                    break;
-
-                case AttackClass.Blister:
-                    break;
-
-                case AttackClass.BestowWards:
-                    break;
-
-                case AttackClass.Shatter:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        /// <summary>
-        /// Обработать начало моментального эффекта.
-        /// </summary>
-        /// <param name="unit">Юнит у которого начался моментальный эффект.</param>
-        private void OnUnitInstantaneousEffectBegin(Unit unit)
-        {
-            var currentInstantaneousEffect = unit.Effects.CurrentInstantaneousEffect;
-            switch (currentInstantaneousEffect.EffectType) {
-                case UnitInstantaneousEffectType.Damaged:
-                    unit.ChangeHitPoints(- currentInstantaneousEffect.Power.Value);
-                    break;
-                case UnitInstantaneousEffectType.Healed:
-                    unit.ChangeHitPoints(currentInstantaneousEffect.Power.Value);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Обработать завершение моментального эффекта.
-        /// </summary>
-        /// <param name="unit">Юнит у которого завершился моментальный эффект.</param>
-        private void OnUnitInstantaneousEffectEnded(Unit unit)
-        {
-            var currentInstantaneousEffect = unit.Effects.CurrentInstantaneousEffect;
-            switch (currentInstantaneousEffect.EffectType)
-            {
-                case UnitInstantaneousEffectType.Defended:
-                    // При защите юнита, который бьёт дважды, необходимо сразу передать ход следующему.
-                    // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
-                    IsSecondAttack = true;
-
-                    unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
-                    break;
-                case UnitInstantaneousEffectType.Waiting:
-                    // При ожидании юнита, который бьёт дважды, необходимо сразу передать ход следующему.
-                    // Поэтому считаем, что была совершена вторая атака, чтобы не делать дополнительных проверок где-либо еще.
-                    IsSecondAttack = true;
-
-                    // todo Перебросить в конец очереди.
-                    break;
-            }
-        }
-
-        /// <inheritdoc />
-        public BattleState BattleState { get; private set; } = BattleState.WaitingAction;
-
-        public BattleUnit CurrentUnitObject { get; private set; }
-
-        /// <inheritdoc />
-        public bool IsSecondAttack { get; private set; }
-
-        /// <inheritdoc />
-        public IReadOnlyList<BattleUnit> Units => _units;
-
-
-        /// <inheritdoc />
-        public event EventHandler<UnitActionBeginEventArgs> UnitActionBegin;
-
-        /// <inheritdoc />
-        public event EventHandler UnitActionEnded;
-
-        /// <inheritdoc />
-        public event EventHandler BattleEnded;
-
 
         /// <summary>
         /// Расставить юнитов по позициям.
@@ -479,16 +122,12 @@ namespace Disciples.Scene.Battle.Controllers
         {
             _units = new List<BattleUnit>();
 
-            foreach (var attackSquadUnit in _attackSquad.Units) {
+            foreach (var attackSquadUnit in _attackSquad.Units)
                 _units.Add(_battleSceneController.AddBattleUnit(attackSquadUnit, true));
-            }
 
-            foreach (var defendSquadUnit in _defendSquad.Units) {
+            foreach (var defendSquadUnit in _defendSquad.Units)
                 _units.Add(_battleSceneController.AddBattleUnit(defendSquadUnit, false));
-            }
         }
-
-
 
         // Начать новый раунд.
         private void StartNewRound()
@@ -503,22 +142,43 @@ namespace Disciples.Scene.Battle.Controllers
         }
 
         // Передать ход следующему юниту.
-        private void NextTurn()
+        private void NextTurn(BattleUpdateContext context)
         {
-            do {
-                if (_turnOrder.TryDequeue(out var nextUnit) && nextUnit.Unit.IsDead == false) {
+            if (IsBattleCompleted())
+            {
+                // TODO Также должны быть сняты все эффекты с оставшихся юнитов.
+                context.AddNewAction(new BattleCompletedAction());
+                return;
+            }
+
+            // Была завершена первая атака юнита, который может атаковать дважды.
+            // В этом случае ход остаётся у него.
+            if (CurrentUnitObject.Unit.UnitType.IsAttackTwice && !IsSecondAttack)
+            {
+                IsSecondAttack = true;
+                return;
+            }
+
+            IsSecondAttack = false;
+
+            do
+            {
+                if (_turnOrder.TryDequeue(out var nextUnit) && nextUnit.Unit.IsDead == false)
+                {
                     CurrentUnitObject = nextUnit;
                     CurrentUnitObject.Unit.Effects.OnUnitTurn();
 
                     return;
                 }
-            } while (_turnOrder.Any());
+            } while (_turnOrder.Count > 0);
 
             StartNewRound();
         }
 
-        // Проверить, если ли враги.
-        private bool IsBattleEnd()
+        /// <summary>
+        /// Проверить битва завершилась победой одной из сторон.
+        /// </summary>
+        private bool IsBattleCompleted()
         {
             return Units
                        .Where(u => u.Unit.IsDead == false)
@@ -541,7 +201,6 @@ namespace Disciples.Scene.Battle.Controllers
             var currentUnit = CurrentUnitObject.Unit;
             var targetUnit = targetUnitGameObject.Unit;
 
-
             // Лекарь не может атаковать врага, а воин не может атаковать союзника.
             if (currentUnit.Player == targetUnit.Player && currentUnit.HasAllyAbility() == false ||
                 currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility() == false) {
@@ -550,21 +209,21 @@ namespace Disciples.Scene.Battle.Controllers
 
             // todo Патриарх может воскресить юнита, так что эта проверка не совсем корректна.
             // Если юнит бьёт по площади, то разрешаем кликнуть на мертвого юнита.
-            if (targetUnitGameObject.Unit.IsDead && currentUnit.UnitType.FirstAttack.Reach != Reach.All)
+            if (targetUnitGameObject.Unit.IsDead && currentUnit.UnitType.MainAttack.Reach != Reach.All)
                 return false;
 
             // Лекарь по одиночной цели без второй атаки может лечить только тех,
             // у кого меньше максимального значения здоровья.
             if (currentUnit.Player == targetUnit.Player &&
-                currentUnit.UnitType.FirstAttack.AttackClass == AttackClass.Heal &&
-                currentUnit.UnitType.FirstAttack.Reach == Reach.Any &&
-                currentUnit.UnitType.SecondAttack == null &&
+                currentUnit.UnitType.MainAttack.AttackClass == AttackClass.Heal &&
+                currentUnit.UnitType.MainAttack.Reach == Reach.Any &&
+                currentUnit.UnitType.SecondaryAttack == null &&
                 targetUnit.HitPoints == targetUnit.UnitType.HitPoints) {
                 return false;
             }
 
             // Если юнит может атаковать только ближайшего, то проверяем препятствия.
-            if (currentUnit.UnitType.FirstAttack.Reach == Reach.Adjacent) {
+            if (currentUnit.UnitType.MainAttack.Reach == Reach.Adjacent) {
                 // Если атакующий юнит находится сзади и есть линия союзников впереди.
                 var currentSquad = GetUnitSquad(CurrentUnitObject);
                 if (currentUnit.SquadLinePosition == 0 && IsFirstLineEmpty(currentSquad) == false)
@@ -587,43 +246,6 @@ namespace Disciples.Scene.Battle.Controllers
             return true;
         }
 
-        public bool AttackUnit(BattleUnit targetUnitGameObject)
-        {
-            if (CanAttack(targetUnitGameObject) == false)
-                return false;
-
-            UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Attack));
-
-            CurrentUnitObject.Action = BattleAction.Attacking;
-
-            _targetUnits = CurrentUnitObject.Unit.UnitType.FirstAttack.Reach == Reach.All
-                ? GetUnitSquad(targetUnitGameObject)
-                : new [] { targetUnitGameObject };
-
-            BattleState = BattleState.BeforeTouch;
-
-            return true;
-        }
-
-        public void Defend()
-        {
-            UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Defend));
-
-            CurrentUnitObject.Unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Defended));
-
-            BattleState = BattleState.Delay;
-        }
-
-        public void Wait()
-        {
-            UnitActionBegin?.Invoke(this, new UnitActionBeginEventArgs(UnitActionType.Wait));
-
-            CurrentUnitObject.Unit.Effects.AddInstantaneousEffect(new UnitInstantaneousEffect(UnitInstantaneousEffectType.Waiting));
-            // todo Перебросить в конец очереди.
-            BattleState = BattleState.Delay;
-        }
-
-
         /// <summary>
         /// Получить весь отряд указанного юнита.
         /// </summary>
@@ -631,7 +253,6 @@ namespace Disciples.Scene.Battle.Controllers
         {
             return Units.Where(u => u.Unit.Player == battleUnit.Unit.Player && u.Unit.IsDead == false).ToList();
         }
-
 
         /// <summary>
         /// Проверить, свободна ли первая линия в отряде.
@@ -666,5 +287,318 @@ namespace Disciples.Scene.Battle.Controllers
         }
 
         #endregion
+
+        /// <summary>
+        /// Обработать начало нового действия.
+        /// </summary>
+        private void ProcessBeginAction(BattleUpdateContext context, IBattleAction battleAction)
+        {
+            if (battleAction is BeginAttackUnitBattleAction beginAttackUnitAction)
+            {
+                ProcessBeginAttackUnitAction(context, beginAttackUnitAction);
+                return;
+            }
+
+            if (battleAction is DefendBattleAction)
+            {
+                ProcessDefendUnitAction(context);
+                return;
+            }
+
+            if (battleAction is WaitingBattleAction)
+            {
+                ProcessWaitingUnitAction(context);
+                return;
+            }
+
+            if (battleAction is BeginSecondaryAttackBattleAction secondaryAttackAction)
+            {
+                ProcessBeginSecondaryAttackAction(context, secondaryAttackAction);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Обработать начало воздействия на юнита.
+        /// </summary>
+        private void ProcessBeginAttackUnitAction(BattleUpdateContext context, BeginAttackUnitBattleAction beginAttackUnitAction)
+        {
+            // Нельзя было атаковать данного юнита.
+            if (!CanAttack(beginAttackUnitAction.TargetUnit))
+                return;
+
+            CurrentUnitObject.Action = BattleAction.Attacking;
+
+            var targetUnitGameObject = beginAttackUnitAction.TargetUnit;
+            context.AddNewAction(new MainAttackBattleAction(CurrentUnitObject, targetUnitGameObject));
+        }
+
+        /// <summary>
+        /// Обработать защиту юнита.
+        /// </summary>
+        private void ProcessDefendUnitAction(BattleUpdateContext context)
+        {
+            IsSecondAttack = true;
+            context.AddNewAction(new UnitBattleAction(CurrentUnitObject, UnitActionType.Defend));
+        }
+
+        /// <summary>
+        /// Обработать ожидание юнита.
+        /// </summary>
+        private void ProcessWaitingUnitAction(BattleUpdateContext context)
+        {
+            IsSecondAttack = true;
+            context.AddNewAction(new UnitBattleAction(CurrentUnitObject, UnitActionType.Waiting));
+        }
+
+        /// <summary>
+        /// Обработать завершение дополнительной атаки юнита.
+        /// </summary>
+        private void ProcessBeginSecondaryAttackAction(BattleUpdateContext context, BeginSecondaryAttackBattleAction beginSecondaryAttackAction)
+        {
+            var attacker = beginSecondaryAttackAction.Attacker;
+            var target = beginSecondaryAttackAction.Target;
+            var power = beginSecondaryAttackAction.Power;
+
+            var attackResult = _battleProcessor.ProcessSecondaryAttack(attacker.Unit, target.Unit, power);
+            ProcessAttackResult(context, attacker, target, attackResult);
+        }
+
+        /// <summary>
+        /// Обработать завершение действия 
+        /// </summary>
+        private void ProcessCompletedBattleAction(BattleUpdateContext context, IBattleAction battleAction)
+        {
+            if (battleAction is MainAttackBattleAction mainAttackAction)
+            {
+                ProcessCompletedMainAttackAction(context, mainAttackAction);
+                return;
+            }
+
+            if (battleAction is AnimationBattleAction animationAction)
+            {
+                ProcessCompletedBattleUnitAnimation(context, animationAction);
+                return;
+            }
+
+            if (battleAction is UnitBattleAction unitBattleAction)
+            {
+                ProcessCompletedUnitAction(unitBattleAction);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Обработать завершение базовой атаки юнита.
+        /// </summary>
+        private void ProcessCompletedMainAttackAction(
+            BattleUpdateContext context,
+            MainAttackBattleAction mainAttackBattleAction)
+        {
+            var targetUnitGameObject = mainAttackBattleAction.Target;
+            var curUnitAnimation = CurrentUnitObject.AnimationComponent;
+            var curUnit = CurrentUnitObject.Unit;
+            var targetUnits = CurrentUnitObject.Unit.UnitType.MainAttack.Reach == Reach.All
+                ? GetUnitSquad(targetUnitGameObject)
+                : new[] { targetUnitGameObject };
+
+            // Некоторые вторые атаки, например, выпить жизненную силу обрабатываются особым образом.
+            // Мы должны посчитать весь урон, который нанесли первой атакой, а потом сделать целями других юнитов.
+            var unitSecondAttack = curUnit.UnitType.SecondaryAttack;
+            bool shouldCalculateDamage = false;
+            int damage = 0;
+            if (unitSecondAttack?.AttackClass == AttackClass.DrainOverflow ||
+                unitSecondAttack?.AttackClass == AttackClass.Doppelganger)
+            {
+                shouldCalculateDamage = true;
+            }
+
+            foreach (var targetUnit in targetUnits)
+            {
+                var attackResult = _battleProcessor.ProcessMainAttack(curUnit, targetUnit.Unit);
+
+                // Атака не выполнялась, либо еще не умеем обрабатывать данный тип атаки.
+                if (attackResult == null)
+                    continue;
+
+                ProcessAttackResult(context, CurrentUnitObject, targetUnit, attackResult);
+
+                if (attackResult.AttackResult == AttackResult.Attack)
+                    damage += attackResult.Power!.Value;
+
+                // Сразу обрабатываем вторую атаку.
+                // Однако, её последствия будут только после завершения всех анимаций, которые связаны с первой.
+                if (unitSecondAttack != null && !shouldCalculateDamage)
+                    context.AddDelayedAction(new BeginSecondaryAttackBattleAction(CurrentUnitObject, targetUnit));
+            }
+
+            // Если есть анимация, применяемая на площадь, то добавляем её на сцену.
+            if (curUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == false)
+            {
+                // Центр анимации будет приходиться на середину между первым и вторым рядом.
+                var isTargetAttacker = targetUnits.First().IsAttacker;
+                var (x, y) = BattleUnit.GetSceneUnitPosition(isTargetAttacker, 0.5, 1);
+
+                var areaAnimation = _battleSceneController.AddAnimation(
+                    curUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
+                    x,
+                    y,
+                    ABOVE_ALL_UNITS_LAYER,
+                    false);
+                context.AddNewAction(new AnimationBattleAction(areaAnimation.AnimationComponent));
+            }
+
+            // В любом случае дожидаемся завершения анимации атаки.
+            context.AddNewAction(new AnimationBattleAction(curUnitAnimation));
+
+            // TODO Добавить обработка выпить жизнь.
+            // По идее, нужно будет разделить урон на каждого юнита.
+            // Но если юнит здоров, то делить нужно между оставшимися.
+            if (shouldCalculateDamage)
+            {
+            }
+        }
+
+        /// <summary>
+        /// Обработать завершения анимации атаки юнита.
+        /// </summary>
+        private void ProcessCompletedBattleUnitAnimation(BattleUpdateContext context, AnimationBattleAction animationAction)
+        {
+            if (animationAction.AnimationComponent.GameObject is not BattleUnit battleUnit)
+                return;
+
+            battleUnit.Action = BattleAction.Waiting;
+
+            // Обрабатываем смерть юнита.
+            if (battleUnit.Unit.HitPoints == 0)
+            {
+                battleUnit.Unit.IsDead = true;
+
+                var deathAnimation = _battleSceneController.AddAnimation(
+                    battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
+                    battleUnit.X,
+                    battleUnit.Y,
+                    battleUnit.AnimationComponent.Layer + 2,
+                    false);
+                context.AddNewAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
+                context.AddNewAction(new UnitBattleAction(battleUnit, UnitActionType.Dying));
+            }
+        }
+
+        /// <summary>
+        /// Обработать завершение действия юнита.
+        /// </summary>
+        private static void ProcessCompletedUnitAction(UnitBattleAction unitAction)
+        {
+            // Если юнит защитился, то добавляем эффект.
+            if (unitAction.UnitActionType == UnitActionType.Defend)
+            {
+                unitAction.TargetUnit.Unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
+            }
+
+            // Если юнит умер, то превращаем его в кучу костей.
+            if (unitAction.UnitActionType == UnitActionType.Dying)
+            {
+                unitAction.TargetUnit.Action = BattleAction.Dead;
+            }
+
+            // На юнита наложен эффект.
+            if (unitAction.UnitActionType == UnitActionType.UnderEffect)
+            {
+                var effectAction = (EffectUnitBattleAction)unitAction;
+                effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
+                    new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackClass), effectAction.RoundDuration, effectAction.Power));
+            }
+        }
+
+        /// <summary>
+        /// Обработать результат атаки.
+        /// </summary>
+        private void ProcessAttackResult(
+            BattleUpdateContext context,
+            BattleUnit attackerUnit,
+            BattleUnit targetUnit,
+            BattleProcessorAttackResult? attackResult)
+        {
+            // Атака не выполнялась, либо еще не умеем обрабатывать данный тип атаки.
+            if (attackResult == null)
+                return;
+
+            switch (attackResult.AttackResult)
+            {
+                case AttackResult.Miss:
+                {
+                    context.AddNewAction(new UnitBattleAction(targetUnit, UnitActionType.Dodge));
+                    break;
+                }
+
+                case AttackResult.Attack:
+                {
+                    var power = attackResult.Power!.Value;
+                    var attackClass = attackResult.AttackClass!.Value;
+
+                    targetUnit.Unit.HitPoints -= power;
+                    targetUnit.Action = BattleAction.TakingDamage;
+
+                    context.AddNewAction(new AnimationBattleAction(targetUnit.AnimationComponent));
+                    context.AddNewAction(new AttackUnitBattleAction(targetUnit, power, attackClass));
+
+                    break;
+                }
+
+                case AttackResult.Heal:
+                {
+                    var healPower = attackResult.Power!.Value;
+                    var attackClass = attackResult.AttackClass!.Value;
+
+                    targetUnit.Unit.HitPoints += healPower;
+                    context.AddNewAction(new AttackUnitBattleAction(targetUnit, healPower, attackClass));
+
+                    break;
+                }
+
+                case AttackResult.Effect:
+                {
+                    var power = attackResult.Power;
+                    var roundDuration = attackResult.RoundDuration!.Value;
+                    var attackClass = attackResult.AttackClass!.Value;
+
+                    targetUnit.Unit.Effects.AddBattleEffect(
+                        new UnitBattleEffect(AttackClassToEffectType(attackClass), roundDuration, power));
+                    context.AddNewAction(new EffectUnitBattleAction(targetUnit, attackClass));
+                    break;
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            // Если у атакующего есть анимация, применяемая к юниту, то добавляем её на сцену.
+            var targetUnitAnimation = attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
+            if (targetUnitAnimation?.IsSingle == true)
+            {
+                var targetAnimation = _battleSceneController.AddAnimation(
+                    targetUnitAnimation.Frames,
+                    targetUnit.X,
+                    targetUnit.Y,
+                    targetUnit.AnimationComponent.Layer + 2,
+                    false);
+                context.AddNewAction(new AnimationBattleAction(targetAnimation.AnimationComponent));
+            }
+        }
+
+        /// <summary>
+        /// Получить тип эффекта в зависимости от типа атаки.
+        /// </summary>
+        private static UnitBattleEffectType AttackClassToEffectType(AttackClass attackClass)
+        {
+            return attackClass switch
+            {
+                AttackClass.Poison => UnitBattleEffectType.Poison,
+                AttackClass.Frostbite => UnitBattleEffectType.Frostbite,
+                AttackClass.Blister => UnitBattleEffectType.Blister,
+                _ => throw new ArgumentOutOfRangeException(nameof(attackClass), attackClass, null)
+            };
+        }
     }
 }

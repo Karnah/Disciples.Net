@@ -155,18 +155,18 @@ namespace Disciples.Scene.Battle.GameObjects
                 .Replace("%IMMU%", "Нет") // todo Заполнить.
                 .Replace("%WARD%", "Нет") // todo Заполнить.
 
-                .Replace("%TWICE%", Unit.UnitType.AttackTwice ? "(2x) " : string.Empty)
+                .Replace("%TWICE%", Unit.UnitType.IsAttackTwice ? "(2x) " : string.Empty)
                 .Replace("%ALTATTACK%", string.Empty) // todo Что это?
-                .Replace("%ATTACK%", Unit.UnitType.FirstAttack.Description)
-                .Replace("%SECOND%", Unit.UnitType.SecondAttack == null ? string.Empty : $" / {Unit.UnitType.SecondAttack.Description}")
+                .Replace("%ATTACK%", Unit.UnitType.MainAttack.Description)
+                .Replace("%SECOND%", Unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {Unit.UnitType.SecondaryAttack.Description}")
                 .Replace("%HIT%", $"{GetValueWithModifier(Unit.BaseFirstAttackAccuracy, Unit.FirstAttackAccuracyModifier)}%")
-                .Replace("%HIT2%", Unit.SecondAttackAccuracy == null ? string.Empty : $" / {Unit.SecondAttackAccuracy}%")
+                .Replace("%HIT2%", Unit.SecondaryAttackAccuracy == null ? string.Empty : $" / {Unit.SecondaryAttackAccuracy}%")
 
                 .Replace("%EFFECT%", GetUnitEffectTitle())
                 .Replace("%DAMAGE%", GetValueWithModifier(Unit.BaseFirstAttackPower, Unit.FirstAttackPowerModifier)
                                      + (Unit.SecondAttackPower > 0 ? $" / {Unit.SecondAttackPower}" : string.Empty))
-                .Replace("%SOURCE%", GetAttackSourceTitle(Unit.UnitType.FirstAttack.AttackSource))
-                .Replace("%SOURCE2%", Unit.UnitType.SecondAttack == null ? string.Empty : $" / {GetAttackSourceTitle(Unit.UnitType.FirstAttack.AttackSource)}")
+                .Replace("%SOURCE%", GetAttackSourceTitle(Unit.UnitType.MainAttack.AttackSource))
+                .Replace("%SOURCE2%", Unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {GetAttackSourceTitle(Unit.UnitType.MainAttack.AttackSource)}")
                 .Replace("%INIT%", GetValueWithModifier(Unit.BaseInitiative, Unit.InitiativeModifier))
                 .Replace("%REACH%", GetReachTitle())
                 .Replace("%TARGETS%", GetReachCount());
@@ -193,10 +193,10 @@ namespace Disciples.Scene.Battle.GameObjects
         /// </summary>
         private string GetUnitEffectTitle()
         {
-            if (Unit.UnitType.FirstAttack.AttackClass == AttackClass.Heal)
+            if (Unit.UnitType.MainAttack.AttackClass == AttackClass.Heal)
                 return _textProvider.GetText("X005TA0504");
 
-            if (Unit.UnitType.FirstAttack.AttackClass == AttackClass.BoostDamage)
+            if (Unit.UnitType.MainAttack.AttackClass == AttackClass.BoostDamage)
                 return _textProvider.GetText("X005TA0534");
 
             return _textProvider.GetText("X005TA0503");
@@ -246,7 +246,7 @@ namespace Disciples.Scene.Battle.GameObjects
         /// </summary>
         private string GetReachTitle()
         {
-            if (Unit.UnitType.FirstAttack.Reach == Reach.Adjacent)
+            if (Unit.UnitType.MainAttack.Reach == Reach.Adjacent)
                 return _textProvider.GetText("X005TA0201");
 
             return _textProvider.GetText("X005TA0200");
@@ -257,7 +257,7 @@ namespace Disciples.Scene.Battle.GameObjects
         /// </summary>
         private string GetReachCount()
         {
-            if (Unit.UnitType.FirstAttack.Reach == Reach.All)
+            if (Unit.UnitType.MainAttack.Reach == Reach.All)
                 return "6";
 
             return "1";
