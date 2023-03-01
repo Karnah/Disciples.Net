@@ -13,13 +13,13 @@ namespace Disciples.Scene.Battle.Models
         public BattleSceneParameters(
             IBattleController battleController,
             IBattleInterfaceController battleInterfaceController,
-            Squad attackSquad,
-            Squad defendSquad)
+            Squad attackingSquad,
+            Squad defendingSquad)
         {
             BattleController = battleController;
             BattleInterfaceController = battleInterfaceController;
-            AttackSquad = attackSquad;
-            DefendSquad = defendSquad;
+            AttackingSquad = attackingSquad;
+            DefendingSquad = defendingSquad;
         }
 
 
@@ -36,11 +36,11 @@ namespace Disciples.Scene.Battle.Models
         /// <summary>
         /// Атакующий отряд.
         /// </summary>
-        public Squad AttackSquad { get; }
+        public Squad AttackingSquad { get; }
 
         /// <summary>
         /// Защищающийся отряд.
         /// </summary>
-        public Squad DefendSquad { get; }
+        public Squad DefendingSquad { get; }
     }
 }

@@ -4,7 +4,6 @@ using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Platform.Factories;
-using Disciples.Scene.Battle.Enums;
 
 namespace Disciples.Scene.Battle.Providers
 {

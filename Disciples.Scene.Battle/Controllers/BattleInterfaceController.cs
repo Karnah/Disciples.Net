@@ -28,15 +28,16 @@ namespace Disciples.Scene.Battle.Controllers
 
         private readonly IGameController _gameController;
         private readonly IBattleSceneController _battleSceneController;
-        private readonly IBattleController _battleController;
         private readonly IBattleInterfaceProvider _interfaceProvider;
         private readonly IBattleResourceProvider _battleResourceProvider;
+        private readonly BattleContext _context;
+        private readonly BattleProcessor _battleProcessor;
 
         private IReadOnlyCollection<BattleUnit> _rightPanelUnits;
-        private IImageSceneObject _currentUnitFace;
-        private BattleUnitInfoGameObject _currentUnitTextInfoObject;
-        private IImageSceneObject _targetUnitFace;
-        private BattleUnitInfoGameObject _targetUnitTextInfoObject;
+        private IImageSceneObject? _currentUnitFace;
+        private BattleUnitInfoGameObject? _currentUnitTextInfoObject;
+        private IImageSceneObject? _targetUnitFace;
+        private BattleUnitInfoGameObject? _targetUnitTextInfoObject;
         private BattleUnit? _targetUnitObject;
         private DetailUnitInfoObject? _detailUnitInfoObject;
 
@@ -51,20 +52,20 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Объект, над которым была зажата кнопка мыши.
         /// </summary>
-        private GameObject _pressedObject;
+        private GameObject? _pressedObject;
 
         /// <summary>
         /// Игровой объект, отрисовывающий на текущем юните анимацию выделения.
         /// </summary>
-        private AnimationObject _selectionAnimation;
+        private AnimationObject? _currentUnitSelectionAnimation;
         /// <summary>
         /// Игровые объекты, которые отрисовывают анимации цели на юнитах-целях.
         /// </summary>
-        private IList<AnimationObject> _targetAnimations;
+        private IList<AnimationObject>? _targetUnitsAnimations;
         /// <summary>
         /// Необходимо ли отрисовывать анимации цели на юнитах.
         /// </summary>
-        private bool _animateTarget;
+        private bool _shouldAnimateTargets;
 
         /// <summary>
         /// Объекты портретов на правой панели.
@@ -96,26 +97,49 @@ namespace Disciples.Scene.Battle.Controllers
         public BattleInterfaceController(
             IGameController gameController,
             IBattleSceneController battleSceneController,
-            IBattleController battleController,
             IBattleInterfaceProvider battleInterfaceProvider,
-            IBattleResourceProvider battleResourceProvider)
+            IBattleResourceProvider battleResourceProvider,
+            BattleContext context,
+            BattleProcessor battleProcessor)
         {
             _gameController = gameController;
             _battleSceneController = battleSceneController;
-            _battleController = battleController;
             _interfaceProvider = battleInterfaceProvider;
             _battleResourceProvider = battleResourceProvider;
+            _context = context;
+            _battleProcessor = battleProcessor;
         }
 
         /// <inheritdoc />
         public override bool IsSharedBetweenScenes => false;
 
+        /// <summary>
+        ///  Юнит, который выполняет свой ход.
+        /// </summary>
+        private BattleUnit CurrentBattleUnit => _context.CurrentBattleUnit;
+
+        /// <summary>
+        /// Признак того, что юнит атакует второй раз за текущий ход.
+        /// </summary>
+        /// <remarks>Актуально только для юнитов, которые бьют дважды за ход.</remarks>
+        private bool IsSecondAttack => _context.IsSecondAttack;
+
+        /// <summary>
+        /// Список юнитов.
+        /// </summary>
+        private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
+
+        /// <summary>
+        /// Список всех действий на поле боя.
+        /// </summary>
+        private BattleActionContainer Actions => _context.Actions;
+
         /// <inheritdoc />
-        public void BeforeSceneUpdate(BattleUpdateContext context)
+        public void BeforeSceneUpdate()
         {
-            foreach (var inputDeviceEvent in context.InputDeviceEvents)
+            foreach (var inputDeviceEvent in _context.InputDeviceEvents)
             {
-                ProcessInputDeviceEvent(context, inputDeviceEvent);
+                ProcessInputDeviceEvent(inputDeviceEvent);
             }
         }
 
@@ -123,24 +147,24 @@ namespace Disciples.Scene.Battle.Controllers
         /// <remarks>
         /// Порядок обработки важен.
         /// </remarks>
-        public void AfterSceneUpdate(BattleUpdateContext context)
+        public void AfterSceneUpdate()
         {
-            if (context.IsActionsBeginThisUpdate)
+            if (Actions.IsActionsBeginThisUpdate)
             {
-                ProcessActionsBegin(context);
+                ProcessActionsBegin();
             }
 
-            foreach (var beginAction in context.NewActions)
+            foreach (var beginAction in Actions.New)
             {
                 ProcessBeginAction(beginAction);
             }
 
-            foreach (var beginAction in context.CompletedActions)
+            foreach (var beginAction in Actions.Completed)
             {
                 ProcessCompletedAction(beginAction);
             }
 
-            if (context.IsAllActionsCompletedThisUpdate)
+            if (Actions.IsAllActionsCompletedThisUpdate)
             {
                 ProcessActionsCompleted();
             }
@@ -152,7 +176,7 @@ namespace Disciples.Scene.Battle.Controllers
             InitializeMainInterface();
             InitializeButtons();
 
-            AttachSelectedAnimation(_battleController.CurrentUnitObject);
+            AttachSelectedAnimation(CurrentBattleUnit);
             InitializeUnitsOnRightPanel();
             InitializeAnimationsOnRightUnitsPanel();
         }
@@ -174,7 +198,7 @@ namespace Disciples.Scene.Battle.Controllers
             _battleSceneController.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
             _battleSceneController.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
 
-            var currentUnitBattleFace = _battleController.CurrentUnitObject.Unit.UnitType.BattleFace;
+            var currentUnitBattleFace = CurrentBattleUnit.Unit.UnitType.BattleFace;
             _currentUnitFace = _battleSceneController.AddImage(
                 currentUnitBattleFace,
                 0,
@@ -182,7 +206,7 @@ namespace Disciples.Scene.Battle.Controllers
                 INTERFACE_LAYER + 1);
 
             _currentUnitTextInfoObject = _battleSceneController.AddBattleUnitInfo(190, 520, INTERFACE_LAYER + 1);
-            _currentUnitTextInfoObject.Unit = _battleController.CurrentUnitObject.Unit;
+            _currentUnitTextInfoObject.Unit = CurrentBattleUnit.Unit;
 
 
             // Используем размеры лица текущего юнита, так как юнит-цель не инициализируются в начале боя.
@@ -249,9 +273,9 @@ namespace Disciples.Scene.Battle.Controllers
             }
 
             _targetUnitObject = targetUnitObject;
-            _targetUnitFace.Bitmap = targetUnitObject.Unit.UnitType.BattleFace;
-            _targetUnitTextInfoObject.Unit = targetUnitObject.Unit;
-            _animateTarget = shouldAnimateTarget;
+            _targetUnitFace!.Bitmap = targetUnitObject.Unit.UnitType.BattleFace;
+            _targetUnitTextInfoObject!.Unit = targetUnitObject.Unit;
+            _shouldAnimateTargets = shouldAnimateTarget;
 
             if (shouldAnimateTarget && !_isAnimating)
                 SelectTargetUnits();
@@ -282,7 +306,7 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Обработать событие воздействия с игровым объектом (наведение, клик мышью и т.д.).
         /// </summary>
-        private void ProcessInputDeviceEvent(BattleUpdateContext context, InputDeviceEvent inputDeviceEvent)
+        private void ProcessInputDeviceEvent(InputDeviceEvent inputDeviceEvent)
         {
             var actionType = inputDeviceEvent.ActionType;
             var actionState = inputDeviceEvent.ActionState;
@@ -311,7 +335,7 @@ namespace Disciples.Scene.Battle.Controllers
                     GameObjectPressed(gameObject);
                     break;
                 case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Deactivated:
-                    GameObjectClicked(context, gameObject);
+                    GameObjectClicked(gameObject);
                     break;
 
                 case InputDeviceActionType.MouseRight when actionState == InputDeviceActionState.Activated:
@@ -320,7 +344,7 @@ namespace Disciples.Scene.Battle.Controllers
 
                 case InputDeviceActionType.UiButton:
                     GameObjectPressed(gameObject);
-                    GameObjectClicked(context, gameObject);
+                    GameObjectClicked(gameObject);
                     break;
             }
         }
@@ -340,8 +364,8 @@ namespace Disciples.Scene.Battle.Controllers
             }
             else if (gameObject is UnitPortraitObject unitPortrait)
             {
-                var targetUnitObject = _battleController.GetUnitObject(unitPortrait.Unit);
-                UpdateTargetUnit(targetUnitObject, false);
+                var targetBattleUnit = _context.GetBattleUnit(unitPortrait.Unit);
+                UpdateTargetUnit(targetBattleUnit, false);
             }
             else if (gameObject is ButtonObject button)
             {
@@ -381,7 +405,7 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Обработчик события клика на игровом объекта.
         /// </summary>
-        private void GameObjectClicked(BattleUpdateContext context, GameObject gameObject)
+        private void GameObjectClicked(GameObject? gameObject)
         {
             // В том случае, если нажали кнопку на одном объекте, а отпустили на другом, то ничего не делаем.
             if (_pressedObject != gameObject)
@@ -392,17 +416,17 @@ namespace Disciples.Scene.Battle.Controllers
                 if (_isAnimating)
                     return;
 
-                if (_battleController.CanAttack(targetUnitGameObject))
-                    context.AddNewAction(new BeginAttackUnitBattleAction(targetUnitGameObject));
+                if (CanAttack(targetUnitGameObject))
+                    Actions.Add(new BeginAttackUnitBattleAction(targetUnitGameObject));
             }
             else if (gameObject is UnitPortraitObject unitPortrait)
             {
                 if (_isAnimating)
                     return;
 
-                var targetUnitObject = _battleController.GetUnitObject(unitPortrait.Unit);
-                if (_battleController.CanAttack(targetUnitObject))
-                    context.AddNewAction(new BeginAttackUnitBattleAction(targetUnitObject));
+                var targetUnitObject = _context.GetBattleUnit(unitPortrait.Unit);
+                if (CanAttack(targetUnitObject))
+                    Actions.Add(new BeginAttackUnitBattleAction(targetUnitObject));
             }
             else if (gameObject is ButtonObject button)
             {
@@ -411,11 +435,11 @@ namespace Disciples.Scene.Battle.Controllers
 
                 if (button == _defendButton)
                 {
-                    context.AddNewAction(new DefendBattleAction());
+                    Actions.Add(new DefendBattleAction());
                 }
                 else if (button == _waitButton)
                 {
-                    context.AddNewAction(new WaitingBattleAction());
+                    Actions.Add(new WaitingBattleAction());
                 }
             }
         }
@@ -423,7 +447,7 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Обработать событие того, что на игровой объект нажали ПКМ.
         /// </summary>
-        private void GameObjectRightButtonPressed(GameObject gameObject)
+        private void GameObjectRightButtonPressed(GameObject? gameObject)
         {
             Unit? unit = null;
 
@@ -476,7 +500,7 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Обработать начало действий на сцене.
         /// </summary>
-        private void ProcessActionsBegin(BattleUpdateContext context)
+        private void ProcessActionsBegin()
         {
             _isAnimating = true;
 
@@ -485,14 +509,14 @@ namespace Disciples.Scene.Battle.Controllers
             DetachTargetAnimations();
 
             // Если юнит атакует, то возвращаем состояние панели в нормальное значение.
-            if (context.NewActions.OfType<BeginAttackUnitBattleAction>().Any())
+            if (Actions.New.OfType<BeginAttackUnitBattleAction>().Any())
             {
                 CheckRightPanelReflection();
             }
             // Если юнит защищается/ждёт и т.д., то в любом случае нужно показывать его отряд.
             else
             {
-                _isRightUnitPanelReflected = _battleController.CurrentUnitObject.IsAttacker;
+                _isRightUnitPanelReflected = CurrentBattleUnit.IsAttacker;
             }
 
             // Обновляем портреты, если это требуется.
@@ -512,16 +536,16 @@ namespace Disciples.Scene.Battle.Controllers
             ActivateButtons(_reflectUnitPanelButton);
 
             // Если юнит наносит второй удар, то указанные кнопки активировать не нужно.
-            if (!_battleController.IsSecondAttack)
+            if (!IsSecondAttack)
                 ActivateButtons(_defendButton, _retreatButton, _waitButton);
 
-            AttachSelectedAnimation(_battleController.CurrentUnitObject);
+            AttachSelectedAnimation(CurrentBattleUnit);
 
             CheckRightPanelReflection();
             InitializeUnitsOnRightPanel();
             InitializeAnimationsOnRightUnitsPanel();
 
-            if (_targetUnitObject != null && _animateTarget)
+            if (_targetUnitObject != null && _shouldAnimateTargets)
                 SelectTargetUnits();
         }
 
@@ -565,6 +589,8 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private void ProcessBattleCompleted()
         {
+            // BUG. Не работает информация о юните после завершения битвы.
+
             _isAnimating = false;
 
             _defendButton.Destroy();
@@ -576,7 +602,7 @@ namespace Disciples.Scene.Battle.Controllers
             // todo Создать две новые кнопки - "выйти" и "выйти и открыть" интерфейс.
 
             // Отображаем отряд победителя.
-            _isRightUnitPanelReflected = _battleController.CurrentUnitObject.IsAttacker;
+            _isRightUnitPanelReflected = CurrentBattleUnit.IsAttacker;
             _reflectUnitPanelButton.Activate();
             _reflectUnitPanelButton.SetState(_isRightUnitPanelReflected);
 
@@ -598,8 +624,7 @@ namespace Disciples.Scene.Battle.Controllers
             if (_currentUnitTextInfoObject != null)
                 _currentUnitTextInfoObject.Unit = battleUnit.Unit;
 
-            if (_selectionAnimation != null)
-                DetachSelectedAnimation();
+            DetachSelectedAnimation();
 
             var frames = _battleResourceProvider.GetBattleAnimation(
                 battleUnit.Unit.UnitType.SizeSmall
@@ -608,7 +633,7 @@ namespace Disciples.Scene.Battle.Controllers
 
 
             // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде.
-            _selectionAnimation = _battleSceneController.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
+            _currentUnitSelectionAnimation = _battleSceneController.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
         }
 
         /// <summary>
@@ -616,8 +641,11 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private void DetachSelectedAnimation()
         {
-            _gameController.DestroyObject(_selectionAnimation);
-            _selectionAnimation = null;
+            if (_currentUnitSelectionAnimation == null)
+                return;
+
+            _gameController.DestroyObject(_currentUnitSelectionAnimation);
+            _currentUnitSelectionAnimation = null;
         }
 
 
@@ -629,7 +657,7 @@ namespace Disciples.Scene.Battle.Controllers
             if (_targetUnitObject == null)
                 return;
 
-            var currentUnit = _battleController.CurrentUnitObject.Unit;
+            var currentUnit = CurrentBattleUnit.Unit;
             var targetUnit = _targetUnitObject.Unit;
 
             if (targetUnit.IsDead)
@@ -650,7 +678,7 @@ namespace Disciples.Scene.Battle.Controllers
             // Иначе, как например, лекарь при наведении на врага будет выделять только 1 врага
             if (currentUnit.Player == targetUnit.Player && currentUnit.HasAllyAbility() ||
                 currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility()) {
-                targetUnits = _battleController.Units
+                targetUnits = BattleUnits
                     .Where(u => u.Unit.Player == targetUnit.Player && u.Unit.IsDead == false)
                     .ToArray();
             }
@@ -666,10 +694,10 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private void AttachTargetAnimations(params BattleUnit[] battleUnits)
         {
-            if (_targetAnimations != null)
+            if (_targetUnitsAnimations != null)
                 DetachTargetAnimations();
 
-            _targetAnimations = new List<AnimationObject>(battleUnits.Length);
+            _targetUnitsAnimations = new List<AnimationObject>(battleUnits.Length);
             foreach (var battleUnit in battleUnits)
             {
                 var frames = _battleResourceProvider.GetBattleAnimation(
@@ -678,7 +706,7 @@ namespace Disciples.Scene.Battle.Controllers
                         : "MRKLARGEA");
 
                 var targetAnimation = _battleSceneController.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
-                _targetAnimations.Add(targetAnimation);
+                _targetUnitsAnimations.Add(targetAnimation);
             }
         }
 
@@ -687,14 +715,14 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private void DetachTargetAnimations()
         {
-            if (_targetAnimations == null)
+            if (_targetUnitsAnimations == null)
                 return;
 
-            foreach (var targetAnimation in _targetAnimations) {
+            foreach (var targetAnimation in _targetUnitsAnimations) {
                 _gameController.DestroyObject(targetAnimation);
             }
 
-            _targetAnimations = null;
+            _targetUnitsAnimations = null;
         }
 
 
@@ -703,11 +731,11 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private void CheckRightPanelReflection()
         {
-            var currentUnit = _battleController.CurrentUnitObject.Unit;
+            var currentUnit = CurrentBattleUnit.Unit;
             var showEnemies = currentUnit.HasEnemyAbility();
 
             // Если текущий юнит находится в атакующем отряде, то мы отражаем панель только, если он лекарь и т.д.
-            if (_battleController.CurrentUnitObject.IsAttacker) {
+            if (CurrentBattleUnit.IsAttacker) {
                 _isRightUnitPanelReflected = !showEnemies;
             }
             // Иначе для защищающегося отряда для отображения врагов нужно отражать панель.
@@ -751,8 +779,7 @@ namespace Disciples.Scene.Battle.Controllers
                 }
             }
 
-            _rightPanelUnits = _battleController
-                .Units
+            _rightPanelUnits = BattleUnits
                 .Where(u => u.IsAttacker && direction == BattleDirection.Attacker ||
                             !u.IsAttacker && direction == BattleDirection.Defender)
                 .ToList();
@@ -798,12 +825,12 @@ namespace Disciples.Scene.Battle.Controllers
         {
             CleanAnimationsOnRightUnitsPanel();
 
-            var currentUnit = _battleController.CurrentUnitObject.Unit;
+            var currentUnit = CurrentBattleUnit.Unit;
             _unitPanelAnimations = new List<AnimationObject>();
 
             // Если отображается отряд текущего юнита, то нужно его выделить на панели.
             if (currentUnit.Player == _rightPanelUnits.First().Unit.Player) {
-                var position = GetRightUnitPanelPosition(currentUnit.SquadLinePosition, currentUnit.SquadFlankPosition, _battleController.CurrentUnitObject.Direction);
+                var position = GetRightUnitPanelPosition(currentUnit.SquadLinePosition, currentUnit.SquadFlankPosition, CurrentBattleUnit.Direction);
 
                 _unitPanelAnimations.Add(
                     _battleSceneController.AddAnimation(
@@ -815,7 +842,7 @@ namespace Disciples.Scene.Battle.Controllers
 
             // Если юнит бьёт по площади и цель юнита - отображаемый отряд, то добавляем одну большую рамку.
             if (currentUnit.UnitType.MainAttack.Reach == Reach.All &&
-                _rightPanelUnits.Any(_battleController.CanAttack)) {
+                _rightPanelUnits.Any(CanAttack)) {
                 var position = GetRightUnitPanelPosition(1, 2, BattleDirection.Defender);
 
                 _unitPanelAnimations.Add(
@@ -830,7 +857,7 @@ namespace Disciples.Scene.Battle.Controllers
             // Иначе добавляем рамку только тем юнитам, которых можно атаковать.
             else {
                 foreach (var targetUnit in _rightPanelUnits) {
-                    if (_battleController.CanAttack(targetUnit) == false)
+                    if (!CanAttack(targetUnit))
                         continue;
 
                     var position = GetRightUnitPanelPosition(targetUnit.Unit.SquadLinePosition,
@@ -863,17 +890,13 @@ namespace Disciples.Scene.Battle.Controllers
             _unitPanelAnimations = null;
         }
 
-
-
         /// <summary>
         /// Активировать указанные кнопки.
         /// </summary>
         private static void ActivateButtons(params ButtonObject[] buttons)
         {
-            if (buttons == null)
-                return;
-
-            foreach (var button in buttons) {
+            foreach (var button in buttons)
+            {
                 button.Activate();
             }
         }
@@ -883,12 +906,24 @@ namespace Disciples.Scene.Battle.Controllers
         /// </summary>
         private static void DisableButtons(params ButtonObject[] buttons)
         {
-            if (buttons == null)
-                return;
-
-            foreach (var button in buttons) {
+            foreach (var button in buttons)
+            {
                 button.Disable();
             }
+        }
+
+        /// <summary>
+        /// Проверить, может ли текущий юнит атаковать цель.
+        /// </summary>
+        private bool CanAttack(BattleUnit targetBattleUnit)
+        {
+            var attackingSquad = CurrentBattleUnit.IsAttacker
+                ? _context.AttackingSquad
+                : _context.DefendingSquad;
+            var targetSquad = targetBattleUnit.IsAttacker
+                ? _context.AttackingSquad
+                : _context.DefendingSquad;
+            return _battleProcessor.CanAttack(CurrentBattleUnit.Unit, attackingSquad, targetBattleUnit.Unit, targetSquad);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Providers;
 using Disciples.Scene.Battle.Controllers;
+using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 using DryIoc;
 
@@ -14,6 +15,7 @@ namespace Disciples.Scene.Battle
         /// <inheritdoc />
         public void Initialize(IRegistrator containerRegistrator)
         {
+            containerRegistrator.Register<BattleContext>(Reuse.Singleton);
             containerRegistrator.Register<BattleProcessor>(Reuse.Singleton);
             containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(Reuse.Singleton);
             containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(Reuse.Singleton);

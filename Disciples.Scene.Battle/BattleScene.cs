@@ -1,5 +1,4 @@
 ﻿using Disciples.Engine.Base;
-using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
@@ -24,7 +23,7 @@ namespace Disciples.Scene.Battle
         private readonly IBattleInterfaceProvider _battleInterfaceProvider;
         private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
 
-        private BattleUpdateContext _battleUpdateContext = new();
+        private readonly BattleContext _battleContext;
 
         private IBattleController _battleController;
         private IBattleInterfaceController _battleInterfaceController;
@@ -38,7 +37,8 @@ namespace Disciples.Scene.Battle
             IUnitInfoProvider unitInfoProvider,
             IBattleResourceProvider battleResourceProvider,
             IBattleInterfaceProvider battleInterfaceProvider,
-            IBattleUnitResourceProvider battleUnitResourceProvider
+            IBattleUnitResourceProvider battleUnitResourceProvider,
+            BattleContext battleContext
             ) : base(gameController, sceneFactory, interfaceProvider)
         {
             _textProvider = textProvider;
@@ -46,6 +46,7 @@ namespace Disciples.Scene.Battle
             _battleResourceProvider = battleResourceProvider;
             _battleInterfaceProvider = battleInterfaceProvider;
             _battleUnitResourceProvider = battleUnitResourceProvider;
+            _battleContext = battleContext;
         }
 
 
@@ -54,9 +55,10 @@ namespace Disciples.Scene.Battle
         {
             base.InitializeParameters(parameters);
 
-            _battleController = parameters.BattleController;
-            _battleController.InitializeParameters(new BattleSquadsData(parameters.AttackSquad, parameters.DefendSquad));
+            _battleContext.AttackingSquad = parameters.AttackingSquad;
+            _battleContext.DefendingSquad = parameters.DefendingSquad;
 
+            _battleController = parameters.BattleController;
             _battleInterfaceController = parameters.BattleInterfaceController;
         }
 
@@ -65,10 +67,9 @@ namespace Disciples.Scene.Battle
         {
             base.BeforeSceneUpdate(data);
 
-            _battleUpdateContext.BeforeSceneUpdate(data);
-
-            _battleInterfaceController.BeforeSceneUpdate(_battleUpdateContext);
-            _battleController.BeforeSceneUpdate(_battleUpdateContext);
+            _battleContext.BeforeSceneUpdate(data);
+            _battleInterfaceController.BeforeSceneUpdate();
+            _battleController.BeforeSceneUpdate();
         }
 
         /// <inheritdoc />
@@ -76,9 +77,9 @@ namespace Disciples.Scene.Battle
         {
             base.AfterSceneUpdate(data);
 
-            _battleController.AfterSceneUpdate(_battleUpdateContext);
-            _battleInterfaceController.AfterSceneUpdate(_battleUpdateContext);
-            _battleUpdateContext.AfterSceneUpdate();
+            _battleController.AfterSceneUpdate();
+            _battleInterfaceController.AfterSceneUpdate();
+            _battleContext.AfterSceneUpdate();
         }
 
         /// <inheritdoc />
@@ -113,14 +114,16 @@ namespace Disciples.Scene.Battle
             };
 
             // Деинициализируем те компоненты, которые существует в рамках одной сцены.
-            foreach (var component in components) {
+            foreach (var component in components)
+            {
                 if (component.IsSharedBetweenScenes)
                     continue;
 
                 component.Unload();
             }
 
-            _battleUpdateContext = new BattleUpdateContext();
+            // TODO Инициализации.
+            //_battleContext = new BattleContext();
         }
 
 

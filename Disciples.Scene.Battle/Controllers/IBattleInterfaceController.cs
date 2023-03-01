@@ -1,5 +1,4 @@
 ﻿using Disciples.Engine.Base;
-using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Controllers
 {
@@ -11,11 +10,11 @@ namespace Disciples.Scene.Battle.Controllers
         /// <summary>
         /// Обработать события перед обновлением сцены.
         /// </summary>
-        void BeforeSceneUpdate(BattleUpdateContext context);
+        void BeforeSceneUpdate();
 
         /// <summary>
         /// Обработать завершение обновлении сцены.
         /// </summary>
-        void AfterSceneUpdate(BattleUpdateContext context);
+        void AfterSceneUpdate();
     }
 }
