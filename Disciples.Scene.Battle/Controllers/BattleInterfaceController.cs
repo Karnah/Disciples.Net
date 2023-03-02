@@ -95,12 +95,12 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// Создать объект типа <see cref="BattleInterfaceController" />.
     /// </summary>
     public BattleInterfaceController(
-        IGameController gameController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleContext context,
-        BattleProcessor battleProcessor, ISceneObjectContainer sceneObjectContainer)
+        BattleProcessor battleProcessor,
+        ISceneObjectContainer sceneObjectContainer)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
@@ -233,7 +233,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             ReflectRightUnitsPanel, 633, 402, INTERFACE_LAYER + 2, KeyboardButton.Tab);
 
         _defendButton = _battleGameObjectContainer.AddButton(_interfaceProvider.DefendButton, () => {
-            //todo вообще убрать прямую обработку кнопок.
+            Actions.Add(new DefendBattleAction());
         }, 380, 504, INTERFACE_LAYER + 2, KeyboardButton.D);
 
         _retreatButton = _battleGameObjectContainer.AddButton(_interfaceProvider.RetreatButton, () => {
@@ -241,7 +241,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }, 343, 524, INTERFACE_LAYER + 2, KeyboardButton.R);
 
         _waitButton = _battleGameObjectContainer.AddButton(_interfaceProvider.WaitButton, () => {
-            // 
+            Actions.Add(new WaitingBattleAction());
         }, 419, 524, INTERFACE_LAYER + 2, KeyboardButton.W);
 
         _instantResolveButton = _battleGameObjectContainer.AddButton(_interfaceProvider.InstantResolveButton, () => {
@@ -299,7 +299,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _detailUnitInfoObject?.Destroy();
         _detailUnitInfoObject = null;
     }
-
 
     #region Interaction
 
@@ -431,16 +430,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         else if (gameObject is ButtonObject button)
         {
             // TODO Подумать над другим способом обработки.
-            //button.OnReleased();
-
-            if (button == _defendButton)
-            {
-                Actions.Add(new DefendBattleAction());
-            }
-            else if (button == _waitButton)
-            {
-                Actions.Add(new WaitingBattleAction());
-            }
+            button.OnReleased();
         }
     }
 
@@ -495,7 +485,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     #endregion
-
 
     /// <summary>
     /// Обработать начало действий на сцене.
