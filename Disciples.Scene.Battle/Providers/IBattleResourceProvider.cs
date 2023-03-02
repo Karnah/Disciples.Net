@@ -7,7 +7,7 @@ namespace Disciples.Scene.Battle.Providers;
 /// <summary>
 /// Поставщик ресурсов для сцены битвы.
 /// </summary>
-public interface IBattleResourceProvider : ISupportLoading
+internal interface IBattleResourceProvider : ISupportLoading
 {
     /// <summary>
     /// Получить анимацию для сцены битвы.

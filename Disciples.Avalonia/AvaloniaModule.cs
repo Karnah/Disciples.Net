@@ -1,6 +1,8 @@
-﻿using Disciples.Avalonia.Factories;
+﻿using Disciples.Avalonia.Controllers;
+using Disciples.Avalonia.Factories;
 using Disciples.Avalonia.Managers;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
 using DryIoc;
@@ -23,7 +25,7 @@ public class AvaloniaModule : IGameModule
 
         // Регистрируем фабрики.
         containerRegistrator.Register<IBitmapFactory, AvaloniaBitmapFactory>();
-        containerRegistrator.Register<ISceneFactory, AvaloniaSceneFactory>();
+        containerRegistrator.Register<IPlatformSceneObjectContainer, AvaloniaSceneObjectContainer>();
 
         // Регистрация ViewModel.
         containerRegistrator.Register<GameWindowViewModel>();

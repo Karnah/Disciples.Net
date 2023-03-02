@@ -11,7 +11,7 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// <summary>
 /// Игровой объект юнита во время сражения.
 /// </summary>
-public class BattleUnit : GameObject
+internal class BattleUnit : GameObject
 {
     /// <summary>
     /// Ширина юнита на сцене.
@@ -23,7 +23,7 @@ public class BattleUnit : GameObject
     private const int BATTLE_UNIT_HEIGHT = 100;
 
     public BattleUnit(
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
         Unit unit,
         bool isAttacker
@@ -36,7 +36,7 @@ public class BattleUnit : GameObject
             : BattleDirection.Defender;
         Action = BattleAction.Waiting;
 
-        AnimationComponent = new BattleUnitAnimationComponent(this, sceneController, battleUnitResourceProvider);
+        AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
         this.Components = new IComponent[] { AnimationComponent };
 
         Width = BATTLE_UNIT_WIDTH;

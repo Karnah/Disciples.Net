@@ -1,6 +1,8 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Managers;
+using Disciples.WPF.Controllers;
 using Disciples.WPF.Factories;
 using Disciples.WPF.Managers;
 using DryIoc;
@@ -23,7 +25,7 @@ public class WpfModule : IGameModule
 
         // Регистрируем фабрики.
         containerRegistrator.Register<IBitmapFactory, WpfBitmapFactory>();
-        containerRegistrator.Register<ISceneFactory, WpfSceneFactory>();
+        containerRegistrator.Register<IPlatformSceneObjectContainer, WpfSceneObjectContainer>();
 
         // Регистрируем View и ViewModel.
         containerRegistrator.Register<GameWindow>();

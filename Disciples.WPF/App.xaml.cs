@@ -7,8 +7,6 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle;
-using Disciples.Scene.Battle.Controllers;
-using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Loading;
 using DryIoc;
 
@@ -49,14 +47,10 @@ public partial class App : Application
             _gameController.Start();
 
             // Сразу отображаем сцену загрузки.
-            var loadingSceneController = Container.Resolve<LoadingScene>();
-            _gameController.ChangeScene(loadingSceneController, SceneParameters.Empty);
+            _gameController.ChangeScene<ILoadingScene, SceneParameters>(SceneParameters.Empty);
 
             // Следующая сцена будет сцена битвы.
-            var battleSceneController = Container.Resolve<BattleScene>();
-            _gameController.ChangeScene(battleSceneController, new BattleSceneParameters(
-                Container.Resolve<IBattleController>(),
-                Container.Resolve<IBattleInterfaceController>(),
+            _gameController.ChangeScene<IBattleScene, BattleSceneParameters>(new BattleSceneParameters(
                 CreateAttackingSquad(),
                 CreateDefendingSquad()));
 

@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Controllers;
 /// <summary>
 /// Контроллер, который взаимодействует и управляет интерфейсом во время битвы.
 /// </summary>
-public interface IBattleInterfaceController : ISupportLoading
+internal interface IBattleInterfaceController : ISupportLoading
 {
     /// <summary>
     /// Обработать события перед обновлением сцены.

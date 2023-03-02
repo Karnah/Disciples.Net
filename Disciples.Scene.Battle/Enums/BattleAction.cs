@@ -3,7 +3,7 @@
 /// <summary>
 /// Состояние юнита на поле боя.
 /// </summary>
-public enum BattleAction
+internal enum BattleAction
 {
     /// <summary>
     /// Юнит ожидает.

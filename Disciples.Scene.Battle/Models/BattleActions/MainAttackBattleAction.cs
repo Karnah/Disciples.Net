@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// <summary>
 /// Действие атаки одного юнита на другого.
 /// </summary>
-public class MainAttackBattleAction : AnimationBattleAction
+internal class MainAttackBattleAction : AnimationBattleAction
 {
     /// <inheritdoc />
     public MainAttackBattleAction(BattleUnit attacker, BattleUnit target)

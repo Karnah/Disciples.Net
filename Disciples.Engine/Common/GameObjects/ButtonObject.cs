@@ -13,14 +13,14 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public class ButtonObject : GameObject
 {
-    private readonly ISceneController _sceneController;
+    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IDictionary<SceneButtonState, IBitmap> _buttonStates;
     private readonly Action _buttonPressedAction;
 
     private IImageSceneObject _buttonVisualObject;
 
     public ButtonObject(
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IDictionary<SceneButtonState, IBitmap> buttonStates,
         Action buttonPressedAction,
         double x,
@@ -29,7 +29,7 @@ public class ButtonObject : GameObject
         KeyboardButton? hotkey = null
     ) : base(x, y)
     {
-        _sceneController = sceneController;
+        _sceneObjectContainer = sceneObjectContainer;
         _buttonStates = buttonStates;
         _buttonPressedAction = buttonPressedAction;
 
@@ -67,7 +67,7 @@ public class ButtonObject : GameObject
     {
         base.Initialize();
 
-        _buttonVisualObject = _sceneController.AddImage(_buttonStates[ButtonState], X, Y, Layer);
+        _buttonVisualObject = _sceneObjectContainer.AddImage(_buttonStates[ButtonState], X, Y, Layer);
     }
 
     /// <inheritdoc />
@@ -75,7 +75,7 @@ public class ButtonObject : GameObject
     {
         base.Destroy();
             
-        _sceneController.RemoveSceneObject(_buttonVisualObject);
+        _sceneObjectContainer.RemoveSceneObject(_buttonVisualObject);
         _buttonVisualObject = null;
     }
 

@@ -11,6 +11,7 @@ public class LoadingSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        containerRegistrator.Register<LoadingScene>();
+        var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadingScene));
+        containerRegistrator.Register<ILoadingScene, LoadingScene>(loadingScopeReuse);
     }
 }

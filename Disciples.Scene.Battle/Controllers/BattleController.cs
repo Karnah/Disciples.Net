@@ -10,14 +10,14 @@ using Disciples.Scene.Battle.Models.BattleActions;
 namespace Disciples.Scene.Battle.Controllers;
 
 /// <inheritdoc cref="IBattleController" />
-public class BattleController : BaseSupportLoading, IBattleController
+internal class BattleController : BaseSupportLoading, IBattleController
 {
     /// <summary>
     /// Слой, который перекрывает всех юнитов.
     /// </summary>
     private const int ABOVE_ALL_UNITS_LAYER = 100 * 4;
 
-    private readonly IBattleSceneController _battleSceneController;
+    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleContext _context;
 
@@ -29,9 +29,9 @@ public class BattleController : BaseSupportLoading, IBattleController
     /// <summary>
     /// Создать объект типа <see cref="BattleController" />.
     /// </summary>
-    public BattleController(IBattleSceneController battleSceneController, BattleProcessor battleProcessor, BattleContext context)
+    public BattleController(IBattleGameObjectContainer battleGameObjectContainer, BattleProcessor battleProcessor, BattleContext context)
     {
-        _battleSceneController = battleSceneController;
+        _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _context = context;
     }
@@ -118,10 +118,10 @@ public class BattleController : BaseSupportLoading, IBattleController
         var units = new List<BattleUnit>();
 
         foreach (var attackSquadUnit in _context.AttackingSquad.Units)
-            units.Add(_battleSceneController.AddBattleUnit(attackSquadUnit, true));
+            units.Add(_battleGameObjectContainer.AddBattleUnit(attackSquadUnit, true));
 
         foreach (var defendSquadUnit in _context.DefendingSquad.Units)
-            units.Add(_battleSceneController.AddBattleUnit(defendSquadUnit, false));
+            units.Add(_battleGameObjectContainer.AddBattleUnit(defendSquadUnit, false));
 
         _context.BattleUnits = units;
     }
@@ -317,7 +317,7 @@ public class BattleController : BaseSupportLoading, IBattleController
             var isTargetAttacker = targetBattleUnits.First().IsAttacker;
             var (x, y) = BattleUnit.GetSceneUnitPosition(isTargetAttacker, 0.5, 1);
 
-            var areaAnimation = _battleSceneController.AddAnimation(
+            var areaAnimation = _battleGameObjectContainer.AddAnimation(
                 currentUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
                 x,
                 y,
@@ -352,7 +352,7 @@ public class BattleController : BaseSupportLoading, IBattleController
         {
             battleUnit.Unit.IsDead = true;
 
-            var deathAnimation = _battleSceneController.AddAnimation(
+            var deathAnimation = _battleGameObjectContainer.AddAnimation(
                 battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
                 battleUnit.X,
                 battleUnit.Y,
@@ -458,7 +458,7 @@ public class BattleController : BaseSupportLoading, IBattleController
         var targetUnitAnimation = attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
         if (isMainAttack && targetUnitAnimation?.IsSingle == true)
         {
-            var targetAnimation = _battleSceneController.AddAnimation(
+            var targetAnimation = _battleGameObjectContainer.AddAnimation(
                 targetUnitAnimation.Frames,
                 targetUnit.X,
                 targetUnit.Y,

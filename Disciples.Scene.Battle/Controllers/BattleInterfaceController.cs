@@ -19,19 +19,19 @@ using Disciples.Scene.Battle.Providers;
 namespace Disciples.Scene.Battle.Controllers;
 
 /// <inheritdoc cref="IBattleInterfaceController" />
-public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceController
+internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceController
 {
     /// <summary>
     /// Слой для расположения интерфейса.
     /// </summary>
     private const int INTERFACE_LAYER = 1000;
 
-    private readonly IGameController _gameController;
-    private readonly IBattleSceneController _battleSceneController;
+    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
+    private readonly ISceneObjectContainer _sceneObjectContainer;
 
     private IReadOnlyCollection<BattleUnit> _rightPanelUnits;
     private IImageSceneObject? _currentUnitFace;
@@ -96,18 +96,18 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
     /// </summary>
     public BattleInterfaceController(
         IGameController gameController,
-        IBattleSceneController battleSceneController,
+        IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleContext context,
-        BattleProcessor battleProcessor)
+        BattleProcessor battleProcessor, ISceneObjectContainer sceneObjectContainer)
     {
-        _gameController = gameController;
-        _battleSceneController = battleSceneController;
+        _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
         _battleResourceProvider = battleResourceProvider;
         _context = context;
         _battleProcessor = battleProcessor;
+        _sceneObjectContainer = sceneObjectContainer;
     }
 
     /// <inheritdoc />
@@ -193,24 +193,24 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
     private void InitializeMainInterface()
     {
         foreach (var battleground in _interfaceProvider.Battleground) {
-            _battleSceneController.AddImage(battleground, 0, 0, 0);
+            _sceneObjectContainer.AddImage(battleground, 0, 0, 0);
         }
-        _battleSceneController.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
-        _battleSceneController.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
+        _sceneObjectContainer.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
+        _sceneObjectContainer.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
 
         var currentUnitBattleFace = CurrentBattleUnit.Unit.UnitType.BattleFace;
-        _currentUnitFace = _battleSceneController.AddImage(
+        _currentUnitFace = _sceneObjectContainer.AddImage(
             currentUnitBattleFace,
             0,
             GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
             INTERFACE_LAYER + 1);
 
-        _currentUnitTextInfoObject = _battleSceneController.AddBattleUnitInfo(190, 520, INTERFACE_LAYER + 1);
+        _currentUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(190, 520, INTERFACE_LAYER + 1);
         _currentUnitTextInfoObject.Unit = CurrentBattleUnit.Unit;
 
 
         // Используем размеры лица текущего юнита, так как юнит-цель не инициализируются в начале боя.
-        _targetUnitFace = _battleSceneController.AddImage(
+        _targetUnitFace = _sceneObjectContainer.AddImage(
             null,
             currentUnitBattleFace.Width,
             currentUnitBattleFace.Height,
@@ -220,7 +220,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
         // todo Добавить перегрузку в метод?
         _targetUnitFace.IsReflected = true;
 
-        _targetUnitTextInfoObject = _battleSceneController.AddBattleUnitInfo(510, 520, INTERFACE_LAYER + 1);
+        _targetUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(510, 520, INTERFACE_LAYER + 1);
     }
 
 
@@ -229,26 +229,26 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
     /// </summary>
     private void InitializeButtons()
     {
-        _reflectUnitPanelButton = _battleSceneController.AddToggleButton(_interfaceProvider.ToggleRightButton,
+        _reflectUnitPanelButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.ToggleRightButton,
             ReflectRightUnitsPanel, 633, 402, INTERFACE_LAYER + 2, KeyboardButton.Tab);
 
-        _defendButton = _battleSceneController.AddButton(_interfaceProvider.DefendButton, () => {
+        _defendButton = _battleGameObjectContainer.AddButton(_interfaceProvider.DefendButton, () => {
             //todo вообще убрать прямую обработку кнопок.
         }, 380, 504, INTERFACE_LAYER + 2, KeyboardButton.D);
 
-        _retreatButton = _battleSceneController.AddButton(_interfaceProvider.RetreatButton, () => {
+        _retreatButton = _battleGameObjectContainer.AddButton(_interfaceProvider.RetreatButton, () => {
             //todo
         }, 343, 524, INTERFACE_LAYER + 2, KeyboardButton.R);
 
-        _waitButton = _battleSceneController.AddButton(_interfaceProvider.WaitButton, () => {
+        _waitButton = _battleGameObjectContainer.AddButton(_interfaceProvider.WaitButton, () => {
             // 
         }, 419, 524, INTERFACE_LAYER + 2, KeyboardButton.W);
 
-        _instantResolveButton = _battleSceneController.AddButton(_interfaceProvider.InstantResolveButton, () => {
+        _instantResolveButton = _battleGameObjectContainer.AddButton(_interfaceProvider.InstantResolveButton, () => {
             // todo
         }, 359, 563, INTERFACE_LAYER + 2, KeyboardButton.I);
 
-        _autoBattleButton = _battleSceneController.AddToggleButton(_interfaceProvider.AutoBattleButton, () => {
+        _autoBattleButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.AutoBattleButton, () => {
             // todo
         }, 403, 563, INTERFACE_LAYER + 2, KeyboardButton.A);
 
@@ -288,7 +288,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
     private void ShowDetailUnitInfo(Unit unit)
     {
         _detailUnitInfoObject?.Destroy();
-        _detailUnitInfoObject = _battleSceneController.ShowDetailUnitInfo(unit);
+        _detailUnitInfoObject = _battleGameObjectContainer.ShowDetailUnitInfo(unit);
     }
 
     /// <summary>
@@ -633,7 +633,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
 
 
         // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде.
-        _currentUnitSelectionAnimation = _battleSceneController.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
+        _currentUnitSelectionAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
     }
 
     /// <summary>
@@ -644,7 +644,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
         if (_currentUnitSelectionAnimation == null)
             return;
 
-        _gameController.DestroyObject(_currentUnitSelectionAnimation);
+        _currentUnitSelectionAnimation?.Destroy();
         _currentUnitSelectionAnimation = null;
     }
 
@@ -705,7 +705,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
                     ? "MRKSMALLA"
                     : "MRKLARGEA");
 
-            var targetAnimation = _battleSceneController.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
+            var targetAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
             _targetUnitsAnimations.Add(targetAnimation);
         }
     }
@@ -718,9 +718,8 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
         if (_targetUnitsAnimations == null)
             return;
 
-        foreach (var targetAnimation in _targetUnitsAnimations) {
-            _gameController.DestroyObject(targetAnimation);
-        }
+        foreach (var targetAnimation in _targetUnitsAnimations)
+            targetAnimation.Destroy();
 
         _targetUnitsAnimations = null;
     }
@@ -790,7 +789,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
                 ? (battleUnit.Unit.SquadLinePosition + 1) % 2
                 : battleUnit.Unit.SquadLinePosition;
 
-            var portrait = _battleSceneController.AddUnitPortrait(battleUnit.Unit,
+            var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit,
                 battleUnit.Direction == BattleDirection.Defender,
                 battleUnit.Unit.UnitType.SizeSmall
                     ? 644 + 79 * lineOffset
@@ -833,7 +832,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
             var position = GetRightUnitPanelPosition(currentUnit.SquadLinePosition, currentUnit.SquadFlankPosition, CurrentBattleUnit.Direction);
 
             _unitPanelAnimations.Add(
-                _battleSceneController.AddAnimation(
+                _battleGameObjectContainer.AddAnimation(
                     _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.SizeSmall),
                     position.X,
                     position.Y,
@@ -846,7 +845,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
             var position = GetRightUnitPanelPosition(1, 2, BattleDirection.Defender);
 
             _unitPanelAnimations.Add(
-                _battleSceneController.AddAnimation(
+                _battleGameObjectContainer.AddAnimation(
                     currentUnit.HasAllyAbility()
                         ? _interfaceProvider.GetFieldHealBorder()
                         : _interfaceProvider.GetFieldAttackBorder(),
@@ -864,7 +863,7 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
                     targetUnit.Unit.SquadFlankPosition, targetUnit.Direction);
 
                 _unitPanelAnimations.Add(
-                    _battleSceneController.AddAnimation(
+                    _battleGameObjectContainer.AddAnimation(
                         currentUnit.HasAllyAbility()
                             ? _interfaceProvider.GetUnitHealBorder(targetUnit.Unit.UnitType.SizeSmall)
                             : _interfaceProvider.GetUnitAttackBorder(targetUnit.Unit.UnitType.SizeSmall),
@@ -883,9 +882,8 @@ public class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceCon
         if (_unitPanelAnimations == null)
             return;
 
-        foreach (var unitPanelAnimation in _unitPanelAnimations) {
-            _gameController.DestroyObject(unitPanelAnimation);
-        }
+        foreach (var unitPanelAnimation in _unitPanelAnimations)
+            unitPanelAnimation.Destroy();
 
         _unitPanelAnimations = null;
     }

@@ -3,7 +3,7 @@
 /// <summary>
 /// Результат атаки одного юнита на другого.
 /// </summary>
-public enum AttackResult
+internal enum AttackResult
 {
     /// <summary>
     /// Промах.

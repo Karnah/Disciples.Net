@@ -6,7 +6,7 @@
 ///
 /// TODO Переделать на отдельный класс событий?
 /// </summary>
-public abstract class BaseEventBattleAction : IBattleAction
+internal abstract class BaseEventBattleAction : IBattleAction
 {
     /// <inheritdoc />
     public bool IsCompleted => true;

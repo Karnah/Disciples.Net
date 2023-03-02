@@ -13,7 +13,7 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// <summary>
 /// Объект, который выводит на сцену детальную информацию о юните.
 /// </summary>
-public class DetailUnitInfoObject : GameObject
+internal class DetailUnitInfoObject : GameObject
 {
     /// <summary>
     /// Слой, на котором располагается информация о юните.
@@ -36,7 +36,7 @@ public class DetailUnitInfoObject : GameObject
     /// </summary>
     private const string UNIT_ATTACK_INFO_SECOND_PART_ID = "X005TA0788";
 
-    private readonly ISceneController _sceneController;
+    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly ITextProvider _textProvider;
     private readonly List<ITextSceneObject> _unitInfo;
@@ -48,12 +48,12 @@ public class DetailUnitInfoObject : GameObject
 
     /// <inheritdoc />
     public DetailUnitInfoObject(
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         ITextProvider textProvider,
         Unit unit)
     {
-        _sceneController = sceneController;
+        _sceneObjectContainer = sceneObjectContainer;
         _battleInterfaceProvider = battleInterfaceProvider;
         _textProvider = textProvider;
 
@@ -80,18 +80,18 @@ public class DetailUnitInfoObject : GameObject
     {
         base.Initialize();
 
-        _unitInfoBackground = _sceneController.AddImage(
+        _unitInfoBackground = _sceneObjectContainer.AddImage(
             _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);
 
-        _unitPortrait = _sceneController.AddImage(
+        _unitPortrait = _sceneObjectContainer.AddImage(
             Unit.UnitType.Portrait,
             X + 70,
             Y + 10,
             INTERFACE_LAYER + 1
         );
-        _unitName = _sceneController.AddText(
+        _unitName = _sceneObjectContainer.AddText(
             Unit.UnitType.Name, 11, X + 110, Y + 440, INTERFACE_LAYER + 1, 260, TextAlignment.Center, true);
-        _unitDescription = _sceneController.AddText(
+        _unitDescription = _sceneObjectContainer.AddText(
             Unit.UnitType.Description, 11, X + 110, Y + 440 + ROW_HEIGHT, INTERFACE_LAYER + 1, 260, TextAlignment.Left);
 
         _unitInfo.AddRange(GetUnitBaseInfo(UNIT_BASE_INFO_ID, 60, out _));
@@ -115,7 +115,7 @@ public class DetailUnitInfoObject : GameObject
         foreach (Match row in rows) {
             var titlePattern = row.Groups["Title"].Value;
             var title = ReplacePlaceholders(titlePattern.Trim());
-            var titleObject = _sceneController.AddText(
+            var titleObject = _sceneObjectContainer.AddText(
                 title, 11, X + 395, Y + endVerticalOffset, INTERFACE_LAYER + 1, true);
             result.Add(titleObject);
 
@@ -125,7 +125,7 @@ public class DetailUnitInfoObject : GameObject
                 ? valuePattern2
                 : valuePattern1;
             var value = ReplacePlaceholders(valuePattern);
-            var valueObject = _sceneController.AddText(
+            var valueObject = _sceneObjectContainer.AddText(
                 value, 11, X + 500, Y + endVerticalOffset, INTERFACE_LAYER + 1, 130, TextAlignment.Left);
             result.Add(valueObject);
 
@@ -268,12 +268,12 @@ public class DetailUnitInfoObject : GameObject
     {
         base.Destroy();
 
-        _sceneController.RemoveSceneObject(_unitInfoBackground);
-        _sceneController.RemoveSceneObject(_unitPortrait);
-        _sceneController.RemoveSceneObject(_unitName);
-        _sceneController.RemoveSceneObject(_unitDescription);
+        _sceneObjectContainer.RemoveSceneObject(_unitInfoBackground);
+        _sceneObjectContainer.RemoveSceneObject(_unitPortrait);
+        _sceneObjectContainer.RemoveSceneObject(_unitName);
+        _sceneObjectContainer.RemoveSceneObject(_unitDescription);
         foreach (var unitInfo in _unitInfo) {
-            _sceneController.RemoveSceneObject(unitInfo);
+            _sceneObjectContainer.RemoveSceneObject(unitInfo);
         }
     }
 }

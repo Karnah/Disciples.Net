@@ -3,7 +3,7 @@
 /// <summary>
 /// Список всех действий на поле боя.
 /// </summary>
-public class BattleActionContainer
+internal class BattleActionContainer
 {
     private readonly List<IBattleAction> _activeActions;
     private readonly List<IBattleAction> _newActions;

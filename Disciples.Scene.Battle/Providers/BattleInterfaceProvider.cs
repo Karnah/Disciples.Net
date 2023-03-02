@@ -8,7 +8,7 @@ using Disciples.Engine.Platform.Factories;
 namespace Disciples.Scene.Battle.Providers;
 
 /// <inheritdoc cref="IBattleInterfaceProvider" />
-public class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfaceProvider
+internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfaceProvider
 {
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IInterfaceProvider _interfaceProvider;

@@ -3,7 +3,7 @@
 /// <summary>
 /// Базовое действие, продолжительность которого зависит от времени.
 /// </summary>
-public abstract class BaseTimerBattleAction : IBattleAction
+internal abstract class BaseTimerBattleAction : IBattleAction
 {
     private readonly long _duration;
     private long _time;

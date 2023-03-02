@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// <summary>
 /// Действие, которое совершается юнитом.
 /// </summary>
-public class UnitBattleAction : BaseTimerBattleAction
+internal class UnitBattleAction : BaseTimerBattleAction
 {
     /// <summary>
     /// Продолжительность воздействия

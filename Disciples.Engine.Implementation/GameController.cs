@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
@@ -13,19 +12,22 @@ using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
 using Disciples.Engine.Platform.Managers;
+using DryIoc;
 
 namespace Disciples.Engine.Implementation;
 
 /// <inheritdoc />
 public class GameController : IGameController
 {
+    private readonly IContainer _container;
     private readonly IGameTimer _gameTimer;
     private readonly ILogger _logger;
     private readonly IInputManager _inputManager;
-    private readonly LinkedList<GameObject> _gameObjects;
 
     private readonly object _lock = new();
     private readonly Stopwatch _stopwatch = new();
+
+    private IResolverContext? _sceneResolverContext;
 
     private long _ticks;
     private IScene? _currentScene;
@@ -42,27 +44,26 @@ public class GameController : IGameController
     /// <summary>
     /// Создать объект типа <see cref="GameController" />.
     /// </summary>
-    public GameController(IGameTimer gameTimer, ILogger logger, IInputManager inputManager)
+    public GameController(IContainer container, IGameTimer gameTimer, ILogger logger, IInputManager inputManager)
     {
+        _container = container;
         _gameTimer = gameTimer;
         _logger = logger;
         _inputManager = inputManager;
 
-        _gameObjects = new LinkedList<GameObject>();
         _inputDeviceEvents = new();
     }
 
+    /// <summary>
+    /// Список игровых объектов на сцене.
+    /// </summary>
+    private IReadOnlyCollection<GameObject> GameObjects => _currentScene?.GameObjectContainer.GameObjects ?? Array.Empty<GameObject>();
 
     /// <inheritdoc />
-    public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
-
-    /// <inheritdoc />
-    public ISceneContainer? CurrentSceneContainer => _currentScene?.SceneContainer;
-
+    public IPlatformSceneObjectContainer? CurrentSceneContainer => _currentScene?.SceneObjectContainer.PlatformSceneObjectContainer;
 
     /// <inheritdoc />
     public event EventHandler? SceneChanged;
-
 
     /// <summary>
     /// Запустить внутренний таймер, который обновляет объекты на сцене.
@@ -94,7 +95,7 @@ public class GameController : IGameController
     /// <summary>
     /// Обновить состояние сцены.
     /// </summary>
-    private void UpdateScene(object sender, EventArgs args)
+    private void UpdateScene(object? sender, EventArgs args)
     {
         lock (_lock)
         {
@@ -107,16 +108,11 @@ public class GameController : IGameController
                 CheckInputDeviceSelection();
 
                 var data = new UpdateSceneData(ticksCount, _inputDeviceEvents);
-
-                _currentScene?.BeforeSceneUpdate(data);
-                UpdateGameObjects(ticksCount);
-                _currentScene?.AfterSceneUpdate(data);
-
-                CurrentSceneContainer?.UpdateContainer();
+                _currentScene?.UpdateScene(data);
             }
             catch (Exception e)
             {
-                _logger.LogError("Ошибка в цикле", e);
+                _logger.LogError("Ошибка в цикле обновления сцены", e);
             }
             finally
             {
@@ -150,27 +146,10 @@ public class GameController : IGameController
         _selectedGameObject = selectedGameObject;
     }
 
-    private void UpdateGameObjects(long ticksCount)
-    {
-        for (var gameObjectNode = _gameObjects.First; gameObjectNode != null;) {
-            var nextNode = gameObjectNode.Next;
-            var gameObject = gameObjectNode.Value;
-
-            if (gameObject.IsDestroyed) {
-                _gameObjects.Remove(gameObjectNode);
-            }
-            else {
-                gameObject.Update(ticksCount);
-            }
-
-            gameObjectNode = nextNode;
-        }
-    }
-
     /// <summary>
     /// Обработать событие от курсора.
     /// </summary>
-    private void OnMouseStateChanged(object sender, MouseButtonEventArgs args)
+    private void OnMouseStateChanged(object? sender, MouseButtonEventArgs args)
     {
         var actionType = args.MouseButton == MouseButton.Left
             ? InputDeviceActionType.MouseLeft
@@ -185,13 +164,13 @@ public class GameController : IGameController
     /// <summary>
     /// Обработать событие от клавиатуры.
     /// </summary>
-    private void OnKeyStateChanged(object sender, KeyButtonEventArgs args)
+    private void OnKeyStateChanged(object? sender, KeyButtonEventArgs args)
     {
         // Обрабатываем только нажатию на клавишу.
         if (args.ButtonState != ButtonState.Pressed)
             return;
 
-        var button = _gameObjects.OfType<ButtonObject>().FirstOrDefault(b => b.Hotkey == args.KeyboardButton);
+        var button = GameObjects.OfType<ButtonObject>().FirstOrDefault(b => b.Hotkey == args.KeyboardButton);
         if (button == null || button.ButtonState == SceneButtonState.Disabled)
             return;
 
@@ -199,37 +178,26 @@ public class GameController : IGameController
     }
 
     /// <inheritdoc />
-    public void CreateObject(GameObject gameObject)
-    {
-        lock (_lock) {
-            gameObject.Initialize();
-            _gameObjects.AddLast(gameObject);
-        }
-    }
-
-    /// <inheritdoc />
-    public void DestroyObject(GameObject gameObject)
-    {
-        lock (_lock) {
-            gameObject.Destroy();
-        }
-    }
-
-    /// <inheritdoc />
-    public async void ChangeScene<TSceneController, TData>(TSceneController sceneController, TData data)
-        where TSceneController : IScene, ISupportLoadingWithParameters<TData>
+    public async void ChangeScene<TScene, TData>(TData data)
+        where TScene : IScene, ISupportLoadingWithParameters<TData>
         where TData : SceneParameters
     {
         _currentScene?.Unload();
 
         // todo сцена "подождите, идёт загрузка"?
 
-        sceneController.InitializeParameters(data);
+        _sceneResolverContext?.Dispose();
+        _sceneResolverContext = _container.OpenScope(typeof(TScene).Name);
 
-        await Task.Run(sceneController.Load);
+        var scene = _sceneResolverContext.Resolve<TScene>();
 
-        _currentScene = sceneController;
+        scene.InitializeParameters(data);
 
+        await Task.Run(scene.Load);
+
+        _currentScene = scene;
+
+        // TODO Вынести в сцену.
         CurrentSceneContainer!.UpdateContainer();
 
         SceneChanged?.Invoke(this, EventArgs.Empty);

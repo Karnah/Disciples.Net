@@ -3,7 +3,7 @@
 /// <summary>
 /// После завершения последнего действия выполняется небольшая задержка перед тем, как будет разблокирован интерфейс.
 /// </summary>
-public class DelayLastBattleAction : BaseTimerBattleAction
+internal class DelayLastBattleAction : BaseTimerBattleAction
 {
     /// <summary>
     /// Задержка после завершения всех действий, прежде чем ход перейдёт к следующему юниту.

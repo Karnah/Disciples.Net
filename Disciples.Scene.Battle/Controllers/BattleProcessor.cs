@@ -11,7 +11,7 @@ namespace Disciples.Scene.Battle.Controllers;
 /// <summary>
 /// Обработчик битвы.
 /// </summary>
-public class BattleProcessor
+internal class BattleProcessor
 {
     /// <summary>
     /// Разброс инициативы при вычислении очередности.

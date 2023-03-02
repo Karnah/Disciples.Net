@@ -3,7 +3,7 @@
 /// <summary>
 /// Действие, которое совершает юнит.
 /// </summary>
-public enum UnitActionType
+internal enum UnitActionType
 {
     /// <summary>
     /// Попадание атаки в этого юнита.

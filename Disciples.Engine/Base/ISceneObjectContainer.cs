@@ -1,48 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Common.GameObjects;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Base;
 
 /// <summary>
-/// Базовый интерфейс для контроллера сцены.
+/// Контейнер для добавления и удаления объектов со сцены.
 /// </summary>
-public interface ISceneController
+public interface ISceneObjectContainer
 {
     /// <summary>
-    /// Добавить анимацию на сцену.
+    /// Платформозависимый контейнер объект на сцене.
     /// </summary>
-    /// <param name="frames">Кадры анимации.</param>
-    /// <param name="x">Положение анимации, координата X.</param>
-    /// <param name="y">Положение анимации, координата Y.</param>
-    /// <param name="layer">Слой на котором будет отображаться анимация.</param>
-    /// <param name="repeat"><value>false</value>, если необходимо уничтожить объект после того, как анимация будет завершена.</param>
-    AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true);
-
-    /// <summary>
-    /// Добавить кнопку на сцену.
-    /// </summary>
-    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
-    /// <param name="x">Положение кнопки, координата X.</param>
-    /// <param name="y">Положение кнопки, координата Y.</param>
-    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ButtonObject AddButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
-
-    /// <summary>
-    /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
-    /// </summary>
-    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
-    /// <param name="x">Положение кнопки, координата X.</param>
-    /// <param name="y">Положение кнопки, координата Y.</param>
-    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ToggleButtonObject AddToggleButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+    IPlatformSceneObjectContainer PlatformSceneObjectContainer { get; }
 
     /// <summary>
     /// Добавить пустое изображение на сцену.
@@ -107,10 +77,9 @@ public interface ISceneController
     ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
         TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null);
 
-
     /// <summary>
-    /// Удалить указанный объект со сцены.
+    /// Удалить объект со сцены.
     /// </summary>
-    /// <param name="sceneObject">Объект, который необходимо удалить.</param>
-    void RemoveSceneObject(ISceneObject? sceneObject);
+    /// <param name="sceneObject">Удаляемый объект.</param>
+    public void RemoveSceneObject(ISceneObject? sceneObject);
 }

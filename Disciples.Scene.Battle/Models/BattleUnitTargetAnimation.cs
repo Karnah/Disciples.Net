@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Models;
 /// <summary>
 /// Класс анимации, которая применяется к атакуемому юниту (например, удары магов или лечение целителей).
 /// </summary>
-public class BattleUnitTargetAnimation
+internal class BattleUnitTargetAnimation
 {
     public BattleUnitTargetAnimation(bool isSingle, IReadOnlyList<Frame> frames)
     {

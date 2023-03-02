@@ -3,7 +3,7 @@
 /// <summary>
 /// Направление юнита на поле боя.
 /// </summary>
-public enum BattleDirection
+internal enum BattleDirection
 {
     /// <summary>
     /// Юнит направлен лицом к игроку.

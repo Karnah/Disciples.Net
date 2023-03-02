@@ -20,10 +20,10 @@ public abstract class BaseAnimationComponent : BaseComponent
     private long _ticksCount;
 
     /// <inheritdoc />
-    protected BaseAnimationComponent(GameObject gameObject, ISceneController sceneController, int layer) :
+    protected BaseAnimationComponent(GameObject gameObject, ISceneObjectContainer sceneObjectContainer, int layer) :
         base(gameObject)
     {
-        SceneController = sceneController;
+        SceneObjectContainer = sceneObjectContainer;
 
         Layer = layer;
     }
@@ -46,7 +46,7 @@ public abstract class BaseAnimationComponent : BaseComponent
     /// <summary>
     /// Контроллер сцены.
     /// </summary>
-    private ISceneController SceneController { get; }
+    private ISceneObjectContainer SceneObjectContainer { get; }
 
     /// <inheritdoc />
     public override void Update(long tickCount)
@@ -74,7 +74,7 @@ public abstract class BaseAnimationComponent : BaseComponent
         var animationHosts = GetAnimationHosts();
         foreach (var animationHost in animationHosts)
         {
-            SceneController.RemoveSceneObject(animationHost);
+            SceneObjectContainer.RemoveSceneObject(animationHost);
         }
     }
 
@@ -127,7 +127,7 @@ public abstract class BaseAnimationComponent : BaseComponent
             {
                 // todo Здесь происходит удаление.
                 // Возможно, просто достаточно перенести в невидимую область
-                SceneController.RemoveSceneObject(animationHost);
+                SceneObjectContainer.RemoveSceneObject(animationHost);
                 animationHost = null;
             }
 
@@ -136,7 +136,7 @@ public abstract class BaseAnimationComponent : BaseComponent
 
         // Добавляем изображение, если его раньше не было.
         if (animationHost == null)
-            animationHost = SceneController.AddImage(layer ?? Layer);
+            animationHost = SceneObjectContainer.AddImage(layer ?? Layer);
 
         // Обновляем кадр анимации.
         var frame = frames[FrameIndex];

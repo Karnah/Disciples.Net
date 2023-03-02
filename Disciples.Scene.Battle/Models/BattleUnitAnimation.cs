@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Models;
 /// <summary>
 /// Вся информация об анимации юнита.
 /// </summary>
-public class BattleUnitAnimation
+internal class BattleUnitAnimation
 {
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitAnimation" />.

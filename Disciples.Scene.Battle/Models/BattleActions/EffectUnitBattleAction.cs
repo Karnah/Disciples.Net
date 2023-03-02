@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// <summary>
 /// Наложение эффекта на юнита.
 /// </summary>
-public class EffectUnitBattleAction : UnitBattleAction
+internal class EffectUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
     public EffectUnitBattleAction(BattleUnit targetUnit, AttackClass attackClass) : base(targetUnit, Enums.UnitActionType.UnderEffect)

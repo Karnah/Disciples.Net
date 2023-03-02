@@ -13,7 +13,7 @@ namespace Disciples.Scene.Battle.Components;
 /// <summary>
 /// Компонент для создания анимации юнита.
 /// </summary>
-public class BattleUnitAnimationComponent : BaseAnimationComponent
+internal class BattleUnitAnimationComponent : BaseAnimationComponent
 {
     private readonly BattleUnit _battleUnit;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
@@ -54,9 +54,9 @@ public class BattleUnitAnimationComponent : BaseAnimationComponent
     /// </summary>
     public BattleUnitAnimationComponent(
         BattleUnit battleUnit,
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider
-    ) : base(battleUnit, sceneController, GetLayer(battleUnit))
+    ) : base(battleUnit, sceneObjectContainer, GetLayer(battleUnit))
     {
         _battleUnit = battleUnit;
         _battleUnitResourceProvider = battleUnitResourceProvider;

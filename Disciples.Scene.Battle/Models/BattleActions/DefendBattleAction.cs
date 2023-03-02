@@ -3,6 +3,6 @@
 /// <summary>
 /// Текущий юнит защитился.
 /// </summary>
-public class DefendBattleAction : BaseEventBattleAction
+internal class DefendBattleAction : BaseEventBattleAction
 {
 }

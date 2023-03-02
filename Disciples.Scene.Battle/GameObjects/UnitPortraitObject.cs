@@ -13,7 +13,7 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// <summary>
 /// Потрет юнита с его состоянием.
 /// </summary>
-public class UnitPortraitObject : GameObject
+internal class UnitPortraitObject : GameObject
 {
     /// <summary>
     /// Слой для расположения интерфейса.
@@ -35,7 +35,7 @@ public class UnitPortraitObject : GameObject
     private const string WAIT_TEXT_ID = "X008TA0020";
 
     private readonly ITextProvider _textProvider;
-    private readonly ISceneController _sceneController;
+    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly bool _rightToLeft;
 
@@ -85,7 +85,7 @@ public class UnitPortraitObject : GameObject
     /// </summary>
     public UnitPortraitObject(
         ITextProvider textProvider,
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         Unit unit,
         bool rightToLeft,
@@ -93,7 +93,7 @@ public class UnitPortraitObject : GameObject
         double y) : base(x, y)
     {
         _textProvider = textProvider;
-        _sceneController = sceneController;
+        _sceneObjectContainer = sceneObjectContainer;
         _battleInterfaceProvider = battleInterfaceProvider;
         _rightToLeft = rightToLeft;
 
@@ -119,13 +119,13 @@ public class UnitPortraitObject : GameObject
     {
         base.Initialize();
 
-        _unitPortrait = _sceneController.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
+        _unitPortrait = _sceneObjectContainer.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
         _unitPortrait.IsReflected = _rightToLeft;
 
-        _unitHitpoints = _sceneController.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
+        _unitHitpoints = _sceneObjectContainer.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
         // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
         if (!Unit.UnitType.SizeSmall) {
-            _unitPanelSeparator = _sceneController.AddImage(
+            _unitPanelSeparator = _sceneObjectContainer.AddImage(
                 _battleInterfaceProvider.PanelSeparator,
                 X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
                 Y + Height - 1,
@@ -154,10 +154,10 @@ public class UnitPortraitObject : GameObject
         RemoveSceneObject(ref _unitPanelSeparator);
 
         foreach (var battleEffectsIcon in _battleEffectsIcons)
-            _sceneController.RemoveSceneObject(battleEffectsIcon.Value);
+            _sceneObjectContainer.RemoveSceneObject(battleEffectsIcon.Value);
 
         foreach (var battleEffectsForeground in _battleEffectsForegrounds)
-            _sceneController.RemoveSceneObject(battleEffectsForeground.Value);
+            _sceneObjectContainer.RemoveSceneObject(battleEffectsForeground.Value);
 
         base.Destroy();
     }
@@ -241,7 +241,7 @@ public class UnitPortraitObject : GameObject
                 // Картинку выравниваем по ширине.
                 var deathScull = _battleInterfaceProvider.DeathSkull;
                 var widthOffset = (Width - deathScull.Width) / 2;
-                _deathIcon = _sceneController.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y,
+                _deathIcon = _sceneObjectContainer.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y,
                     INTERFACE_LAYER + 3);
                 _unitHitpoints!.Text = $"0/{Unit.UnitType.HitPoints}";
 
@@ -263,7 +263,7 @@ public class UnitPortraitObject : GameObject
                 var y = _unitPortrait.Y + (Height - height);
 
                 _unitDamageForeground =
-                    _sceneController.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                    _sceneObjectContainer.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
             }
         }
     }
@@ -283,13 +283,13 @@ public class UnitPortraitObject : GameObject
         {
             if (_battleEffectsIcons.TryGetValue(expiredEffect.Key, out var effectIcon))
             {
-                _sceneController.RemoveSceneObject(effectIcon);
+                _sceneObjectContainer.RemoveSceneObject(effectIcon);
                 _battleEffectsIcons.Remove(expiredEffect.Key);
             }
 
             if (_battleEffectsForegrounds.TryGetValue(expiredEffect.Key, out var effectForeground))
             {
-                _sceneController.RemoveSceneObject(effectForeground);
+                _sceneObjectContainer.RemoveSceneObject(effectForeground);
                 _battleEffectsForegrounds.Remove(expiredEffect.Key);
             }
         }
@@ -304,7 +304,7 @@ public class UnitPortraitObject : GameObject
                 // Иконку "Защиты" располагаем по центру.
                 if (battleEffect.EffectType == UnitBattleEffectType.Defend)
                 {
-                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
+                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
                         icon,
                         X + (Width - icon.Width) / 2,
                         Y + Height - icon.Height,
@@ -317,7 +317,7 @@ public class UnitPortraitObject : GameObject
                         .Where(be => be != UnitBattleEffectType.Defend)
                         .GroupBy(be => be)
                         .Count();
-                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneController.AddImage(
+                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
                         icon,
                         X + Width - icon.Width,
                         Y + Height - icon.Height * (iconsCount + 1),
@@ -350,7 +350,7 @@ public class UnitPortraitObject : GameObject
         if (shouldRemoveDamageImage)
             RemoveSceneObject(ref _unitDamageForeground);
 
-        return _sceneController.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
+        return _sceneObjectContainer.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
     }
 
     /// <summary>
@@ -358,7 +358,7 @@ public class UnitPortraitObject : GameObject
     /// </summary>
     private ITextSceneObject AddText(string text)
     {
-        return _sceneController.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
+        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
     }
 
     /// <summary>
@@ -368,7 +368,7 @@ public class UnitPortraitObject : GameObject
     /// <param name="sceneObject">Объект, который необходимо удалить.</param>
     private void RemoveSceneObject<T>(ref T? sceneObject) where T : ISceneObject
     {
-        _sceneController.RemoveSceneObject(sceneObject);
+        _sceneObjectContainer.RemoveSceneObject(sceneObject);
         sceneObject = default(T);
     }
 }

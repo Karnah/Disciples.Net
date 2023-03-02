@@ -18,10 +18,10 @@ public class AnimationComponent : BaseAnimationComponent
     /// <inheritdoc />
     public AnimationComponent(
         GameObject gameObject,
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IReadOnlyList<Frame> frames,
         int layer
-    ) : base(gameObject, sceneController, layer)
+    ) : base(gameObject, sceneObjectContainer, layer)
     {
         _frames = frames;
 

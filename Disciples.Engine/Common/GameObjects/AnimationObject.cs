@@ -12,7 +12,7 @@ namespace Disciples.Engine.Common.GameObjects;
 public class AnimationObject : GameObject
 {
     public AnimationObject(
-        ISceneController sceneController,
+        ISceneObjectContainer sceneObjectContainer,
         IReadOnlyList<Frame> frames,
         double x,
         double y,
@@ -20,7 +20,7 @@ public class AnimationObject : GameObject
         bool repeat = true
     ) : base(x, y)
     {
-        AnimationComponent = new AnimationComponent(this, sceneController, frames, layer);
+        AnimationComponent = new AnimationComponent(this, sceneObjectContainer, frames, layer);
 
         Components = new IComponent[] {
             AnimationComponent

@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// <summary>
 /// Действие, продолжительность которого зависит от кадра анимации.
 /// </summary>
-public class AnimationBattleAction : IBattleAction
+internal class AnimationBattleAction : IBattleAction
 {
     /// <summary>
     /// Создать объект типа <see cref="AnimationBattleAction" />.

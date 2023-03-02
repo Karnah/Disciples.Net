@@ -3,6 +3,6 @@
 /// <summary>
 /// Текущий юнит ожидает.
 /// </summary>
-public class WaitingBattleAction : BaseEventBattleAction
+internal class WaitingBattleAction : BaseEventBattleAction
 {
 }

@@ -9,7 +9,7 @@ namespace Disciples.Scene.Battle.Models;
 /// <summary>
 /// Контекст битвы.
 /// </summary>
-public class BattleContext : BaseSupportLoading
+internal class BattleContext : BaseSupportLoading
 {
     /// <summary>
     /// Создать объект типа <see cref="BattleContext" />.

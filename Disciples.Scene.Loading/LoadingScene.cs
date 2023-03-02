@@ -3,15 +3,15 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
-using Disciples.Engine.Platform.Factories;
 
 namespace Disciples.Scene.Loading;
 
-/// <summary>
-/// Сцена, которая отображается при переходе между двумя "тяжелыми" сценами.
-/// </summary>
-public class LoadingScene : BaseSceneController<SceneParameters>
+/// <inheritdoc cref="ILoadingScene" />
+internal class LoadingScene : BaseScene, ILoadingScene
 {
+    private readonly ISceneObjectContainer _sceneObjectContainer;
+    private readonly IInterfaceProvider _interfaceProvider;
+
     /// <summary>
     /// Наименование картинки, которая содержит фон загрузки.
     /// </summary>
@@ -20,13 +20,20 @@ public class LoadingScene : BaseSceneController<SceneParameters>
     private IImageSceneObject? _loadingSceneObject;
 
     /// <summary>
-    /// Создать объект сцены загрузки.
+    /// Создать объект типа <see cref="LoadingScene" />.
     /// </summary>
     public LoadingScene(
-        IGameController gameController,
-        ISceneFactory sceneFactory,
+        IGameObjectContainer gameObjectContainer,
+        ISceneObjectContainer sceneObjectContainer,
         IInterfaceProvider interfaceProvider
-    ) : base(gameController, sceneFactory, interfaceProvider)
+        ) : base(gameObjectContainer, sceneObjectContainer)
+    {
+        _sceneObjectContainer = sceneObjectContainer;
+        _interfaceProvider = interfaceProvider;
+    }
+
+    /// <inheritdoc />
+    public void InitializeParameters(SceneParameters parameters)
     {
     }
 
@@ -35,8 +42,10 @@ public class LoadingScene : BaseSceneController<SceneParameters>
     {
         base.LoadInternal();
 
-        var loadingImage = InterfaceProvider.GetImage(LOADING_IMAGE_NAME);
-        _loadingSceneObject = AddImage(loadingImage, 0, 0, 0);
+        _interfaceProvider.Load();
+
+        var loadingImage = _interfaceProvider.GetImage(LOADING_IMAGE_NAME);
+        _loadingSceneObject = _sceneObjectContainer.AddImage(loadingImage, 0, 0, 0);
     }
 
     /// <inheritdoc />
@@ -44,7 +53,20 @@ public class LoadingScene : BaseSceneController<SceneParameters>
     {
         base.UnloadInternal();
 
-        RemoveSceneObject(_loadingSceneObject);
+        if (!_interfaceProvider.IsSharedBetweenScenes)
+            _interfaceProvider.Load();
+
+        _loadingSceneObject?.Destroy();
         _loadingSceneObject = null;
+    }
+
+    /// <inheritdoc />
+    protected override void BeforeSceneUpdate(UpdateSceneData data)
+    {
+    }
+
+    /// <inheritdoc />
+    protected override void AfterSceneUpdate()
+    {
     }
 }

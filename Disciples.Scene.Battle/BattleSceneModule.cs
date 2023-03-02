@@ -15,13 +15,15 @@ public class BattleSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        containerRegistrator.Register<BattleContext>(Reuse.Singleton);
-        containerRegistrator.Register<BattleProcessor>(Reuse.Singleton);
-        containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(Reuse.Singleton);
-        containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(Reuse.Singleton);
-        containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(Reuse.Singleton);
-        containerRegistrator.Register<IBattleController, BattleController>(Reuse.Singleton);
-        containerRegistrator.Register<IBattleInterfaceController, BattleInterfaceController>(Reuse.Singleton);
-        containerRegistrator.RegisterMany<BattleScene>(Reuse.Singleton);
+        var battleScopeReuse = new CurrentScopeReuse(nameof(IBattleScene));
+        containerRegistrator.Register<BattleContext>(battleScopeReuse);
+        containerRegistrator.Register<BattleProcessor>(battleScopeReuse);
+        containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(battleScopeReuse);
+        containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(battleScopeReuse);
+        containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(battleScopeReuse);
+        containerRegistrator.Register<IBattleController, BattleController>(battleScopeReuse);
+        containerRegistrator.Register<IBattleInterfaceController, BattleInterfaceController>(battleScopeReuse);
+        containerRegistrator.Register<IBattleGameObjectContainer, BattleGameObjectContainer>(battleScopeReuse);
+        containerRegistrator.Register<IBattleScene, BattleScene>(battleScopeReuse);
     }
 }

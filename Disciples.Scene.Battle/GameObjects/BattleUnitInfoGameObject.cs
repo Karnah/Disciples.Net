@@ -8,9 +8,9 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// <summary>
 /// Игровой объект, который выводит текстовую информацию о юните.
 /// </summary>
-public class BattleUnitInfoGameObject : GameObject
+internal class BattleUnitInfoGameObject : GameObject
 {
-    private readonly ISceneController _sceneController;
+    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly int _layer;
 
     private ITextSceneObject _unitInfoText;
@@ -18,9 +18,9 @@ public class BattleUnitInfoGameObject : GameObject
     private int? _lastHitpoints;
 
     /// <inheritdoc />
-    public BattleUnitInfoGameObject(ISceneController sceneController, double x, double y, int layer) : base(x, y)
+    public BattleUnitInfoGameObject(ISceneObjectContainer sceneObjectContainer, double x, double y, int layer) : base(x, y)
     {
-        _sceneController = sceneController;
+        _sceneObjectContainer = sceneObjectContainer;
         _layer = layer;
 
         Width = 120;
@@ -43,7 +43,7 @@ public class BattleUnitInfoGameObject : GameObject
         // Удаляем текст со сцены.
         if (Unit == null) {
             if (_unitInfoText != null) {
-                _sceneController.RemoveSceneObject(_unitInfoText);
+                _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
                 _unitInfoText = null;
             }
 
@@ -52,9 +52,9 @@ public class BattleUnitInfoGameObject : GameObject
 
         // Обновляем текст, если изменился юнит или его здоровье.
         if (_lastUnit != Unit || _lastHitpoints != Unit.HitPoints) {
-            _sceneController.RemoveSceneObject(_unitInfoText);
+            _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
 
-            _unitInfoText = _sceneController.AddText(GetUnitNameAndHitPoints(Unit), 14, X, Y, _layer, true);
+            _unitInfoText = _sceneObjectContainer.AddText(GetUnitNameAndHitPoints(Unit), 14, X, Y, _layer, true);
             _unitInfoText.Width = Width;
             _unitInfoText.Height = Height;
 
@@ -68,7 +68,7 @@ public class BattleUnitInfoGameObject : GameObject
     {
         base.Destroy();
 
-        _sceneController.RemoveSceneObject(_unitInfoText);
+        _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
         _unitInfoText = null;
     }
 

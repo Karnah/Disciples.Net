@@ -11,7 +11,7 @@ using Disciples.Scene.Battle.Models;
 namespace Disciples.Scene.Battle.Providers;
 
 /// <inheritdoc cref="IBattleUnitResourceProvider" />
-public class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResourceProvider
+internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResourceProvider
 {
     private readonly string[] _deathAnimationNames = {
         string.Empty,

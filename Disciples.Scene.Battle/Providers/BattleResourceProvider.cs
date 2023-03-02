@@ -9,7 +9,7 @@ using Disciples.ResourceProvider;
 namespace Disciples.Scene.Battle.Providers;
 
 /// <inheritdoc cref="IBattleResourceProvider" />
-public class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvider
+internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvider
 {
     private readonly IBitmapFactory _bitmapFactory;
 

@@ -1,14 +1,13 @@
 ﻿using Disciples.Engine.Base;
-using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.GameObjects;
 
-namespace Disciples.Scene.Battle;
+namespace Disciples.Scene.Battle.Controllers;
 
 /// <summary>
-/// Сцена битвы двух отрядов.
+/// Контейнер для игровых объектов битвы.
 /// </summary>
-public interface IBattleSceneController : ISceneController
+internal interface IBattleGameObjectContainer : IGameObjectContainer
 {
     /// <summary>
     /// Добавить юнита на сцену битвы.

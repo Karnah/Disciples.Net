@@ -3,6 +3,6 @@
 /// <summary>
 /// Событие завершение битвы.
 /// </summary>
-public class BattleCompletedAction : BaseEventBattleAction
+internal class BattleCompletedAction : BaseEventBattleAction
 {
 }

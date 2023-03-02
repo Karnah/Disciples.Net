@@ -1,5 +1,4 @@
-﻿using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Models;
+﻿using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Base;
 
@@ -9,17 +8,17 @@ namespace Disciples.Engine.Base;
 public interface IScene : ISupportLoading
 {
     /// <summary>
+    /// Контейнер игровых объектов.
+    /// </summary>
+    IGameObjectContainer GameObjectContainer { get; }
+
+    /// <summary>
     /// Контейнер объектов сцены.
     /// </summary>
-    ISceneContainer SceneContainer { get; }
+    ISceneObjectContainer SceneObjectContainer { get; }
 
     /// <summary>
-    /// Выполнить действия перед обновлением объектов на сцене.
+    /// Обновить сцену.
     /// </summary>
-    void BeforeSceneUpdate(UpdateSceneData data);
-
-    /// <summary>
-    /// Выполнить действия после обновления объектов на сцене.
-    /// </summary>
-    void AfterSceneUpdate(UpdateSceneData data);
+    void UpdateScene(UpdateSceneData data);
 }

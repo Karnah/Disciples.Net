@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Models;
 /// <summary>
 /// Результат атаки одного юнита на другого.
 /// </summary>
-public class BattleProcessorAttackResult
+internal class BattleProcessorAttackResult
 {
     public BattleProcessorAttackResult(AttackResult attackResult)
     {

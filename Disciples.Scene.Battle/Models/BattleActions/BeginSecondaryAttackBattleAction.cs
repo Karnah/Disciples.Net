@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// <summary>
 /// Событие начала дополнительной атаки указанного.
 /// </summary>
-public class BeginSecondaryAttackBattleAction : BaseEventBattleAction
+internal class BeginSecondaryAttackBattleAction : BaseEventBattleAction
 {
     /// <summary>
     /// Создать объект типа <see cref="BeginSecondaryAttackBattleAction" />.

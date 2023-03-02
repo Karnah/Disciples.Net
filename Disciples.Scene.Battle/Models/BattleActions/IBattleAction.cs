@@ -3,7 +3,7 @@
 /// <summary>
 /// Действие на поле боя.
 /// </summary>
-public interface IBattleAction
+internal interface IBattleAction
 {
     /// <summary>
     /// Признак, что действие завершилось.
