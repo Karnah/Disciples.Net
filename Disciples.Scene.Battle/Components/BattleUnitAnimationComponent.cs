@@ -65,7 +65,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// <summary>
     /// Вся информация об анимации юнита.
     /// </summary>
-    public BattleUnitAnimation BattleUnitAnimation { get; private set; }
+    public BattleUnitAnimation BattleUnitAnimation { get; private set; } = null!;
 
     /// <inheritdoc />
     public override void Initialize()
@@ -75,7 +75,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
         BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_battleUnit.Unit.UnitType.UnitTypeId, _battleUnit.Direction);
 
         // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно.
-        var frameIndex = RandomGenerator.Next(BattleUnitAnimation.BattleUnitFrames[_battleUnit.Action].UnitFrames.Count);
+        var frameIndex = RandomGenerator.Get(BattleUnitAnimation.BattleUnitFrames[_battleUnit.Action].UnitFrames.Count);
         UpdateSource(frameIndex);
     }
 

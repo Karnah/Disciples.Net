@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -12,19 +11,17 @@ namespace Disciples.Avalonia.Converters;
 public class BoldFontConverter : IValueConverter
 {
     /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is bool isBold) {
-            if (isBold)
-                return FontWeight.Bold;
-        }
+        if (value is true)
+            return FontWeight.Bold;
 
         return FontWeight.Normal;
     }
 
     /// <inheritdoc />
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }

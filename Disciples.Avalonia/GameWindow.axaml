@@ -16,7 +16,6 @@
     </Design.DataContext>
 
     <Window.Resources>
-        <c:BitmapToBrushConverter x:Key="BitmapToBrushConverter" />
         <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
         <c:GameColorToBrushConverter x:Key="GameColorToBrushConverter" />
         <c:TextAlignmentConverter x:Key="TextAlignmentConverter" />

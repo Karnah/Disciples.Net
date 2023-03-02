@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using ImageMagick;
-
-using Disciples.Common.Helpers;
 using Disciples.ResourceProvider.Enums;
 using Disciples.ResourceProvider.Helpers;
 using Disciples.ResourceProvider.Models;
-
 using File = Disciples.ResourceProvider.Models.File;
 
 namespace Disciples.ResourceProvider;
 
+/// <summary>
+/// Класс для извлечения изображений из ресурсов.
+/// </summary>
+/// <remarks>
+/// TODO Разобраться с null.
+/// </remarks>
 public class ImagesExtractor
 {
     // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным.
@@ -21,20 +23,24 @@ public class ImagesExtractor
 
     private readonly string _path;
 
-    private IDictionary<int, Record> _records;
-    private IDictionary<int, File> _filesById;
-    private IDictionary<string, File> _filesByName;
+    private IDictionary<int, Record> _records = null!;
+    private IDictionary<int, File> _filesById = null!;
+    private IDictionary<string, File> _filesByName = null!;
 
-    private IDictionary<string, MqImage> _mqImages;
-    private IDictionary<string, MqAnimation> _mqAnimations;
+    private IDictionary<string, MqImage>? _mqImages;
+    private IDictionary<string, MqAnimation>? _mqAnimations;
 
+
+    /// <summary>
+    /// Создать объект типа <see cref="ImagesExtractor" />.
+    /// </summary>
+    /// <param name="path">Путь до ресурса с изображениями.</param>
     public ImagesExtractor(string path)
     {
         _path = path;
 
         Load();
     }
-
 
     /// <summary>
     /// Получить кадры анимации по её имени.
@@ -81,7 +87,8 @@ public class ImagesExtractor
     public RawBitmap GetImage(string name)
     {
         // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям.
-        if (_mqImages?.ContainsKey(name) == true) {
+        if (_mqImages?.ContainsKey(name) == true)
+        {
             var mqImage = _mqImages[name];
             var baseImage = PrepareImage(_filesById[mqImage.FileId]);
 
@@ -101,7 +108,7 @@ public class ImagesExtractor
     public byte[] GetFileContent(string name)
     {
         if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var file) == false)
-            return null;
+            throw new ArgumentException($"Файл {name} не найден");
 
         return GetFileContent(file);
     }
@@ -122,7 +129,8 @@ public class ImagesExtractor
     /// </summary>
     private void Load()
     {
-        using (var stream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
+        using (var stream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+        {
             var mqdb = stream.ReadString(4);
             if (mqdb != "MQDB")
                 throw new ArgumentException("Unknown format of file");
@@ -204,18 +212,20 @@ public class ImagesExtractor
     /// <summary>
     /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени).
     /// </summary>
-    private IDictionary<string, MqIndex> LoadMqIndexes()
+    private IDictionary<string, MqIndex>? LoadMqIndexes()
     {
         _filesByName.TryGetValue("-INDEX.OPT", out var indexFile);
         if (indexFile == null)
             return null;
 
         var mqIndices = new Dictionary<string, MqIndex>();
-        using (var indicesStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
+        using (var indicesStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+        {
             indicesStream.Seek(indexFile.Offset, SeekOrigin.Begin);
 
             var framesCount = indicesStream.ReadInt();
-            for (int frameIndex = 0; frameIndex < framesCount; ++frameIndex) {
+            for (int frameIndex = 0; frameIndex < framesCount; ++frameIndex)
+            {
                 var id = indicesStream.ReadInt();
                 var name = indicesStream.ReadString();
                 var unknownValue1 = indicesStream.ReadInt();

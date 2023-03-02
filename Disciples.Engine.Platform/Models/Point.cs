@@ -16,7 +16,6 @@ public struct Point
         Y = y;
     }
 
-
     /// <summary>
     /// Координата X.
     /// </summary>

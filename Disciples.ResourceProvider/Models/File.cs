@@ -1,7 +1,13 @@
 ﻿namespace Disciples.ResourceProvider.Models;
 
+/// <summary>
+/// Файл в ресурсах игры.
+/// </summary>
 internal class File
 {
+    /// <summary>
+    /// Создать объект типа <see cref="File" />.
+    /// </summary>
     public File(int id, string name, int size, long offset)
     {
         Id = id;
@@ -27,7 +33,7 @@ internal class File
     public int Size { get; }
 
     /// <summary>
-    /// Позиция начала файла в файле ресуров
+    /// Позиция начала файла в файле ресурсов.
     /// </summary>
     public long Offset { get; }
 }

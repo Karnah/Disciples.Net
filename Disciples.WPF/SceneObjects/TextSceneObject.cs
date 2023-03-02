@@ -8,12 +8,16 @@ namespace Disciples.WPF.SceneObjects;
 /// <inheritdoc cref="ITextSceneObject" />
 public class TextSceneObject : BaseSceneObject, ITextSceneObject
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="TextSceneObject" />.
+    /// </summary>
     public TextSceneObject(string text, double fontSize, int layer, bool isBold = false)
         : this(text, fontSize, layer, double.NaN, TextAlignment.Left, isBold)
     { }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="TextSceneObject" />.
+    /// </summary>
     public TextSceneObject(
         string text,
         double fontSize,

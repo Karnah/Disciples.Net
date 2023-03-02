@@ -22,7 +22,6 @@ public class TextProvider : BaseSupportLoading,  ITextProvider
         _resourceTexts = new SortedDictionary<string, ResourceText>(StringComparer.OrdinalIgnoreCase);
     }
 
-
     /// <inheritdoc />
     public override bool IsSharedBetweenScenes => true;
 
@@ -46,7 +45,6 @@ public class TextProvider : BaseSupportLoading,  ITextProvider
     {
         _resourceTexts.Clear();
     }
-
 
     /// <summary>
     /// Загрузить текстовую информацию из ресурсов.

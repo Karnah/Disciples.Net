@@ -5,7 +5,9 @@
 /// </summary>
 public class Bounds
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="Bounds" />.
+    /// </summary>
     public Bounds(int minRow, int maxRow, int minColumn, int maxColumn)
     {
         MinRow = minRow;
@@ -13,7 +15,6 @@ public class Bounds
         MinColumn = minColumn;
         MaxColumn = maxColumn;
     }
-
 
     /// <summary>
     /// Минимальная строка.

@@ -34,21 +34,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
-        Battleground = null;
-        RightPanel = null;
-        BottomPanel = null;
-        PanelSeparator = null;
-        DeathSkull = null;
-        UnitInfoBackground = null;
-
-        UnitBattleEffectsIcon = null;
-
-        ToggleRightButton = null;
-        DefendButton = null;
-        RetreatButton = null;
-        WaitButton = null;
-        InstantResolveButton = null;
-        AutoBattleButton = null;
     }
 
     /// <summary>
@@ -67,7 +52,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         DeathSkull = _bitmapFactory.FromFile(Path.Combine(Directory.GetCurrentDirectory(), "Resources\\Common\\Skull.png"));
         UnitInfoBackground = _interfaceProvider.GetImage("_PG0500IX");
 
-        UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap> {
+        UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap>
+        {
             { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
             { UnitBattleEffectType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
             { UnitBattleEffectType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
@@ -84,47 +70,47 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public IReadOnlyList<IBitmap> Battleground { get; private set; }
+    public IReadOnlyList<IBitmap> Battleground { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap RightPanel { get; private set; }
+    public IBitmap RightPanel { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap BottomPanel { get; private set; }
+    public IBitmap BottomPanel { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap PanelSeparator { get; private set; }
+    public IBitmap PanelSeparator { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap DeathSkull { get; private set; }
+    public IBitmap DeathSkull { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap UnitInfoBackground { get; private set; }
+    public IBitmap UnitInfoBackground { get; private set; } = null!;
 
 
     /// <inheritdoc />
-    public IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; private set; }
+    public IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
 
 
     #region Buttons
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; }
+    public IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; } = null!;
 
 
     /// <summary>
@@ -134,7 +120,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// <param name="buttonName">Имя кнопки.</param>
     private static IDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> battleIcons, string buttonName)
     {
-        return new Dictionary<SceneButtonState, IBitmap> {
+        return new Dictionary<SceneButtonState, IBitmap>
+        {
             { SceneButtonState.Disabled, battleIcons[$"DLG_BATTLE_A_{buttonName}_D"] },
             { SceneButtonState.Active, battleIcons[$"DLG_BATTLE_A_{buttonName}_N"] },
             { SceneButtonState.Selected, battleIcons[$"DLG_BATTLE_A_{buttonName}_H"] },
@@ -213,13 +200,13 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         return _battleResourceProvider.GetBattleAnimation($"HEA{suffix}A");
     }
 
-
     /// <summary>
     /// Получить часть названия файла по размеру рамки.
     /// </summary>
     private static string GetBattleBorderTypeSuffix(BattleBorderSize battleBorderSize)
     {
-        switch (battleBorderSize) {
+        switch (battleBorderSize)
+        {
             case BattleBorderSize.SmallUnit:
                 return "SMALL";
             case BattleBorderSize.LargeUnit:

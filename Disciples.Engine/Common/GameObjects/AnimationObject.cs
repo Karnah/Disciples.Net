@@ -11,6 +11,9 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public class AnimationObject : GameObject
 {
+    /// <summary>
+    /// Создать объект типа <see cref="AnimationObject" />.
+    /// </summary>
     public AnimationObject(
         ISceneObjectContainer sceneObjectContainer,
         IReadOnlyList<Frame> frames,
@@ -29,7 +32,6 @@ public class AnimationObject : GameObject
         Repeat = repeat;
     }
 
-
     /// <summary>
     /// Компонент анимации.
     /// </summary>
@@ -40,17 +42,16 @@ public class AnimationObject : GameObject
     /// </summary>
     public bool Repeat { get; }
 
-
     /// <inheritdoc />
     public override bool IsInteractive => false;
-
 
     /// <inheritdoc />
     public override void Update(long ticksCount)
     {
         // Если анимация не зациклена, то объект уничтожает сам себя.
         // Такая проверка ужасна, так как можно переписать анимацию так, чтобы пропускались фреймы, но сейчас это работает.
-        if (Repeat == false && AnimationComponent.FrameIndex == AnimationComponent.FramesCount - 1) {
+        if (Repeat == false && AnimationComponent.FrameIndex == AnimationComponent.FramesCount - 1)
+        {
             this.Destroy();
             return;
         }

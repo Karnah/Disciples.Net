@@ -42,7 +42,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Картинка с портретом юнита.
     /// </summary>
-    private IImageSceneObject? _unitPortrait;
+    private IImageSceneObject _unitPortrait = null!;
     /// <summary>
     /// Изображение, отображающий полученный юнитом урон (красный прямоугольник поверх портрета).
     /// </summary>
@@ -62,7 +62,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Текст, отображающий текущее количество здоровья и максимальное.
     /// </summary>
-    private ITextSceneObject? _unitHitpoints;
+    private ITextSceneObject _unitHitpoints = null!;
     /// <summary>
     /// Картинка-разделитель на панели для больших существ.
     /// </summary>
@@ -145,8 +145,9 @@ internal class UnitPortraitObject : GameObject
     /// <inheritdoc />
     public override void Destroy()
     {
-        RemoveSceneObject(ref _unitPortrait);
-        RemoveSceneObject(ref _unitHitpoints);
+        _sceneObjectContainer.RemoveSceneObject(_unitPortrait);
+        _sceneObjectContainer.RemoveSceneObject(_unitHitpoints);
+
         RemoveSceneObject(ref _deathIcon);
         RemoveSceneObject(ref _instantaneousEffectImage);
         RemoveSceneObject(ref _instantaneousEffectText);
@@ -184,7 +185,7 @@ internal class UnitPortraitObject : GameObject
                     throw new ArgumentOutOfRangeException();
             }
 
-            _unitHitpoints!.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
+            _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
             return;
         }
 
@@ -213,7 +214,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Обработать завершение действия юнита.
     /// </summary>
-    public void ProcessCompletedUnitAction(UnitBattleAction unitAction)
+    public void ProcessCompletedUnitAction()
     {
         RemoveSceneObject(ref _instantaneousEffectImage);
         RemoveSceneObject(ref _instantaneousEffectText);
@@ -243,7 +244,7 @@ internal class UnitPortraitObject : GameObject
                 var widthOffset = (Width - deathScull.Width) / 2;
                 _deathIcon = _sceneObjectContainer.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y,
                     INTERFACE_LAYER + 3);
-                _unitHitpoints!.Text = $"0/{Unit.UnitType.HitPoints}";
+                _unitHitpoints.Text = $"0/{Unit.UnitType.HitPoints}";
 
                 RemoveSceneObject(ref _unitDamageForeground);
             }
@@ -251,7 +252,7 @@ internal class UnitPortraitObject : GameObject
         else if (_lastUnitHitPoints != Unit.HitPoints)
         {
             _lastUnitHitPoints = Unit.HitPoints;
-            _unitHitpoints!.Text = $"{_lastUnitHitPoints}/{Unit.UnitType.HitPoints}";
+            _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.UnitType.HitPoints}";
 
             RemoveSceneObject(ref _unitDamageForeground);
 
@@ -326,19 +327,27 @@ internal class UnitPortraitObject : GameObject
             }
 
             // Добавляем фон, связанный с воздействием эффекта яда и заморозки.
-            // todo Ожог?
             if (!_battleEffectsForegrounds.ContainsKey(battleEffect.EffectType))
             {
-                if (battleEffect.EffectType == UnitBattleEffectType.Poison)
-                {
-                    _battleEffectsForegrounds.Add(battleEffect.EffectType, AddColorImage(GameColor.Green, false));
-                }
-                else if (battleEffect.EffectType == UnitBattleEffectType.Frostbite)
-                {
-                    _battleEffectsForegrounds.Add(battleEffect.EffectType, AddColorImage(GameColor.Blue, false));
-                }
+                _battleEffectsForegrounds.Add(
+                    battleEffect.EffectType,
+                    AddColorImage(GetEffectTypeColor(battleEffect.EffectType), false));
             }
         }
+    }
+
+    /// <summary>
+    /// Получить цвет эффекта.
+    /// </summary>
+    private static GameColor GetEffectTypeColor(UnitBattleEffectType unitBattleEffectType)
+    {
+        // TODO Ожог.
+        return unitBattleEffectType switch
+        {
+            UnitBattleEffectType.Poison => GameColor.Green,
+            UnitBattleEffectType.Frostbite => GameColor.Blue,
+            _ => throw new ArgumentOutOfRangeException(nameof(unitBattleEffectType), unitBattleEffectType, null)
+        };
     }
 
     /// <summary>

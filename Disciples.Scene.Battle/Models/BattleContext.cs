@@ -36,12 +36,12 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Атакующий отряд
     /// </summary>
-    public Squad AttackingSquad { get; set; }
+    public Squad AttackingSquad { get; set; } = null!;
 
     /// <summary>
     /// Отряд, который защищается.
     /// </summary>
-    public Squad DefendingSquad { get; set; }
+    public Squad DefendingSquad { get; set; } = null!;
 
     /// <summary>
     /// Юнит, который выполняет свой ход.

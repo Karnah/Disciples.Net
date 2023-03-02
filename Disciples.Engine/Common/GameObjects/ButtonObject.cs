@@ -17,8 +17,11 @@ public class ButtonObject : GameObject
     private readonly IDictionary<SceneButtonState, IBitmap> _buttonStates;
     private readonly Action _buttonPressedAction;
 
-    private IImageSceneObject _buttonVisualObject;
+    private IImageSceneObject _buttonVisualObject = null!;
 
+    /// <summary>
+    /// Создать объект типа <see cref="ButtonObject" />.
+    /// </summary>
     public ButtonObject(
         ISceneObjectContainer sceneObjectContainer,
         IDictionary<SceneButtonState, IBitmap> buttonStates,
@@ -74,16 +77,14 @@ public class ButtonObject : GameObject
     public override void Destroy()
     {
         base.Destroy();
-            
-        _sceneObjectContainer.RemoveSceneObject(_buttonVisualObject);
-        _buttonVisualObject = null;
-    }
 
+        _sceneObjectContainer.RemoveSceneObject(_buttonVisualObject);
+    }
 
     /// <summary>
     /// Сделать кнопку доступной для нажатия.
     /// </summary>
-    public virtual void Activate()
+    public virtual void SetActive()
     {
         ButtonState = SceneButtonState.Active;
         UpdateButtonVisualObject();
@@ -92,17 +93,16 @@ public class ButtonObject : GameObject
     /// <summary>
     /// Запретить нажатия на кнопку.
     /// </summary>
-    public virtual void Disable()
+    public virtual void SetDisabled()
     {
         ButtonState = SceneButtonState.Disabled;
         UpdateButtonVisualObject();
     }
 
-
     /// <summary>
     /// Обработка события наведения курсора на кнопку.
     /// </summary>
-    public virtual void OnSelected()
+    public virtual void SetSelected()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
@@ -114,7 +114,7 @@ public class ButtonObject : GameObject
     /// <summary>
     /// Обработка события перемещения курсора с кнопки.
     /// </summary>
-    public virtual void OnUnselected()
+    public virtual void SetUnselected()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
@@ -126,7 +126,7 @@ public class ButtonObject : GameObject
     /// <summary>
     /// Обработка события нажатия на кнопку.
     /// </summary>
-    public virtual void OnPressed()
+    public virtual void Press()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
@@ -138,13 +138,13 @@ public class ButtonObject : GameObject
     /// <summary>
     /// Обработка события клика на кнопку (мышь отпустили).
     /// </summary>
-    public virtual void OnReleased()
+    public virtual void Release()
     {
         // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
         if (ButtonState != SceneButtonState.Pressed)
             return;
 
-        OnButtonClicked();
+        Click();
 
         // Если после клика состояние кнопки не изменилось, то делаем её просто выделенной.
         if (ButtonState == SceneButtonState.Pressed)
@@ -153,6 +153,13 @@ public class ButtonObject : GameObject
         UpdateButtonVisualObject();
     }
 
+    /// <summary>
+    /// Обработать событие нажатия на кнопку.
+    /// </summary>
+    public virtual void Click()
+    {
+        _buttonPressedAction.Invoke();
+    }
 
     /// <summary>
     /// Обновить внешний вид кнопки на сцене.
@@ -160,13 +167,5 @@ public class ButtonObject : GameObject
     protected void UpdateButtonVisualObject()
     {
         _buttonVisualObject.Bitmap = _buttonStates[ButtonState];
-    }
-
-    /// <summary>
-    /// Обработать событие нажатия на кнопку.
-    /// </summary>
-    public virtual void OnButtonClicked()
-    {
-        _buttonPressedAction?.Invoke();
     }
 }

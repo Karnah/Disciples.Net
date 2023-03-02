@@ -18,9 +18,13 @@ namespace Disciples.WPF.Managers;
 /// <inheritdoc />
 public class WpfInputManager : IInputManager
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="WpfInputManager" />.
+    /// </summary>
     public WpfInputManager()
     {
+        MousePosition = new Point();
+
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseDownEvent, new MouseButtonEventHandler(OnMouseUpDown));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpDown));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseMoveEvent, new MouseEventHandler(OnMouseMove));
@@ -30,24 +34,23 @@ public class WpfInputManager : IInputManager
     /// <inheritdoc />
     public Point MousePosition { get; private set; }
 
+    /// <inheritdoc />
+    public event EventHandler<MouseButtonEventArgs>? MouseButtonEvent;
 
     /// <inheritdoc />
-    public event EventHandler<MouseButtonEventArgs> MouseButtonEvent;
-
-    /// <inheritdoc />
-    public event EventHandler<KeyButtonEventArgs> KeyButtonEvent;
-
+    public event EventHandler<KeyButtonEventArgs>? KeyButtonEvent;
 
     /// <summary>
     /// Обработать событие нажатия на кнопку мыши.
     /// </summary>
-    private void OnMouseUpDown(object sender, WpfMouseButtonEventArgs args)
+    private void OnMouseUpDown(object? sender, WpfMouseButtonEventArgs args)
     {
         var gameWindow = sender as GameWindow;
         if (gameWindow == null)
             return;
 
-        if (args.ChangedButton == WpfMouseButton.Left) {
+        if (args.ChangedButton == WpfMouseButton.Left)
+        {
             MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left,
                 args.ButtonState == MouseButtonState.Pressed
                     ? ButtonState.Pressed
@@ -70,7 +73,7 @@ public class WpfInputManager : IInputManager
     /// <summary>
     /// Обработать событие изменения положения мыши.
     /// </summary>
-    private void OnMouseMove(object sender, MouseEventArgs args)
+    private void OnMouseMove(object? sender, MouseEventArgs args)
     {
         var gameWindow = sender as GameWindow;
         if (gameWindow == null)
@@ -83,7 +86,7 @@ public class WpfInputManager : IInputManager
     /// <summary>
     /// Обработать событие нажатия на клавишу клавиатуры.
     /// </summary>
-    private void OnKeyDown(object sender, KeyEventArgs args)
+    private void OnKeyDown(object? sender, KeyEventArgs args)
     {
         // Если были какие-то модификаторы, то игнорируем.
         if (args.KeyboardDevice.Modifiers != ModifierKeys.None)
@@ -102,26 +105,17 @@ public class WpfInputManager : IInputManager
     /// </summary>
     private static KeyboardButton? ToKeyboardButton(Key key)
     {
-        switch (key)
+        return key switch
         {
-            case Key.Tab:
-                return KeyboardButton.Tab;
-            case Key.A:
-                return KeyboardButton.A;
-            case Key.D:
-                return KeyboardButton.D;
-            case Key.I:
-                return KeyboardButton.I;
-            case Key.P:
-                return KeyboardButton.P;
-            case Key.R:
-                return KeyboardButton.R;
-            case Key.S:
-                return KeyboardButton.S;
-            case Key.W:
-                return KeyboardButton.W;
-            default:
-                return null;
-        }
+            Key.Tab => KeyboardButton.Tab,
+            Key.A => KeyboardButton.A,
+            Key.D => KeyboardButton.D,
+            Key.I => KeyboardButton.I,
+            Key.P => KeyboardButton.P,
+            Key.R => KeyboardButton.R,
+            Key.S => KeyboardButton.S,
+            Key.W => KeyboardButton.W,
+            _ => null
+        };
     }
 }

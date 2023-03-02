@@ -13,16 +13,18 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
 {
     private readonly IBitmapFactory _bitmapFactory;
 
-    private ImagesExtractor _extractor;
-    private IDictionary<string, IReadOnlyList<Frame>> _animations;
-    private IDictionary<string, Frame> _images;
+    private readonly IDictionary<string, IReadOnlyList<Frame>> _animations;
+    private readonly IDictionary<string, Frame> _images;
+
+    private ImagesExtractor _extractor = null!;
 
     /// <inheritdoc />
     public BattleResourceProvider(IBitmapFactory bitmapFactory)
     {
         _bitmapFactory = bitmapFactory;
+        _animations = new SortedDictionary<string, IReadOnlyList<Frame>>();
+        _images = new SortedDictionary<string, Frame>();
     }
-
 
     /// <inheritdoc />
     public override bool IsSharedBetweenScenes => false;
@@ -31,23 +33,18 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     protected override void LoadInternal()
     {
         _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Battle.ff");
-        _animations = new SortedDictionary<string, IReadOnlyList<Frame>>();
-        _images = new SortedDictionary<string, Frame>();
     }
 
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
-        _animations = null;
-        _images = null;
     }
 
     /// <inheritdoc />
     public IReadOnlyList<Frame> GetBattleAnimation(string animationName)
     {
-        if (!_animations.ContainsKey(animationName)) {
+        if (!_animations.ContainsKey(animationName))
             _animations[animationName] = ExtractAnimationFrames(animationName);
-        }
 
         return _animations[animationName];
     }
@@ -59,6 +56,9 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     private IReadOnlyList<Frame> ExtractAnimationFrames(string animationName)
     {
         var images = _extractor.GetAnimationFrames(animationName);
+        if (images == null)
+            throw new ArgumentException($"Не найдена анимация {animationName}", nameof(animationName));
+
         return _bitmapFactory.ConvertToFrames(images);
     }
 
@@ -66,7 +66,8 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     /// <inheritdoc />
     public Frame GetBattleFrame(string frameName)
     {
-        if (!_images.ContainsKey(frameName)) {
+        if (!_images.ContainsKey(frameName))
+        {
             var image = _extractor.GetImage(frameName);
             _images[frameName] = _bitmapFactory.FromRawBitmap(image);
         }
@@ -74,14 +75,13 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
         return _images[frameName];
     }
 
-
     /// <inheritdoc />
     public IReadOnlyList<IBitmap> GetRandomBattleground()
     {
         var battlegrounds = _extractor.GetAllFilesNames()
             .Where(name => name.StartsWith("BG_"))
             .ToList();
-        var index = RandomGenerator.Next(battlegrounds.Count);
+        var index = RandomGenerator.Get(battlegrounds.Count);
         var battleground = _extractor.GetImageParts(battlegrounds[index]);
 
         // Картинка поля боя имеет размер 950 * 600. Если игрок атакует, то первые 150 пикселей высоты пропускаются.

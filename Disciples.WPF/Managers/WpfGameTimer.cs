@@ -16,10 +16,10 @@ public class WpfGameTimer : IGameTimer
     /// <summary>
     /// Объект таймера.
     /// </summary>
-    private DispatcherTimer _dispatcherTimer;
+    private DispatcherTimer? _dispatcherTimer;
 
     /// <inheritdoc />
-    public event EventHandler TimerTick;
+    public event EventHandler? TimerTick;
 
     /// <inheritdoc />
     public void Start()
@@ -36,7 +36,7 @@ public class WpfGameTimer : IGameTimer
         _dispatcherTimer = null;
     }
 
-    private void OnTimerTick(object sender, EventArgs e)
+    private void OnTimerTick(object? sender, EventArgs e)
     {
         TimerTick?.Invoke(sender, EventArgs.Empty);
     }

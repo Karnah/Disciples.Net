@@ -1,21 +1,26 @@
 ﻿namespace Disciples.Engine.Common.Models;
 
+/// <summary>
+/// Информация об игроке.
+/// </summary>
 public class Player
 {
-    public Player(int id, bool isAi)
+    /// <summary>
+    /// Создать объект типа <see cref="Player" />.
+    /// </summary>
+    public Player(int id, bool isComputer)
     {
         Id = id;
-        IsAI = isAi;
+        IsComputer = isComputer;
     }
 
-
     /// <summary>
-    /// Уникальный идентификатор игрока
+    /// Уникальный идентификатор игрока.
     /// </summary>
     public int Id { get; }
 
     /// <summary>
-    /// Управляется ли игрок компьютером (ИИ)
+    /// Управляется ли игрок компьютером (ИИ).
     /// </summary>
-    public bool IsAI { get; }
+    public bool IsComputer { get; }
 }

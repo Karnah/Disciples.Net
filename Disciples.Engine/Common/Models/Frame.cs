@@ -5,7 +5,9 @@
 /// </summary>
 public class Frame
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="Frame" />.
+    /// </summary>
     public Frame(double width, double height, double offsetX, double offsetY, IBitmap bitmap)
     {
         Width = width;
@@ -14,7 +16,6 @@ public class Frame
         OffsetY = offsetY;
         Bitmap = bitmap;
     }
-
 
     /// <summary>
     /// Ширина изображения.

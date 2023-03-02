@@ -33,9 +33,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly BattleProcessor _battleProcessor;
     private readonly ISceneObjectContainer _sceneObjectContainer;
 
-    private IReadOnlyCollection<BattleUnit> _rightPanelUnits;
-    private IImageSceneObject? _currentUnitFace;
-    private BattleUnitInfoGameObject? _currentUnitTextInfoObject;
+    private IReadOnlyCollection<BattleUnit> _rightPanelUnits = Array.Empty<BattleUnit>();
+    private IImageSceneObject _currentUnitFace = null!;
+    private BattleUnitInfoGameObject _currentUnitTextInfoObject = null!;
     private IImageSceneObject? _targetUnitFace;
     private BattleUnitInfoGameObject? _targetUnitTextInfoObject;
     private BattleUnit? _targetUnitObject;
@@ -70,7 +70,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <summary>
     /// Объекты портретов на правой панели.
     /// </summary>
-    private IReadOnlyList<UnitPortraitObject> _rightPanelUnitPortraits;
+    private IReadOnlyList<UnitPortraitObject> _rightPanelUnitPortraits = Array.Empty<UnitPortraitObject>();
     /// <summary>
     /// Отряд, который в данный момент отображается на правой панели.
     /// </summary>
@@ -82,14 +82,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <summary>
     /// Анимации-рамки, которые отрисовываются на панели с юнитами.
     /// </summary>
-    private IList<AnimationObject> _unitPanelAnimations;
+    private IList<AnimationObject>? _unitPanelAnimations;
 
-    private ToggleButtonObject _reflectUnitPanelButton;
-    private ButtonObject _defendButton;
-    private ButtonObject _retreatButton;
-    private ButtonObject _waitButton;
-    private ButtonObject _instantResolveButton;
-    private ToggleButtonObject _autoBattleButton;
+    private ToggleButtonObject _reflectUnitPanelButton = null!;
+    private ButtonObject? _defendButton;
+    private ButtonObject? _retreatButton;
+    private ButtonObject? _waitButton;
+    private ButtonObject? _instantResolveButton;
+    private ToggleButtonObject? _autoBattleButton;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleInterfaceController" />.
@@ -192,9 +192,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void InitializeMainInterface()
     {
-        foreach (var battleground in _interfaceProvider.Battleground) {
+        foreach (var battleground in _interfaceProvider.Battleground)
             _sceneObjectContainer.AddImage(battleground, 0, 0, 0);
-        }
+
         _sceneObjectContainer.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
         _sceneObjectContainer.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
 
@@ -312,17 +312,18 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         var gameObject = inputDeviceEvent.GameObject;
 
         // Если отпустили ПКМ, то прекращаем отображать информацию о юните.
-        if (actionType == InputDeviceActionType.MouseRight && actionState == InputDeviceActionState.Deactivated) {
+        if (actionType == InputDeviceActionType.MouseRight && actionState == InputDeviceActionState.Deactivated)
+        {
             GameObjectRightButtonReleased(gameObject);
             return;
         }
 
         // Если ПКМ зажата, то не меняем выбранного юнита до тех пор, пока не будет отпущена кнопка.
-        if (_isUnitInfoShowing) {
+        if (_isUnitInfoShowing)
             return;
-        }
 
-        switch (actionType) {
+        switch (actionType)
+        {
             case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Activated:
                 GameObjectSelected(gameObject);
                 break;
@@ -368,7 +369,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }
         else if (gameObject is ButtonObject button)
         {
-            button.OnSelected();
+            button.SetSelected();
         }
     }
 
@@ -377,11 +378,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void GameObjectUnselected(GameObject? gameObject)
     {
-        if (gameObject is BattleUnit) {
+        if (gameObject is BattleUnit)
+        {
             UpdateTargetUnit(null);
         }
-        else if (gameObject is ButtonObject button) {
-            button.OnUnselected();
+        else if (gameObject is ButtonObject button)
+        {
+            button.SetUnselected();
         }
     }
 
@@ -397,7 +400,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         if (gameObject is ButtonObject button)
         {
-            button.OnPressed();
+            button.Press();
         }
     }
 
@@ -430,7 +433,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         else if (gameObject is ButtonObject button)
         {
             // TODO Подумать над другим способом обработки.
-            button.OnReleased();
+            button.Release();
         }
     }
 
@@ -569,7 +572,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             if (portrait == null)
                 return;
 
-            portrait.ProcessCompletedUnitAction(unitBattleAction);
+            portrait.ProcessCompletedUnitAction();
         }
     }
 
@@ -582,17 +585,27 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         _isAnimating = false;
 
-        _defendButton.Destroy();
-        _retreatButton.Destroy();
-        _waitButton.Destroy();
-        _instantResolveButton.Destroy();
-        _autoBattleButton.Destroy();
+        _defendButton?.Destroy();
+        _defendButton = null;
+
+        _retreatButton?.Destroy();
+        _retreatButton = null;
+
+
+        _waitButton?.Destroy();
+        _waitButton = null;
+
+        _instantResolveButton?.Destroy();
+        _instantResolveButton = null;
+
+        _autoBattleButton?.Destroy();
+        _autoBattleButton = null;
 
         // todo Создать две новые кнопки - "выйти" и "выйти и открыть" интерфейс.
 
         // Отображаем отряд победителя.
         _isRightUnitPanelReflected = CurrentBattleUnit.IsAttacker;
-        _reflectUnitPanelButton.Activate();
+        _reflectUnitPanelButton.SetActive();
         _reflectUnitPanelButton.SetState(_isRightUnitPanelReflected);
 
         InitializeUnitsOnRightPanel();
@@ -607,11 +620,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void AttachSelectedAnimation(BattleUnit battleUnit)
     {
-        if (_currentUnitFace != null)
-            _currentUnitFace.Bitmap = battleUnit.Unit.UnitType.BattleFace;
-
-        if (_currentUnitTextInfoObject != null)
-            _currentUnitTextInfoObject.Unit = battleUnit.Unit;
+        _currentUnitFace.Bitmap = battleUnit.Unit.UnitType.BattleFace;
+        _currentUnitTextInfoObject.Unit = battleUnit.Unit;
 
         DetachSelectedAnimation();
 
@@ -637,7 +647,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _currentUnitSelectionAnimation = null;
     }
 
-
     /// <summary>
     /// Отобразить анимацию выделения цели исходя из типа атаки текущего юнита.
     /// </summary>
@@ -654,7 +663,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         // Если текущий юнит может атаковать только одну цель,
         // то всегда будет выделена только одна цель
-        if (currentUnit.UnitType.MainAttack.Reach != Reach.All) {
+        if (currentUnit.UnitType.MainAttack.Reach != Reach.All)
+        {
             AttachTargetAnimations(_targetUnitObject);
             return;
         }
@@ -666,12 +676,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         // Также наоборот, если юнит применяет способность на врагов, то выделятся все враги
         // Иначе, как например, лекарь при наведении на врага будет выделять только 1 врага
         if (currentUnit.Player == targetUnit.Player && currentUnit.HasAllyAbility() ||
-            currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility()) {
+            currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility())
+        {
             targetUnits = BattleUnits
                 .Where(u => u.Unit.Player == targetUnit.Player && u.Unit.IsDead == false)
                 .ToArray();
         }
-        else {
+        else
+        {
             targetUnits = new[] { _targetUnitObject };
         }
 
@@ -723,11 +735,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         var showEnemies = currentUnit.HasEnemyAbility();
 
         // Если текущий юнит находится в атакующем отряде, то мы отражаем панель только, если он лекарь и т.д.
-        if (CurrentBattleUnit.IsAttacker) {
+        if (CurrentBattleUnit.IsAttacker)
+        {
             _isRightUnitPanelReflected = !showEnemies;
         }
         // Иначе для защищающегося отряда для отображения врагов нужно отражать панель.
-        else {
+        else
+        {
             _isRightUnitPanelReflected = showEnemies;
         }
 
@@ -755,17 +769,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         // Если юниты уже расположены на панели и отряд, который необходимо отображать не изменился,
         // То нет необходимости что-либо менять.
-        if (_rightPanelUnitPortraits != null && _rightUnitsPanelSquadDirection == direction)
+        if (_rightUnitsPanelSquadDirection == direction)
             return;
 
         _rightUnitsPanelSquadDirection = direction;
 
         // Удаляем старые портреты.
-        if (_rightPanelUnitPortraits != null) {
-            foreach (var portrait in _rightPanelUnitPortraits) {
-                portrait.Destroy();
-            }
-        }
+        foreach (var portrait in _rightPanelUnitPortraits)
+            portrait.Destroy();
 
         _rightPanelUnits = BattleUnits
             .Where(u => u.IsAttacker && direction == BattleDirection.Attacker ||
@@ -773,7 +784,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             .ToList();
 
         var portraits = new List<UnitPortraitObject>();
-        foreach (var battleUnit in _rightPanelUnits) {
+        foreach (var battleUnit in _rightPanelUnits)
+        {
             var lineOffset = direction == BattleDirection.Defender
                 ? (battleUnit.Unit.SquadLinePosition + 1) % 2
                 : battleUnit.Unit.SquadLinePosition;
@@ -817,7 +829,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _unitPanelAnimations = new List<AnimationObject>();
 
         // Если отображается отряд текущего юнита, то нужно его выделить на панели.
-        if (currentUnit.Player == _rightPanelUnits.First().Unit.Player) {
+        if (currentUnit.Player == _rightPanelUnits.First().Unit.Player)
+        {
             var position = GetRightUnitPanelPosition(currentUnit.SquadLinePosition, currentUnit.SquadFlankPosition, CurrentBattleUnit.Direction);
 
             _unitPanelAnimations.Add(
@@ -830,7 +843,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         // Если юнит бьёт по площади и цель юнита - отображаемый отряд, то добавляем одну большую рамку.
         if (currentUnit.UnitType.MainAttack.Reach == Reach.All &&
-            _rightPanelUnits.Any(CanAttack)) {
+            _rightPanelUnits.Any(CanAttack))
+        {
             var position = GetRightUnitPanelPosition(1, 2, BattleDirection.Defender);
 
             _unitPanelAnimations.Add(
@@ -843,8 +857,10 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                     INTERFACE_LAYER + 3));
         }
         // Иначе добавляем рамку только тем юнитам, которых можно атаковать.
-        else {
-            foreach (var targetUnit in _rightPanelUnits) {
+        else
+        {
+            foreach (var targetUnit in _rightPanelUnits)
+            {
                 if (!CanAttack(targetUnit))
                     continue;
 
@@ -880,22 +896,22 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <summary>
     /// Активировать указанные кнопки.
     /// </summary>
-    private static void ActivateButtons(params ButtonObject[] buttons)
+    private static void ActivateButtons(params ButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {
-            button.Activate();
+            button?.SetActive();
         }
     }
 
     /// <summary>
     /// Деактивировать указанные кнопки.
     /// </summary>
-    private static void DisableButtons(params ButtonObject[] buttons)
+    private static void DisableButtons(params ButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {
-            button.Disable();
+            button?.SetDisabled();
         }
     }
 

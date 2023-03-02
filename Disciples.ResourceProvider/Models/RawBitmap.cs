@@ -5,7 +5,9 @@
 /// </summary>
 public class RawBitmap
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="RawBitmap" />.
+    /// </summary>
     public RawBitmap(int minRow, int maxRow, int minColumn, int maxColumn, int width, int height, byte[] data)
     {
         MinRow = minRow;

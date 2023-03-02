@@ -16,6 +16,12 @@ namespace Disciples.Scene.Battle.GameObjects;
 internal class DetailUnitInfoObject : GameObject
 {
     /// <summary>
+    /// Паттерн для разбора характеристик юнита.
+    /// </summary>
+    private static Regex UnitInfoRegexPattern =
+        new(@"(?<Title>[%\w ]+:)\\t(?:(?<Value1>[\w\W]+?)(?:\\n)|(?<Value2>%[\w]+%))", RegexOptions.Compiled);
+
+    /// <summary>
     /// Слой, на котором располагается информация о юните.
     /// </summary>
     private const int INTERFACE_LAYER = 2000;
@@ -41,10 +47,10 @@ internal class DetailUnitInfoObject : GameObject
     private readonly ITextProvider _textProvider;
     private readonly List<ITextSceneObject> _unitInfo;
 
-    private IImageSceneObject _unitInfoBackground;
-    private IImageSceneObject _unitPortrait;
-    private ITextSceneObject _unitName;
-    private ITextSceneObject _unitDescription;
+    private IImageSceneObject _unitInfoBackground = null!;
+    private IImageSceneObject _unitPortrait = null!;
+    private ITextSceneObject _unitName = null!;
+    private ITextSceneObject _unitDescription = null!;
 
     /// <inheritdoc />
     public DetailUnitInfoObject(
@@ -65,7 +71,6 @@ internal class DetailUnitInfoObject : GameObject
         Unit = unit;
     }
 
-
     /// <summary>
     /// Юнит, о котором выводится информация.
     /// </summary>
@@ -73,7 +78,6 @@ internal class DetailUnitInfoObject : GameObject
 
     /// <inheritdoc />
     public override bool IsInteractive => false;
-
 
     /// <inheritdoc />
     public override void Initialize()
@@ -111,8 +115,9 @@ internal class DetailUnitInfoObject : GameObject
         var text = _textProvider.GetText(textId);
 
         endVerticalOffset = verticalOffset;
-        var rows = Regex.Matches(text, @"(?<Title>[%\w ]+:)\\t(?:(?<Value1>[\w\W]+?)(?:\\n)|(?<Value2>%[\w]+%))");
-        foreach (Match row in rows) {
+        var rows = UnitInfoRegexPattern.Matches(text);
+        foreach (Match row in rows)
+        {
             var titlePattern = row.Groups["Title"].Value;
             var title = ReplacePlaceholders(titlePattern.Trim());
             var titleObject = _sceneObjectContainer.AddText(
@@ -139,6 +144,9 @@ internal class DetailUnitInfoObject : GameObject
         return result;
     }
 
+    /// <summary>
+    /// Заменить плейсхолдеры значениями характеристик юнита.
+    /// </summary>
     private string ReplacePlaceholders(string value)
     {
         // todo Модификаторы добавляются обычным цветом, а не зелёным/красном.
@@ -207,36 +215,18 @@ internal class DetailUnitInfoObject : GameObject
     /// </summary>
     private string GetAttackSourceTitle(AttackSource source)
     {
-        string attackSourceId;
-
-        switch (source) {
-            case AttackSource.Weapon:
-                attackSourceId = "X005TA0145";
-                break;
-            case AttackSource.Mind:
-                attackSourceId = "X005TA0146";
-                break;
-            case AttackSource.Life:
-                attackSourceId = "X005TA0147";
-                break;
-            case AttackSource.Death:
-                attackSourceId = "X005TA0148";
-                break;
-            case AttackSource.Fire:
-                attackSourceId = "X005TA0149";
-                break;
-            case AttackSource.Water:
-                attackSourceId = "X005TA0150";
-                break;
-            case AttackSource.Earth:
-                attackSourceId = "X005TA0152";
-                break;
-            case AttackSource.Air:
-                attackSourceId = "X005TA0151";
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(source), source, null);
-        }
+        var attackSourceId = source switch
+        {
+            AttackSource.Weapon => "X005TA0145",
+            AttackSource.Mind => "X005TA0146",
+            AttackSource.Life => "X005TA0147",
+            AttackSource.Death => "X005TA0148",
+            AttackSource.Fire => "X005TA0149",
+            AttackSource.Water => "X005TA0150",
+            AttackSource.Earth => "X005TA0152",
+            AttackSource.Air => "X005TA0151",
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+        };
 
         return _textProvider.GetText(attackSourceId);
     }
@@ -272,8 +262,8 @@ internal class DetailUnitInfoObject : GameObject
         _sceneObjectContainer.RemoveSceneObject(_unitPortrait);
         _sceneObjectContainer.RemoveSceneObject(_unitName);
         _sceneObjectContainer.RemoveSceneObject(_unitDescription);
-        foreach (var unitInfo in _unitInfo) {
+
+        foreach (var unitInfo in _unitInfo)
             _sceneObjectContainer.RemoveSceneObject(unitInfo);
-        }
     }
 }

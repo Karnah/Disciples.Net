@@ -13,8 +13,8 @@ internal class BattleUnitInfoGameObject : GameObject
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly int _layer;
 
-    private ITextSceneObject _unitInfoText;
-    private Unit _lastUnit;
+    private ITextSceneObject? _unitInfoText;
+    private Unit? _lastUnit;
     private int? _lastHitpoints;
 
     /// <inheritdoc />
@@ -30,7 +30,7 @@ internal class BattleUnitInfoGameObject : GameObject
     /// <summary>
     /// Юнит, информация о котором отображается.
     /// </summary>
-    public Unit Unit { get; set; }
+    public Unit? Unit { get; set; }
 
     /// <inheritdoc />
     public override bool IsInteractive => false;
@@ -41,8 +41,10 @@ internal class BattleUnitInfoGameObject : GameObject
         base.Update(ticksCount);
 
         // Удаляем текст со сцены.
-        if (Unit == null) {
-            if (_unitInfoText != null) {
+        if (Unit == null)
+        {
+            if (_unitInfoText != null)
+            {
                 _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
                 _unitInfoText = null;
             }
@@ -51,7 +53,8 @@ internal class BattleUnitInfoGameObject : GameObject
         }
 
         // Обновляем текст, если изменился юнит или его здоровье.
-        if (_lastUnit != Unit || _lastHitpoints != Unit.HitPoints) {
+        if (_lastUnit != Unit || _lastHitpoints != Unit.HitPoints)
+        {
             _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
 
             _unitInfoText = _sceneObjectContainer.AddText(GetUnitNameAndHitPoints(Unit), 14, X, Y, _layer, true);

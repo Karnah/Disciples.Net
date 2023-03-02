@@ -2,8 +2,14 @@
 
 namespace Disciples.Engine.Common.Models;
 
+/// <summary>
+/// Характеристики атаки юнита.
+/// </summary>
 public class Attack
 {
+    /// <summary>
+    /// Создать объект типа <see cref="Attack" />.
+    /// </summary>
     public Attack(
         string attackId,
         string name,
@@ -30,52 +36,52 @@ public class Attack
 
 
     /// <summary>
-    /// Идентификатор атаки
+    /// Идентификатор атаки.
     /// </summary>
     public string AttackId { get; }
 
     /// <summary>
-    /// Имя
+    /// Имя.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// Описание
+    /// Описание.
     /// </summary>
     public string Description { get; }
 
     /// <summary>
-    /// Инициатива
+    /// Инициатива.
     /// </summary>
     public int Initiative { get; }
 
     /// <summary>
-    /// Тип атаки
+    /// Тип атаки.
     /// </summary>
     public AttackSource AttackSource { get; }
 
     /// <summary>
-    /// Класс атаки
+    /// Класс атаки.
     /// </summary>
     public AttackClass AttackClass { get; }
 
     /// <summary>
-    /// Точность
+    /// Точность.
     /// </summary>
     public int Accuracy { get; }
 
     /// <summary>
-    /// Достижимость целей для атаки
+    /// Достижимость целей для атаки.
     /// </summary>
     public Reach Reach { get; }
 
     /// <summary>
-    /// Сила исцеления
+    /// Сила исцеления.
     /// </summary>
     public int HealPower { get; }
 
     /// <summary>
-    /// Наносимый урон
+    /// Наносимый урон.
     /// </summary>
     public int DamagePower { get; }
 

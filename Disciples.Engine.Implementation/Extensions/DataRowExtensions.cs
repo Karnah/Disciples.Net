@@ -6,6 +6,9 @@ namespace Disciples.Engine.Implementation.Extensions;
 /// <summary>
 /// Методы расширения для работы со строкой таблицы.
 /// </summary>
+/// <remarks>
+/// TODO Разобраться с null.
+/// </remarks>
 public static class DataRowExtensions
 {
     /// <summary>

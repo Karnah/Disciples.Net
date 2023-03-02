@@ -9,21 +9,29 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public abstract class GameObject
 {
+    /// <summary>
+    /// Создать объект типа <see cref="GameObject" />.
+    /// </summary>
     protected GameObject()
     {
         Components = Array.Empty<IComponent>();
     }
 
+    /// <summary>
+    /// Создать объект типа <see cref="GameObject" />.
+    /// </summary>
     protected GameObject(double x, double y) : this()
     {
         X = x;
         Y = y;
     }
 
+    /// <summary>
+    /// Создать объект типа <see cref="GameObject" />.
+    /// </summary>
     protected GameObject((double X, double Y) position) : this(position.X, position.Y)
     {
     }
-
 
     /// <summary>
     /// Положение объекта на сцене, координата X.
@@ -52,7 +60,6 @@ public abstract class GameObject
     /// </summary>
     public abstract bool IsInteractive { get; }
 
-
     /// <summary>
     /// Компоненты из которых состоит объект.
     /// </summary>
@@ -68,7 +75,6 @@ public abstract class GameObject
     /// </summary>
     public bool IsDestroyed { get; private set; }
 
-
     /// <summary>
     /// Инициализировать игровой объект.
     /// </summary>
@@ -77,9 +83,8 @@ public abstract class GameObject
         if (IsInitialized)
             throw new InvalidOperationException("Game object already initialized");
 
-        foreach (var component in Components) {
+        foreach (var component in Components)
             component.Initialize();
-        }
 
         IsInitialized = true;
     }
@@ -90,9 +95,8 @@ public abstract class GameObject
     /// <param name="ticksCount">Количество тиков, которое прошло со времени предыдущего обновления.</param>
     public virtual void Update(long ticksCount)
     {
-        foreach (var component in Components) {
+        foreach (var component in Components)
             component.Update(ticksCount);
-        }
     }
 
     /// <summary>
@@ -103,9 +107,8 @@ public abstract class GameObject
         if (IsDestroyed)
             throw new ObjectDisposedException("Game object already destroyed");
 
-        foreach (var component in Components) {
+        foreach (var component in Components)
             component.Destroy();
-        }
 
         IsDestroyed = true;
     }

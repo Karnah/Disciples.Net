@@ -3,6 +3,9 @@
 /// <summary>
 /// Изображение, которое отображается на сцене.
 /// </summary>
+/// <remarks>
+/// TODO Сейчас Bitmap может быть null.
+/// </remarks>
 public interface IImageSceneObject : ISceneObject
 {
     /// <summary>

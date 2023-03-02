@@ -22,6 +22,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        ILogger logger = null;
+
         try
         {
             var stopwatch = new Stopwatch();
@@ -30,7 +32,7 @@ public partial class App : Application
             Container = CreateContainer();
             _gameController = Container.Resolve<GameController>();
 
-            var logger = Container.Resolve<ILogger>();
+            logger = Container.Resolve<ILogger>();
 
             logger.Log("Create GameWindow");
             var gw = Container.Resolve<GameWindow>();
@@ -56,7 +58,9 @@ public partial class App : Application
 
             gw.ShowDialog();
         }
-        catch (Exception exception) {
+        catch (Exception exception)
+        {
+            logger?.LogError("Ошибка при запуске приложения", exception);
             MessageBox.Show(exception.Message);
             Shutdown();
         }

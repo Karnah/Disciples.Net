@@ -29,10 +29,8 @@ public class WpfBitmapFactory : IBitmapFactory
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
-        if (bitmapData == null)
-            return null;
-
-        using (var memoryStream = new MemoryStream(bitmapData)) {
+        using (var memoryStream = new MemoryStream(bitmapData))
+        {
             var bitmap = BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             return new WpfBitmap(bitmap);
         }
@@ -47,12 +45,11 @@ public class WpfBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds bounds = null)
+    public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null)
     {
         // Если границы не указаны явно, то берём наименьшее возможное изображение.
-        if (bounds == null) {
+        if (bounds == null)
             bounds = new Bounds(rawBitmap.MinRow, rawBitmap.MaxRow, rawBitmap.MinColumn, rawBitmap.MaxColumn);
-        }
 
         var width = bounds.MaxColumn - bounds.MinColumn;
         var height = bounds.MaxRow - bounds.MinRow;
@@ -62,7 +59,8 @@ public class WpfBitmapFactory : IBitmapFactory
         int stride = width << 2;
 
         var data = new byte[stride * height];
-        for (int row = bounds.MinRow; row < bounds.MaxRow; ++row) {
+        for (int row = bounds.MinRow; row < bounds.MaxRow; ++row)
+        {
             var begin = (row * rawBitmap.Width + bounds.MinColumn) << 2;
             Buffer.BlockCopy(rawBitmap.Data, begin, data, (row - bounds.MinRow) * stride, stride);
         }
@@ -76,7 +74,9 @@ public class WpfBitmapFactory : IBitmapFactory
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
         // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
-        if (rawBitmap.Width == GameInfo.OriginalWidth && rawBitmap.Height == GameInfo.OriginalHeight) {
+        if (Math.Abs(rawBitmap.Width - GameInfo.OriginalWidth) < float.Epsilon
+            && Math.Abs(rawBitmap.Height - GameInfo.OriginalHeight) < float.Epsilon)
+        {
             offsetX -= BIG_FRAME_OFFSET_X;
             offsetY -= BIG_FRAME_OFFSET_Y;
         }
@@ -89,7 +89,8 @@ public class WpfBitmapFactory : IBitmapFactory
     public void SaveToFile(IBitmap bitmap, string filePath)
     {
         var bitmapFrame = bitmap.BitmapData as BitmapFrame;
-        if (bitmapFrame == null) {
+        if (bitmapFrame == null)
+        {
             var bitmapSource = bitmap.BitmapData as BitmapSource;
             if (bitmapSource == null)
                 return;
@@ -97,7 +98,8 @@ public class WpfBitmapFactory : IBitmapFactory
             bitmapFrame = BitmapFrame.Create(bitmapSource);
         }
 
-        using (var fileStream = new FileStream(filePath, FileMode.Create)) {
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
             BitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(bitmapFrame);
             encoder.Save(fileStream);

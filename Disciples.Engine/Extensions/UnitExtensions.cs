@@ -14,14 +14,16 @@ public static class UnitExtensions
     public static bool HasAllyAbility(this Unit unit)
     {
         var attackClass = unit.UnitType.MainAttack.AttackClass;
-        if (attackClass == AttackClass.Heal ||
-            attackClass == AttackClass.BoostDamage ||
-            attackClass == AttackClass.Revive ||
-            attackClass == AttackClass.Cure ||
-            attackClass == AttackClass.GiveAttack ||
-            attackClass == AttackClass.TransformSelf ||
-            attackClass == AttackClass.BestowWards)
+        if (attackClass is AttackClass.Heal
+            or AttackClass.BoostDamage
+            or AttackClass.Revive
+            or AttackClass.Cure
+            or AttackClass.GiveAttack
+            or AttackClass.TransformSelf
+            or AttackClass.BestowWards)
+        {
             return true;
+        }
 
         return false;
     }
@@ -32,22 +34,24 @@ public static class UnitExtensions
     public static bool HasEnemyAbility(this Unit unit)
     {
         var attackClass = unit.UnitType.MainAttack.AttackClass;
-        if (attackClass == AttackClass.Damage ||
-            attackClass == AttackClass.Drain ||
-            attackClass == AttackClass.Paralyze ||
-            attackClass == AttackClass.Fear ||
-            attackClass == AttackClass.Petrify ||
-            attackClass == AttackClass.LowerDamage ||
-            attackClass == AttackClass.LowerInitiative ||
-            attackClass == AttackClass.Poison ||
-            attackClass == AttackClass.Frostbite ||
-            attackClass == AttackClass.DrainOverflow ||
-            attackClass == AttackClass.DrainLevel ||
-            attackClass == AttackClass.Doppelganger ||
-            attackClass == AttackClass.TransformOther ||
-            attackClass == AttackClass.Blister ||
-            attackClass == AttackClass.Shatter)
+        if (attackClass is AttackClass.Damage
+            or AttackClass.Drain
+            or AttackClass.Paralyze
+            or AttackClass.Fear
+            or AttackClass.Petrify
+            or AttackClass.LowerDamage
+            or AttackClass.LowerInitiative
+            or AttackClass.Poison
+            or AttackClass.Frostbite
+            or AttackClass.DrainOverflow
+            or AttackClass.DrainLevel
+            or AttackClass.Doppelganger
+            or AttackClass.TransformOther
+            or AttackClass.Blister
+            or AttackClass.Shatter)
+        {
             return true;
+        }
 
         return false;
     }

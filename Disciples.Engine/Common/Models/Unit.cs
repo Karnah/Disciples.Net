@@ -5,6 +5,9 @@
 /// </summary>
 public class Unit
 {
+    /// <summary>
+    /// Создать объект типа <see cref="Unit" />.
+    /// </summary>
     public Unit(string id, UnitType unitType, Player player, int squadLinePosition, int squadFlankPosition)
     {
         Id = id;
@@ -19,7 +22,6 @@ public class Unit
         HitPoints = UnitType.HitPoints;
         Effects = new UnitEffects();
     }
-
 
     /// <summary>
     /// Уникальный идентификатор юнита.
@@ -172,23 +174,4 @@ public class Unit
     /// Эффекты, воздействующие на юнита.
     /// </summary>
     public UnitEffects Effects { get; }
-
-
-    /// <summary>
-    /// Изменить текущее количество очков здоровья у юнита.
-    /// </summary>
-    /// <param name="value">На какое количество необходимо изменить.</param>
-    public void ChangeHitPoints(int value)
-    {
-        var hitpoints = HitPoints + value;
-        if (hitpoints > UnitType.HitPoints) {
-            HitPoints = UnitType.HitPoints;
-        }
-        else if (hitpoints < 0) {
-            HitPoints = 0;
-        }
-        else {
-            HitPoints = hitpoints;
-        }
-    }
 }

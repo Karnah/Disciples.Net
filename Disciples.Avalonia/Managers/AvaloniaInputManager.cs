@@ -25,7 +25,7 @@ public class AvaloniaInputManager : IInputManager
     /// </summary>
     public AvaloniaInputManager()
     {
-        Application.Current.InputManager.PostProcess.OfType<RawPointerEventArgs>().Subscribe(OnMouseStateChanged);
+        Application.Current!.InputManager!.PostProcess.OfType<RawPointerEventArgs>().Subscribe(OnMouseStateChanged);
         Application.Current.InputManager.PostProcess.OfType<RawKeyEventArgs>().Subscribe(OnKeyStateChanged);
     }
 
@@ -35,11 +35,10 @@ public class AvaloniaInputManager : IInputManager
 
 
     /// <inheritdoc />
-    public event EventHandler<MouseButtonEventArgs> MouseButtonEvent;
+    public event EventHandler<MouseButtonEventArgs>? MouseButtonEvent;
 
     /// <inheritdoc />
-    public event EventHandler<KeyButtonEventArgs> KeyButtonEvent;
-
+    public event EventHandler<KeyButtonEventArgs>? KeyButtonEvent;
 
     /// <summary>
     /// Обработать событие от курсора.
@@ -58,8 +57,8 @@ public class AvaloniaInputManager : IInputManager
                 }
 
                 MousePosition = new Point(
-                    (int)(args.Position.X - _screenOffset?.X) / GameInfo.Scale,
-                    (int)(args.Position.Y - _screenOffset?.Y) / GameInfo.Scale);
+                    (int)(args.Position.X - _screenOffset.Value.X) / GameInfo.Scale,
+                    (int)(args.Position.Y - _screenOffset.Value.Y) / GameInfo.Scale);
 
                 break;
 
@@ -106,26 +105,17 @@ public class AvaloniaInputManager : IInputManager
     /// </summary>
     private static KeyboardButton? ToKeyboardButton(Key key)
     {
-        switch (key)
+        return key switch
         {
-            case Key.Tab:
-                return KeyboardButton.Tab;
-            case Key.A:
-                return KeyboardButton.A;
-            case Key.D:
-                return KeyboardButton.D;
-            case Key.I:
-                return KeyboardButton.I;
-            case Key.P:
-                return KeyboardButton.P;
-            case Key.R:
-                return KeyboardButton.R;
-            case Key.S:
-                return KeyboardButton.S;
-            case Key.W:
-                return KeyboardButton.W;
-            default:
-                return null;
-        }
+            Key.Tab => KeyboardButton.Tab,
+            Key.A => KeyboardButton.A,
+            Key.D => KeyboardButton.D,
+            Key.I => KeyboardButton.I,
+            Key.P => KeyboardButton.P,
+            Key.R => KeyboardButton.R,
+            Key.S => KeyboardButton.S,
+            Key.W => KeyboardButton.W,
+            _ => null
+        };
     }
 }

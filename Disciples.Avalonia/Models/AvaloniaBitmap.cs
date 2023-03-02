@@ -10,12 +10,13 @@ public class AvaloniaBitmap : IBitmap
 {
     private readonly Bitmap _bitmap;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="AvaloniaBitmap" />.
+    /// </summary>
     public AvaloniaBitmap(Bitmap bitmap)
     {
         _bitmap = bitmap;
     }
-
 
     /// <inheritdoc />
     public double Width => _bitmap.PixelSize.Width;

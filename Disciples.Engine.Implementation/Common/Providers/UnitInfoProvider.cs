@@ -16,15 +16,27 @@ namespace Disciples.Engine.Implementation.Common.Providers;
 /// <inheritdoc cref="IUnitInfoProvider" />
 public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
 {
+    /// <summary>
+    /// Значение определяющее, что у объекта нет базового/родителя.
+    /// </summary>
+    /// <remarks>
+    /// Юнит второго уровня ссылается на юнита первого уровня как базового.
+    /// Юнит первого уровня будет ссылаться на это значение.
+    /// </remarks>
+    private const string NO_PARENT = "G000000000";
+
     private readonly ITextProvider _textProvider;
     private readonly IBitmapFactory _bitmapFactory;
     private readonly DataExtractor _dataExtractor;
     private readonly ImagesExtractor _facesExtractor;
     private readonly ImagesExtractor _portraitExtractor;
 
-    private SortedDictionary<string, Attack> _attacks;
-    private SortedDictionary<string, UnitType> _units;
+    private readonly SortedDictionary<string, Attack> _attacks = new();
+    private readonly SortedDictionary<string, UnitType> _units = new();
 
+    /// <summary>
+    /// Создать объект типа <see cref="UnitInfoProvider" />.
+    /// </summary>
     public UnitInfoProvider(ITextProvider textProvider, IBitmapFactory bitmapFactory)
     {
         _textProvider = textProvider;
@@ -66,12 +78,9 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// </summary>
     private void LoadAttacks()
     {
-        _attacks = new SortedDictionary<string, Attack>(StringComparer.InvariantCultureIgnoreCase) {
-            {"G000000000", null }
-        };
-
         var attacks = _dataExtractor.GetData("Gattacks.dbf");
-        foreach (DataRow attackInfoRow in attacks.Rows) {
+        foreach (DataRow attackInfoRow in attacks.Rows)
+        {
             var attack = ExtractAttack(attackInfoRow);
             _attacks.Add(attack.AttackId, attack);
         }
@@ -82,17 +91,13 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// </summary>
     private void LoadUnitTypes()
     {
-        _units = new SortedDictionary<string, UnitType>(StringComparer.InvariantCultureIgnoreCase) {
-            {"G000000000", null }
-        };
-
         var units = _dataExtractor.GetData("Gunits.dbf");
-        foreach (DataRow unitInfoRow in units.Rows) {
+        foreach (DataRow unitInfoRow in units.Rows)
+        {
             var unit = ExtractUnitType(unitInfoRow);
             _units.Add(unit.UnitTypeId, unit);
         }
     }
-
 
     /// <summary>
     /// Извлечь из строки информацию об атаке.
@@ -144,8 +149,8 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
         var nameId = unitInfo.GetClass<string>("NAME_TXT");
         var descriptionId = unitInfo.GetClass<string>("DESC_TXT");
         var abilId = unitInfo.GetClass<string>("ABIL_TXT");
-        var firstAttackId = unitInfo.GetClass<string>("ATTACK_ID");
-        var secondAttackId = unitInfo.GetClass<string>("ATTACK2_ID");
+        var mainAttackId = unitInfo.GetClass<string>("ATTACK_ID");
+        var secondaryAttackId = unitInfo.GetClass<string>("ATTACK2_ID");
         var attackTwice = unitInfo.GetStruct<bool>("ATCK_TWICE") ?? false;
         var hitpoint = unitInfo.GetStruct<int>("HIT_POINT") ?? 0;
         var baseUnitId = unitInfo.GetClass<string>("BASE_UNIT");
@@ -180,11 +185,11 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
             _textProvider.GetText(nameId),
             _textProvider.GetText(descriptionId),
             _textProvider.GetText(abilId),
-            _attacks[firstAttackId],
-            _attacks[secondAttackId],
+            _attacks[mainAttackId],
+            GetSecondaryUnitAttack(secondaryAttackId),
             attackTwice,
             hitpoint,
-            null, //todo GetUnitType(baseUnitId),
+            null, //todo GetBaseUnitType(baseUnitId),
             armor,
             regen,
             reviveCost,
@@ -200,5 +205,27 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
         );
 
         return unit;
+    }
+
+    /// <summary>
+    /// Получить базовый тип юнита.
+    /// </summary>
+    private UnitType? GetBaseUnitType(string baseUnitId)
+    {
+        if (string.Equals(baseUnitId, NO_PARENT, StringComparison.InvariantCultureIgnoreCase))
+            return null;
+
+        return GetUnitType(baseUnitId);
+    }
+
+    /// <summary>
+    /// Получить атаку юнита.
+    /// </summary>
+    private Attack? GetSecondaryUnitAttack(string attackId)
+    {
+        if (string.Equals(attackId, NO_PARENT, StringComparison.InvariantCultureIgnoreCase))
+            return null;
+
+        return _attacks[attackId];
     }
 }

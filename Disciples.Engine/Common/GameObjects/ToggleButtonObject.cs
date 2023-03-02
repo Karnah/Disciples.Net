@@ -13,6 +13,9 @@ public class ToggleButtonObject : ButtonObject
 {
     private bool _isChecked;
 
+    /// <summary>
+    /// Создать объект типа <see cref="ToggleButtonObject" />.
+    /// </summary>
     public ToggleButtonObject(
         ISceneObjectContainer sceneObjectContainer,
         IDictionary<SceneButtonState, IBitmap> buttonStates,
@@ -26,36 +29,34 @@ public class ToggleButtonObject : ButtonObject
         _isChecked = false;
     }
 
-
     /// <inheritdoc />
-    public override void Disable()
+    public override void SetDisabled()
     {
         _isChecked = false;
 
-        base.Disable();
+        base.SetDisabled();
     }
 
-
     /// <inheritdoc />
-    public override void OnSelected()
+    public override void SetSelected()
     {
         if (ButtonState == SceneButtonState.Pressed && _isChecked)
             return;
 
-        base.OnSelected();
+        base.SetSelected();
     }
 
     /// <inheritdoc />
-    public override void OnUnselected()
+    public override void SetUnselected()
     {
         if (ButtonState == SceneButtonState.Pressed && _isChecked)
             return;
 
-        base.OnUnselected();
+        base.SetUnselected();
     }
 
     /// <inheritdoc />
-    public override void OnReleased()
+    public override void Release()
     {
         // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
         if (ButtonState != SceneButtonState.Pressed)
@@ -64,17 +65,16 @@ public class ToggleButtonObject : ButtonObject
         if (_isChecked)
             ButtonState = SceneButtonState.Selected;
 
-        OnButtonClicked();
+        Click();
         UpdateButtonVisualObject();
     }
 
-
     /// <inheritdoc />
-    public override void OnButtonClicked()
+    public override void Click()
     {
         SetState(!_isChecked);
 
-        base.OnButtonClicked();
+        base.Click();
     }
 
     /// <summary>

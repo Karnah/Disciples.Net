@@ -36,7 +36,7 @@ internal class BattleProcessor
             attackingSquad.Units
                 .Concat(defendingSquad.Units)
                 .Where(u => !u.IsDead)
-                .OrderByDescending(u => u.Initiative + RandomGenerator.Next(0, INITIATIVE_RANGE)));
+                .OrderByDescending(u => u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE)));
     }
 
     #endregion
@@ -183,7 +183,7 @@ internal class BattleProcessor
         }
 
         // Проверяем меткость юнита.
-        var chanceOfFirstAttack = RandomGenerator.Next(0, 100);
+        var chanceOfFirstAttack = RandomGenerator.Get(0, 100);
         if (chanceOfFirstAttack > accuracy)
             return new BattleProcessorAttackResult(AttackResult.Miss);
 
@@ -194,7 +194,7 @@ internal class BattleProcessor
         {
             case AttackClass.Damage:
                 // todo Максимальное значение атаки - 250/300/400.
-                var attackPower = power!.Value + RandomGenerator.Next(ATTACK_RANGE);
+                var attackPower = power!.Value + RandomGenerator.Get(ATTACK_RANGE);
 
                 // Уменьшаем входящий урон в зависимости от защиты.
                 attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));

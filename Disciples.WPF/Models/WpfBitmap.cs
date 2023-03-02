@@ -10,12 +10,13 @@ public class WpfBitmap : IBitmap
 {
     private readonly ImageSource _imageSource;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="WpfBitmap" />.
+    /// </summary>
     public WpfBitmap(ImageSource imageSource)
     {
         _imageSource = imageSource;
     }
-
 
     /// <inheritdoc />
     public double Width => _imageSource.Width;

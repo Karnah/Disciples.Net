@@ -8,5 +8,5 @@ public class SceneParameters
     /// <summary>
     /// Сцене не требуется дополнительных параметров.
     /// </summary>
-    public static SceneParameters Empty = new();
+    public static readonly SceneParameters Empty = new();
 }

@@ -8,7 +8,9 @@ namespace Disciples.WPF.SceneObjects;
 /// <inheritdoc cref="IImageSceneObject" />
 public class ImageSceneObject : BaseSceneObject, IImageSceneObject
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="ImageSceneObject" />.
+    /// </summary>
     public ImageSceneObject(int layer) : base(layer)
     { }
 

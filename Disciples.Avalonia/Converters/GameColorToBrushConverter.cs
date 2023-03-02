@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Globalization;
-
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-
 using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Avalonia.Converters;
@@ -14,34 +12,26 @@ namespace Disciples.Avalonia.Converters;
 public class GameColorToBrushConverter : IValueConverter
 {
     /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var gameColor = value as GameColor?;
-        switch (gameColor) {
-            case GameColor.Black:
-                return new SolidColorBrush(Colors.Black);
-            case GameColor.White:
-                return new SolidColorBrush(Colors.White);
-            case GameColor.Red:
-                return new SolidColorBrush(Colors.Red, 128);
-            case GameColor.Yellow:
-                return new SolidColorBrush(Colors.Yellow, 128);
-            case GameColor.Blue:
-                return new SolidColorBrush(Colors.Blue, 128);
-            case GameColor.Gray:
-                return new SolidColorBrush(Colors.Gray, 128);
-            case GameColor.Green:
-                return new SolidColorBrush(Colors.Green, 128);
-            case null:
-                return new SolidColorBrush(Colors.Black);
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        return gameColor switch
+        {
+            GameColor.Black => new SolidColorBrush(Colors.Black),
+            GameColor.White => new SolidColorBrush(Colors.White),
+            GameColor.Red => new SolidColorBrush(Colors.Red, 128),
+            GameColor.Yellow => new SolidColorBrush(Colors.Yellow, 128),
+            GameColor.Blue => new SolidColorBrush(Colors.Blue, 128),
+            GameColor.Gray => new SolidColorBrush(Colors.Gray, 128),
+            GameColor.Green => new SolidColorBrush(Colors.Green, 128),
+            null => new SolidColorBrush(Colors.Black),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     /// <inheritdoc />
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }

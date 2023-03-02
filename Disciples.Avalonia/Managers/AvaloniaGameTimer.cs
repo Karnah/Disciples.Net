@@ -35,6 +35,9 @@ public class AvaloniaGameTimer : IGameTimer
         _dispatcherTimer = null;
     }
 
+    /// <summary>
+    /// Обработать срабатывание таймера.
+    /// </summary>
     private void OnTimerTick(object? sender, EventArgs e)
     {
         TimerTick?.Invoke(sender, EventArgs.Empty);

@@ -90,7 +90,7 @@
 //                return;
 
 //            var musics = _musics[name];
-//            var sound = musics[RandomGenerator.Next(0, musics.Count)];
+//            var sound = musics[RandomGenerator.Get(0, musics.Count)];
 //            PlaySound(sound);
 //        }
 

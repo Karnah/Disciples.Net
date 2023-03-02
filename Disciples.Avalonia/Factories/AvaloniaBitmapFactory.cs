@@ -1,18 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-
 using Disciples.Avalonia.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Models;
 using Disciples.ResourceProvider.Models;
-
 using IBitmap = Disciples.Engine.IBitmap;
 
 namespace Disciples.Avalonia.Factories;
@@ -33,10 +30,8 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
-        if (bitmapData == null)
-            return null;
-
-        using (var memoryStream = new MemoryStream(bitmapData)) {
+        using (var memoryStream = new MemoryStream(bitmapData))
+        {
             var bitmap = new Bitmap(memoryStream);
             return new AvaloniaBitmap(bitmap);
         }
@@ -50,24 +45,25 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds bounds = null)
+    public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null)
     {
         // Если границы не указаны явно, то берём наименьшее возможное изображение.
-        if (bounds == null) {
+        if (bounds == null)
             bounds = new Bounds(rawBitmap.MinRow, rawBitmap.MaxRow, rawBitmap.MinColumn, rawBitmap.MaxColumn);
-        }
 
         var width = bounds.MaxColumn - bounds.MinColumn;
         var height = bounds.MaxRow - bounds.MinRow;
-        var dpi = new Vector(96, 96); 
+        var dpi = new Vector(96, 96);
 
         var bitmap = new WriteableBitmap(new PixelSize(width, height), dpi, PixelFormat.Bgra8888, AlphaFormat.Unpremul);
-        using (var l = bitmap.Lock()) {
+        using (var l = bitmap.Lock())
+        {
             // Размер строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
-            var stride = width << 2;
+            var stride = width * 4;
 
-            for (int row = bounds.MinRow; row < bounds.MaxRow; ++row) {
-                var begin = (row * rawBitmap.Width + bounds.MinColumn) << 2;
+            for (int row = bounds.MinRow; row < bounds.MaxRow; ++row)
+            {
+                var begin = (row * rawBitmap.Width + bounds.MinColumn) * 4;
 
                 Marshal.Copy(rawBitmap.Data, begin,
                     new IntPtr(l.Address.ToInt64() + (row - bounds.MinRow) * stride), stride);
@@ -80,14 +76,15 @@ public class AvaloniaBitmapFactory : IBitmapFactory
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
         // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
-        if (rawBitmap.Width == GameInfo.OriginalWidth && rawBitmap.Height == GameInfo.OriginalHeight) {
+        if (Math.Abs(rawBitmap.Width - GameInfo.OriginalWidth) < float.Epsilon
+            && Math.Abs(rawBitmap.Height - GameInfo.OriginalHeight) < float.Epsilon)
+        {
             offsetX -= BIG_FRAME_OFFSET_X;
             offsetY -= BIG_FRAME_OFFSET_Y;
         }
 
         return new Frame(width, height, offsetX, offsetY, new AvaloniaBitmap(bitmap));
     }
-
 
     /// <inheritdoc />
     public void SaveToFile(IBitmap bitmap, string filePath)

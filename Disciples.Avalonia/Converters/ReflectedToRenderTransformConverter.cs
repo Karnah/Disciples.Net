@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -12,18 +12,18 @@ namespace Disciples.Avalonia.Converters;
 public class ReflectedToRenderTransformConverter : IValueConverter
 {
     /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var isReflected = value as bool? ?? false;
         if (isReflected)
             return new ScaleTransform(-1, 1);
 
-        return null;
+        return BindingOperations.DoNothing;
     }
 
     /// <inheritdoc />
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }

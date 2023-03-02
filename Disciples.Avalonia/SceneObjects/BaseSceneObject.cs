@@ -7,7 +7,9 @@ namespace Disciples.Avalonia.SceneObjects;
 /// <inheritdoc cref="ISceneObject" />
 public abstract class BaseSceneObject : ReactiveObject, ISceneObject
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Создать объект типа <see cref="BaseSceneObject" />.
+    /// </summary>
     protected BaseSceneObject(int layer)
     {
         Layer = layer;

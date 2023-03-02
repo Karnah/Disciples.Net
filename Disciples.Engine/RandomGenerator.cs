@@ -2,22 +2,33 @@
 
 namespace Disciples.Engine;
 
+/// <summary>
+/// Генератор случайных чисел.
+/// </summary>
 public static class RandomGenerator
 {
-    private static readonly Random Random = new Random();
+    private static readonly Random Random = new();
 
-
-    public static int Next()
+    /// <summary>
+    /// Получить случайное число от 0 до <see cref="int.MaxValue" />.
+    /// </summary>
+    public static int Get()
     {
         return Random.Next();
     }
 
-    public static int Next(int max)
+    /// <summary>
+    /// Получить случайное число от 0 до <paramref name="max" />.
+    /// </summary>
+    public static int Get(int max)
     {
         return Random.Next(max);
     }
 
-    public static int Next(int min, int max)
+    /// <summary>
+    /// Получить случайное число от <paramref name="min" /> до <paramref name="max" />.
+    /// </summary>
+    public static int Get(int min, int max)
     {
         return Random.Next(min, max);
     }
