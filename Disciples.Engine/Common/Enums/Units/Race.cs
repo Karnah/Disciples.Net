@@ -1,38 +1,37 @@
-﻿namespace Disciples.Engine.Common.Enums.Units
+﻿namespace Disciples.Engine.Common.Enums.Units;
+
+/// <summary>
+/// Расы.
+/// </summary>
+public enum Race
 {
     /// <summary>
-    /// Расы.
+    /// Защитники Империи.
     /// </summary>
-    public enum Race
-    {
-        /// <summary>
-        /// Защитники Империи.
-        /// </summary>
-        Human,
+    Human,
 
-        /// <summary>
-        /// Орды Нежити.
-        /// </summary>
-        Undead,
+    /// <summary>
+    /// Орды Нежити.
+    /// </summary>
+    Undead,
 
-        /// <summary>
-        /// Легионы Проклятых.
-        /// </summary>
-        Heretic,
+    /// <summary>
+    /// Легионы Проклятых.
+    /// </summary>
+    Heretic,
 
-        /// <summary>
-        /// Горные Кланы.
-        /// </summary>
-        Dwarf,
+    /// <summary>
+    /// Горные Кланы.
+    /// </summary>
+    Dwarf,
 
-        /// <summary>
-        /// Нейтралы.
-        /// </summary>
-        Neutral,
+    /// <summary>
+    /// Нейтралы.
+    /// </summary>
+    Neutral,
 
-        /// <summary>
-        /// Эльфийский Союз.
-        /// </summary>
-        Elf
-    }
+    /// <summary>
+    /// Эльфийский Союз.
+    /// </summary>
+    Elf
 }

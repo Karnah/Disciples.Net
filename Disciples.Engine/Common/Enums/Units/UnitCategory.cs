@@ -1,50 +1,49 @@
-﻿namespace Disciples.Engine.Common.Enums.Units
+﻿namespace Disciples.Engine.Common.Enums.Units;
+
+/// <summary>
+/// Категория юнита.
+/// </summary>
+public enum UnitCategory
 {
     /// <summary>
-    /// Категория юнита.
+    /// Солдат.
     /// </summary>
-    public enum UnitCategory
-    {
-        /// <summary>
-        /// Солдат.
-        /// </summary>
-        Soldier,
+    Soldier,
 
-        /// <summary>
-        /// Благородный.
-        /// todo Уточнить, что это значит.
-        /// </summary>
-        Noble,
+    /// <summary>
+    /// Благородный.
+    /// todo Уточнить, что это значит.
+    /// </summary>
+    Noble,
 
-        /// <summary>
-        /// Лидер.
-        /// </summary>
-        Leader,
+    /// <summary>
+    /// Лидер.
+    /// </summary>
+    Leader,
 
-        /// <summary>
-        /// Вызванный юнит.
-        /// </summary>
-        Summon,
+    /// <summary>
+    /// Вызванный юнит.
+    /// </summary>
+    Summon,
 
-        /// <summary>
-        /// Иллюзия.
-        /// </summary>
-        Illusion,
+    /// <summary>
+    /// Иллюзия.
+    /// </summary>
+    Illusion,
 
-        /// <summary>
-        /// Нейтральный лидер.
-        /// </summary>
-        NeutralLeader,
+    /// <summary>
+    /// Нейтральный лидер.
+    /// </summary>
+    NeutralLeader,
 
-        /// <summary>
-        /// Нейтральный солдат.
-        /// </summary>
-        NeutralSoldier,
+    /// <summary>
+    /// Нейтральный солдат.
+    /// </summary>
+    NeutralSoldier,
 
-        /// <summary>
-        /// Защитник.
-        /// todo столицы?
-        /// </summary>
-        Guardian
-    }
+    /// <summary>
+    /// Защитник.
+    /// todo столицы?
+    /// </summary>
+    Guardian
 }

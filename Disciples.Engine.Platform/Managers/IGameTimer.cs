@@ -1,26 +1,25 @@
 ﻿using System;
 
-namespace Disciples.Engine.Platform.Managers
+namespace Disciples.Engine.Platform.Managers;
+
+/// <summary>
+/// Игровой таймер.
+/// </summary>
+public interface IGameTimer
 {
     /// <summary>
-    /// Игровой таймер.
+    /// Событие срабатывания таймера.
     /// </summary>
-    public interface IGameTimer
-    {
-        /// <summary>
-        /// Событие срабатывания таймера.
-        /// </summary>
-        event EventHandler TimerTick;
+    event EventHandler TimerTick;
 
 
-        /// <summary>
-        /// Начать работу таймера.
-        /// </summary>
-        void Start();
+    /// <summary>
+    /// Начать работу таймера.
+    /// </summary>
+    void Start();
 
-        /// <summary>
-        /// Остановить таймер.
-        /// </summary>
-        void Stop();
-    }
+    /// <summary>
+    /// Остановить таймер.
+    /// </summary>
+    void Stop();
 }

@@ -8,61 +8,60 @@ using Disciples.Engine.Common.SceneObjects;
 // Используем ReactiveList не смотря на то, что он помечен устаревшим.
 #pragma warning disable 618
 
-namespace Disciples.WPF.Controllers
+namespace Disciples.WPF.Controllers;
+
+/// <inheritdoc />
+public class WpfSceneContainer : ISceneContainer
 {
+    private readonly ObservableCollection<ISceneObject> _visuals;
+    private readonly IList<ISceneObject> _addVisualBuffer;
+    private readonly IList<ISceneObject> _removeVisualBuffer;
+
     /// <inheritdoc />
-    public class WpfSceneContainer : ISceneContainer
+    public WpfSceneContainer()
     {
-        private readonly ObservableCollection<ISceneObject> _visuals;
-        private readonly IList<ISceneObject> _addVisualBuffer;
-        private readonly IList<ISceneObject> _removeVisualBuffer;
+        _visuals = new ObservableCollection<ISceneObject>();
+        _addVisualBuffer = new List<ISceneObject>();
+        _removeVisualBuffer = new List<ISceneObject>();
+    }
 
-        /// <inheritdoc />
-        public WpfSceneContainer()
-        {
-            _visuals = new ObservableCollection<ISceneObject>();
-            _addVisualBuffer = new List<ISceneObject>();
-            _removeVisualBuffer = new List<ISceneObject>();
+
+    /// <inheritdoc />
+    public IReadOnlyList<ISceneObject> SceneObjects => _visuals;
+
+    /// <inheritdoc />
+    public void AddSceneObject(ISceneObject sceneObject)
+    {
+        _addVisualBuffer.Add(sceneObject);
+    }
+
+    /// <inheritdoc />
+    public void RemoveSceneObject(ISceneObject sceneObject)
+    {
+        // Обрабатываем ситуацию, когда объект был добавлен и тут же удалён.
+        if (_addVisualBuffer.Contains(sceneObject)) {
+            _addVisualBuffer.Remove(sceneObject);
+            return;
         }
 
+        _removeVisualBuffer.Add(sceneObject);
+    }
 
-        /// <inheritdoc />
-        public IReadOnlyList<ISceneObject> SceneObjects => _visuals;
+    /// <inheritdoc />
+    public void UpdateContainer()
+    {
+        if (_removeVisualBuffer.Any()) {
+            _visuals.RemoveMany(_removeVisualBuffer);
 
-        /// <inheritdoc />
-        public void AddSceneObject(ISceneObject sceneObject)
-        {
-            _addVisualBuffer.Add(sceneObject);
+            foreach (var visualObject in _removeVisualBuffer) {
+                visualObject.Destroy();
+            }
+            _removeVisualBuffer.Clear();
         }
 
-        /// <inheritdoc />
-        public void RemoveSceneObject(ISceneObject sceneObject)
-        {
-            // Обрабатываем ситуацию, когда объект был добавлен и тут же удалён.
-            if (_addVisualBuffer.Contains(sceneObject)) {
-                _addVisualBuffer.Remove(sceneObject);
-                return;
-            }
-
-            _removeVisualBuffer.Add(sceneObject);
-        }
-
-        /// <inheritdoc />
-        public void UpdateContainer()
-        {
-            if (_removeVisualBuffer.Any()) {
-                _visuals.RemoveMany(_removeVisualBuffer);
-
-                foreach (var visualObject in _removeVisualBuffer) {
-                    visualObject.Destroy();
-                }
-                _removeVisualBuffer.Clear();
-            }
-
-            if (_addVisualBuffer.Any()) {
-                _visuals.AddRange(_addVisualBuffer);
-                _addVisualBuffer.Clear();
-            }
+        if (_addVisualBuffer.Any()) {
+            _visuals.AddRange(_addVisualBuffer);
+            _addVisualBuffer.Clear();
         }
     }
 }

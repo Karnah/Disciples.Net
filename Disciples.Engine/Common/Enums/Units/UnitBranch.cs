@@ -1,49 +1,48 @@
-﻿namespace Disciples.Engine.Common.Enums.Units
+﻿namespace Disciples.Engine.Common.Enums.Units;
+
+/// <summary>
+/// Ветка юнита.
+/// </summary>
+public enum UnitBranch
 {
     /// <summary>
-    /// Ветка юнита.
+    /// Боец ближнего боя.
     /// </summary>
-    public enum UnitBranch
-    {
-        /// <summary>
-        /// Боец ближнего боя.
-        /// </summary>
-        Fighter,
+    Fighter,
 
-        /// <summary>
-        /// Стрелок.
-        /// </summary>
-        Archer,
+    /// <summary>
+    /// Стрелок.
+    /// </summary>
+    Archer,
 
-        /// <summary>
-        /// Маг.
-        /// </summary>
-        Mage,
+    /// <summary>
+    /// Маг.
+    /// </summary>
+    Mage,
 
-        /// <summary>
-        /// Специальный юнит.
-        /// </summary>
-        Special,
+    /// <summary>
+    /// Специальный юнит.
+    /// </summary>
+    Special,
 
-        /// <summary>
-        /// todo
-        /// </summary>
-        Sideshow,
+    /// <summary>
+    /// todo
+    /// </summary>
+    Sideshow,
 
-        /// <summary>
-        /// Герой.
-        /// </summary>
-        Hero,
+    /// <summary>
+    /// Герой.
+    /// </summary>
+    Hero,
 
-        /// <summary>
-        /// Благородный.
-        /// todo Уточнить, что это значит.
-        /// </summary>
-        Noble,
+    /// <summary>
+    /// Благородный.
+    /// todo Уточнить, что это значит.
+    /// </summary>
+    Noble,
 
-        /// <summary>
-        /// Вызванный юнит.
-        /// </summary>
-        Summon
-    }
+    /// <summary>
+    /// Вызванный юнит.
+    /// </summary>
+    Summon
 }

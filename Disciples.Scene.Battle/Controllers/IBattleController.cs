@@ -1,20 +1,19 @@
 ﻿using Disciples.Engine.Base;
 
-namespace Disciples.Scene.Battle.Controllers
+namespace Disciples.Scene.Battle.Controllers;
+
+/// <summary>
+/// Класс для мониторинга и управлением состояния битвы.
+/// </summary>
+public interface IBattleController : ISupportLoading
 {
     /// <summary>
-    /// Класс для мониторинга и управлением состояния битвы.
+    /// Обновить состояние объектов на сцене.
     /// </summary>
-    public interface IBattleController : ISupportLoading
-    {
-        /// <summary>
-        /// Обновить состояние объектов на сцене.
-        /// </summary>
-        public void BeforeSceneUpdate();
+    public void BeforeSceneUpdate();
 
-        /// <summary>
-        /// Обновить состояние объектов на сцене.
-        /// </summary>
-        public void AfterSceneUpdate();
-    }
+    /// <summary>
+    /// Обновить состояние объектов на сцене.
+    /// </summary>
+    public void AfterSceneUpdate();
 }

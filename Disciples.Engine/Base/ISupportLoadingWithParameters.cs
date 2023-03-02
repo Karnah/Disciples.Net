@@ -1,16 +1,15 @@
-﻿namespace Disciples.Engine.Base
+﻿namespace Disciples.Engine.Base;
+
+/// <summary>
+/// Интерфейс для объектов, которым необходима установка параметров перед инициализацией.
+/// </summary>
+/// <remarks>
+/// TODO Вообще, может стоит переписать инициализацию на конструкторы.
+/// </remarks>
+public interface ISupportLoadingWithParameters<in TParameters> : ISupportLoading
 {
     /// <summary>
-    /// Интерфейс для объектов, которым необходима установка параметров перед инициализацией.
+    /// Инициализировать параметры.
     /// </summary>
-    /// <remarks>
-    /// TODO Вообще, может стоит переписать инициализацию на конструкторы.
-    /// </remarks>
-    public interface ISupportLoadingWithParameters<in TParameters> : ISupportLoading
-    {
-        /// <summary>
-        /// Инициализировать параметры.
-        /// </summary>
-        void InitializeParameters(TParameters parameters);
-    }
+    void InitializeParameters(TParameters parameters);
 }

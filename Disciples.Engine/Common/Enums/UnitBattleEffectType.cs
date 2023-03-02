@@ -1,28 +1,27 @@
-﻿namespace Disciples.Engine.Common.Enums
+﻿namespace Disciples.Engine.Common.Enums;
+
+/// <summary>
+/// Тип эффекта, наложенного на юнита во время битвы.
+/// </summary>
+public enum UnitBattleEffectType
 {
     /// <summary>
-    /// Тип эффекта, наложенного на юнита во время битвы.
+    /// Защита.
     /// </summary>
-    public enum UnitBattleEffectType
-    {
-        /// <summary>
-        /// Защита.
-        /// </summary>
-        Defend,
+    Defend,
 
-        /// <summary>
-        /// Отравление.
-        /// </summary>
-        Poison,
+    /// <summary>
+    /// Отравление.
+    /// </summary>
+    Poison,
 
-        /// <summary>
-        /// Обморожение.
-        /// </summary>
-        Frostbite,
+    /// <summary>
+    /// Обморожение.
+    /// </summary>
+    Frostbite,
 
-        /// <summary>
-        /// Ожог.
-        /// </summary>
-        Blister
-    }
+    /// <summary>
+    /// Ожог.
+    /// </summary>
+    Blister
 }

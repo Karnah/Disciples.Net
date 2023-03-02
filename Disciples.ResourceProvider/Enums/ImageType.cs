@@ -1,23 +1,22 @@
-﻿namespace Disciples.ResourceProvider.Enums
+﻿namespace Disciples.ResourceProvider.Enums;
+
+/// <summary>
+/// Тип изображения в ресурсах.
+/// </summary>
+internal enum ImageType
 {
     /// <summary>
-    /// Тип изображения в ресурсах.
+    /// Представляет собой обычное изображение.
     /// </summary>
-    internal enum ImageType
-    {
-        /// <summary>
-        /// Представляет собой обычное изображение.
-        /// </summary>
-        Simple,
+    Simple,
 
-        /// <summary>
-        /// Тень. Должна быть полупрозрачна.
-        /// </summary>
-        Shadow,
+    /// <summary>
+    /// Тень. Должна быть полупрозрачна.
+    /// </summary>
+    Shadow,
 
-        /// <summary>
-        /// Аура. Прозрачность достигается за счёт индексов кистей в палитре.
-        /// </summary>
-        Aura
-    }
+    /// <summary>
+    /// Аура. Прозрачность достигается за счёт индексов кистей в палитре.
+    /// </summary>
+    Aura
 }

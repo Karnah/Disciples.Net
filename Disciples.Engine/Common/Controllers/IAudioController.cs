@@ -1,18 +1,17 @@
-﻿namespace Disciples.Engine.Common.Controllers
+﻿namespace Disciples.Engine.Common.Controllers;
+
+/// <summary>
+/// Контроллер музыки и звуков.
+/// </summary>
+public interface IAudioController
 {
     /// <summary>
-    /// Контроллер музыки и звуков.
+    /// Играть зацикленную фоновую музыку.
     /// </summary>
-    public interface IAudioController
-    {
-        /// <summary>
-        /// Играть зацикленную фоновую музыку.
-        /// </summary>
-        void PlayBackground(string name);
+    void PlayBackground(string name);
 
-        /// <summary>
-        /// Проиграть звук.
-        /// </summary>
-        void PlaySound(string name);
-    }
+    /// <summary>
+    /// Проиграть звук.
+    /// </summary>
+    void PlaySound(string name);
 }

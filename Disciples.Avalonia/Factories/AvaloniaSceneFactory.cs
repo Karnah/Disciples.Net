@@ -5,39 +5,38 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Platform.Factories;
 
-namespace Disciples.Avalonia.Factories
+namespace Disciples.Avalonia.Factories;
+
+/// <inheritdoc />
+public class AvaloniaSceneFactory : ISceneFactory
 {
     /// <inheritdoc />
-    public class AvaloniaSceneFactory : ISceneFactory
+    public ISceneContainer CreateSceneContainer()
     {
-        /// <inheritdoc />
-        public ISceneContainer CreateSceneContainer()
-        {
-            return new AvaloniaSceneContainer();
-        }
+        return new AvaloniaSceneContainer();
+    }
 
-        /// <inheritdoc />
-        public IImageSceneObject CreateImageSceneObject(int layer)
-        {
-            return new ImageSceneObject(layer);
-        }
+    /// <inheritdoc />
+    public IImageSceneObject CreateImageSceneObject(int layer)
+    {
+        return new ImageSceneObject(layer);
+    }
 
-        /// <inheritdoc />
-        public ITextSceneObject CreateTextSceneObject(string text, double fontSize, int layer, bool isBold = false)
-        {
-            return new TextSceneObject(text, fontSize, layer, isBold);
-        }
+    /// <inheritdoc />
+    public ITextSceneObject CreateTextSceneObject(string text, double fontSize, int layer, bool isBold = false)
+    {
+        return new TextSceneObject(text, fontSize, layer, isBold);
+    }
 
-        /// <inheritdoc />
-        public ITextSceneObject CreateTextSceneObject(string text,
-            double fontSize,
-            int layer,
-            double width,
-            TextAlignment textAlignment = TextAlignment.Center,
-            bool isBold = false,
-            GameColor? foregroundColor = null)
-        {
-            return new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);
-        }
+    /// <inheritdoc />
+    public ITextSceneObject CreateTextSceneObject(string text,
+        double fontSize,
+        int layer,
+        double width,
+        TextAlignment textAlignment = TextAlignment.Center,
+        bool isBold = false,
+        GameColor? foregroundColor = null)
+    {
+        return new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);
     }
 }

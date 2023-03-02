@@ -3,33 +3,32 @@ using System.Windows.Controls;
 
 using Disciples.Engine.Common.SceneObjects;
 
-namespace Disciples.WPF.DataTemplateSelectors
+namespace Disciples.WPF.DataTemplateSelectors;
+
+/// <summary>
+/// Выбрать шаблон для отображения на сцене.
+/// </summary>
+public class SceneObjectTemplateSelector : DataTemplateSelector
 {
     /// <summary>
-    /// Выбрать шаблон для отображения на сцене.
+    /// Шаблон для изображения.
     /// </summary>
-    public class SceneObjectTemplateSelector : DataTemplateSelector
+    public DataTemplate ImageTemplate { get; set; }
+
+    /// <summary>
+    /// Шаблон для текста.
+    /// </summary>
+    public DataTemplate TextTemplate { get; set; }
+
+    /// <inheritdoc />
+    public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-        /// <summary>
-        /// Шаблон для изображения.
-        /// </summary>
-        public DataTemplate ImageTemplate { get; set; }
+        if (item is IImageSceneObject)
+            return ImageTemplate;
 
-        /// <summary>
-        /// Шаблон для текста.
-        /// </summary>
-        public DataTemplate TextTemplate { get; set; }
+        if (item is ITextSceneObject)
+            return TextTemplate;
 
-        /// <inheritdoc />
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
-        {
-            if (item is IImageSceneObject)
-                return ImageTemplate;
-
-            if (item is ITextSceneObject)
-                return TextTemplate;
-
-            return base.SelectTemplate(item, container);
-        }
+        return base.SelectTemplate(item, container);
     }
 }

@@ -1,18 +1,17 @@
-﻿namespace Disciples.Engine.Platform.Enums
+﻿namespace Disciples.Engine.Platform.Enums;
+
+/// <summary>
+/// Состояние кнопки.
+/// </summary>
+public enum ButtonState
 {
     /// <summary>
-    /// Состояние кнопки.
+    /// Кнопка была нажата.
     /// </summary>
-    public enum ButtonState
-    {
-        /// <summary>
-        /// Кнопка была нажата.
-        /// </summary>
-        Pressed,
+    Pressed,
 
-        /// <summary>
-        /// Кнопка была отпущена.
-        /// </summary>
-        Released
-    }
+    /// <summary>
+    /// Кнопка была отпущена.
+    /// </summary>
+    Released
 }

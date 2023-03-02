@@ -1,18 +1,17 @@
-﻿namespace Disciples.Engine.Platform.Enums
+﻿namespace Disciples.Engine.Platform.Enums;
+
+/// <summary>
+/// Кнопка мыши.
+/// </summary>
+public enum MouseButton
 {
     /// <summary>
-    /// Кнопка мыши.
+    /// Левая кнопка мыши.
     /// </summary>
-    public enum MouseButton
-    {
-        /// <summary>
-        /// Левая кнопка мыши.
-        /// </summary>
-        Left,
+    Left,
 
-        /// <summary>
-        /// Правая кнопка мыши.
-        /// </summary>
-        Right
-    }
+    /// <summary>
+    /// Правая кнопка мыши.
+    /// </summary>
+    Right
 }

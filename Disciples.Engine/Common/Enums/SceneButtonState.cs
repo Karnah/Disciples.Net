@@ -1,28 +1,27 @@
-﻿namespace Disciples.Engine.Common.Enums
+﻿namespace Disciples.Engine.Common.Enums;
+
+/// <summary>
+/// Состояние кнопки на сцене.
+/// </summary>
+public enum SceneButtonState
 {
     /// <summary>
-    /// Состояние кнопки на сцене.
+    /// Активна.
     /// </summary>
-    public enum SceneButtonState
-    {
-        /// <summary>
-        /// Активна.
-        /// </summary>
-        Active,
+    Active,
 
-        /// <summary>
-        /// Невозможно выбрать.
-        /// </summary>
-        Disabled,
+    /// <summary>
+    /// Невозможно выбрать.
+    /// </summary>
+    Disabled,
 
-        /// <summary>
-        /// Курсор располагается над кнопкой.
-        /// </summary>
-        Selected,
+    /// <summary>
+    /// Курсор располагается над кнопкой.
+    /// </summary>
+    Selected,
 
-        /// <summary>
-        /// Кнопка нажата.
-        /// </summary>
-        Pressed
-    }
+    /// <summary>
+    /// Кнопка нажата.
+    /// </summary>
+    Pressed
 }

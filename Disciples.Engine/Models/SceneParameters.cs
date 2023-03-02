@@ -1,13 +1,12 @@
-﻿namespace Disciples.Engine.Models
+﻿namespace Disciples.Engine.Models;
+
+/// <summary>
+/// Параметры для инициализации сцены.
+/// </summary>
+public class SceneParameters
 {
     /// <summary>
-    /// Параметры для инициализации сцены.
+    /// Сцене не требуется дополнительных параметров.
     /// </summary>
-    public class SceneParameters
-    {
-        /// <summary>
-        /// Сцене не требуется дополнительных параметров.
-        /// </summary>
-        public static SceneParameters Empty = new();
-    }
+    public static SceneParameters Empty = new();
 }

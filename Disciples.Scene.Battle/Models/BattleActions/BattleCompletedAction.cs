@@ -1,9 +1,8 @@
-﻿namespace Disciples.Scene.Battle.Models.BattleActions
+﻿namespace Disciples.Scene.Battle.Models.BattleActions;
+
+/// <summary>
+/// Событие завершение битвы.
+/// </summary>
+public class BattleCompletedAction : BaseEventBattleAction
 {
-    /// <summary>
-    /// Событие завершение битвы.
-    /// </summary>
-    public class BattleCompletedAction : BaseEventBattleAction
-    {
-    }
 }

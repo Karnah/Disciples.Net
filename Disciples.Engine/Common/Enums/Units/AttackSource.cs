@@ -1,48 +1,47 @@
-﻿namespace Disciples.Engine.Common.Enums.Units
+﻿namespace Disciples.Engine.Common.Enums.Units;
+
+/// <summary>
+/// Источник атаки юнита.
+/// </summary>
+public enum AttackSource
 {
     /// <summary>
-    /// Источник атаки юнита.
+    /// Оружие.
     /// </summary>
-    public enum AttackSource
-    {
-        /// <summary>
-        /// Оружие.
-        /// </summary>
-        Weapon = 0,
+    Weapon = 0,
 
-        /// <summary>
-        /// Разум.
-        /// </summary>
-        Mind,
+    /// <summary>
+    /// Разум.
+    /// </summary>
+    Mind,
 
-        /// <summary>
-        /// Жизнь.
-        /// </summary>
-        Life,
+    /// <summary>
+    /// Жизнь.
+    /// </summary>
+    Life,
 
-        /// <summary>
-        /// Смерть.
-        /// </summary>
-        Death,
+    /// <summary>
+    /// Смерть.
+    /// </summary>
+    Death,
 
-        /// <summary>
-        /// Огонь.
-        /// </summary>
-        Fire,
+    /// <summary>
+    /// Огонь.
+    /// </summary>
+    Fire,
 
-        /// <summary>
-        /// Вода.
-        /// </summary>
-        Water,
+    /// <summary>
+    /// Вода.
+    /// </summary>
+    Water,
 
-        /// <summary>
-        /// Земля.
-        /// </summary>
-        Earth,
+    /// <summary>
+    /// Земля.
+    /// </summary>
+    Earth,
 
-        /// <summary>
-        /// Воздух.
-        /// </summary>
-        Air
-    }
+    /// <summary>
+    /// Воздух.
+    /// </summary>
+    Air
 }

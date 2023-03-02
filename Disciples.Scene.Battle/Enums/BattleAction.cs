@@ -1,33 +1,32 @@
-﻿namespace Disciples.Scene.Battle.Enums
+﻿namespace Disciples.Scene.Battle.Enums;
+
+/// <summary>
+/// Состояние юнита на поле боя.
+/// </summary>
+public enum BattleAction
 {
     /// <summary>
-    /// Состояние юнита на поле боя.
+    /// Юнит ожидает.
     /// </summary>
-    public enum BattleAction
-    {
-        /// <summary>
-        /// Юнит ожидает.
-        /// </summary>
-        Waiting,
+    Waiting,
 
-        /// <summary>
-        /// Юнит атакует.
-        /// </summary>
-        Attacking,
+    /// <summary>
+    /// Юнит атакует.
+    /// </summary>
+    Attacking,
 
-        /// <summary>
-        /// Юнит получает удар.
-        /// </summary>
-        TakingDamage,
+    /// <summary>
+    /// Юнит получает удар.
+    /// </summary>
+    TakingDamage,
 
-        /// <summary>
-        /// Юнит парализован.
-        /// </summary>
-        Paralyzed,
+    /// <summary>
+    /// Юнит парализован.
+    /// </summary>
+    Paralyzed,
 
-        /// <summary>
-        /// Юнит убит.
-        /// </summary>
-        Dead
-    }
+    /// <summary>
+    /// Юнит убит.
+    /// </summary>
+    Dead
 }

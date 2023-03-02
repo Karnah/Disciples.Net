@@ -1,15 +1,14 @@
 ﻿using DryIoc;
 
-namespace Disciples.Engine.Base
+namespace Disciples.Engine.Base;
+
+/// <summary>
+/// Модуль для регистрации зависимостей.
+/// </summary>
+public interface IGameModule
 {
     /// <summary>
-    /// Модуль для регистрации зависимостей.
+    /// Зарегистрировать все необходимые зависимости для модуля сцены.
     /// </summary>
-    public interface IGameModule
-    {
-        /// <summary>
-        /// Зарегистрировать все необходимые зависимости для модуля сцены.
-        /// </summary>
-        void Initialize(IRegistrator containerRegistrator);
-    }
+    void Initialize(IRegistrator containerRegistrator);
 }

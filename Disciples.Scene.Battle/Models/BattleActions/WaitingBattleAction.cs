@@ -1,9 +1,8 @@
-﻿namespace Disciples.Scene.Battle.Models.BattleActions
+﻿namespace Disciples.Scene.Battle.Models.BattleActions;
+
+/// <summary>
+/// Текущий юнит ожидает.
+/// </summary>
+public class WaitingBattleAction : BaseEventBattleAction
 {
-    /// <summary>
-    /// Текущий юнит ожидает.
-    /// </summary>
-    public class WaitingBattleAction : BaseEventBattleAction
-    {
-    }
 }

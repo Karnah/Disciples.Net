@@ -1,33 +1,32 @@
-﻿namespace Disciples.Engine.Common.Enums
+﻿namespace Disciples.Engine.Common.Enums;
+
+/// <summary>
+/// Тип моментального эффекта, который произошел с юнитом.
+/// </summary>
+public enum UnitInstantaneousEffectType
 {
     /// <summary>
-    /// Тип моментального эффекта, который произошел с юнитом.
+    /// Юнит получил повреждения.
     /// </summary>
-    public enum UnitInstantaneousEffectType
-    {
-        /// <summary>
-        /// Юнит получил повреждения.
-        /// </summary>
-        Damaged,
+    Damaged,
 
-        /// <summary>
-        /// Юнит был исцелён.
-        /// </summary>
-        Healed,
+    /// <summary>
+    /// Юнит был исцелён.
+    /// </summary>
+    Healed,
 
-        /// <summary>
-        /// По юниту промахнулись.
-        /// </summary>
-        Miss,
+    /// <summary>
+    /// По юниту промахнулись.
+    /// </summary>
+    Miss,
 
-        /// <summary>
-        /// Юнит защитился.
-        /// </summary>
-        Defended,
+    /// <summary>
+    /// Юнит защитился.
+    /// </summary>
+    Defended,
 
-        /// <summary>
-        /// Юнит ждёт.
-        /// </summary>
-        Waiting
-    }
+    /// <summary>
+    /// Юнит ждёт.
+    /// </summary>
+    Waiting
 }

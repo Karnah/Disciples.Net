@@ -1,24 +1,23 @@
 ﻿using Disciples.Scene.Battle.GameObjects;
 
-namespace Disciples.Scene.Battle.Models.BattleActions
+namespace Disciples.Scene.Battle.Models.BattleActions;
+
+/// <summary>
+/// Событие начала атаки указанного юнита.
+/// </summary>
+public class BeginAttackUnitBattleAction : BaseEventBattleAction
 {
     /// <summary>
-    /// Событие начала атаки указанного юнита.
+    /// Создать объект типа <see cref="BeginAttackUnitBattleAction" />.
     /// </summary>
-    public class BeginAttackUnitBattleAction : BaseEventBattleAction
+    /// <param name="targetBattleUnit">Цель воздействия.</param>
+    public BeginAttackUnitBattleAction(BattleUnit targetBattleUnit)
     {
-        /// <summary>
-        /// Создать объект типа <see cref="BeginAttackUnitBattleAction" />.
-        /// </summary>
-        /// <param name="targetBattleUnit">Цель воздействия.</param>
-        public BeginAttackUnitBattleAction(BattleUnit targetBattleUnit)
-        {
-            TargetBattleUnit = targetBattleUnit;
-        }
-
-        /// <summary>
-        /// Цель воздействия.
-        /// </summary>
-        public BattleUnit TargetBattleUnit { get; }
+        TargetBattleUnit = targetBattleUnit;
     }
+
+    /// <summary>
+    /// Цель воздействия.
+    /// </summary>
+    public BattleUnit TargetBattleUnit { get; }
 }

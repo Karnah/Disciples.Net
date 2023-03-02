@@ -1,28 +1,27 @@
-﻿namespace Disciples.Engine.Enums
+﻿namespace Disciples.Engine.Enums;
+
+/// <summary>
+/// Тип действия, которое было выполнено с помощью устройства ввода.
+/// </summary>
+public enum InputDeviceActionType
 {
     /// <summary>
-    /// Тип действия, которое было выполнено с помощью устройства ввода.
+    /// Выделение.
     /// </summary>
-    public enum InputDeviceActionType
-    {
-        /// <summary>
-        /// Выделение.
-        /// </summary>
-        Selection,
+    Selection,
 
-        /// <summary>
-        /// Левая кнопка мыши.
-        /// </summary>
-        MouseLeft,
+    /// <summary>
+    /// Левая кнопка мыши.
+    /// </summary>
+    MouseLeft,
 
-        /// <summary>
-        /// Правая кнопка мыши.
-        /// </summary>
-        MouseRight,
+    /// <summary>
+    /// Правая кнопка мыши.
+    /// </summary>
+    MouseRight,
 
-        /// <summary>
-        /// Нажатие кнопки на экране.
-        /// </summary>
-        UiButton
-    }
+    /// <summary>
+    /// Нажатие кнопки на экране.
+    /// </summary>
+    UiButton
 }

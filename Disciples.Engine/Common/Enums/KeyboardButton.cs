@@ -1,48 +1,47 @@
-﻿namespace Disciples.Engine.Common.Enums
+﻿namespace Disciples.Engine.Common.Enums;
+
+/// <summary>
+/// Клавиша клавиатуры.
+/// </summary>
+public enum KeyboardButton
 {
     /// <summary>
-    /// Клавиша клавиатуры.
+    /// Клавиша "W" (Ц).
     /// </summary>
-    public enum KeyboardButton
-    {
-        /// <summary>
-        /// Клавиша "W" (Ц).
-        /// </summary>
-        W,
+    W,
 
-        /// <summary>
-        /// Клавиша "A" (Ф).
-        /// </summary>
-        A,
+    /// <summary>
+    /// Клавиша "A" (Ф).
+    /// </summary>
+    A,
 
-        /// <summary>
-        /// Клавиша "S" (Ы).
-        /// </summary>
-        S,
+    /// <summary>
+    /// Клавиша "S" (Ы).
+    /// </summary>
+    S,
 
-        /// <summary>
-        /// Клавиша "D" (В).
-        /// </summary>
-        D,
+    /// <summary>
+    /// Клавиша "D" (В).
+    /// </summary>
+    D,
 
-        /// <summary>
-        /// Клавиша "R" (К).
-        /// </summary>
-        R,
+    /// <summary>
+    /// Клавиша "R" (К).
+    /// </summary>
+    R,
 
-        /// <summary>
-        /// Клавиша "I" (Ш).
-        /// </summary>
-        I,
+    /// <summary>
+    /// Клавиша "I" (Ш).
+    /// </summary>
+    I,
 
-        /// <summary>
-        /// Клавиша "P" (З).
-        /// </summary>
-        P,
+    /// <summary>
+    /// Клавиша "P" (З).
+    /// </summary>
+    P,
 
-        /// <summary>
-        /// Клавиша "Tab".
-        /// </summary>
-        Tab
-    }
+    /// <summary>
+    /// Клавиша "Tab".
+    /// </summary>
+    Tab
 }

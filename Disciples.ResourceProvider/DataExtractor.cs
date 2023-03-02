@@ -2,30 +2,29 @@
 using System.Text;
 using NDbfReader;
 
-namespace Disciples.ResourceProvider
+namespace Disciples.ResourceProvider;
+
+/// <summary>
+/// Класс для извлечения данных из текстовых ресурсов.
+/// </summary>
+public class DataExtractor
 {
-    /// <summary>
-    /// Класс для извлечения данных из текстовых ресурсов.
-    /// </summary>
-    public class DataExtractor
+    private readonly string _path;
+
+    /// <inheritdoc />
+    public DataExtractor(string path)
     {
-        private readonly string _path;
-
-        /// <inheritdoc />
-        public DataExtractor(string path)
-        {
-            _path = path;
-        }
+        _path = path;
+    }
 
 
-        /// <summary>
-        /// Извлечь данные из указанной таблицы.
-        /// </summary>
-        public DataTable GetData(string dbName)
-        {
-            using (var table = Table.Open($"{_path}\\{dbName}")) {
-                return table.AsDataTable(CodePagesEncodingProvider.Instance.GetEncoding(866));
-            }
+    /// <summary>
+    /// Извлечь данные из указанной таблицы.
+    /// </summary>
+    public DataTable GetData(string dbName)
+    {
+        using (var table = Table.Open($"{_path}\\{dbName}")) {
+            return table.AsDataTable(CodePagesEncodingProvider.Instance.GetEncoding(866));
         }
     }
 }

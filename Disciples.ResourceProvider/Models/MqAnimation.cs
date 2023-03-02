@@ -1,29 +1,28 @@
 ﻿using System.Collections.Generic;
 
-namespace Disciples.ResourceProvider.Models
+namespace Disciples.ResourceProvider.Models;
+
+internal class MqAnimation
 {
-    internal class MqAnimation
+    public MqAnimation(int index, string name, IReadOnlyCollection<MqImage> frames)
     {
-        public MqAnimation(int index, string name, IReadOnlyCollection<MqImage> frames)
-        {
-            Index = index;
-            Name = name;
-            Frames = frames;
-        }
-
-        /// <summary>
-        /// Идентификатор анимации
-        /// </summary>
-        public int Index { get; }
-
-        /// <summary>
-        /// Название анимации
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Фреймы из которых состоит анимация
-        /// </summary>
-        public IReadOnlyCollection<MqImage> Frames { get; }
+        Index = index;
+        Name = name;
+        Frames = frames;
     }
+
+    /// <summary>
+    /// Идентификатор анимации
+    /// </summary>
+    public int Index { get; }
+
+    /// <summary>
+    /// Название анимации
+    /// </summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// Фреймы из которых состоит анимация
+    /// </summary>
+    public IReadOnlyCollection<MqImage> Frames { get; }
 }
