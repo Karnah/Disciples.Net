@@ -329,9 +329,13 @@ internal class UnitPortraitObject : GameObject
             // Добавляем фон, связанный с воздействием эффекта яда и заморозки.
             if (!_battleEffectsForegrounds.ContainsKey(battleEffect.EffectType))
             {
-                _battleEffectsForegrounds.Add(
-                    battleEffect.EffectType,
-                    AddColorImage(GetEffectTypeColor(battleEffect.EffectType), false));
+                var effectTypeColor = GetEffectTypeColor(battleEffect.EffectType);
+                if (effectTypeColor != null)
+                {
+                    _battleEffectsForegrounds.Add(
+                        battleEffect.EffectType,
+                        AddColorImage(effectTypeColor.Value, false));
+                }
             }
         }
     }
@@ -339,14 +343,14 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить цвет эффекта.
     /// </summary>
-    private static GameColor GetEffectTypeColor(UnitBattleEffectType unitBattleEffectType)
+    private static GameColor? GetEffectTypeColor(UnitBattleEffectType unitBattleEffectType)
     {
         // TODO Ожог.
         return unitBattleEffectType switch
         {
             UnitBattleEffectType.Poison => GameColor.Green,
             UnitBattleEffectType.Frostbite => GameColor.Blue,
-            _ => throw new ArgumentOutOfRangeException(nameof(unitBattleEffectType), unitBattleEffectType, null)
+            _ => null
         };
     }
 
