@@ -27,7 +27,7 @@ internal class BattleUnit : GameObject
         IBattleUnitResourceProvider battleUnitResourceProvider,
         Unit unit,
         bool isAttacker
-    ) : base(GetSceneUnitPosition(isAttacker, unit.SquadLinePosition, unit.SquadFlankPosition))
+    ) : base(GetSceneUnitPosition(isAttacker, (int)unit.SquadLinePosition, (int)unit.SquadFlankPosition))
     {
         Unit = unit;
         IsAttacker = isAttacker;
@@ -78,18 +78,22 @@ internal class BattleUnit : GameObject
     /// Рассчитать позицию юнита на сцене.
     /// </summary>
     /// <param name="isAttacker">Находится ли юнит в атакующем отряде.</param>
-    /// <param name="line">Линия, на которой располагается юнит.</param>
-    /// <param name="flank">Позиция на которой находится юнит (центр, правый и левый фланги).</param>
-    public static (double X, double Y) GetSceneUnitPosition(bool isAttacker, double line, double flank)
+    /// <param name="linePosition">Линия, на которой располагается юнит.</param>
+    /// <param name="flankPosition">Позиция на которой находится юнит (центр, правый и левый фланги).</param>
+    /// <remarks>
+    /// Этот метод используется в том числе для расчета позиций анимаций, которые располагаются между юнитами.
+    /// Поэтому используем double для позиций.
+    /// </remarks>
+    public static (double X, double Y) GetSceneUnitPosition(bool isAttacker, double linePosition, double flankPosition)
     {
         // Если смотреть на поле, то фронт защищающегося отряда (линия 0) - это 2 линия
         // Тыл же (линия 1) будет на 3 линии. Поэтому пересчитываем положение
         var gameLine = isAttacker
-            ? line
-            : 3 - line;
+            ? linePosition
+            : 3 - linePosition;
 
-        var x = 60 + 95 * gameLine + 123 * flank;
-        var y = 200 + 60 * gameLine - 43 * flank;
+        var x = 60 + 95 * gameLine + 123 * flankPosition;
+        var y = 200 + 60 * gameLine - 43 * flankPosition;
 
         return (x, y);
     }

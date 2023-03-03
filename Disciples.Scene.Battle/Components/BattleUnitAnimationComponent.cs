@@ -115,9 +115,9 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     private static int GetLayer(BattleUnit battleUnit)
     {
         var battleLine = battleUnit.IsAttacker
-            ? battleUnit.Unit.SquadLinePosition
-            : 3 - battleUnit.Unit.SquadLinePosition;
-        var flankPosition = 2 - battleUnit.Unit.SquadFlankPosition;
+            ? (int)battleUnit.Unit.SquadLinePosition
+            : 3 - (int)battleUnit.Unit.SquadLinePosition;
+        var flankPosition = 2 - (int)battleUnit.Unit.SquadFlankPosition;
 
         return battleLine * 100 + flankPosition * 10 + 5;
     }

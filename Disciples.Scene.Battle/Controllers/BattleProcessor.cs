@@ -82,11 +82,11 @@ internal class BattleProcessor
         if (attackingUnit.UnitType.MainAttack.Reach == Reach.Adjacent)
         {
             // Если атакующий юнит находится сзади и есть линия союзников впереди.
-            if (attackingUnit.SquadLinePosition == 0 && IsFirstLineEmpty(attackingSquad) == false)
+            if (attackingUnit.SquadLinePosition == 0 && IsFrontLineEmpty(attackingSquad) == false)
                 return false;
 
             // Если враг находится сзади, то проверяем, что нет первой вражеской линии.
-            if (targetUnit.SquadLinePosition == 0 && IsFirstLineEmpty(targetSquad) == false)
+            if (targetUnit.SquadLinePosition == 0 && IsFrontLineEmpty(targetSquad) == false)
                 return false;
 
             // Проверка, может ли юнит дотянуться до врага.
@@ -106,23 +106,24 @@ internal class BattleProcessor
     /// <summary>
     /// Проверить, свободна ли первая линия в отряде.
     /// </summary>
-    private static bool IsFirstLineEmpty(Squad squad)
+    private static bool IsFrontLineEmpty(Squad squad)
     {
-        return !squad.Units.Any(u => u.SquadLinePosition == 1 && !u.IsDead);
+        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsDead);
     }
 
     /// <summary>
     /// Проверить, можно ли атаковать цель в зависимости от расположения на фланге.
     /// </summary>
     private static bool CanAttackOnFlank(
-        int currentUnitFlankPosition,
-        int targetUnitFlankPosition,
-        int targetUnitLinePosition,
+        UnitSquadFlankPosition currentUnitFlankPosition,
+        UnitSquadFlankPosition targetUnitFlankPosition,
+        UnitSquadLinePosition targetUnitLinePosition,
         Squad targetSquad)
     {
         // Если юниты находятся по разные стороны флагов и занят вражеский центр или соседняя с атакующим клетка, то атаковать нельзя.
         if (Math.Abs(currentUnitFlankPosition - targetUnitFlankPosition) > 1 &&
-            (IsPlaceEmpty(targetSquad, targetUnitLinePosition, 1) == false || IsPlaceEmpty(targetSquad, targetUnitLinePosition, currentUnitFlankPosition) == false))
+            (!IsPlaceEmpty(targetSquad, targetUnitLinePosition, UnitSquadFlankPosition.Center)
+             || !IsPlaceEmpty(targetSquad, targetUnitLinePosition, currentUnitFlankPosition)))
         {
             return false;
         }
@@ -133,10 +134,10 @@ internal class BattleProcessor
     /// <summary>
     /// Проверить, свободна ли клетка на арене.
     /// </summary>
-    private static bool IsPlaceEmpty(Squad squad, int line, int flank)
+    private static bool IsPlaceEmpty(Squad squad, UnitSquadLinePosition linePosition, UnitSquadFlankPosition flankPosition)
     {
-        return squad.Units.Any(u => u.SquadLinePosition == line &&
-                                    u.SquadFlankPosition == flank &&
+        return squad.Units.Any(u => u.SquadLinePosition == linePosition &&
+                                    u.SquadFlankPosition == flankPosition &&
                                     u.IsDead == false) == false;
     }
 

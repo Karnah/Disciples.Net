@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine.Common.Models;
+﻿using Disciples.Engine.Common.Enums;
+
+namespace Disciples.Engine.Common.Models;
 
 /// <summary>
 /// Информация о конкретном юните.
@@ -8,7 +10,7 @@ public class Unit
     /// <summary>
     /// Создать объект типа <see cref="Unit" />.
     /// </summary>
-    public Unit(string id, UnitType unitType, Player player, int squadLinePosition, int squadFlankPosition)
+    public Unit(string id, UnitType unitType, Player player, UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition)
     {
         Id = id;
         UnitType = unitType;
@@ -42,12 +44,12 @@ public class Unit
     /// <summary>
     /// На какой линии располагается юнит в отряде.
     /// </summary>
-    public int SquadLinePosition { get; set; }
+    public UnitSquadLinePosition SquadLinePosition { get; set; }
 
     /// <summary>
     /// На какой позиции находится юнит в отряде.
     /// </summary>
-    public int SquadFlankPosition { get; set; }
+    public UnitSquadFlankPosition SquadFlankPosition { get; set; }
 
 
     /// <summary>

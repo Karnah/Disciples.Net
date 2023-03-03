@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
@@ -53,8 +54,8 @@ public partial class App : Application
 
             // Следующая сцена будет сцена битвы.
             _gameController.ChangeScene<IBattleScene, BattleSceneParameters>(new BattleSceneParameters(
-                CreateAttackingSquad(),
-                CreateDefendingSquad()));
+                CreateAttackingSquad(Container),
+                CreateDefendingSquad(Container)));
 
             gw.ShowDialog();
         }
@@ -88,59 +89,65 @@ public partial class App : Application
         return container;
     }
 
-
-    public static Squad CreateAttackingSquad()
+    /// <summary>
+    /// Создать нападающий отряд.
+    /// </summary>
+    private static Squad CreateAttackingSquad(IContainer container)
     {
-        var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
+        var unitInfoProvider = container.Resolve<IUnitInfoProvider>();
         var player = new Player(0, false);
 
 
-        var mage = unitInfoProvider.GetUnitType("g000uu0010");
-        var u02 = new Unit(Guid.NewGuid().ToString(), mage, player, 0, 2);
+        var assassin = unitInfoProvider.GetUnitType("g000uu0154");
+        //var mage = unitInfoProvider.GetUnitType("g000uu0010");
+        var u02 = new Unit(Guid.NewGuid().ToString(), assassin, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Top);
 
         var wight = unitInfoProvider.GetUnitType("g000uu0178");
         //var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
-        var u01 = new Unit(Guid.NewGuid().ToString(), wight, player, 0, 1);
+        var u01 = new Unit(Guid.NewGuid().ToString(), wight, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Center);
 
         var abbess = unitInfoProvider.GetUnitType("g000uu0017");
-        var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, 0, 0);
+        var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Bottom);
 
 
         var knight = unitInfoProvider.GetUnitType("g000uu0002");
-        var u12 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 2);
+        var u12 = new Unit(Guid.NewGuid().ToString(), knight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Top);
 
         var imperialKnight = unitInfoProvider.GetUnitType("g000uu0003");
-        var u11 = new Unit(Guid.NewGuid().ToString(), imperialKnight, player, 1, 1);
+        var u11 = new Unit(Guid.NewGuid().ToString(), imperialKnight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Center);
 
-        var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, 1, 0);
+        var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Bottom);
 
 
-        return new Squad(new[] { u02, u01, u00, u12, u11, u10 });
+        return new Squad(new []{ u02, u01, u00, u12, u11, u10});
     }
 
-    public static Squad CreateDefendingSquad()
+    /// <summary>
+    /// Создать защищающийся отряд.
+    /// </summary>
+    private static Squad CreateDefendingSquad(IContainer container)
     {
-        var unitInfoProvider = Container.Resolve<IUnitInfoProvider>();
-        var player = new Player(0, false);
+        var unitInfoProvider = container.Resolve<IUnitInfoProvider>();
+        var player = new Player(0, true);
 
 
         var hillGiant = unitInfoProvider.GetUnitType("g000uu0029");
-        var u12 = new Unit(Guid.NewGuid().ToString(), hillGiant, player, 1, 2);
+        var u12 = new Unit(Guid.NewGuid().ToString(), hillGiant, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Top);
 
         var masterOfRunes = unitInfoProvider.GetUnitType("g000uu0165");
-        var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, player, 1, 1);
+        var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Center);
 
         var gnomesKing = unitInfoProvider.GetUnitType("g000uu0039");
-        var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, player, 1, 0);
+        var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Bottom);
 
 
         var crossbowman = unitInfoProvider.GetUnitType("g000uu0027");
-        var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, player, 0, 1);
+        var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Center);
 
         var gornDefender = unitInfoProvider.GetUnitType("g000uu0162");
-        var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, player, 0, 0);
+        var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Bottom);
 
 
-        return new Squad(new[] { u12, u11, u10, u02, u01 });
+        return new Squad(new []{ u12, u11, u10, u02, u01});
     }
 }

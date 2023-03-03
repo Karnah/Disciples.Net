@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Disciples.Engine;
 using DryIoc;
@@ -15,11 +16,10 @@ public partial class GameWindow : Window
 
         Activated += OnActivated;
 
-        InitializeComponent();
+        AvaloniaXamlLoader.Load(this);
 
 #if DEBUG
         this.AttachDevTools();
-        Renderer.DrawFps = true;
 #endif
     }
 

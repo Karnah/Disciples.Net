@@ -813,15 +813,15 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         foreach (var battleUnit in _rightPanelUnits)
         {
             var lineOffset = direction == BattleDirection.Defender
-                ? (battleUnit.Unit.SquadLinePosition + 1) % 2
-                : battleUnit.Unit.SquadLinePosition;
+                ? ((int)battleUnit.Unit.SquadLinePosition + 1) % 2
+                : (int)battleUnit.Unit.SquadLinePosition;
 
             var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit,
                 battleUnit.Direction == BattleDirection.Defender,
                 battleUnit.Unit.UnitType.SizeSmall
                     ? 644 + 79 * lineOffset
                     : 644, // todo проверить большого юнита, который атакует.
-                85 + 106 * (2 - battleUnit.Unit.SquadFlankPosition));
+                85 + 106 * (2 - (int)battleUnit.Unit.SquadFlankPosition));
             portraits.Add(portrait);
         }
 
@@ -831,16 +831,16 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <summary>
     /// Получить координаты на сцене для портрета юнита.
     /// </summary>
-    private static (double X, double Y) GetRightUnitPanelPosition(int linePosition, int flankPosition, BattleDirection unitDirection)
+    private static (double X, double Y) GetRightUnitPanelPosition(UnitSquadLinePosition linePosition, UnitSquadFlankPosition flankPosition, BattleDirection unitDirection)
     {
         // Защищающиеся на правой панели располагаются ли справа налево, а атакующие слева направо.
         var lineOffset = unitDirection == BattleDirection.Defender
-            ? linePosition
-            : (linePosition + 1) % 2;
+            ? (int)linePosition
+            : ((int)linePosition + 1) % 2;
 
         return (
             642 + (1 - lineOffset) * 79,
-            83 + (2 - flankPosition) * 106
+            83 + (2 - (int)flankPosition) * 106
         );
     }
 
@@ -874,7 +874,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         if (currentUnit.UnitType.MainAttack.Reach == Reach.All &&
             _rightPanelUnits.Any(CanAttack))
         {
-            var position = GetRightUnitPanelPosition(1, 2, BattleDirection.Defender);
+            var position = GetRightUnitPanelPosition(UnitSquadLinePosition.Back, UnitSquadFlankPosition.Top, BattleDirection.Defender);
 
             _unitPanelAnimations.Add(
                 _battleGameObjectContainer.AddAnimation(
