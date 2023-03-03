@@ -18,6 +18,7 @@ public class BattleSceneModule : IGameModule
         var battleScopeReuse = new CurrentScopeReuse(nameof(IBattleScene));
         containerRegistrator.Register<BattleContext>(battleScopeReuse);
         containerRegistrator.Register<BattleProcessor>(battleScopeReuse);
+        containerRegistrator.Register<BattleAiProcessor>(battleScopeReuse);
         containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(battleScopeReuse);
         containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(battleScopeReuse);
         containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(battleScopeReuse);

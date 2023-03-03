@@ -100,9 +100,6 @@ internal class BattleScene : BaseScene, IBattleScene
 
             component.Unload();
         }
-
-        // TODO Инициализации.
-        //_battleContext = new BattleContext();
     }
 
     /// <inheritdoc />

@@ -22,6 +22,11 @@ internal class BattleActionContainer
     }
 
     /// <summary>
+    /// Признак, что вообще в очереди никаких действий.
+    /// </summary>
+    public bool IsNoActions => IsAllActionsCompleted && Completed.Count == 0;
+
+    /// <summary>
     /// Признак, что все действия были завершены.
     /// </summary>
     public bool IsAllActionsCompleted =>

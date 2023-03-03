@@ -20,6 +20,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleContext _context;
+    private readonly BattleAiProcessor _battleAiProcessor;
 
     /// <summary>
     /// Очередность хода юнитов.
@@ -34,11 +35,16 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <summary>
     /// Создать объект типа <see cref="BattleController" />.
     /// </summary>
-    public BattleController(IBattleGameObjectContainer battleGameObjectContainer, BattleProcessor battleProcessor, BattleContext context)
+    public BattleController(
+        IBattleGameObjectContainer battleGameObjectContainer,
+        BattleProcessor battleProcessor,
+        BattleContext context,
+        BattleAiProcessor battleAiProcessor)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _context = context;
+        _battleAiProcessor = battleAiProcessor;
     }
 
     /// <inheritdoc />
@@ -73,6 +79,11 @@ internal class BattleController : BaseSupportLoading, IBattleController
     }
 
     /// <summary>
+    /// Признак, что битва проходит в автоматическом режиме.
+    /// </summary>
+    private bool IsAutoBattle => _context.IsAutoBattle;
+
+    /// <summary>
     /// Список всех действий на поле боя.
     /// </summary>
     private BattleActionContainer Actions => _context.Actions;
@@ -87,6 +98,9 @@ internal class BattleController : BaseSupportLoading, IBattleController
         {
             ProcessBeginAction(newBattleAction);
         }
+
+        if (IsAutoBattle && Actions.IsNoActions)
+            CheckAndProcessIfAiTurn();
     }
 
     /// <inheritdoc />
@@ -148,6 +162,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         IsWaitingUnitTurn = false;
         CurrentBattleUnit = _context.GetBattleUnit(_turnOrder.Dequeue());
         CurrentBattleUnit.Unit.Effects.OnUnitTurn();
+        CheckAndProcessIfAiTurn();
     }
 
     // Передать ход следующему юниту.
@@ -165,6 +180,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         if (CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !IsSecondAttack)
         {
             IsSecondAttack = true;
+            CheckAndProcessIfAiTurn();
             return;
         }
 
@@ -177,6 +193,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             {
                 CurrentBattleUnit = _context.GetBattleUnit(nextUnit);
                 CurrentBattleUnit.Unit.Effects.OnUnitTurn();
+                CheckAndProcessIfAiTurn();
 
                 return;
             }
@@ -193,6 +210,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
                 if (_waitingTurnOrder.TryPop(out var nextUnit) && !nextUnit.IsDead)
                 {
                     CurrentBattleUnit = _context.GetBattleUnit(nextUnit);
+                    CheckAndProcessIfAiTurn();
 
                     // TODO Посмотреть как работают эффекты. Возможно, эффект работает только один раз за раунд.
                     // Т.е. если эффект уже отработал - больше не применяется. Но если наложили после ожидания, должен отработать.
@@ -203,6 +221,36 @@ internal class BattleController : BaseSupportLoading, IBattleController
         }
 
         StartNewRound();
+    }
+
+    /// <summary>
+    /// Обработать ход искусственного интеллекта.
+    /// </summary>
+    private void CheckAndProcessIfAiTurn()
+    {
+        if (!CurrentBattleUnit.Unit.Player.IsComputer && !IsAutoBattle)
+            return;
+
+        var attackingSquad = CurrentBattleUnit.IsAttacker
+            ? _context.AttackingSquad
+            : _context.DefendingSquad;
+        var defendingSquad = CurrentBattleUnit.IsAttacker
+            ? _context.DefendingSquad
+            : _context.AttackingSquad;
+        var command = _battleAiProcessor.GetAiCommand(
+            CurrentBattleUnit.Unit,
+            attackingSquad,
+            defendingSquad);
+
+        IBattleAction action = command.CommandType switch
+        {
+            BattleCommandType.Attack => new BeginAttackUnitBattleAction(_context.GetBattleUnit(command.Target!)),
+            BattleCommandType.Defend => new DefendBattleAction(),
+            BattleCommandType.Wait => new WaitingBattleAction(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        Actions.AddDelayed(action);
     }
 
     /// <summary>
@@ -240,7 +288,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// </summary>
     private void ProcessBeginAttackUnitAction(BeginAttackUnitBattleAction beginAttackUnitAction)
     {
-        CurrentBattleUnit.Action = BattleAction.Attacking;
+        CurrentBattleUnit.UnitState = BattleUnitState.Attacking;
 
         var targetBattleUnit = beginAttackUnitAction.TargetBattleUnit;
         Actions.Add(new MainAttackBattleAction(CurrentBattleUnit, targetBattleUnit));
@@ -337,9 +385,10 @@ internal class BattleController : BaseSupportLoading, IBattleController
             if (attackResult.AttackResult == AttackResult.Attack)
                 damage += attackResult.Power!.Value;
 
-            // Сразу обрабатываем вторую атаку.
+            // Сразу добавляем действие второй атаки, если первая была успешная.
             // Однако, её последствия будут только после завершения всех анимаций, которые связаны с первой.
-            if (unitSecondAttack != null && !shouldCalculateDamage)
+            var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss;
+            if (unitSecondAttack != null && isSuccessAttack && !shouldCalculateDamage)
                 Actions.AddDelayed(new BeginSecondaryAttackBattleAction(CurrentBattleUnit, targetBattleUnit));
         }
 
@@ -378,12 +427,13 @@ internal class BattleController : BaseSupportLoading, IBattleController
         if (animationAction.AnimationComponent.GameObject is not BattleUnit battleUnit)
             return;
 
-        battleUnit.Action = BattleAction.Waiting;
+        battleUnit.UnitState = BattleUnitState.Waiting;
 
         // Обрабатываем смерть юнита.
         if (battleUnit.Unit.HitPoints == 0)
         {
             battleUnit.Unit.IsDead = true;
+            battleUnit.Unit.Effects.Clear();
 
             var deathAnimation = _battleGameObjectContainer.AddAnimation(
                 battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
@@ -410,7 +460,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         // Если юнит умер, то превращаем его в кучу костей.
         if (unitAction.UnitActionType == UnitActionType.Dying)
         {
-            unitAction.TargetUnit.Action = BattleAction.Dead;
+            unitAction.TargetUnit.UnitState = BattleUnitState.Dead;
         }
 
         // На юнита наложен эффект.
@@ -451,7 +501,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
                 var attackClass = attackResult.AttackClass!.Value;
 
                 targetUnit.Unit.HitPoints -= power;
-                targetUnit.Action = BattleAction.TakingDamage;
+                targetUnit.UnitState = BattleUnitState.TakingDamage;
 
                 Actions.Add(new AnimationBattleAction(targetUnit.AnimationComponent));
                 Actions.Add(new AttackUnitBattleAction(targetUnit, power, attackClass));

@@ -21,7 +21,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// <summary>
     /// Анимация какого действия отображается в данный момент.
     /// </summary>
-    private BattleAction _action;
+    private BattleUnitState _unitState;
 
     /// <summary>
     /// Кадры анимации тени юнита.
@@ -75,14 +75,14 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
         BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_battleUnit.Unit.UnitType.UnitTypeId, _battleUnit.Direction);
 
         // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно.
-        var frameIndex = RandomGenerator.Get(BattleUnitAnimation.BattleUnitFrames[_battleUnit.Action].UnitFrames.Count);
+        var frameIndex = RandomGenerator.Get(BattleUnitAnimation.BattleUnitFrames[_battleUnit.UnitState].UnitFrames.Count);
         UpdateSource(frameIndex);
     }
 
     /// <inheritdoc />
     public override void Update(long tickCount)
     {
-        if (_battleUnit.Action != _action)
+        if (_battleUnit.UnitState != _unitState)
         {
             UpdateSource();
             return;
@@ -127,9 +127,9 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// </summary>
     private void UpdateSource(int startFrameIndex = 0)
     {
-        _action = _battleUnit.Action;
+        _unitState = _battleUnit.UnitState;
 
-        var frames = BattleUnitAnimation.BattleUnitFrames[_action];
+        var frames = BattleUnitAnimation.BattleUnitFrames[_unitState];
         _shadowFrames = frames.ShadowFrames;
         _unitFrames = frames.UnitFrames;
         _auraFrames = frames.AuraFrames;

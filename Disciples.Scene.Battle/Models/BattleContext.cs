@@ -60,6 +60,11 @@ internal class BattleContext : BaseSupportLoading
     public bool IsWaitingUnitTurn { get; set; }
 
     /// <summary>
+    /// Признак, что битва проходит в автоматическом режиме.
+    /// </summary>
+    public bool IsAutoBattle { get; set; }
+
+    /// <summary>
     /// Все юниты.
     /// </summary>
     public IReadOnlyList<BattleUnit> BattleUnits { get; set; } = null!;

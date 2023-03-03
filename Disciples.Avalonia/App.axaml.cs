@@ -100,8 +100,9 @@ public partial class App : Application
         var player = new Player(0, false);
 
 
-        var mage = unitInfoProvider.GetUnitType("g000uu0010");
-        var u02 = new Unit(Guid.NewGuid().ToString(), mage, player, 0, 2);
+        var assassin = unitInfoProvider.GetUnitType("g000uu0154");
+        //var mage = unitInfoProvider.GetUnitType("g000uu0010");
+        var u02 = new Unit(Guid.NewGuid().ToString(), assassin, player, 0, 2);
 
         var wight = unitInfoProvider.GetUnitType("g000uu0178");
         //var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
@@ -129,7 +130,7 @@ public partial class App : Application
     public static Squad CreateDefendingSquad(IContainer container)
     {
         var unitInfoProvider = container.Resolve<IUnitInfoProvider>();
-        var player = new Player(0, false);
+        var player = new Player(0, true);
 
 
         var hillGiant = unitInfoProvider.GetUnitType("g000uu0029");

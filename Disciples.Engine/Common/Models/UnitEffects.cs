@@ -44,6 +44,14 @@ public class UnitEffects
     }
 
     /// <summary>
+    /// Удалить все действующие эффекты.
+    /// </summary>
+    public void Clear()
+    {
+        _battleEffects.Clear();
+    }
+
+    /// <summary>
     /// Уменьшить длительность всех эффектов в схватке на единицу.
     /// </summary>
     public void OnUnitTurn()

@@ -137,6 +137,8 @@ internal class DetailUnitInfoObject : GameObject
             endVerticalOffset += ROW_HEIGHT;
 
             // Если слишком длинная строка, то следующую располагаем ниже.
+            // TODO Некоторые значения занимают больше двух строк, в этом случае нужно увеличивать offset.
+            // Посмотреть переносы слов.
             if (value.Length > 20)
                 endVerticalOffset += ROW_HEIGHT;
         }

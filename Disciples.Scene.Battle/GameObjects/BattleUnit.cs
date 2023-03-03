@@ -34,7 +34,7 @@ internal class BattleUnit : GameObject
         Direction = isAttacker
             ? BattleDirection.Attacker
             : BattleDirection.Defender;
-        Action = BattleAction.Waiting;
+        UnitState = BattleUnitState.Waiting;
 
         AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
         this.Components = new IComponent[] { AnimationComponent };
@@ -71,7 +71,7 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Действие, которое выполняет юнит в данный момент.
     /// </summary>
-    public BattleAction Action { get; set; }
+    public BattleUnitState UnitState { get; set; }
 
 
     /// <summary>

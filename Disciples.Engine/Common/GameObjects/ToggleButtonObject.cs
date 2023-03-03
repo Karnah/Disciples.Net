@@ -11,8 +11,6 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public class ToggleButtonObject : ButtonObject
 {
-    private bool _isChecked;
-
     /// <summary>
     /// Создать объект типа <see cref="ToggleButtonObject" />.
     /// </summary>
@@ -26,13 +24,18 @@ public class ToggleButtonObject : ButtonObject
         KeyboardButton? hotkey = null)
         : base(sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotkey)
     {
-        _isChecked = false;
+        IsChecked = false;
     }
+
+    /// <summary>
+    /// Признак, что кнопка находится во включенном состоянии.
+    /// </summary>
+    public bool IsChecked { get; private set; }
 
     /// <inheritdoc />
     public override void SetDisabled()
     {
-        _isChecked = false;
+        IsChecked = false;
 
         base.SetDisabled();
     }
@@ -40,7 +43,7 @@ public class ToggleButtonObject : ButtonObject
     /// <inheritdoc />
     public override void SetSelected()
     {
-        if (ButtonState == SceneButtonState.Pressed && _isChecked)
+        if (ButtonState == SceneButtonState.Pressed && IsChecked)
             return;
 
         base.SetSelected();
@@ -49,7 +52,7 @@ public class ToggleButtonObject : ButtonObject
     /// <inheritdoc />
     public override void SetUnselected()
     {
-        if (ButtonState == SceneButtonState.Pressed && _isChecked)
+        if (ButtonState == SceneButtonState.Pressed && IsChecked)
             return;
 
         base.SetUnselected();
@@ -62,7 +65,7 @@ public class ToggleButtonObject : ButtonObject
         if (ButtonState != SceneButtonState.Pressed)
             return;
 
-        if (_isChecked)
+        if (IsChecked)
             ButtonState = SceneButtonState.Selected;
 
         Click();
@@ -72,7 +75,7 @@ public class ToggleButtonObject : ButtonObject
     /// <inheritdoc />
     public override void Click()
     {
-        SetState(!_isChecked);
+        SetState(!IsChecked);
 
         base.Click();
     }
@@ -82,11 +85,11 @@ public class ToggleButtonObject : ButtonObject
     /// </summary>
     public void SetState(bool isChecked)
     {
-        if (ButtonState == SceneButtonState.Disabled || _isChecked == isChecked)
+        if (ButtonState == SceneButtonState.Disabled || IsChecked == isChecked)
             return;
 
-        _isChecked = isChecked;
-        ButtonState = _isChecked
+        IsChecked = isChecked;
+        ButtonState = IsChecked
             ? SceneButtonState.Pressed
             : SceneButtonState.Active;
         UpdateButtonVisualObject();

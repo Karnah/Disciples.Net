@@ -75,33 +75,17 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
 
         foreach (GameColor color in Enum.GetValues(typeof(GameColor)))
         {
-            byte[] colorBytes = new byte[4];
-
-            switch (color)
+            var colorBytes = color switch
             {
-                case GameColor.Red:
-                    colorBytes = new byte[] { 0, 0, 255, 128 };
-                    break;
-                case GameColor.Gray:
-                    break;
-                case GameColor.Green:
-                    colorBytes = new byte[] { 0, 255, 0, 128 };
-                    break;
-                case GameColor.Yellow:
-                    colorBytes = new byte[] { 0, 255, 255, 128 };
-                    break;
-                case GameColor.Blue:
-                    colorBytes = new byte[] { 255, 0, 0, 128 };
-                    break;
-                case GameColor.Black:
-                    colorBytes = new byte[] { 0, 0, 0, 255 };
-                    break;
-                case GameColor.White:
-                    colorBytes = new byte[] { 255, 255, 255, 255 };
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                GameColor.Red => new byte[] { 0, 0, 255, 128 },
+                GameColor.Gray => new byte[] { 0, 66, 66, 128 },
+                GameColor.Green => new byte[] { 0, 33, 33, 128 },
+                GameColor.Yellow => new byte[] { 0, 255, 255, 128 },
+                GameColor.Blue => new byte[] { 255, 0, 0, 128 },
+                GameColor.Black => new byte[] { 0, 0, 0, 255 },
+                GameColor.White => new byte[] { 255, 255, 255, 255 },
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             var rawBitmap = new RawBitmap(0, 1, 0, 1, 1, 1, colorBytes);
             var bitmap = _bitmapFactory.FromRawToBitmap(rawBitmap);

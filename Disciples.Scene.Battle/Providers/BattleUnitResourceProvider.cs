@@ -69,14 +69,14 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     {
         var unitType = _unitInfoProvider.GetUnitType(unitId);
         // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
-        var unitFrames = new Dictionary<BattleAction, BattleUnitFrames>
+        var unitFrames = new Dictionary<BattleUnitState, BattleUnitFrames>
         {
-            { BattleAction.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.SizeSmall), null) }
+            { BattleUnitState.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.SizeSmall), null) }
         };
 
-        foreach (BattleAction action in Enum.GetValues(typeof(BattleAction)))
+        foreach (BattleUnitState action in Enum.GetValues(typeof(BattleUnitState)))
         {
-            if (action == BattleAction.Dead)
+            if (action == BattleUnitState.Dead)
                 continue;
 
             unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
@@ -119,17 +119,17 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     // 1 - объект | 2 -аура
     // A - атакующий, лицом | D - защищающийся, спиной | B - симметрично
     // 00
-    private BattleUnitFrames GetUnitFrames(string unitId, BattleDirection direction, BattleAction action)
+    private BattleUnitFrames GetUnitFrames(string unitId, BattleDirection direction, BattleUnitState unitState)
     {
-        var shadowImagesName = $"{unitId.ToUpper()}{GetBattleActionResourceKey(action)}S1{GetDirectionResourceKey(direction)}00";
+        var shadowImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}S1{GetDirectionResourceKey(direction)}00";
         var shadowFrames = GetAnimationFrames(shadowImagesName);
 
-        var unitImagesName = $"{unitId.ToUpper()}{GetBattleActionResourceKey(action)}A1{GetDirectionResourceKey(direction)}00";
+        var unitImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}A1{GetDirectionResourceKey(direction)}00";
         var unitFrames = GetAnimationFrames(unitImagesName);
         if (unitFrames == null)
             throw new ArgumentException($"Отсутствует анимация для юнита: {unitImagesName}");
 
-        var auraImagesName = $"{unitId.ToUpper()}{GetBattleActionResourceKey(action)}A2{GetDirectionResourceKey(direction)}00";
+        var auraImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}A2{GetDirectionResourceKey(direction)}00";
         var auraFrames = GetAnimationFrames(auraImagesName);
 
         return new BattleUnitFrames(shadowFrames, unitFrames, auraFrames);
@@ -150,15 +150,15 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Получить ключ ресурсах, которое соответствует определённому действию.
     /// </summary>
-    private static string GetBattleActionResourceKey(BattleAction action)
+    private static string GetUnitStateResourceKey(BattleUnitState unitState)
     {
-        return action switch
+        return unitState switch
         {
-            BattleAction.Waiting => "IDLE",
-            BattleAction.Attacking => "HMOV",
-            BattleAction.TakingDamage => "HHIT",
-            BattleAction.Paralyzed => "STIL",
-            _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
+            BattleUnitState.Waiting => "IDLE",
+            BattleUnitState.Attacking => "HMOV",
+            BattleUnitState.TakingDamage => "HHIT",
+            BattleUnitState.Paralyzed => "STIL",
+            _ => throw new ArgumentOutOfRangeException(nameof(unitState), unitState, null)
         };
     }
 

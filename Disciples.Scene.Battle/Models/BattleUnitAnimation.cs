@@ -12,7 +12,7 @@ internal class BattleUnitAnimation
     /// Создать объект типа <see cref="BattleUnitAnimation" />.
     /// </summary>
     public BattleUnitAnimation(
-        Dictionary<BattleAction, BattleUnitFrames> battleUnitFrames,
+        Dictionary<BattleUnitState, BattleUnitFrames> battleUnitFrames,
         BattleUnitTargetAnimation? targetAnimation,
         IReadOnlyList<Frame> deathFrames)
     {
@@ -25,7 +25,7 @@ internal class BattleUnitAnimation
     /// <summary>
     /// Кадры анимации для каждого состояния юнита.
     /// </summary>
-    public Dictionary<BattleAction, BattleUnitFrames> BattleUnitFrames { get; }
+    public Dictionary<BattleUnitState, BattleUnitFrames> BattleUnitFrames { get; }
 
     /// <summary>
     /// Информации об анимации, которая применяются в юниту-цели.

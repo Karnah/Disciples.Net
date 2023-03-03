@@ -130,6 +130,15 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private bool IsWaitingUnitTurn => _context.IsWaitingUnitTurn;
 
     /// <summary>
+    /// Признак, что битва проходит в автоматическом режиме.
+    /// </summary>
+    private bool IsAutoBattle
+    {
+        get => _context.IsAutoBattle;
+        set => _context.IsAutoBattle = value;
+    }
+
+    /// <summary>
     /// Список юнитов.
     /// </summary>
     private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
@@ -254,11 +263,16 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }, 359, 563, INTERFACE_LAYER + 2, KeyboardButton.I);
 
         _autoBattleButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.AutoBattleButton, () => {
-            // todo
+            IsAutoBattle = _autoBattleButton!.IsChecked;
         }, 403, 563, INTERFACE_LAYER + 2, KeyboardButton.A);
 
 
-        ActivateButtons(_reflectUnitPanelButton, _defendButton, _retreatButton, _waitButton, _instantResolveButton, _autoBattleButton);
+        // Эти кнопки доступны всегда.
+        ActivateButtons(_instantResolveButton, _autoBattleButton);
+
+        // Эти кнопки могут быть недоступны, если первый ход - компьютера.
+        if (Actions.IsAllActionsCompleted)
+            ActivateButtons(_reflectUnitPanelButton, _defendButton, _retreatButton, _waitButton);
     }
 
 
@@ -836,6 +850,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private void InitializeAnimationsOnRightUnitsPanel()
     {
         CleanAnimationsOnRightUnitsPanel();
+
+        if (!Actions.IsAllActionsCompleted)
+            return;
 
         var currentUnit = CurrentBattleUnit.Unit;
         _unitPanelAnimations = new List<AnimationObject>();
