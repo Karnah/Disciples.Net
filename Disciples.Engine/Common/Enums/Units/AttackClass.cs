@@ -86,7 +86,7 @@ public enum AttackClass
     DrainLevel = 18,
 
     /// <summary>
-    /// todo Передать атаку?
+    /// Дать дополнительную атаку.
     /// </summary>
     GiveAttack = 19,
 

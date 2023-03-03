@@ -125,6 +125,11 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private bool IsSecondAttack => _context.IsSecondAttack;
 
     /// <summary>
+    /// Признак, что ходит юнит, который "ждал" в этом раунде.
+    /// </summary>
+    private bool IsWaitingUnitTurn => _context.IsWaitingUnitTurn;
+
+    /// <summary>
     /// Список юнитов.
     /// </summary>
     private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
@@ -525,11 +530,18 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         _isAnimating = false;
 
+
         ActivateButtons(_reflectUnitPanelButton);
 
         // Если юнит наносит второй удар, то указанные кнопки активировать не нужно.
         if (!IsSecondAttack)
-            ActivateButtons(_defendButton, _retreatButton, _waitButton);
+        {
+            ActivateButtons(_defendButton, _retreatButton);
+
+            // Если юнит уже ждал на этом ходу, то больше ждать не может.
+            if (!IsWaitingUnitTurn)
+                ActivateButtons(_waitButton);
+        }
 
         AttachSelectedAnimation(CurrentBattleUnit);
 

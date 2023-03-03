@@ -55,6 +55,11 @@ internal class BattleContext : BaseSupportLoading
     public bool IsSecondAttack { get; set; }
 
     /// <summary>
+    /// Признак, что ходит юнит, который "ждал" в этом раунде.
+    /// </summary>
+    public bool IsWaitingUnitTurn { get; set; }
+
+    /// <summary>
     /// Все юниты.
     /// </summary>
     public IReadOnlyList<BattleUnit> BattleUnits { get; set; } = null!;

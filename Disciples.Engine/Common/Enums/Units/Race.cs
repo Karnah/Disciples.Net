@@ -8,30 +8,30 @@ public enum Race
     /// <summary>
     /// Защитники Империи.
     /// </summary>
-    Human,
+    Human = 0,
 
     /// <summary>
     /// Орды Нежити.
     /// </summary>
-    Undead,
+    Undead = 1,
 
     /// <summary>
     /// Легионы Проклятых.
     /// </summary>
-    Heretic,
+    Heretic = 2,
 
     /// <summary>
     /// Горные Кланы.
     /// </summary>
-    Dwarf,
+    Dwarf = 3,
 
     /// <summary>
     /// Нейтралы.
     /// </summary>
-    Neutral,
+    Neutral = 4,
 
     /// <summary>
     /// Эльфийский Союз.
     /// </summary>
-    Elf
+    Elf = 5
 }

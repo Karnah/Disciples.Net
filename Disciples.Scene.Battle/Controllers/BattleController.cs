@@ -24,7 +24,12 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <summary>
     /// Очередность хода юнитов.
     /// </summary>
-    private Queue<BattleUnit> _turnOrder = new();
+    private Queue<Unit> _turnOrder = new();
+
+    /// <summary>
+    /// Очередность хода юнитов, которые выбрали ожидание во время своего хода.
+    /// </summary>
+    private readonly Stack<Unit> _waitingTurnOrder = new ();
 
     /// <summary>
     /// Создать объект типа <see cref="BattleController" />.
@@ -56,6 +61,15 @@ internal class BattleController : BaseSupportLoading, IBattleController
     {
         get => _context.IsSecondAttack;
         set => _context.IsSecondAttack = value;
+    }
+
+    /// <summary>
+    /// Признак, что ходит юнит, который "ждал" в этом раунде.
+    /// </summary>
+    private bool IsWaitingUnitTurn
+    {
+        get => _context.IsWaitingUnitTurn;
+        set => _context.IsWaitingUnitTurn = value;
     }
 
     /// <summary>
@@ -129,13 +143,10 @@ internal class BattleController : BaseSupportLoading, IBattleController
     // Начать новый раунд.
     private void StartNewRound()
     {
-        _turnOrder = new Queue<BattleUnit>(
-            _battleProcessor
-                .GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad)
-                .Select(u => _context.GetBattleUnit(u))
-        );
+        _turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad);
 
-        CurrentBattleUnit = _turnOrder.Dequeue();
+        IsWaitingUnitTurn = false;
+        CurrentBattleUnit = _context.GetBattleUnit(_turnOrder.Dequeue());
         CurrentBattleUnit.Unit.Effects.OnUnitTurn();
     }
 
@@ -159,16 +170,37 @@ internal class BattleController : BaseSupportLoading, IBattleController
 
         IsSecondAttack = false;
 
+        // Очередь из основных ходов юнитов.
         do
         {
-            if (_turnOrder.TryDequeue(out var nextUnit) && nextUnit.Unit.IsDead == false)
+            if (_turnOrder.TryDequeue(out var nextUnit) && !nextUnit.IsDead)
             {
-                CurrentBattleUnit = nextUnit;
+                CurrentBattleUnit = _context.GetBattleUnit(nextUnit);
                 CurrentBattleUnit.Unit.Effects.OnUnitTurn();
 
                 return;
             }
         } while (_turnOrder.Count > 0);
+
+
+        // Стек из юнитов, которые "ждали".
+        if (_waitingTurnOrder.Count > 0)
+        {
+            IsWaitingUnitTurn = true;
+
+            do
+            {
+                if (_waitingTurnOrder.TryPop(out var nextUnit) && !nextUnit.IsDead)
+                {
+                    CurrentBattleUnit = _context.GetBattleUnit(nextUnit);
+
+                    // TODO Посмотреть как работают эффекты. Возможно, эффект работает только один раз за раунд.
+                    // Т.е. если эффект уже отработал - больше не применяется. Но если наложили после ожидания, должен отработать.
+
+                    return;
+                }
+            } while (_waitingTurnOrder.Count > 0);
+        }
 
         StartNewRound();
     }
@@ -229,6 +261,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private void ProcessWaitingUnitAction()
     {
         IsSecondAttack = true;
+        _waitingTurnOrder.Push(CurrentBattleUnit.Unit);
         Actions.Add(new UnitBattleAction(CurrentBattleUnit, UnitActionType.Waiting));
     }
 
