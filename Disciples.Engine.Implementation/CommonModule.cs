@@ -2,6 +2,7 @@
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Providers;
+using Disciples.Resources.Database;
 using DryIoc;
 
 namespace Disciples.Engine.Implementation;
@@ -22,6 +23,7 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);
         containerRegistrator.Register<IUnitInfoProvider, UnitInfoProvider>(Reuse.Singleton);
 
+        containerRegistrator.RegisterInstance(new Database("Resources"));
 
         containerRegistrator.Register<ISceneObjectContainer, SceneObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IGameObjectContainer, GameObjectContainer>(Reuse.Scoped);

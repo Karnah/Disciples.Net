@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,6 +16,7 @@
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.ResourceProvider\Disciples.ResourceProvider.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Database\Disciples.Resources.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
