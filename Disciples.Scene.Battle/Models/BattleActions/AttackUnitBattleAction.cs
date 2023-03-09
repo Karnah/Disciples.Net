@@ -9,10 +9,10 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class AttackUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public AttackUnitBattleAction(BattleUnit targetUnit, int power, AttackClass attackClass) : base(targetUnit, Enums.UnitActionType.GetHit)
+    public AttackUnitBattleAction(BattleUnit targetUnit, int power, UnitAttackType attackType) : base(targetUnit, Enums.UnitActionType.GetHit)
     {
         Power = power;
-        AttackClass = attackClass;
+        AttackType = attackType;
     }
 
     /// <summary>
@@ -23,5 +23,5 @@ internal class AttackUnitBattleAction : UnitBattleAction
     /// <summary>
     /// Тип атаки.
     /// </summary>
-    public AttackClass AttackClass { get; }
+    public UnitAttackType AttackType { get; }
 }

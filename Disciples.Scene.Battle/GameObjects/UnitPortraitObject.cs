@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using Disciples.Engine;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
@@ -7,6 +8,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
 
@@ -38,6 +40,8 @@ internal class UnitPortraitObject : GameObject
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly bool _rightToLeft;
+
+    private readonly IBitmap _unitFaceBitmap;
 
     /// <summary>
     /// Картинка с портретом юнита.
@@ -87,6 +91,7 @@ internal class UnitPortraitObject : GameObject
         ITextProvider textProvider,
         ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
+        IBattleUnitResourceProvider battleUnitResourceProvider,
         Unit unit,
         bool rightToLeft,
         double x,
@@ -97,10 +102,12 @@ internal class UnitPortraitObject : GameObject
         _battleInterfaceProvider = battleInterfaceProvider;
         _rightToLeft = rightToLeft;
 
+        _unitFaceBitmap = battleUnitResourceProvider.GetUnitFace(unit.UnitType);
+
         Unit = unit;
 
-        Width = Unit.UnitType.Face.Width;
-        Height = Unit.UnitType.Face.Height;
+        Width = _unitFaceBitmap.Width;
+        Height = _unitFaceBitmap.Height;
 
         _battleEffectsIcons = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
         _battleEffectsForegrounds = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
@@ -119,12 +126,12 @@ internal class UnitPortraitObject : GameObject
     {
         base.Initialize();
 
-        _unitPortrait = _sceneObjectContainer.AddImage(Unit.UnitType.Face, X, Y, INTERFACE_LAYER + 2);
+        _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, X, Y, INTERFACE_LAYER + 2);
         _unitPortrait.IsReflected = _rightToLeft;
 
         _unitHitpoints = _sceneObjectContainer.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
         // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
-        if (!Unit.UnitType.SizeSmall) {
+        if (!Unit.UnitType.IsSmall) {
             _unitPanelSeparator = _sceneObjectContainer.AddImage(
                 _battleInterfaceProvider.PanelSeparator,
                 X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
@@ -171,13 +178,13 @@ internal class UnitPortraitObject : GameObject
         // Обрабатываем попадание в юнита.
         if (unitAction is AttackUnitBattleAction attackUnitAction)
         {
-            switch (attackUnitAction.AttackClass)
+            switch (attackUnitAction.AttackType)
             {
-                case AttackClass.Damage:
+                case UnitAttackType.Damage:
                     _instantaneousEffectImage = AddColorImage(GameColor.Red);
                     _instantaneousEffectText = AddText($"-{attackUnitAction.Power}");
                     break;
-                case AttackClass.Heal:
+                case UnitAttackType.Heal:
                     _instantaneousEffectImage = AddColorImage(GameColor.Blue);
                     _instantaneousEffectText = AddText($"+{attackUnitAction.Power}");
                     break;

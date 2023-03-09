@@ -45,7 +45,7 @@ internal class BattleAiProcessor
     /// <returns>Команда для юнита.</returns>
     private BattleAiCommand GetOwnSquadCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad)
     {
-        if (attackingUnit.UnitType.MainAttack.AttackClass == AttackClass.Heal)
+        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
         {
             var target = attackingSquad
                 .Units

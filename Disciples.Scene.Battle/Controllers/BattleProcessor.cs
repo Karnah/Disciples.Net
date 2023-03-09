@@ -64,14 +64,14 @@ internal class BattleProcessor
 
         // BUG Патриарх может воскресить юнита, так что эта проверка не совсем корректна.
         // Если юнит бьёт по площади, то разрешаем кликнуть на мертвого юнита.
-        if (targetUnit.IsDead && attackingUnit.UnitType.MainAttack.Reach != Reach.All)
+        if (targetUnit.IsDead && attackingUnit.UnitType.MainAttack.Reach != UnitAttackReach.All)
             return false;
 
         // Лекарь по одиночной цели без второй атаки может лечить только тех,
         // у кого меньше максимального значения здоровья.
         if (attackingUnit.Player == targetUnit.Player &&
-            attackingUnit.UnitType.MainAttack.AttackClass == AttackClass.Heal &&
-            attackingUnit.UnitType.MainAttack.Reach == Reach.Any &&
+            attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal &&
+            attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any &&
             attackingUnit.UnitType.SecondaryAttack == null &&
             targetUnit.HitPoints == targetUnit.UnitType.HitPoints)
         {
@@ -79,7 +79,7 @@ internal class BattleProcessor
         }
 
         // Если юнит может атаковать только ближайшего, то проверяем препятствия.
-        if (attackingUnit.UnitType.MainAttack.Reach == Reach.Adjacent)
+        if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Adjacent)
         {
             // Если атакующий юнит находится сзади и есть линия союзников впереди.
             if (attackingUnit.SquadLinePosition == 0 && IsFrontLineEmpty(attackingSquad) == false)
@@ -174,11 +174,11 @@ internal class BattleProcessor
     /// <param name="attack">Тип атаки.</param>
     /// <param name="power">Сила атаки.</param>
     /// <param name="accuracy">Точность атаки.</param>
-    private static BattleProcessorAttackResult? ProcessAttack(Unit targetUnit, Attack attack, int? power, int accuracy)
+    private static BattleProcessorAttackResult? ProcessAttack(Unit targetUnit, UnitAttack attack, int? power, int accuracy)
     {
         // Единственная атаки, которая действует на мёртвых юнитов - воскрешение и призыв.
         if (targetUnit.IsDead
-            && attack.AttackClass is not AttackClass.Revive or AttackClass.Summon)
+            && attack.AttackType is not UnitAttackType.Revive or UnitAttackType.Summon)
         {
             return null;
         }
@@ -191,9 +191,9 @@ internal class BattleProcessor
         // todo Сразу обработать иммунитет + сопротивления. Также вернуть результат.
         // Вторая атака не будет действовать, если первая упёрлась в иммунитет.
 
-        switch (attack.AttackClass)
+        switch (attack.AttackType)
         {
-            case AttackClass.Damage:
+            case UnitAttackType.Damage:
                 // todo Максимальное значение атаки - 250/300/400.
                 var attackPower = power!.Value + RandomGenerator.Get(ATTACK_RANGE);
 
@@ -211,51 +211,51 @@ internal class BattleProcessor
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
                     attackPower,
-                    attack.AttackClass);
+                    attack.AttackType);
 
-            case AttackClass.Drain:
-            case AttackClass.Paralyze:
+            case UnitAttackType.Drain:
+            case UnitAttackType.Paralyze:
                 break;
 
-            case AttackClass.Heal:
+            case UnitAttackType.Heal:
                 var healPower = Math.Min(power!.Value, targetUnit.MaxHitPoints - targetUnit.HitPoints);
                 if (healPower != 0)
                 {
                     return new BattleProcessorAttackResult(
                         AttackResult.Heal,
                         healPower,
-                        attack.AttackClass);
+                        attack.AttackType);
                 }
 
                 break;
 
-            case AttackClass.Fear:
-            case AttackClass.BoostDamage:
-            case AttackClass.Petrify:
-            case AttackClass.LowerDamage:
-            case AttackClass.LowerInitiative:
+            case UnitAttackType.Fear:
+            case UnitAttackType.BoostDamage:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.LowerDamage:
+            case UnitAttackType.LowerInitiative:
                 break;
 
-            case AttackClass.Poison:
-            case AttackClass.Frostbite:
-            case AttackClass.Blister:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.Blister:
                 return new BattleProcessorAttackResult(
                     AttackResult.Effect,
                     power,
                     2,
-                    attack.AttackClass);
+                    attack.AttackType);
 
-            case AttackClass.Revive:
-            case AttackClass.DrainOverflow:
-            case AttackClass.Cure:
-            case AttackClass.Summon:
-            case AttackClass.DrainLevel:
-            case AttackClass.GiveAttack:
-            case AttackClass.Doppelganger:
-            case AttackClass.TransformSelf:
-            case AttackClass.TransformOther:
-            case AttackClass.BestowWards:
-            case AttackClass.Shatter:
+            case UnitAttackType.Revive:
+            case UnitAttackType.DrainOverflow:
+            case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
+            case UnitAttackType.DrainLevel:
+            case UnitAttackType.GiveAttack:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.TransformOther:
+            case UnitAttackType.BestowWards:
+            case UnitAttackType.Shatter:
                 break;
 
             default:

@@ -101,22 +101,22 @@ public partial class App : Application
         var player = new Player(0, false);
 
 
-        var assassin = unitInfoProvider.GetUnitType("g000uu0154");
-        //var mage = unitInfoProvider.GetUnitType("g000uu0010");
+        var assassin = unitInfoProvider.GetUnitType("G000UU0154");
+        //var mage = unitInfoProvider.GetUnitType("G000UU0010");
         var u02 = new Unit(Guid.NewGuid().ToString(), assassin, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Top);
 
-        var wight = unitInfoProvider.GetUnitType("g000uu0178");
-        //var pathfinder = unitInfoProvider.GetUnitType("g000uu0020");
+        var wight = unitInfoProvider.GetUnitType("G000UU0178");
+        //var pathfinder = unitInfoProvider.GetUnitType("G000UU0020");
         var u01 = new Unit(Guid.NewGuid().ToString(), wight, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Center);
 
-        var abbess = unitInfoProvider.GetUnitType("g000uu0017");
+        var abbess = unitInfoProvider.GetUnitType("G000UU0017");
         var u00 = new Unit(Guid.NewGuid().ToString(), abbess, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Bottom);
 
 
-        var knight = unitInfoProvider.GetUnitType("g000uu0002");
+        var knight = unitInfoProvider.GetUnitType("G000UU0002");
         var u12 = new Unit(Guid.NewGuid().ToString(), knight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Top);
 
-        var imperialKnight = unitInfoProvider.GetUnitType("g000uu0003");
+        var imperialKnight = unitInfoProvider.GetUnitType("G000UU0003");
         var u11 = new Unit(Guid.NewGuid().ToString(), imperialKnight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Center);
 
         var u10 = new Unit(Guid.NewGuid().ToString(), knight, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Bottom);
@@ -134,20 +134,20 @@ public partial class App : Application
         var player = new Player(0, true);
 
 
-        var hillGiant = unitInfoProvider.GetUnitType("g000uu0029");
+        var hillGiant = unitInfoProvider.GetUnitType("G000UU0029");
         var u12 = new Unit(Guid.NewGuid().ToString(), hillGiant, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Top);
 
-        var masterOfRunes = unitInfoProvider.GetUnitType("g000uu0165");
+        var masterOfRunes = unitInfoProvider.GetUnitType("G000UU0165");
         var u11 = new Unit(Guid.NewGuid().ToString(), masterOfRunes, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Center);
 
-        var gnomesKing = unitInfoProvider.GetUnitType("g000uu0039");
+        var gnomesKing = unitInfoProvider.GetUnitType("G000UU0039");
         var u10 = new Unit(Guid.NewGuid().ToString(), gnomesKing, player, UnitSquadLinePosition.Front, UnitSquadFlankPosition.Bottom);
 
 
-        var crossbowman = unitInfoProvider.GetUnitType("g000uu0027");
+        var crossbowman = unitInfoProvider.GetUnitType("G000UU0027");
         var u01 = new Unit(Guid.NewGuid().ToString(), crossbowman, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Center);
 
-        var gornDefender = unitInfoProvider.GetUnitType("g000uu0162");
+        var gornDefender = unitInfoProvider.GetUnitType("G000UU0162");
         var u02 = new Unit(Guid.NewGuid().ToString(), gornDefender, player, UnitSquadLinePosition.Back, UnitSquadFlankPosition.Bottom);
 
 

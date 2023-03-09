@@ -1,48 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
-
-using Disciples.Engine.Common.Enums.Units;
+using AutoMapper;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Platform.Factories;
 using Disciples.ResourceProvider;
+using Disciples.Resources.Database;
+using UnitType = Disciples.Engine.Common.Models.UnitType;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
 
 /// <inheritdoc cref="IUnitInfoProvider" />
 public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
 {
-    /// <summary>
-    /// Значение определяющее, что у объекта нет базового/родителя.
-    /// </summary>
-    /// <remarks>
-    /// Юнит второго уровня ссылается на юнита первого уровня как базового.
-    /// Юнит первого уровня будет ссылаться на это значение.
-    /// </remarks>
-    private const string NO_PARENT = "G000000000";
-
-    private readonly ITextProvider _textProvider;
     private readonly IBitmapFactory _bitmapFactory;
-    private readonly DataExtractor _dataExtractor;
+    private readonly IMapper _mapper;
+    private readonly Database _database;
     private readonly ImagesExtractor _facesExtractor;
     private readonly ImagesExtractor _portraitExtractor;
 
-    private readonly SortedDictionary<string, Attack> _attacks = new();
-    private readonly SortedDictionary<string, UnitType> _units = new();
+    private readonly Dictionary<string, UnitType> _unitTypes = new();
+    private readonly Dictionary<string, IBitmap> _unitFaces = new();
+    private readonly Dictionary<string, IBitmap> _unitBattleFaces = new();
+    private readonly Dictionary<string, IBitmap> _unitPortraits = new ();
 
     /// <summary>
     /// Создать объект типа <see cref="UnitInfoProvider" />.
     /// </summary>
-    public UnitInfoProvider(ITextProvider textProvider, IBitmapFactory bitmapFactory)
+    public UnitInfoProvider(IBitmapFactory bitmapFactory, IMapper mapper, Database database)
     {
-        _textProvider = textProvider;
         _bitmapFactory = bitmapFactory;
+        _mapper = mapper;
+        _database = database;
 
-        _dataExtractor = new DataExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Globals");
         _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
         _portraitExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
     }
@@ -55,177 +48,124 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// <inheritdoc />
     public UnitType GetUnitType(string unitTypeId)
     {
-        return _units[unitTypeId];
+        if (!_unitTypes.TryGetValue(unitTypeId, out var unitType))
+        {
+            unitType = GetUnitTypeInternal(unitTypeId);
+            _unitTypes.Add(unitTypeId, unitType);
+        }
+
+        return unitType;
+    }
+
+    /// <inheritdoc />
+    public IBitmap GetUnitFace(string unitTypeId)
+    {
+        if (!_unitFaces.TryGetValue(unitTypeId, out var unitFace))
+        {
+            unitFace = _bitmapFactory.FromByteArray(_facesExtractor.GetFileContent($"{unitTypeId}FACE"));
+            _unitFaces.Add(unitTypeId, unitFace);
+        }
+
+        return unitFace;
+    }
+
+    /// <inheritdoc />
+    public IBitmap GetUnitBattleFace(string unitTypeId)
+    {
+        if (!_unitBattleFaces.TryGetValue(unitTypeId, out var unitBattleFace))
+        {
+            unitBattleFace = _bitmapFactory.FromRawToBitmap(_facesExtractor.GetImage($"{unitTypeId}FACEB"));
+            _unitBattleFaces.Add(unitTypeId, unitBattleFace);
+        }
+
+        return unitBattleFace;
+    }
+
+    /// <inheritdoc />
+    public IBitmap GetUnitPortrait(string unitTypeId)
+    {
+        if (!_unitPortraits.TryGetValue(unitTypeId, out var unitPortrait))
+        {
+            unitPortrait = _bitmapFactory.FromRawToOriginalBitmap(_portraitExtractor.GetImage(unitTypeId.ToUpper()));
+            _unitPortraits.Add(unitTypeId, unitPortrait);
+        }
+
+        return unitPortrait;
     }
 
 
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        LoadAttacks();
-        LoadUnitTypes();
     }
 
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
-        _units.Clear();
-        _attacks.Clear();
     }
 
     /// <summary>
-    /// Загрузить информацию о типах атаки.
+    /// Получить тип юнита.
     /// </summary>
-    private void LoadAttacks()
+    /// <param name="unitTypeId">Идентификатор типа юнита.</param>
+    private UnitType GetUnitTypeInternal(string unitTypeId)
     {
-        var attacks = _dataExtractor.GetData("Gattacks.dbf");
-        foreach (DataRow attackInfoRow in attacks.Rows)
+        if (!_database.UnitTypes.TryGetValue(unitTypeId, out var dbUnitType))
+            throw new ArgumentException($"Тип юнита {unitTypeId} не найден", nameof(unitTypeId));
+
+        var unitType = new UnitType
         {
-            var attack = ExtractAttack(attackInfoRow);
-            _attacks.Add(attack.AttackId, attack);
-        }
+            PreviousUnitType = dbUnitType.PreviousUnitTypeId == null ? null : GetUnitType(dbUnitType.PreviousUnitTypeId),
+            RaceId = string.Empty, // todo
+            RecruitBuildingId = null, // todo,
+            Name = GetText(dbUnitType.NameTextId),
+            Description = GetText(dbUnitType.DescriptionTextId),
+            Ability = GetText(dbUnitType.AbilityTextId),
+            MainAttack = GetUnitAttack(dbUnitType.MainUserAttackId),
+            SecondaryAttack = dbUnitType.SecondaryUserAttackId == null ? null : GetUnitAttack(dbUnitType.SecondaryUserAttackId),
+            LeaderBaseUnit = dbUnitType.LeaderBaseUnitId == null ? null : GetUnitType(dbUnitType.LeaderBaseUnitId),
+            UpgradeBuildingId = null, // todo
+            LowLevelUpgradeId = string.Empty, // todo
+            HighLevelUpgradeId = string.Empty // todo
+        };
+
+        unitType = _mapper.Map(dbUnitType, unitType);
+        return unitType;
     }
 
     /// <summary>
-    /// Загрузить информацию о юнитах.
+    /// Получить данные атаки юнита.
     /// </summary>
-    private void LoadUnitTypes()
+    /// <param name="unitAttackId">Идентификатор атаки юнита.</param>
+    private UnitAttack GetUnitAttack(string unitAttackId)
     {
-        var units = _dataExtractor.GetData("Gunits.dbf");
-        foreach (DataRow unitInfoRow in units.Rows)
+        if (!_database.UnitAttacks.TryGetValue(unitAttackId, out var dbUnitAttack))
+            throw new ArgumentException($"Тип атаки юнита {unitAttackId} не найден", nameof(unitAttackId));
+
+        var unitAttack = new UnitAttack
         {
-            var unit = ExtractUnitType(unitInfoRow);
-            _units.Add(unit.UnitTypeId, unit);
-        }
+            Name = GetText(dbUnitAttack.NameTextId),
+            Description = GetText(dbUnitAttack.DescriptionTextId),
+            AlternativeUnitAttack = dbUnitAttack.AlternativeUnitAttackId == null ? null : GetUnitAttack(dbUnitAttack.AlternativeUnitAttackId),
+            Ward1 = null, // todo ссылки.
+            Ward2 = null,
+            Ward3 = null,
+            Ward4 = null
+        };
+
+        unitAttack = _mapper.Map(dbUnitAttack, unitAttack);
+        return unitAttack;
     }
 
     /// <summary>
-    /// Извлечь из строки информацию об атаке.
+    /// Получить текст по его идентификатору.
     /// </summary>
-    private Attack ExtractAttack(DataRow attackInfo)
+    /// <param name="textId">Идентификатор текстовой записи.</param>
+    private string GetText(string textId)
     {
-        var attackId = attackInfo.GetClass<string>("ATT_ID");
-        var nameId = attackInfo.GetClass<string>("NAME_TXT");
-        var descriptionId = attackInfo.GetClass<string>("DESC_TXT");
-        var initiative = attackInfo.GetStruct<int>("INITIATIVE") ?? 10;
-        var source = (AttackSource)(attackInfo.GetStruct<int>("SOURCE") ?? 1);
-        var attackClass = (AttackClass)(attackInfo.GetStruct<int>("CLASS") ?? 1);
-        var accuracy = attackInfo.GetStruct<int>("POWER") ?? 80;
-        var reach = (Reach)(attackInfo.GetStruct<int>("REACH") ?? 1);
-        var heal = attackInfo.GetStruct<int>("QTY_HEAL") ?? 0;
-        var damage = attackInfo.GetStruct<int>("QTY_DAM") ?? 0;
+        if (!_database.GlobalTextResources.TryGetValue(textId, out var textResource))
+            throw new ArgumentException($"Текстовый идентификатор {textId} не найден", nameof(textId));
 
-
-        return new Attack(
-            attackId,
-            _textProvider.GetText(nameId),
-            _textProvider.GetText(descriptionId),
-            initiative,
-            source,
-            attackClass,
-            accuracy,
-            reach,
-            heal,
-            damage
-        );
-    }
-
-    /// <summary>
-    /// Извлечь из строки информацию о юните.
-    /// </summary>
-    private UnitType ExtractUnitType(DataRow unitInfo)
-    {
-        var unitId = unitInfo.GetClass<string>("UNIT_ID");
-        var unitCategory = (UnitCategory)(unitInfo.GetStruct<int>("UNIT_CAT") ?? 0);
-        var level = unitInfo.GetStruct<int>("LEVEL") ?? 1;
-        var prevUnitId = unitInfo.GetClass<string>("PREV_ID");
-        var raceId = unitInfo.GetClass<string>("RACE_ID");
-        var subrace = (Subrace)(unitInfo.GetStruct<int>("SUBRACE") ?? 0);
-        var branch = (UnitBranch)(unitInfo.GetStruct<int>("BRANCH") ?? 0);
-        var sizeSmall = unitInfo.GetStruct<bool>("SIZE_SMALL") ?? true;
-        var isMale = unitInfo.GetStruct<bool>("SEX_M") ?? true;
-        var enrollCost = unitInfo.GetClass<string>("ENROLL_C");
-        var enrollBuilding = unitInfo.GetClass<string>("ENROLL_B");
-        var nameId = unitInfo.GetClass<string>("NAME_TXT");
-        var descriptionId = unitInfo.GetClass<string>("DESC_TXT");
-        var abilId = unitInfo.GetClass<string>("ABIL_TXT");
-        var mainAttackId = unitInfo.GetClass<string>("ATTACK_ID");
-        var secondaryAttackId = unitInfo.GetClass<string>("ATTACK2_ID");
-        var attackTwice = unitInfo.GetStruct<bool>("ATCK_TWICE") ?? false;
-        var hitpoint = unitInfo.GetStruct<int>("HIT_POINT") ?? 0;
-        var baseUnitId = unitInfo.GetClass<string>("BASE_UNIT");
-        var armor = unitInfo.GetStruct<int>("ARMOR") ?? 0;
-        var regen = unitInfo.GetStruct<int>("REGEN") ?? 0;
-        var reviveCost = unitInfo.GetClass<string>("REVIVE_C");
-        var healCost = unitInfo.GetClass<string>("HEAL_C");
-        var trainingCost = unitInfo.GetClass<string>("TRAINING_C");
-        var xpKilled = unitInfo.GetStruct<int>("XP_KILLED") ?? 0;
-        var upgradeBuildingId = unitInfo.GetClass<string>("UPGRADE_B");
-        var xpNext = unitInfo.GetStruct<int>("XP_NEXT") ?? 0;
-        var deathAnim = unitInfo.GetStruct<int>("DEATH_ANIM") ?? 1;
-
-        // Лицо юнита дополнительно обрабатывать не надо.
-        // Кроме того, там есть проблемы с некоторым портретами, если их получать обычным путём.
-        var face = new Lazy<IBitmap>(() => _bitmapFactory.FromByteArray(_facesExtractor.GetFileContent($"{unitId}FACE")));
-        var battleFace = new Lazy<IBitmap>(() => _bitmapFactory.FromRawToBitmap(_facesExtractor.GetImage($"{unitId}FACEB")));
-        var portrait = new Lazy<IBitmap>(() => _bitmapFactory.FromRawToOriginalBitmap(_portraitExtractor.GetImage(unitId.ToUpper())));
-
-        var unit = new UnitType(
-            unitId,
-            unitCategory,
-            level,
-            null, //todo Просто так делать нельзя. Иногда базовый тип юнита идёт после следующего GetUnitType(prevUnitId),
-            raceId,
-            subrace,
-            branch,
-            sizeSmall,
-            isMale,
-            enrollCost,
-            enrollBuilding,
-            _textProvider.GetText(nameId),
-            _textProvider.GetText(descriptionId),
-            _textProvider.GetText(abilId),
-            _attacks[mainAttackId],
-            GetSecondaryUnitAttack(secondaryAttackId),
-            attackTwice,
-            hitpoint,
-            null, //todo GetBaseUnitType(baseUnitId),
-            armor,
-            regen,
-            reviveCost,
-            healCost,
-            trainingCost,
-            xpKilled,
-            upgradeBuildingId,
-            xpNext,
-            deathAnim,
-            face,
-            battleFace,
-            portrait
-        );
-
-        return unit;
-    }
-
-    /// <summary>
-    /// Получить базовый тип юнита.
-    /// </summary>
-    private UnitType? GetBaseUnitType(string baseUnitId)
-    {
-        if (string.Equals(baseUnitId, NO_PARENT, StringComparison.InvariantCultureIgnoreCase))
-            return null;
-
-        return GetUnitType(baseUnitId);
-    }
-
-    /// <summary>
-    /// Получить атаку юнита.
-    /// </summary>
-    private Attack? GetSecondaryUnitAttack(string attackId)
-    {
-        if (string.Equals(attackId, NO_PARENT, StringComparison.InvariantCultureIgnoreCase))
-            return null;
-
-        return _attacks[attackId];
+        return textResource.Text;
     }
 }

@@ -9,16 +9,16 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class EffectUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, AttackClass attackClass) : base(targetUnit, Enums.UnitActionType.UnderEffect)
+    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType) : base(targetUnit, Enums.UnitActionType.UnderEffect)
     {
-        AttackClass = attackClass;
+        AttackType = attackType;
     }
 
     /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, AttackClass attackClass, int roundDuration, int? power)
+    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, int roundDuration, int? power)
         : base(targetUnit, Enums.UnitActionType.UnderEffect)
     {
-        AttackClass = attackClass;
+        AttackType = attackType;
         RoundDuration = roundDuration;
         Power = power;
     }
@@ -27,7 +27,7 @@ internal class EffectUnitBattleAction : UnitBattleAction
     /// <summary>
     /// Атака из-за которой был наложен эффект.
     /// </summary>
-    public AttackClass AttackClass { get; }
+    public UnitAttackType AttackType { get; }
 
     /// <summary>
     /// Продолжительность эффекта в раундах.

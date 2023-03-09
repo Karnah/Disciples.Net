@@ -3,7 +3,7 @@
 /// <summary>
 /// Юниты, которые являются целями.
 /// </summary>
-public enum Reach
+public enum UnitAttackReach
 {
     /// <summary>
     /// Все юниты.

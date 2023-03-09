@@ -3,7 +3,7 @@
 /// <summary>
 /// Тип того, что делает атака юнита.
 /// </summary>
-public enum AttackClass
+public enum UnitAttackType
 {
     /// <summary>
     /// Повреждение.

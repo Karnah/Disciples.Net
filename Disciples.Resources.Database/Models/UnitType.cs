@@ -32,7 +32,7 @@ public class UnitType : IEntity
     /// Предыдущий тип юнита в иерархии.
     /// </summary>
     [Column("PREV_ID")]
-    public string? PreviousBaseUnitTypeId { get; init; }
+    public string? PreviousUnitTypeId { get; init; }
 
     /// <summary>
     /// Раса юнита.
@@ -128,7 +128,7 @@ public class UnitType : IEntity
     /// Базовый тип юнита для юнита-героя.
     /// </summary>
     [Column("BASE_UNIT")]
-    public string? HeroBaseUnitId { get; init; }
+    public string? LeaderBaseUnitId { get; init; }
 
     /// <summary>
     /// Базовая защита юнита.

@@ -72,7 +72,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     {
         base.Initialize();
 
-        BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_battleUnit.Unit.UnitType.UnitTypeId, _battleUnit.Direction);
+        BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_battleUnit.Unit.UnitType, _battleUnit.Direction);
 
         // Чтобы юниты не двигались синхронно в начале боя, первый кадр выбирается случайно.
         var frameIndex = RandomGenerator.Get(BattleUnitAnimation.BattleUnitFrames[_battleUnit.UnitState].UnitFrames.Count);

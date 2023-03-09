@@ -7,6 +7,7 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
 
@@ -44,6 +45,7 @@ internal class DetailUnitInfoObject : GameObject
 
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
+    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly ITextProvider _textProvider;
     private readonly List<ITextSceneObject> _unitInfo;
 
@@ -56,11 +58,13 @@ internal class DetailUnitInfoObject : GameObject
     public DetailUnitInfoObject(
         ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
+        IBattleUnitResourceProvider battleUnitResourceProvider,
         ITextProvider textProvider,
         Unit unit)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _battleInterfaceProvider = battleInterfaceProvider;
+        _battleUnitResourceProvider = battleUnitResourceProvider;
         _textProvider = textProvider;
 
         _unitInfo = new List<ITextSceneObject>();
@@ -88,7 +92,7 @@ internal class DetailUnitInfoObject : GameObject
             _battleInterfaceProvider.UnitInfoBackground, X, Y, INTERFACE_LAYER);
 
         _unitPortrait = _sceneObjectContainer.AddImage(
-            Unit.UnitType.Portrait,
+            _battleUnitResourceProvider.GetUnitPortrait(Unit.UnitType),
             X + 70,
             Y + 10,
             INTERFACE_LAYER + 1
@@ -203,10 +207,10 @@ internal class DetailUnitInfoObject : GameObject
     /// </summary>
     private string GetUnitEffectTitle()
     {
-        if (Unit.UnitType.MainAttack.AttackClass == AttackClass.Heal)
+        if (Unit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
             return _textProvider.GetText("X005TA0504");
 
-        if (Unit.UnitType.MainAttack.AttackClass == AttackClass.BoostDamage)
+        if (Unit.UnitType.MainAttack.AttackType == UnitAttackType.BoostDamage)
             return _textProvider.GetText("X005TA0534");
 
         return _textProvider.GetText("X005TA0503");
@@ -215,18 +219,18 @@ internal class DetailUnitInfoObject : GameObject
     /// <summary>
     /// Получить наименование источники атаки.
     /// </summary>
-    private string GetAttackSourceTitle(AttackSource source)
+    private string GetAttackSourceTitle(UnitAttackSource source)
     {
         var attackSourceId = source switch
         {
-            AttackSource.Weapon => "X005TA0145",
-            AttackSource.Mind => "X005TA0146",
-            AttackSource.Life => "X005TA0147",
-            AttackSource.Death => "X005TA0148",
-            AttackSource.Fire => "X005TA0149",
-            AttackSource.Water => "X005TA0150",
-            AttackSource.Earth => "X005TA0152",
-            AttackSource.Air => "X005TA0151",
+            UnitAttackSource.Weapon => "X005TA0145",
+            UnitAttackSource.Mind => "X005TA0146",
+            UnitAttackSource.Life => "X005TA0147",
+            UnitAttackSource.Death => "X005TA0148",
+            UnitAttackSource.Fire => "X005TA0149",
+            UnitAttackSource.Water => "X005TA0150",
+            UnitAttackSource.Earth => "X005TA0152",
+            UnitAttackSource.Air => "X005TA0151",
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
 
@@ -238,7 +242,7 @@ internal class DetailUnitInfoObject : GameObject
     /// </summary>
     private string GetReachTitle()
     {
-        if (Unit.UnitType.MainAttack.Reach == Reach.Adjacent)
+        if (Unit.UnitType.MainAttack.Reach == UnitAttackReach.Adjacent)
             return _textProvider.GetText("X005TA0201");
 
         return _textProvider.GetText("X005TA0200");
@@ -249,7 +253,7 @@ internal class DetailUnitInfoObject : GameObject
     /// </summary>
     private string GetReachCount()
     {
-        if (Unit.UnitType.MainAttack.Reach == Reach.All)
+        if (Unit.UnitType.MainAttack.Reach == UnitAttackReach.All)
             return "6";
 
         return "1";

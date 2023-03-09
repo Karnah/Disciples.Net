@@ -13,14 +13,14 @@ public static class UnitExtensions
     /// </summary>
     public static bool HasAllyAbility(this Unit unit)
     {
-        var attackClass = unit.UnitType.MainAttack.AttackClass;
-        if (attackClass is AttackClass.Heal
-            or AttackClass.BoostDamage
-            or AttackClass.Revive
-            or AttackClass.Cure
-            or AttackClass.GiveAttack
-            or AttackClass.TransformSelf
-            or AttackClass.BestowWards)
+        var attackClass = unit.UnitType.MainAttack.AttackType;
+        if (attackClass is UnitAttackType.Heal
+            or UnitAttackType.BoostDamage
+            or UnitAttackType.Revive
+            or UnitAttackType.Cure
+            or UnitAttackType.GiveAttack
+            or UnitAttackType.TransformSelf
+            or UnitAttackType.BestowWards)
         {
             return true;
         }
@@ -33,22 +33,22 @@ public static class UnitExtensions
     /// </summary>
     public static bool HasEnemyAbility(this Unit unit)
     {
-        var attackClass = unit.UnitType.MainAttack.AttackClass;
-        if (attackClass is AttackClass.Damage
-            or AttackClass.Drain
-            or AttackClass.Paralyze
-            or AttackClass.Fear
-            or AttackClass.Petrify
-            or AttackClass.LowerDamage
-            or AttackClass.LowerInitiative
-            or AttackClass.Poison
-            or AttackClass.Frostbite
-            or AttackClass.DrainOverflow
-            or AttackClass.DrainLevel
-            or AttackClass.Doppelganger
-            or AttackClass.TransformOther
-            or AttackClass.Blister
-            or AttackClass.Shatter)
+        var attackClass = unit.UnitType.MainAttack.AttackType;
+        if (attackClass is UnitAttackType.Damage
+            or UnitAttackType.Drain
+            or UnitAttackType.Paralyze
+            or UnitAttackType.Fear
+            or UnitAttackType.Petrify
+            or UnitAttackType.LowerDamage
+            or UnitAttackType.LowerInitiative
+            or UnitAttackType.Poison
+            or UnitAttackType.Frostbite
+            or UnitAttackType.DrainOverflow
+            or UnitAttackType.DrainLevel
+            or UnitAttackType.Doppelganger
+            or UnitAttackType.TransformOther
+            or UnitAttackType.Blister
+            or UnitAttackType.Shatter)
         {
             return true;
         }

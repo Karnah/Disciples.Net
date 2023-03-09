@@ -357,7 +357,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     {
         var currentUnitAnimation = CurrentBattleUnit.AnimationComponent;
         var currentUnit = CurrentBattleUnit.Unit;
-        var targetBattleUnits = currentUnit.UnitType.MainAttack.Reach == Reach.All
+        var targetBattleUnits = currentUnit.UnitType.MainAttack.Reach == UnitAttackReach.All
             ? GetUnitBattleSquad(mainAttackBattleAction.Target)
             : new[] { mainAttackBattleAction.Target };
 
@@ -366,8 +366,8 @@ internal class BattleController : BaseSupportLoading, IBattleController
         var unitSecondAttack = currentUnit.UnitType.SecondaryAttack;
         bool shouldCalculateDamage = false;
         int damage = 0;
-        if (unitSecondAttack?.AttackClass == AttackClass.DrainOverflow ||
-            unitSecondAttack?.AttackClass == AttackClass.Doppelganger)
+        if (unitSecondAttack?.AttackType == UnitAttackType.DrainOverflow ||
+            unitSecondAttack?.AttackType == UnitAttackType.Doppelganger)
         {
             shouldCalculateDamage = true;
         }
@@ -468,7 +468,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         {
             var effectAction = (EffectUnitBattleAction)unitAction;
             effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
-                new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackClass), effectAction.RoundDuration, effectAction.Power));
+                new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackType), effectAction.RoundDuration, effectAction.Power));
         }
     }
 
@@ -498,7 +498,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             case AttackResult.Attack:
             {
                 var power = attackResult.Power!.Value;
-                var attackClass = attackResult.AttackClass!.Value;
+                var attackClass = attackResult.AttackType!.Value;
 
                 targetUnit.Unit.HitPoints -= power;
                 targetUnit.UnitState = BattleUnitState.TakingDamage;
@@ -512,7 +512,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             case AttackResult.Heal:
             {
                 var healPower = attackResult.Power!.Value;
-                var attackClass = attackResult.AttackClass!.Value;
+                var attackClass = attackResult.AttackType!.Value;
 
                 targetUnit.Unit.HitPoints += healPower;
                 Actions.Add(new AttackUnitBattleAction(targetUnit, healPower, attackClass));
@@ -524,7 +524,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             {
                 var power = attackResult.Power;
                 var roundDuration = attackResult.RoundDuration!.Value;
-                var attackClass = attackResult.AttackClass!.Value;
+                var attackClass = attackResult.AttackType!.Value;
 
                 targetUnit.Unit.Effects.AddBattleEffect(
                     new UnitBattleEffect(AttackClassToEffectType(attackClass), roundDuration, power));
@@ -568,14 +568,14 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <summary>
     /// Получить тип эффекта в зависимости от типа атаки.
     /// </summary>
-    private static UnitBattleEffectType AttackClassToEffectType(AttackClass attackClass)
+    private static UnitBattleEffectType AttackClassToEffectType(UnitAttackType attackType)
     {
-        return attackClass switch
+        return attackType switch
         {
-            AttackClass.Poison => UnitBattleEffectType.Poison,
-            AttackClass.Frostbite => UnitBattleEffectType.Frostbite,
-            AttackClass.Blister => UnitBattleEffectType.Blister,
-            _ => throw new ArgumentOutOfRangeException(nameof(attackClass), attackClass, null)
+            UnitAttackType.Poison => UnitBattleEffectType.Poison,
+            UnitAttackType.Frostbite => UnitBattleEffectType.Frostbite,
+            UnitAttackType.Blister => UnitBattleEffectType.Blister,
+            _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
     }
 }

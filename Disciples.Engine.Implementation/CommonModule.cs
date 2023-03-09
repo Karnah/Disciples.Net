@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using AutoMapper;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Providers;
@@ -27,5 +28,11 @@ public class CommonModule : IGameModule
 
         containerRegistrator.Register<ISceneObjectContainer, SceneObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IGameObjectContainer, GameObjectContainer>(Reuse.Scoped);
+
+
+        var mapperConfiguration = new MapperConfiguration(cnf =>
+            cnf.AddMaps(typeof(IGameController).GetAssembly()));
+        mapperConfiguration.AssertConfigurationIsValid();
+        containerRegistrator.RegisterInstance(mapperConfiguration.CreateMapper());
     }
 }

@@ -29,6 +29,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
+    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -98,6 +99,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         IBattleResourceProvider battleResourceProvider,
+        IBattleUnitResourceProvider battleUnitResourceProvider,
         BattleContext context,
         BattleProcessor battleProcessor,
         ISceneObjectContainer sceneObjectContainer)
@@ -105,6 +107,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
         _battleResourceProvider = battleResourceProvider;
+        _battleUnitResourceProvider = battleUnitResourceProvider;
         _context = context;
         _battleProcessor = battleProcessor;
         _sceneObjectContainer = sceneObjectContainer;
@@ -212,7 +215,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _sceneObjectContainer.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
         _sceneObjectContainer.AddImage(_interfaceProvider.RightPanel, GameInfo.OriginalWidth - _interfaceProvider.RightPanel.Width, 30, INTERFACE_LAYER);
 
-        var currentUnitBattleFace = CurrentBattleUnit.Unit.UnitType.BattleFace;
+        var currentUnitBattleFace = _battleUnitResourceProvider.GetUnitBattleFace(CurrentBattleUnit.Unit.UnitType);
         _currentUnitFace = _sceneObjectContainer.AddImage(
             currentUnitBattleFace,
             0,
@@ -292,7 +295,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }
 
         _targetUnitObject = targetUnitObject;
-        _targetUnitFace!.Bitmap = targetUnitObject.Unit.UnitType.BattleFace;
+        _targetUnitFace!.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(targetUnitObject.Unit.UnitType);
         _targetUnitTextInfoObject!.Unit = targetUnitObject.Unit;
         _shouldAnimateTargets = shouldAnimateTarget;
 
@@ -646,13 +649,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void AttachSelectedAnimation(BattleUnit battleUnit)
     {
-        _currentUnitFace.Bitmap = battleUnit.Unit.UnitType.BattleFace;
+        _currentUnitFace.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(battleUnit.Unit.UnitType);
         _currentUnitTextInfoObject.Unit = battleUnit.Unit;
 
         DetachSelectedAnimation();
 
         var frames = _battleResourceProvider.GetBattleAnimation(
-            battleUnit.Unit.UnitType.SizeSmall
+            battleUnit.Unit.UnitType.IsSmall
                 ? "MRKCURSMALLA"
                 : "MRKCURLARGEA");
 
@@ -689,7 +692,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         // Если текущий юнит может атаковать только одну цель,
         // то всегда будет выделена только одна цель
-        if (currentUnit.UnitType.MainAttack.Reach != Reach.All)
+        if (currentUnit.UnitType.MainAttack.Reach != UnitAttackReach.All)
         {
             AttachTargetAnimations(_targetUnitObject);
             return;
@@ -728,7 +731,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         foreach (var battleUnit in battleUnits)
         {
             var frames = _battleResourceProvider.GetBattleAnimation(
-                battleUnit.Unit.UnitType.SizeSmall
+                battleUnit.Unit.UnitType.IsSmall
                     ? "MRKSMALLA"
                     : "MRKLARGEA");
 
@@ -818,7 +821,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
             var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit,
                 battleUnit.Direction == BattleDirection.Defender,
-                battleUnit.Unit.UnitType.SizeSmall
+                battleUnit.Unit.UnitType.IsSmall
                     ? 644 + 79 * lineOffset
                     : 644, // todo проверить большого юнита, который атакует.
                 85 + 106 * (2 - (int)battleUnit.Unit.SquadFlankPosition));
@@ -864,14 +867,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
             _unitPanelAnimations.Add(
                 _battleGameObjectContainer.AddAnimation(
-                    _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.SizeSmall),
+                    _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.IsSmall),
                     position.X,
                     position.Y,
                     INTERFACE_LAYER + 3));
         }
 
         // Если юнит бьёт по площади и цель юнита - отображаемый отряд, то добавляем одну большую рамку.
-        if (currentUnit.UnitType.MainAttack.Reach == Reach.All &&
+        if (currentUnit.UnitType.MainAttack.Reach == UnitAttackReach.All &&
             _rightPanelUnits.Any(CanAttack))
         {
             var position = GetRightUnitPanelPosition(UnitSquadLinePosition.Back, UnitSquadFlankPosition.Top, BattleDirection.Defender);
@@ -899,8 +902,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 _unitPanelAnimations.Add(
                     _battleGameObjectContainer.AddAnimation(
                         currentUnit.HasAllyAbility()
-                            ? _interfaceProvider.GetUnitHealBorder(targetUnit.Unit.UnitType.SizeSmall)
-                            : _interfaceProvider.GetUnitAttackBorder(targetUnit.Unit.UnitType.SizeSmall),
+                            ? _interfaceProvider.GetUnitHealBorder(targetUnit.Unit.UnitType.IsSmall)
+                            : _interfaceProvider.GetUnitAttackBorder(targetUnit.Unit.UnitType.IsSmall),
                         position.X,
                         position.Y,
                         INTERFACE_LAYER + 3));

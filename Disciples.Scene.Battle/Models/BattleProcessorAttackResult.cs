@@ -13,19 +13,19 @@ internal class BattleProcessorAttackResult
         AttackResult = attackResult;
     }
 
-    public BattleProcessorAttackResult(AttackResult attackResult, int power, AttackClass attackClass)
+    public BattleProcessorAttackResult(AttackResult attackResult, int power, UnitAttackType attackType)
     {
         AttackResult = attackResult;
         Power = power;
-        AttackClass = attackClass;
+        AttackType = attackType;
     }
 
-    public BattleProcessorAttackResult(AttackResult attackResult, int? power, int roundDuration, AttackClass attackClass)
+    public BattleProcessorAttackResult(AttackResult attackResult, int? power, int roundDuration, UnitAttackType attackType)
     {
         AttackResult = attackResult;
         Power = power;
         RoundDuration = roundDuration;
-        AttackClass = attackClass;
+        AttackType = attackType;
     }
 
     public AttackResult AttackResult { get; }
@@ -43,5 +43,5 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Тип атаки.
     /// </summary>
-    public AttackClass? AttackClass { get; }
+    public UnitAttackType? AttackType { get; }
 }

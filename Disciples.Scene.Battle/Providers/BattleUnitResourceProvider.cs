@@ -44,6 +44,34 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     public override bool IsSharedBetweenScenes => false;
 
     /// <inheritdoc />
+    public IBitmap GetUnitFace(UnitType unitType)
+    {
+        return _unitInfoProvider.GetUnitFace(unitType.Id);
+    }
+
+    /// <inheritdoc />
+    public IBitmap GetUnitBattleFace(UnitType unitType)
+    {
+        return _unitInfoProvider.GetUnitBattleFace(unitType.Id);
+    }
+
+    /// <inheritdoc />
+    public IBitmap GetUnitPortrait(UnitType unitType)
+    {
+        return _unitInfoProvider.GetUnitPortrait(unitType.Id);
+    }
+
+    /// <inheritdoc />
+    public BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction)
+    {
+        var unitTypeId = unitType.Id;
+        if (!_unitsAnimations.ContainsKey((unitTypeId, direction)))
+            _unitsAnimations[(unitTypeId, direction)] = ExtractUnitAnimation(unitTypeId, direction);
+
+        return _unitsAnimations[(unitTypeId, direction)];
+    }
+
+    /// <inheritdoc />
     protected override void LoadInternal()
     {
         _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\BatUnits.ff");
@@ -55,23 +83,18 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     {
     }
 
-    /// <inheritdoc />
-    public BattleUnitAnimation GetBattleUnitAnimation(string unitId, BattleDirection direction)
-    {
-        if (!_unitsAnimations.ContainsKey((unitId, direction)))
-            _unitsAnimations[(unitId, direction)] = ExtractUnitAnimation(unitId, direction);
-
-        return _unitsAnimations[(unitId, direction)];
-    }
-
-
+    /// <summary>
+    /// Извлечь анимации юнита.
+    /// </summary>
+    /// <param name="unitId">Идентификатор типа юнита.</param>
+    /// <param name="direction">Направление юнита.</param>
     private BattleUnitAnimation ExtractUnitAnimation(string unitId, BattleDirection direction)
     {
         var unitType = _unitInfoProvider.GetUnitType(unitId);
         // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
         var unitFrames = new Dictionary<BattleUnitState, BattleUnitFrames>
         {
-            { BattleUnitState.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.SizeSmall), null) }
+            { BattleUnitState.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.IsSmall), null) }
         };
 
         foreach (BattleUnitState action in Enum.GetValues(typeof(BattleUnitState)))
@@ -108,7 +131,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
             }
         }
 
-        var deathAnimation = GetDeathFrames(unitType.DeathAnimationId);
+        var deathAnimation = GetDeathFrames(unitType.DeathAnimation);
         return new BattleUnitAnimation(unitFrames, unitTargetAnimation, deathAnimation);
     }
 

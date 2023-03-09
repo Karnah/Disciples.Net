@@ -49,14 +49,14 @@ internal class BattleGameObjectContainer : IBattleGameObjectContainer
     /// <inheritdoc />
     public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
     {
-        var unitPortrait = new UnitPortraitObject(_textProvider, _sceneObjectContainer, _battleInterfaceProvider, unit, rightToLeft, x, y);
+        var unitPortrait = new UnitPortraitObject(_textProvider, _sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider, unit, rightToLeft, x, y);
         return AddObject(unitPortrait);
     }
 
     /// <inheritdoc />
     public DetailUnitInfoObject ShowDetailUnitInfo(Unit unit)
     {
-        var detailUnitInfoObject = new DetailUnitInfoObject(_sceneObjectContainer, _battleInterfaceProvider, _textProvider, unit);
+        var detailUnitInfoObject = new DetailUnitInfoObject(_sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider, _textProvider, unit);
         return AddObject(detailUnitInfoObject);
     }
 

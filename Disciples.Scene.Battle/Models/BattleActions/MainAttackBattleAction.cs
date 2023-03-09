@@ -39,18 +39,18 @@ internal class MainAttackBattleAction : AnimationBattleAction
 
         var framesCount = animationComponent.FramesCount;
 
-        return unit.Unit.UnitType.UnitTypeId switch
+        return unit.Unit.UnitType.Id switch
         {
             // Ассасин Империи, 41 фрейм.
-            "g000uu0154" => 12,
+            "G000UU0154" => 12,
             // Рыцарь, 31 фрейм.
-            "g000uu0002" => 12,
+            "G000UU0002" => 12,
             // Страж Горна, 31 фрейм.
-            "g000uu0162" => 26,
+            "G000UU0162" => 26,
             // Арбалетчик, 26 фреймов.
-            "g000uu0027" => 5,
+            "G000UU0027" => 5,
             // Мастер рун, 30 фреймов.
-            "g000uu0165" => 10,
+            "G000UU0165" => 10,
             _ => framesCount - 12
         };
     }

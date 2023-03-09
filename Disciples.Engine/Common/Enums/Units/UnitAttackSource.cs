@@ -3,7 +3,7 @@
 /// <summary>
 /// Источник атаки юнита.
 /// </summary>
-public enum AttackSource
+public enum UnitAttackSource
 {
     /// <summary>
     /// Оружие.
