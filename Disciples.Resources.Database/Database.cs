@@ -48,6 +48,8 @@ public class Database
         GlobalTextResources = GetTable<GlobalTextResource>();
         UnitAttacks = GetTable<UnitAttack>();
         UnitTypes = GetTable<UnitType>();
+        UnitLevelUpgrades = GetTable<UnitLevelUpgrade>();
+        Races = GetTable<Race>();
     }
 
     /// <summary>
@@ -69,6 +71,16 @@ public class Database
     /// Тип юнитов.
     /// </summary>
     public IReadOnlyDictionary<string, UnitType> UnitTypes { get; }
+
+    /// <summary>
+    /// Данные о том, как растут характеристики юнита с повышением уровня.
+    /// </summary>
+    public IReadOnlyDictionary<string, UnitLevelUpgrade> UnitLevelUpgrades { get; }
+
+    /// <summary>
+    /// Список рас.
+    /// </summary>
+    public IReadOnlyDictionary<string, Race> Races { get; }
 
     /// <summary>
     /// Получить данные таблицы.

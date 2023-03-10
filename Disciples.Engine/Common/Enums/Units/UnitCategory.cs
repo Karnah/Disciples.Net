@@ -11,10 +11,9 @@ public enum UnitCategory
     Soldier,
 
     /// <summary>
-    /// Благородный.
-    /// todo Уточнить, что это значит.
+    /// Лидер-вор.
     /// </summary>
-    Noble,
+    LeaderThief,
 
     /// <summary>
     /// Лидер.
@@ -42,8 +41,7 @@ public enum UnitCategory
     NeutralSoldier,
 
     /// <summary>
-    /// Защитник.
-    /// todo столицы?
+    /// Защитник столицы.
     /// </summary>
     Guardian
 }

@@ -33,13 +33,12 @@ public enum UnitBranch
     /// <summary>
     /// Герой.
     /// </summary>
-    Hero = 5,
+    Leader = 5,
 
     /// <summary>
-    /// Благородный.
-    /// todo Уточнить, что это значит.
+    /// Лидер-вор.
     /// </summary>
-    Noble = 6,
+    LeaderThief = 6,
 
     /// <summary>
     /// Вызванный юнит.

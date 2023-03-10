@@ -1,9 +1,9 @@
 ﻿namespace Disciples.Engine.Common.Enums.Units;
 
 /// <summary>
-/// Расы.
+/// Тип расы.
 /// </summary>
-public enum Race
+public enum RaceType
 {
     /// <summary>
     /// Защитники Империи.

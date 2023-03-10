@@ -1,9 +1,9 @@
 ﻿namespace Disciples.Resources.Database.Enums;
 
 /// <summary>
-/// Расы.
+/// Тип расы.
 /// </summary>
-public enum Race
+public enum RaceType
 {
     /// <summary>
     /// Защитники Империи.
