@@ -49,6 +49,8 @@ public class Database
         UnitAttacks = GetTable<UnitAttack>();
         UnitTypes = GetTable<UnitType>();
         UnitLevelUpgrades = GetTable<UnitLevelUpgrade>();
+        UnitAttackSourceProtections = GetUnionTable<UnitAttackSourceProtection>();
+        UnitAttackTypeProtections = GetUnionTable<UnitAttackTypeProtection>();
         Races = GetTable<Race>();
     }
 
@@ -78,6 +80,16 @@ public class Database
     public IReadOnlyDictionary<string, UnitLevelUpgrade> UnitLevelUpgrades { get; }
 
     /// <summary>
+    /// Защита юнита от источников атак.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<UnitAttackSourceProtection>> UnitAttackSourceProtections { get; }
+
+    /// <summary>
+    /// Защита юнита от типов атак.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<UnitAttackTypeProtection>> UnitAttackTypeProtections { get; }
+
+    /// <summary>
     /// Список рас.
     /// </summary>
     public IReadOnlyDictionary<string, Race> Races { get; }
@@ -89,14 +101,10 @@ public class Database
     private IReadOnlyDictionary<string, TEntity> GetTable<TEntity>(string folder = DEFAULT_RESOURCE_FOLDER)
         where TEntity : IEntity, new()
     {
-        var type = typeof(TEntity);
-        var properties = type.GetProperties();
-        var tableName = (TableAttribute?)type.GetCustomAttribute(typeof(TableAttribute));
-        if (string.IsNullOrWhiteSpace(tableName?.Name))
-            throw new ArgumentException($"Для типа {type.Name} не указан атрибут {nameof(TableAttribute)}.{nameof(TableAttribute.Name)}");
-
+        var properties = typeof(TEntity).GetProperties();
+        var tableName = GetTableName<TEntity>();
         var dictionary = new Dictionary<string, TEntity>();
-        var connection = Path.Combine(_databasePath, folder, $"{tableName.Name}.dbf");
+        var connection = Path.Combine(_databasePath, folder, $"{tableName}.dbf");
         using (var table = Table.Open(connection))
         {
             var reader = table.OpenReader(_encoding);
@@ -108,6 +116,50 @@ public class Database
         }
 
         return dictionary;
+    }
+
+    /// <summary>
+    /// Получить данные таблицы, сущности которых не имеют уникального ключа.
+    /// В итоге все записи с одинаковым ключом объединяться в список.
+    /// </summary>
+    /// <typeparam name="TEntity">Сущность.</typeparam>
+    private IReadOnlyDictionary<string, IReadOnlyList<TEntity>> GetUnionTable<TEntity>(string folder = DEFAULT_RESOURCE_FOLDER)
+        where TEntity : IEntity, new()
+    {
+        var properties = typeof(TEntity).GetProperties();
+        var tableName = GetTableName<TEntity>();
+        var dictionary = new Dictionary<string, List<TEntity>>();
+        var connection = Path.Combine(_databasePath, folder, $"{tableName}.dbf");
+        using (var table = Table.Open(connection))
+        {
+            var reader = table.OpenReader(_encoding);
+            while (reader.Read())
+            {
+                var entity = GetEntity<TEntity>(reader, properties);
+
+                if (!dictionary.ContainsKey(entity.Id))
+                    dictionary.Add(entity.Id, new List<TEntity>());
+
+                dictionary[entity.Id].Add(entity);
+            }
+        }
+
+        return dictionary.ToDictionary(d => d.Key, d => (IReadOnlyList<TEntity>)d.Value);
+    }
+
+    /// <summary>
+    /// Получить название таблицы сущности.
+    /// </summary>
+    /// <typeparam name="TEntity">Тип сущности..</typeparam>
+    private static string GetTableName<TEntity>()
+        where TEntity : IEntity
+    {
+        var type = typeof(TEntity);
+        var tableName = (TableAttribute?)type.GetCustomAttribute(typeof(TableAttribute));
+        if (string.IsNullOrWhiteSpace(tableName?.Name))
+            throw new ArgumentException($"Для типа {type.Name} не указан атрибут {nameof(TableAttribute)}.{nameof(TableAttribute.Name)}");
+
+        return tableName.Name;
     }
 
     /// <summary>

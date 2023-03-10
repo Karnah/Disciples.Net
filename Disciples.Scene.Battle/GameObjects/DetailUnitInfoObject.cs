@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using Disciples.Engine;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
@@ -19,7 +20,7 @@ internal class DetailUnitInfoObject : GameObject
     /// <summary>
     /// Паттерн для разбора характеристик юнита.
     /// </summary>
-    private static Regex UnitInfoRegexPattern =
+    private static readonly Regex UnitInfoRegexPattern =
         new(@"(?<Title>[%\w ]+:)\\t(?:(?<Value1>[\w\W]+?)(?:\\n)|(?<Value2>%[\w]+%))", RegexOptions.Compiled);
 
     /// <summary>
@@ -166,8 +167,8 @@ internal class DetailUnitInfoObject : GameObject
             .Replace("%HP1%", Unit.HitPoints.ToString())
             .Replace("%HP2%", Unit.MaxHitPoints.ToString())
             .Replace("%ARMOR%", GetValueWithModifier(Unit.BaseArmor, Unit.ArmorModifier))
-            .Replace("%IMMU%", "Нет") // todo Заполнить.
-            .Replace("%WARD%", "Нет") // todo Заполнить.
+            .Replace("%IMMU%", GetProtectionInfo(Unit.UnitType, ProtectionCategory.Immunity))
+            .Replace("%WARD%", GetProtectionInfo(Unit.UnitType, ProtectionCategory.Ward))
 
             .Replace("%TWICE%", Unit.UnitType.IsAttackTwice ? "(2x) " : string.Empty)
             .Replace("%ALTATTACK%", string.Empty) // todo Что это?
@@ -217,11 +218,38 @@ internal class DetailUnitInfoObject : GameObject
     }
 
     /// <summary>
+    /// Получить информацию о защитах юнита указанной категории.
+    /// </summary>
+    private string GetProtectionInfo(UnitType unitType, ProtectionCategory protectionCategory)
+    {
+        var attackSourceProtections = unitType
+            .AttackSourceProtections
+            .Where(p => p.ProtectionCategory == protectionCategory)
+            .OrderBy(p => p.UnitAttackSource)
+            .ToList();
+        var attackTypeProtections = unitType
+            .AttackTypeProtections
+            .Where(p => p.ProtectionCategory == protectionCategory)
+            .OrderBy(p => p.UnitAttackType)
+            .ToList();
+
+        if (attackSourceProtections.Count == 0 && attackTypeProtections.Count == 0)
+            return _textProvider.GetText("X005TA0469");
+
+        var stringBuilder = new StringBuilder();
+        stringBuilder.Append(
+            string.Join(", ", attackSourceProtections.Select(sp => GetAttackSourceTitle(sp.UnitAttackSource))));
+        stringBuilder.Append(
+            string.Join(", ", attackTypeProtections.Select(atp => GetAttackTypeTitle(atp.UnitAttackType))));
+        return stringBuilder.ToString();
+    }
+
+    /// <summary>
     /// Получить наименование источники атаки.
     /// </summary>
-    private string GetAttackSourceTitle(UnitAttackSource source)
+    private string GetAttackSourceTitle(UnitAttackSource attackSource)
     {
-        var attackSourceId = source switch
+        var attackSourceTextId = attackSource switch
         {
             UnitAttackSource.Weapon => "X005TA0145",
             UnitAttackSource.Mind => "X005TA0146",
@@ -231,10 +259,46 @@ internal class DetailUnitInfoObject : GameObject
             UnitAttackSource.Water => "X005TA0150",
             UnitAttackSource.Earth => "X005TA0152",
             UnitAttackSource.Air => "X005TA0151",
-            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(attackSource), attackSource, null)
         };
 
-        return _textProvider.GetText(attackSourceId);
+        return _textProvider.GetText(attackSourceTextId);
+    }
+
+    /// <summary>
+    /// Получить наименование класса атаки юнита.
+    /// </summary>
+    private string GetAttackTypeTitle(UnitAttackType attackType)
+    {
+        var attackTypeTextId = attackType switch
+        {
+            UnitAttackType.Damage => "X005TA0791",
+            UnitAttackType.Drain => "X005TA0792",
+            UnitAttackType.Paralyze => "X005TA0789",
+            UnitAttackType.Heal => "X005TA0802",
+            UnitAttackType.Fear => "X005TA0794",
+            UnitAttackType.BoostDamage => "X005TA0795",
+            UnitAttackType.Petrify => "X005TA0790",
+            UnitAttackType.LowerDamage => "X005TA0796",
+            UnitAttackType.LowerInitiative => "X005TA0797",
+            UnitAttackType.Poison => "X005TA0798",
+            UnitAttackType.Frostbite => "X005TA0799",
+            UnitAttackType.Revive => "X005TA0800",
+            UnitAttackType.DrainOverflow => "X005TA0801", // TODO перепроверить.
+            UnitAttackType.Cure => "X005TA0793",
+            UnitAttackType.Summon => "X005TA0803",
+            UnitAttackType.DrainLevel => "X005TA0804",
+            UnitAttackType.GiveAttack => "X005TA0805",
+            UnitAttackType.Doppelganger => "X005TA0806",
+            UnitAttackType.TransformSelf => "X005TA0807",
+            UnitAttackType.TransformOther => "X005TA0808",
+            UnitAttackType.Blister => "X160TA0012",
+            UnitAttackType.BestowWards => "X160TA0014",
+            UnitAttackType.Shatter => "X160TA0020",
+            _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
+        };
+
+        return _textProvider.GetText(attackTypeTextId);
     }
 
     /// <summary>

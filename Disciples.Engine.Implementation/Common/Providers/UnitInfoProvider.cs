@@ -126,7 +126,13 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
             LeaderBaseUnit = dbUnitType.LeaderBaseUnitId == null ? null : GetUnitType(dbUnitType.LeaderBaseUnitId),
             UpgradeBuildingId = null, // todo
             LowLevelUpgradeId = string.Empty, // todo
-            HighLevelUpgradeId = string.Empty // todo
+            HighLevelUpgradeId = string.Empty, // todo
+            AttackSourceProtections = _database.UnitAttackSourceProtections.TryGetValue(dbUnitType.Id, out var unitAttackSourceProtections)
+                    ? _mapper.Map<List<UnitAttackSourceProtection>>(unitAttackSourceProtections)
+                    : Array.Empty<UnitAttackSourceProtection>(),
+            AttackTypeProtections = _database.UnitAttackTypeProtections.TryGetValue(dbUnitType.Id, out var unitAttackTypeProtections)
+                ? _mapper.Map<List<UnitAttackTypeProtection>>(unitAttackTypeProtections)
+                : Array.Empty<UnitAttackTypeProtection>(),
         };
 
         unitType = _mapper.Map(dbUnitType, unitType);

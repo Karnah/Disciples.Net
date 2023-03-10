@@ -26,6 +26,8 @@ internal class UnitTypeProfile : Profile
             .ForMember(dst => dst.UpgradeBuildingId, opt => opt.Ignore())
             .ForMember(dst => dst.LowLevelUpgradeId, opt => opt.Ignore())
             .ForMember(dst => dst.HighLevelUpgradeId, opt => opt.Ignore())
+            .ForMember(dst => dst.AttackSourceProtections, opt => opt.Ignore())
+            .ForMember(dst => dst.AttackTypeProtections, opt => opt.Ignore())
             ;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using System.Collections.Generic;
+using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -210,11 +211,21 @@ public class UnitType
     /// Актуально только для юнитов-героев.
     /// Морские юниты могут перемещаться по суше в составе сухопутного героя.
     /// </remarks>
-    public bool IsWaterOnly { get; init; }
+    public bool IsLeaderWaterOnly { get; init; }
 
     /// <summary>
     /// Анимация, которая отображается при смерти юнита.
     /// TODO Enum?
     /// </summary>
     public int DeathAnimation { get; init; }
+
+    /// <summary>
+    /// Защита от источников атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
+
+    /// <summary>
+    /// Защита от типов атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; init; } = null!;
 }

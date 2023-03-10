@@ -877,7 +877,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         if (currentUnit.UnitType.MainAttack.Reach == UnitAttackReach.All &&
             _rightPanelUnits.Any(CanAttack))
         {
-            var position = GetRightUnitPanelPosition(UnitSquadLinePosition.Back, UnitSquadFlankPosition.Top, BattleDirection.Defender);
+            var position = GetRightUnitPanelPosition(UnitSquadLinePosition.Front, UnitSquadFlankPosition.Top, BattleDirection.Defender);
 
             _unitPanelAnimations.Add(
                 _battleGameObjectContainer.AddAnimation(

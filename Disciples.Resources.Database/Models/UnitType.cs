@@ -250,7 +250,7 @@ public class UnitType : IEntity
     /// Морские юниты могут перемещаться по суше в составе сухопутного героя.
     /// </remarks>
     [Column("WATER_ONLY")]
-    public bool IsWaterOnly { get; init; }
+    public bool IsLeaderWaterOnly { get; init; }
 
     /// <summary>
     /// Анимация, которая отображается при смерти юнита.
