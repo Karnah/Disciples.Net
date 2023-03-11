@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
-using Disciples.Engine.Common.Enums.Units;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Disciples.Resources.Database.Sqlite.Components;
+using Disciples.Resources.Database.Sqlite.Enums;
 
-namespace Disciples.Engine.Common.Models;
+namespace Disciples.Resources.Database.Sqlite.Models;
 
 /// <summary>
-/// Тип юнита.
+/// Информация о типе юнита.
 /// </summary>
-public class UnitType
+public class UnitType : IEntity
 {
     /// <summary>
     /// Идентификатор типа юнита.
@@ -31,7 +32,7 @@ public class UnitType
     /// <summary>
     /// Раса юнита.
     /// </summary>
-    public string RaceId { get; init; } = null!;
+    public Race Race { get; init; } = null!;
 
     /// <summary>
     /// Подраса юнита.
@@ -69,12 +70,12 @@ public class UnitType
     /// <summary>
     /// Имя типа юнита.
     /// </summary>
-    public string Name { get; init; } = null!;
+    public GlobalTextResource Name { get; init; } = null!;
 
     /// <summary>
     /// Описание типа юнита.
     /// </summary>
-    public string Description { get; init; } = null!;
+    public GlobalTextResource Description { get; init; } = null!;
 
     /// <summary>
     /// Описание основной способности героя.
@@ -82,17 +83,18 @@ public class UnitType
     /// <remarks>
     /// Например: "Воин", "Разведчик", "Маг", "Жезл власти", "Вор", "Ничего".
     /// </remarks>
-    public string Ability { get; init; } = null!;
+    public GlobalTextResource AbilityTextId { get; init; } = null!;
 
     /// <summary>
     /// Основная атака.
     /// </summary>
-    public UnitAttack MainAttack { get; init; } = null!;
+    [Column("ATTACK_ID")]
+    public UnitAttack MainUserAttack { get; init; } = null!;
 
     /// <summary>
     /// Дополнительная атака.
     /// </summary>
-    public UnitAttack? SecondaryAttack { get; init; }
+    public UnitAttack? SecondaryUserAttack { get; init; }
 
     /// <summary>
     /// Атакует ли юнит дважды.
@@ -160,7 +162,7 @@ public class UnitType
     public int? LeaderScoutPoints { get; init; }
 
     /// <summary>
-    /// Количество ходов, которое живёт юнит.
+    /// Количество ходов, которое живёт юнит-герой.
     /// </summary>
     /// <remarks>
     /// Актуально для героев призыва (они живут один ход) и иллюзий (они живут три хода).
@@ -190,11 +192,11 @@ public class UnitType
     /// Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня.
     /// Используется для расчета уровня меньше или равным <see cref="UpgradeChangeLevel" />.
     /// </summary>
-    public string LowLevelUpgradeId { get; init; } = null!;
+    public UnitLevelUpgrade LowLevelUpgrade { get; init; } = null!;
 
     /// <summary>
-    /// Последний уровень, когда рост характеристик рассчитывается по формуле <see cref="LowLevelUpgradeId" />,
-    /// А потом переходит к <see cref="HighLevelUpgradeId" />.
+    /// Последний уровень, когда рост характеристик рассчитывается по формуле <see cref="LowLevelUpgrade" />,
+    /// А потом переходит к <see cref="HighLevelUpgrade" />.
     /// </summary>
     public int UpgradeChangeLevel { get; init; }
 
@@ -202,7 +204,7 @@ public class UnitType
     /// Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня.
     /// Используется для расчета уровня выше <see cref="UpgradeChangeLevel" />.
     /// </summary>
-    public string HighLevelUpgradeId { get; init; } = null!;
+    public UnitLevelUpgrade HighLevelUpgrade { get; init; } = null!;
 
     /// <summary>
     /// Признак, что юнит перемещается только по воде.
@@ -218,14 +220,4 @@ public class UnitType
     /// TODO Enum?
     /// </summary>
     public int DeathAnimation { get; init; }
-
-    /// <summary>
-    /// Защита от источников атак.
-    /// </summary>
-    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
-
-    /// <summary>
-    /// Защита от типов атак.
-    /// </summary>
-    public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; init; } = null!;
 }

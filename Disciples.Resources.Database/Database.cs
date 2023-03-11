@@ -209,7 +209,13 @@ public class Database
         }
 
         if (propertyType == typeof(string))
+        {
+            // В ресурсах почему-то часть строк null. Конвертируем их в пустые строки.
+            if (propertyName is nameof(GlobalTextResource.Text) or nameof(InterfaceTextResource.Text))
+                return reader.GetString(columnName) ?? string.Empty;
+
             return reader.GetString(columnName);
+        }
 
         if (propertyType == typeof(int?))
             return (int?)reader.GetDecimal(columnName);
@@ -220,8 +226,8 @@ public class Database
         if (propertyType == typeof(bool))
             return reader.GetBoolean(columnName) ?? false;
 
-        if (propertyType == typeof(ResourceCost))
-            return ResourceCost.Parse(reader.GetString(columnName));
+        if (propertyType == typeof(ResourceSet))
+            return ResourceSet.Parse(reader.GetString(columnName));
 
         throw new ArgumentException($"Некорректный тип для разбора {propertyType.Name}");
     }

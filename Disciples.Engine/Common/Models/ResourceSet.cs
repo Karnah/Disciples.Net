@@ -1,9 +1,9 @@
 ﻿namespace Disciples.Engine.Common.Models;
 
 /// <summary>
-/// Стоимость найма юнита/постройки здания и так далее.
+/// Набор ресурсов (используется для стоимости найма юнита/постройки здания, ежедневный прирост ресурсов и т.д.)
 /// </summary>
-public class ResourceCost
+public class ResourceSet
 {
     /// <summary>
     /// Стоимость в золоте.

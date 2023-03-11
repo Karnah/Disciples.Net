@@ -68,7 +68,7 @@ public class UnitType : IEntity
     /// Стоимость найма юнита.
     /// </summary>
     [Column("ENROLL_C")]
-    public ResourceCost RecruitCost { get; init; } = null!;
+    public ResourceSet RecruitCost { get; init; } = null!;
 
     /// <summary>
     /// Здание, которое нужно построить в столице, чтобы нанимать юнита.
@@ -146,19 +146,19 @@ public class UnitType : IEntity
     /// Стоимость воскрешения юнита.
     /// </summary>
     [Column("REVIVE_C")]
-    public ResourceCost ReviveCost { get; init; } = null!;
+    public ResourceSet ReviveCost { get; init; } = null!;
 
     /// <summary>
     /// Стоимость восстановления 1 единицы здоровья.
     /// </summary>
     [Column("HEAL_C")]
-    public ResourceCost HealCost { get; init; } = null!;
+    public ResourceSet HealCost { get; init; } = null!;
 
     /// <summary>
     /// Стоимость обучения 1 очка опыта юнита у инструктора.
     /// </summary>
     [Column("TRAINING_C")]
-    public ResourceCost TrainingCost { get; init; } = null!;
+    public ResourceSet TrainingCost { get; init; } = null!;
 
     /// <summary>
     /// Количество опыта за убийство юнита.
@@ -191,7 +191,7 @@ public class UnitType : IEntity
     public int? LeaderScoutPoints { get; init; }
 
     /// <summary>
-    /// Количество ходов, которое живёт юнит.
+    /// Количество ходов, которое живёт юнит-герой.
     /// </summary>
     /// <remarks>
     /// Актуально для героев призыва (они живут один ход) и иллюзий (они живут три хода).

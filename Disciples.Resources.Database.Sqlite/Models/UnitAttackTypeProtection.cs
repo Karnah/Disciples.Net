@@ -1,12 +1,10 @@
-﻿using Disciples.Resources.Database.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Disciples.Resources.Database.Sqlite.Enums;
 
-namespace Disciples.Resources.Database.Models;
+namespace Disciples.Resources.Database.Sqlite.Models;
 
 /// <summary>
 /// Защита юнита от типа атаки.
 /// </summary>
-[Table("GimmuC")]
 public class UnitAttackTypeProtection : IEntity
 {
     /// <summary>
@@ -15,18 +13,15 @@ public class UnitAttackTypeProtection : IEntity
     /// <remarks>
     /// Идентификатор НЕ уникален.
     /// </remarks>
-    [Column("UNIT_ID")]
     public string Id { get; init; } = null!;
 
     /// <summary>
     /// Тип атаки.
     /// </summary>
-    [Column("IMMUNITY")]
     public UnitAttackType UnitAttackType { get; init; }
 
     /// <summary>
     /// Категория защиты.
     /// </summary>
-    [Column("IMMUNECAT")]
     public ProtectionCategory ProtectionCategory { get; init; }
 }

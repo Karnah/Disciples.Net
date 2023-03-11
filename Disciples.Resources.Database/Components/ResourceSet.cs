@@ -1,47 +1,47 @@
 ﻿namespace Disciples.Resources.Database.Components;
 
 /// <summary>
-/// Стоимость найма юнита/постройки здания и так далее.
+/// Набор ресурсов (используется для стоимости найма юнита/постройки здания, ежедневный прирост ресурсов и т.д.)
 /// </summary>
-public class ResourceCost
+public class ResourceSet
 {
     /// <summary>
-    /// Стоимость в золоте.
+    /// Количество золота.
     /// </summary>
     public int Gold { get; init; }
 
     /// <summary>
-    /// Стоимость в мане смерти.
+    /// Количество маны смерти.
     /// </summary>
     public int DeathMana { get; init; }
 
     /// <summary>
-    /// Стоимость в мане рун.
+    /// Количество маны рун.
     /// </summary>
     public int RuneMana { get; init; }
 
     /// <summary>
-    /// Стоимость в мане жизни.
+    /// Количество маны жизни.
     /// </summary>
     public int LifeMana { get; init; }
 
     /// <summary>
-    /// Стоимость в мане ада.
+    /// Количество маны ада.
     /// </summary>
     public int InfernalMana { get; init; }
 
     /// <summary>
-    /// Стоимость в мане рощи.
+    /// Количество маны рощи.
     /// </summary>
     public int GroveMana { get; init; }
 
     /// <summary>
-    /// Получить данные о стоимости.
+    /// Получить набор ресурсов.
     /// </summary>
-    public static ResourceCost Parse(string? costString)
+    internal static ResourceSet Parse(string costString)
     {
         if (string.IsNullOrWhiteSpace(costString))
-            throw new ArgumentException($"Стоимость не может быть пустой строкой", nameof(costString));
+            throw new ArgumentException("Стоимость не может быть пустой строкой", nameof(costString));
 
         int gold = 0,
             deathMana = 0,
@@ -79,7 +79,7 @@ public class ResourceCost
             }
         }
 
-        return new ResourceCost
+        return new ResourceSet
         {
             Gold = gold,
             DeathMana = deathMana,
