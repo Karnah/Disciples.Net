@@ -16,57 +16,57 @@ public class Race : IEntity
     /// <summary>
     /// Идентификатор юнита-стража столицы.
     /// </summary>
-    public UnitType? GuardingUnitTypeId { get; init; }
+    public UnitType? GuardingUnitType { get; init; }
 
     /// <summary>
     /// Идентификатор лидера-вора расы.
     /// </summary>
-    public UnitType? LeaderThiefUnitTypeId { get; init; }
+    public UnitType? LeaderThiefUnitType { get; init; }
 
     /// <summary>
     /// Идентификатор первого героя расы.
     /// </summary>
-    public UnitType? Leader1UnitTypeId { get; init; }
+    public UnitType? Leader1UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор второго героя расы.
     /// </summary>
-    public UnitType? Leader2UnitTypeId { get; init; }
+    public UnitType? Leader2UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор третьего героя расы.
     /// </summary>
-    public UnitType? Leader3UnitTypeId { get; init; }
+    public UnitType? Leader3UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор четвертого героя расы.
     /// </summary>
-    public UnitType? Leader4UnitTypeId { get; init; }
+    public UnitType? Leader4UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор первого солдата расы.
     /// </summary>
-    public UnitType? Soldier1UnitTypeId { get; init; }
+    public UnitType? Soldier1UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор второго солдата расы.
     /// </summary>
-    public UnitType? Soldier2UnitTypeId { get; init; }
+    public UnitType? Soldier2UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор третьего солдата расы.
     /// </summary>
-    public UnitType? Soldier3UnitTypeId { get; init; }
+    public UnitType? Soldier3UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор четвертого солдата расы.
     /// </summary>
-    public UnitType? Soldier4UnitTypeId { get; init; }
+    public UnitType? Soldier4UnitType { get; init; }
 
     /// <summary>
     /// Идентификатор пятого солдата расы.
     /// </summary>
-    public UnitType? Soldier5UnitTypeId { get; init; }
+    public UnitType? Soldier5UnitType { get; init; }
 
     /// <summary>
     /// Дальность обзора столицы вокруг себя.
@@ -91,7 +91,7 @@ public class Race : IEntity
     /// <summary>
     /// Наименование расы.
     /// </summary>
-    public InterfaceTextResource Name { get; init; } = null!;
+    public GlobalTextResource Name { get; init; } = null!;
 
     /// <summary>
     /// Тип расы.

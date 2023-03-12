@@ -16,6 +16,11 @@ public class UnitAttackSourceProtection : IEntity
     public string Id { get; init; } = null!;
 
     /// <summary>
+    /// Тип юнита, который имеет защиту.
+    /// </summary>
+    public UnitType UnitType { get; init; } = null!;
+
+    /// <summary>
     /// Источник атаки.
     /// </summary>
     public UnitAttackSource UnitAttackSource { get; init; }

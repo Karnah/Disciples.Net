@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
-using Disciples.Resources.Database;
-using Disciples.Resources.Database.Models;
+using Disciples.Resources.Database.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
 
 /// <inheritdoc cref="ITextProvider" />
 public class TextProvider : BaseSupportLoading,  ITextProvider
 {
-    private readonly IReadOnlyDictionary<string, InterfaceTextResource> _interfaceTextResources;
-    private readonly IReadOnlyDictionary<string, GlobalTextResource> _globalTextResources;
+    private readonly GameDataContextFactory _gameDataContextFactory;
+    private IReadOnlyDictionary<string, string> _interfaceTextResources = null!;
+    private IReadOnlyDictionary<string, string> _globalTextResources = null!;
 
     /// <inheritdoc />
-    public TextProvider(Database database)
+    public TextProvider(GameDataContextFactory gameDataContextFactory)
     {
-        _interfaceTextResources = database.InterfaceTextResources;
-        _globalTextResources = database.GlobalTextResources;
+        _gameDataContextFactory = gameDataContextFactory;
     }
 
     /// <inheritdoc />
@@ -31,10 +32,10 @@ public class TextProvider : BaseSupportLoading,  ITextProvider
         textId = textId.ToUpperInvariant();
 
         if (_interfaceTextResources.TryGetValue(textId, out var interfaceTextResource))
-            return RemoveTags(interfaceTextResource.Text);
+            return RemoveTags(interfaceTextResource);
 
         if (_globalTextResources.TryGetValue(textId, out var globalTextResource))
-            return RemoveTags(globalTextResource.Text);
+            return RemoveTags(globalTextResource);
 
         throw new ArgumentException($"Не найден текст с ключом {textId}");
     }
@@ -42,6 +43,20 @@ public class TextProvider : BaseSupportLoading,  ITextProvider
     /// <inheritdoc />
     protected override void LoadInternal()
     {
+        using (var context = _gameDataContextFactory.Create())
+        {
+            _interfaceTextResources = context
+                .InterfaceTextResources
+                .AsNoTracking()
+                .Select(tr => new { tr.Id, tr.Text })
+                .ToDictionary(tr => tr.Id, tr => tr.Text);
+
+            _globalTextResources = context
+                .GlobalTextResources
+                .AsNoTracking()
+                .Select(tr => new { tr.Id, tr.Text })
+                .ToDictionary(tr => tr.Id, tr => tr.Text);
+        }
     }
 
     /// <inheritdoc />

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AutoMapper;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Platform.Factories;
 using Disciples.ResourceProvider;
-using Disciples.Resources.Database;
+using Disciples.Resources.Database.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using UnitType = Disciples.Engine.Common.Models.UnitType;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
@@ -18,7 +19,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
 {
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IMapper _mapper;
-    private readonly Database _database;
+    private readonly GameDataContextFactory _gameDataContextFactory;
     private readonly ImagesExtractor _facesExtractor;
     private readonly ImagesExtractor _portraitExtractor;
 
@@ -30,11 +31,11 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// <summary>
     /// Создать объект типа <see cref="UnitInfoProvider" />.
     /// </summary>
-    public UnitInfoProvider(IBitmapFactory bitmapFactory, IMapper mapper, Database database)
+    public UnitInfoProvider(IBitmapFactory bitmapFactory, IMapper mapper, GameDataContextFactory gameDataContextFactory)
     {
         _bitmapFactory = bitmapFactory;
         _mapper = mapper;
-        _database = database;
+        _gameDataContextFactory = gameDataContextFactory;
 
         _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
         _portraitExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
@@ -110,68 +111,37 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// <param name="unitTypeId">Идентификатор типа юнита.</param>
     private UnitType GetUnitTypeInternal(string unitTypeId)
     {
-        if (!_database.UnitTypes.TryGetValue(unitTypeId, out var dbUnitType))
-            throw new ArgumentException($"Тип юнита {unitTypeId} не найден", nameof(unitTypeId));
-
-        var unitType = new UnitType
+        using (var context = _gameDataContextFactory.Create())
         {
-            PreviousUnitType = dbUnitType.PreviousUnitTypeId == null ? null : GetUnitType(dbUnitType.PreviousUnitTypeId),
-            RaceId = string.Empty, // todo
-            RecruitBuildingId = null, // todo,
-            Name = GetText(dbUnitType.NameTextId),
-            Description = GetText(dbUnitType.DescriptionTextId),
-            Ability = GetText(dbUnitType.AbilityTextId),
-            MainAttack = GetUnitAttack(dbUnitType.MainUserAttackId),
-            SecondaryAttack = dbUnitType.SecondaryUserAttackId == null ? null : GetUnitAttack(dbUnitType.SecondaryUserAttackId),
-            LeaderBaseUnit = dbUnitType.LeaderBaseUnitId == null ? null : GetUnitType(dbUnitType.LeaderBaseUnitId),
-            UpgradeBuildingId = null, // todo
-            LowLevelUpgradeId = string.Empty, // todo
-            HighLevelUpgradeId = string.Empty, // todo
-            AttackSourceProtections = _database.UnitAttackSourceProtections.TryGetValue(dbUnitType.Id, out var unitAttackSourceProtections)
-                    ? _mapper.Map<List<UnitAttackSourceProtection>>(unitAttackSourceProtections)
-                    : Array.Empty<UnitAttackSourceProtection>(),
-            AttackTypeProtections = _database.UnitAttackTypeProtections.TryGetValue(dbUnitType.Id, out var unitAttackTypeProtections)
-                ? _mapper.Map<List<UnitAttackTypeProtection>>(unitAttackTypeProtections)
-                : Array.Empty<UnitAttackTypeProtection>(),
-        };
+            var unitType = context
+                .UnitTypes
+                .AsNoTracking()
+                .Include(ut => ut.LeaderBaseUnit)
+                .Include(ut => ut.PreviousUnitType)
+                .Include(ut => ut.Name)
+                .Include(ut => ut.Description)
+                .Include(ut => ut.AbilityDescription)
+                .Include(ut => ut.MainAttack.Name)
+                .Include(ut => ut.MainAttack.Description)
+                .Include(ut => ut.MainAttack.AlternativeAttack!.Name)
+                .Include(ut => ut.MainAttack.AlternativeAttack!.Description)
+                .Include(ut => ut.SecondaryAttack!.Name)
+                .Include(ut => ut.SecondaryAttack!.Description)
+                .Include(ut => ut.LowLevelUpgrade)
+                .Include(ut => ut.HighLevelUpgrade)
+                .FirstOrDefault(ut => ut.Id == unitTypeId);
+            if (unitType == null)
+                throw new ArgumentException($"Тип юнита {unitTypeId} не найден", nameof(unitTypeId));
 
-        unitType = _mapper.Map(dbUnitType, unitType);
-        return unitType;
-    }
+            // Грузим их отдельными запросами, чтобы не увеличить количество строк в предыдущем запросе.
+            context.Entry(unitType)
+                .Collection(ut => ut.AttackSourceProtections)
+                .Load();
+            context.Entry(unitType)
+                .Collection(ut => ut.AttackTypeProtections)
+                .Load();
 
-    /// <summary>
-    /// Получить данные атаки юнита.
-    /// </summary>
-    /// <param name="unitAttackId">Идентификатор атаки юнита.</param>
-    private UnitAttack GetUnitAttack(string unitAttackId)
-    {
-        if (!_database.UnitAttacks.TryGetValue(unitAttackId, out var dbUnitAttack))
-            throw new ArgumentException($"Тип атаки юнита {unitAttackId} не найден", nameof(unitAttackId));
-
-        var unitAttack = new UnitAttack
-        {
-            Name = GetText(dbUnitAttack.NameTextId),
-            Description = GetText(dbUnitAttack.DescriptionTextId),
-            AlternativeUnitAttack = dbUnitAttack.AlternativeUnitAttackId == null ? null : GetUnitAttack(dbUnitAttack.AlternativeUnitAttackId),
-            Ward1 = null, // todo ссылки.
-            Ward2 = null,
-            Ward3 = null,
-            Ward4 = null
-        };
-
-        unitAttack = _mapper.Map(dbUnitAttack, unitAttack);
-        return unitAttack;
-    }
-
-    /// <summary>
-    /// Получить текст по его идентификатору.
-    /// </summary>
-    /// <param name="textId">Идентификатор текстовой записи.</param>
-    private string GetText(string textId)
-    {
-        if (!_database.GlobalTextResources.TryGetValue(textId, out var textResource))
-            throw new ArgumentException($"Текстовый идентификатор {textId} не найден", nameof(textId));
-
-        return textResource.Text;
+            return _mapper.Map<UnitType>(unitType);
+        }
     }
 }

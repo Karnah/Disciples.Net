@@ -16,7 +16,7 @@
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.ResourceProvider\Disciples.ResourceProvider.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
-    <ProjectReference Include="..\Disciples.Resources.Database\Disciples.Resources.Database.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj" />
   </ItemGroup>
 
   <ItemGroup>

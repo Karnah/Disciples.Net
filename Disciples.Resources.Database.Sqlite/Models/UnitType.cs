@@ -83,18 +83,17 @@ public class UnitType : IEntity
     /// <remarks>
     /// Например: "Воин", "Разведчик", "Маг", "Жезл власти", "Вор", "Ничего".
     /// </remarks>
-    public GlobalTextResource AbilityTextId { get; init; } = null!;
+    public GlobalTextResource AbilityDescription { get; init; } = null!;
 
     /// <summary>
     /// Основная атака.
     /// </summary>
-    [Column("ATTACK_ID")]
-    public UnitAttack MainUserAttack { get; init; } = null!;
+    public UnitAttack MainAttack { get; init; } = null!;
 
     /// <summary>
     /// Дополнительная атака.
     /// </summary>
-    public UnitAttack? SecondaryUserAttack { get; init; }
+    public UnitAttack? SecondaryAttack { get; init; }
 
     /// <summary>
     /// Атакует ли юнит дважды.
@@ -220,4 +219,14 @@ public class UnitType : IEntity
     /// TODO Enum?
     /// </summary>
     public int DeathAnimation { get; init; }
+
+    /// <summary>
+    /// Защита юнита от источников атак.
+    /// </summary>
+    public ICollection<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
+
+    /// <summary>
+    /// Защита юнита от типов атак.
+    /// </summary>
+    public ICollection<UnitAttackTypeProtection> AttackTypeProtections { get; init; } = null!;
 }

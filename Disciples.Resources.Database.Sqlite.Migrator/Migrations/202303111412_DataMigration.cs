@@ -73,6 +73,10 @@ public class DataMigration : Migration
                 dictionary.Add($"{entityProperty.Name}{nameof(resourceSet.InfernalMana)}", resourceSet.InfernalMana);
                 dictionary.Add($"{entityProperty.Name}{nameof(resourceSet.GroveMana)}", resourceSet.GroveMana);
             }
+            else if(entityProperty.PropertyType.IsEnum)
+            {
+                dictionary.Add(entityProperty.Name, (int)entityValue!);
+            }
             else
             {
                 dictionary.Add(entityProperty.Name, entityValue);

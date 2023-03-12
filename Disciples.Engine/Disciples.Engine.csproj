@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Disciples.Resources.Database\Disciples.Resources.Database.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj" />
   </ItemGroup>
 
   <ItemGroup>

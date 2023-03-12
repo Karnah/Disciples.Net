@@ -13,6 +13,6 @@ internal class ResourceSetProfile : Profile
     /// </summary>
     public ResourceSetProfile()
     {
-        CreateMap<Resources.Database.Components.ResourceSet, ResourceSet>();
+        CreateMap<Resources.Database.Sqlite.Components.ResourceSet, ResourceSet>();
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0-preview.1.23111.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

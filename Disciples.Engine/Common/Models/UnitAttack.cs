@@ -73,7 +73,7 @@ public class UnitAttack
     /// Используется для доппельгангера и повелителя волков.
     /// Основной атакой они превращаются, альтернативной бьют врагов.
     /// </remarks>
-    public UnitAttack? AlternativeUnitAttack { get; init; }
+    public UnitAttack? AlternativeAttack { get; init; }
 
     /// <summary>
     /// Признак, что эффект, накладываемый атакой, длится до конца боя.

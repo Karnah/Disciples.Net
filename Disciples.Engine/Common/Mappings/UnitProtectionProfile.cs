@@ -13,8 +13,8 @@ internal class UnitProtectionProfile : Profile
     /// </summary>
     public UnitProtectionProfile()
     {
-        CreateMap<Resources.Database.Models.UnitAttackSourceProtection, UnitAttackSourceProtection>();
+        CreateMap<Resources.Database.Sqlite.Models.UnitAttackSourceProtection, UnitAttackSourceProtection>();
 
-        CreateMap<Resources.Database.Models.UnitAttackTypeProtection, UnitAttackTypeProtection>();
+        CreateMap<Resources.Database.Sqlite.Models.UnitAttackTypeProtection, UnitAttackTypeProtection>();
     }
 }

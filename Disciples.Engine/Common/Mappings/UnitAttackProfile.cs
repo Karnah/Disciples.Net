@@ -13,10 +13,9 @@ internal class UnitAttackProfile : Profile
     /// </summary>
     public UnitAttackProfile()
     {
-        CreateMap<Resources.Database.Models.UnitAttack, UnitAttack>()
-            .ForMember(dst => dst.Name, opt => opt.Ignore())
-            .ForMember(dst => dst.Description, opt => opt.Ignore())
-            .ForMember(dst => dst.AlternativeUnitAttack, opt => opt.Ignore())
+        CreateMap<Resources.Database.Sqlite.Models.UnitAttack, UnitAttack>()
+            .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Name.Text))
+            .ForMember(dst => dst.Description, opt => opt.MapFrom(src => src.Description.Text))
             .ForMember(dst => dst.Ward1, opt => opt.Ignore())
             .ForMember(dst => dst.Ward2, opt => opt.Ignore())
             .ForMember(dst => dst.Ward3, opt => opt.Ignore())

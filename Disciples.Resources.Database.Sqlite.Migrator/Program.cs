@@ -23,7 +23,7 @@ internal class Program
             .AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddSQLite()
-                .WithGlobalConnectionString("Data Source=disciples.db")
+                .WithGlobalConnectionString("Data Source=gamedata.db")
                 .ScanIn(typeof(Program).Assembly).For.Migrations())
             .AddLogging(lb => lb.AddFluentMigratorConsole())
             .BuildServiceProvider(false);
