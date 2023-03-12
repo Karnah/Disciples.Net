@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Disciples.Resources.Database.Models;
+namespace Disciples.Resources.Database.Dbf.Models;
 
 /// <summary>
-/// Текстовая информация для интерфейса.
+/// Общая текстовая информация.
 /// </summary>
-[Table("TApp")]
-public class InterfaceTextResource : IEntity
+[Table("Tglobal")]
+public class GlobalTextResource : IEntity
 {
     /// <summary>
     /// Идентификатор записи.

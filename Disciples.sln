@@ -23,15 +23,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Loading", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Battle", "Disciples.Scene.Battle\Disciples.Scene.Battle.csproj", "{B37ABF40-108C-40C8-BAA0-43DEADE8E39A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database", "Disciples.Resources.Database\Disciples.Resources.Database.csproj", "{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Dbf", "Disciples.Resources.Database.Dbf\Disciples.Resources.Database.Dbf.csproj", "{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{0CE2E50A-E48D-4B8B-928A-121E330AA90E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite", "Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj", "{70ADC080-BE40-45D5-82CF-DC4CABA22D13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Database.Sqlite", "Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj", "{70ADC080-BE40-45D5-82CF-DC4CABA22D13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Database.Sqlite.Migrator", "Disciples.Resources.Database.Sqlite.Migrator\Disciples.Resources.Database.Sqlite.Migrator.csproj", "{7478B22C-CB31-4093-AB9C-8E1C4E8DD968}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite.Migrator", "Disciples.Resources.Database.Sqlite.Migrator\Disciples.Resources.Database.Sqlite.Migrator.csproj", "{7478B22C-CB31-4093-AB9C-8E1C4E8DD968}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,7 +95,7 @@ Global
 		{B37ABF40-108C-40C8-BAA0-43DEADE8E39A} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 		{70ADC080-BE40-45D5-82CF-DC4CABA22D13} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
-		{7478B22C-CB31-4093-AB9C-8E1C4E8DD968} = {0CE2E50A-E48D-4B8B-928A-121E330AA90E}
+		{7478B22C-CB31-4093-AB9C-8E1C4E8DD968} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E186CCB-6441-4721-BA47-1C0F06A46447}

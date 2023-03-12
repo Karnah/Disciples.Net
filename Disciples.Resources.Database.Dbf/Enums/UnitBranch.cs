@@ -1,4 +1,4 @@
-﻿namespace Disciples.Resources.Database.Enums;
+﻿namespace Disciples.Resources.Database.Dbf.Enums;
 
 /// <summary>
 /// Ветка юнита.

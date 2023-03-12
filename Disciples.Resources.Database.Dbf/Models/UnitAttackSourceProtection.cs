@@ -1,13 +1,13 @@
-﻿using Disciples.Resources.Database.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Disciples.Resources.Database.Dbf.Enums;
 
-namespace Disciples.Resources.Database.Models;
+namespace Disciples.Resources.Database.Dbf.Models;
 
 /// <summary>
-/// Защита юнита от типа атаки.
+/// Защита юнита от источника атак.
 /// </summary>
-[Table("GimmuC")]
-public class UnitAttackTypeProtection : IEntity
+[Table("Gimmu")]
+public class UnitAttackSourceProtection : IEntity
 {
     /// <summary>
     /// Идентификатор юнита, который имеет защиту.
@@ -19,10 +19,10 @@ public class UnitAttackTypeProtection : IEntity
     public string Id { get; init; } = null!;
 
     /// <summary>
-    /// Тип атаки.
+    /// Источник атаки.
     /// </summary>
     [Column("IMMUNITY")]
-    public UnitAttackType UnitAttackType { get; init; }
+    public UnitAttackSource UnitAttackSource { get; init; }
 
     /// <summary>
     /// Категория защиты.

@@ -267,5 +267,4 @@ __pycache__/
 *.dlg
 *.mft
 
-# This libraries use for up-to-date Avalonia build
-!**/AdditionalPackages/*
+!Disciples.Resources.Database.Dbf/

@@ -1,4 +1,4 @@
-﻿namespace Disciples.Resources.Database.Components;
+﻿namespace Disciples.Resources.Database.Dbf.Components;
 
 /// <summary>
 /// Набор ресурсов (используется для стоимости найма юнита/постройки здания, ежедневный прирост ресурсов и т.д.)

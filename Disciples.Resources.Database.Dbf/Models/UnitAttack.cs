@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Disciples.Resources.Database.Enums;
+using Disciples.Resources.Database.Dbf.Enums;
 
-namespace Disciples.Resources.Database.Models;
+namespace Disciples.Resources.Database.Dbf.Models;
 
 /// <summary>
 /// Атака юнита.

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Disciples.Resources.Database.Components;
+using Disciples.Resources.Database.Dbf.Components;
 
-namespace Disciples.Resources.Database.Models;
+namespace Disciples.Resources.Database.Dbf.Models;
 
 /// <summary>
 /// Данные о том, как растут характеристики юнита с повышением уровня.

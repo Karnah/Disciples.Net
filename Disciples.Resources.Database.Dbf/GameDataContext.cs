@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
-using Disciples.Resources.Database.Components;
-using Disciples.Resources.Database.Models;
+using Disciples.Resources.Database.Dbf.Components;
+using Disciples.Resources.Database.Dbf.Models;
 using NDbfReader;
 
-namespace Disciples.Resources.Database;
+namespace Disciples.Resources.Database.Dbf;
 
 /// <summary>
 /// База данных Disciples.
 /// </summary>
-public class Database
+public class GameDataContext
 {
     /// <summary>
     /// Кодировка базы данных.
@@ -36,10 +36,10 @@ public class Database
     private readonly Encoding _encoding;
 
     /// <summary>
-    /// Создать объект типа <see cref="Database" />.
+    /// Создать объект типа <see cref="GameDataContext" />.
     /// </summary>
     /// <param name="databasePath">Путь до папки с таблицами.</param>
-    public Database(string databasePath)
+    public GameDataContext(string databasePath)
     {
         _databasePath = databasePath;
         _encoding = CodePagesEncodingProvider.Instance.GetEncoding(DATABASE_ENCODING)!;
