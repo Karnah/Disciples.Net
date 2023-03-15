@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine.Common.Models;
+﻿using System.Collections.Generic;
+
+namespace Disciples.Engine.Common.Models;
 
 /// <summary>
 /// Информация об игроке.
@@ -6,21 +8,17 @@
 public class Player
 {
     /// <summary>
-    /// Создать объект типа <see cref="Player" />.
-    /// </summary>
-    public Player(int id, bool isComputer)
-    {
-        Id = id;
-        IsComputer = isComputer;
-    }
-
-    /// <summary>
     /// Уникальный идентификатор игрока.
     /// </summary>
-    public int Id { get; }
+    public int Id { get; init; }
 
     /// <summary>
     /// Управляется ли игрок компьютером (ИИ).
     /// </summary>
-    public bool IsComputer { get; }
+    public bool IsComputer { get; init; }
+
+    /// <summary>
+    /// Отряды игрока.
+    /// </summary>
+    public List<PlayerSquad> Squads { get; init; } = new();
 }

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Enums;
+using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
@@ -175,6 +178,24 @@ public class GameController : IGameController
             return;
 
         _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.UiButton, InputDeviceActionState.Activated, button));
+    }
+
+    /// <summary>
+    /// Загрузить данные игры.
+    /// </summary>
+    public GameContext LoadGame()
+    {
+        const string gameContextFileName = "save.json";
+        try
+        {
+            return File
+                .ReadAllText(gameContextFileName)
+                .DeserializeFromJson<GameContext>();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Не удалось загрузить сейв-файл {gameContextFileName}", e);
+        }
     }
 
     /// <inheritdoc />

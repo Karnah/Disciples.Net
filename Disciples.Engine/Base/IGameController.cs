@@ -1,4 +1,5 @@
 ﻿using System;
+using Disciples.Engine.Common;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Models;
 
@@ -18,6 +19,11 @@ public interface IGameController
     /// Событие смены текущей сцены.
     /// </summary>
     event EventHandler SceneChanged;
+
+    /// <summary>
+    /// Загрузить данные игры.
+    /// </summary>
+    public GameContext LoadGame();
 
     /// <summary>
     /// Поменять сцену.
