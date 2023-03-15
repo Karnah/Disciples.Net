@@ -35,7 +35,7 @@ public interface IBitmapFactory
     /// <param name="bitmap">Изображение, которое необходимо сохранить.</param>
     /// <param name="filePath">Путь до файла.</param>
     /// <remarks>
-    /// TODO Используется только для тестов и подготовки данных.
+    /// Используется только для тестов и подготовки данных.
     /// </remarks>
     void SaveToFile(IBitmap bitmap, string filePath);
 }
