@@ -72,6 +72,10 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private IImageSceneObject? _unitPanelSeparator;
     /// <summary>
+    /// Иконка для юнитов, уровень которых больше базового на 5/10/15.
+    /// </summary>
+    private IImageSceneObject? _highLevelUnitIcon;
+    /// <summary>
     /// Иконки эффектов, которые воздействуют на юнита.
     /// </summary>
     private readonly Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsIcons;
@@ -83,6 +87,10 @@ internal class UnitPortraitObject : GameObject
     /// Количество ОЗ, которое было при предыдущей проверке.
     /// </summary>
     private int _lastUnitHitPoints;
+    /// <summary>
+    /// Количество уровней, которые было при предыдущей проверке.
+    /// </summary>
+    private int _lastLevelDiff;
 
     /// <summary>
     /// Создать объект класса <see cref="UnitPortraitObject" />.
@@ -160,6 +168,7 @@ internal class UnitPortraitObject : GameObject
         RemoveSceneObject(ref _instantaneousEffectText);
         RemoveSceneObject(ref _unitDamageForeground);
         RemoveSceneObject(ref _unitPanelSeparator);
+        RemoveSceneObject(ref _highLevelUnitIcon);
 
         foreach (var battleEffectsIcon in _battleEffectsIcons)
             _sceneObjectContainer.RemoveSceneObject(battleEffectsIcon.Value);
@@ -238,6 +247,14 @@ internal class UnitPortraitObject : GameObject
     {
         ProcessBattleEffects();
 
+        var levelDiff = Unit.Level - Unit.UnitType.Level;
+        if (levelDiff != _lastLevelDiff)
+        {
+            RemoveSceneObject(ref _highLevelUnitIcon);
+            _highLevelUnitIcon = GetHighLevelUnitIcon(levelDiff);
+            _lastLevelDiff = levelDiff;
+        }
+
         // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
         if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
             return;
@@ -251,7 +268,7 @@ internal class UnitPortraitObject : GameObject
                 var widthOffset = (Width - deathScull.Width) / 2;
                 _deathIcon = _sceneObjectContainer.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y,
                     INTERFACE_LAYER + 3);
-                _unitHitpoints.Text = $"0/{Unit.UnitType.HitPoints}";
+                _unitHitpoints.Text = $"0/{Unit.MaxHitPoints}";
 
                 RemoveSceneObject(ref _unitDamageForeground);
             }
@@ -259,11 +276,11 @@ internal class UnitPortraitObject : GameObject
         else if (_lastUnitHitPoints != Unit.HitPoints)
         {
             _lastUnitHitPoints = Unit.HitPoints;
-            _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.UnitType.HitPoints}";
+            _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.MaxHitPoints}";
 
             RemoveSceneObject(ref _unitDamageForeground);
 
-            var height = (1 - ((double)_lastUnitHitPoints / Unit.UnitType.HitPoints)) * Height;
+            var height = (1 - ((double)_lastUnitHitPoints / Unit.MaxHitPoints)) * Height;
             if (height > 0)
             {
                 var width = Width;
@@ -379,6 +396,28 @@ internal class UnitPortraitObject : GameObject
     private ITextSceneObject AddText(string text)
     {
         return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
+    }
+
+    /// <summary>
+    /// Получить иконку соответствующую уровню юнита.
+    /// </summary>
+    private IImageSceneObject? GetHighLevelUnitIcon(int levelDiff)
+    {
+        if (levelDiff < 5)
+            return null;
+
+        var icon = levelDiff switch
+        {
+            >= 15 => _battleInterfaceProvider.RedLevelIcon,
+            >= 10 => _battleInterfaceProvider.OrangeLevelIcon,
+            _ => _battleInterfaceProvider.BlueLevelIcon
+        };
+
+        return _sceneObjectContainer.AddImage(
+            icon,
+            X + (Width - icon.Width) / 2,
+            Y + Height - icon.Height,
+            INTERFACE_LAYER + 4);
     }
 
     /// <summary>

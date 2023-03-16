@@ -42,6 +42,21 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IBitmap UnitInfoBackground { get; }
 
     /// <summary>
+    /// Иконка для обозначения юнита, чей уровень выше базового на 5-9.
+    /// </summary>
+    IBitmap BlueLevelIcon { get; }
+
+    /// <summary>
+    /// Иконка для обозначения юнита, чей уровень выше базового на 10-14.
+    /// </summary>
+    IBitmap OrangeLevelIcon { get; }
+
+    /// <summary>
+    /// Иконка для обозначения юнита, чей уровень выше базового на 15 и больше.
+    /// </summary>
+    IBitmap RedLevelIcon { get; }
+
+    /// <summary>
     /// Иконки для эффектов, воздействующих на юнита.
     /// </summary>
     IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; }

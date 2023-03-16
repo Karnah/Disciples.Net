@@ -20,8 +20,6 @@ internal class UnitTypeProfile : Profile
             .ForMember(dst => dst.Description, opt => opt.MapFrom(src => src.Description.Text))
             .ForMember(dst => dst.Ability, opt => opt.MapFrom(src => src.AbilityDescription.Text))
             .ForMember(dst => dst.UpgradeBuildingId, opt => opt.Ignore())
-            .ForMember(dst => dst.LowLevelUpgradeId, opt => opt.Ignore())
-            .ForMember(dst => dst.HighLevelUpgradeId, opt => opt.Ignore())
             ;
     }
 }

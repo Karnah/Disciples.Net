@@ -56,9 +56,9 @@
               "UnitTypeId": "G000UU0003", // имперский рыцарь.
               "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
-              "Level": 3,
+              "Level": 18,
               "Experience": 0,
-              "HitPoints": 200,
+              "HitPoints": 440,
               "IsDead": false
             },
             {

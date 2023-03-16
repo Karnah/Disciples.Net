@@ -223,21 +223,21 @@ public class UnitType : IEntity
 
     /// <summary>
     /// Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня.
-    /// Используется для расчета уровня меньше или равным <see cref="UpgradeChangeLevel" />.
+    /// Используется для расчета, когда разница уровней меньше <see cref="UpgradeChangeLevel" />.
     /// </summary>
     [Column("DYN_UPG1")]
     public string LowLevelUpgradeId { get; init; } = null!;
 
     /// <summary>
-    /// Последний уровень, когда рост характеристик рассчитывается по формуле <see cref="LowLevelUpgradeId" />,
-    /// А потом переходит к <see cref="HighLevelUpgradeId" />.
+    /// Разница уровней, начиная с которой используется формула <see cref="HighLevelUpgradeId" />.
+    /// Если разница меньше, то используется формула <see cref="LowLevelUpgradeId" />.
     /// </summary>
     [Column("DYN_UPG_LV")]
     public int UpgradeChangeLevel { get; init; }
 
     /// <summary>
     /// Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня.
-    /// Используется для расчета уровня выше <see cref="UpgradeChangeLevel" />.
+    /// Используется для расчета уровня, начиная с <see cref="UpgradeChangeLevel" />.
     /// </summary>
     [Column("DYN_UPG2")]
     public string HighLevelUpgradeId { get; init; } = null!;

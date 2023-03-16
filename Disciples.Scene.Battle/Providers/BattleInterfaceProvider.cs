@@ -52,6 +52,10 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         DeathSkull = _bitmapFactory.FromFile(Path.Combine(Directory.GetCurrentDirectory(), "Resources\\Common\\Skull.png"));
         UnitInfoBackground = _interfaceProvider.GetImage("_PG0500IX");
 
+        BlueLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL1").Bitmap;
+        OrangeLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL2").Bitmap;
+        RedLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL3").Bitmap;
+
         UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap>
         {
             { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
@@ -86,6 +90,15 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
     /// <inheritdoc />
     public IBitmap UnitInfoBackground { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap BlueLevelIcon { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap OrangeLevelIcon { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap RedLevelIcon { get; private set; } = null!;
 
 
     /// <inheritdoc />

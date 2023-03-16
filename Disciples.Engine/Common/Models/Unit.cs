@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums;
+﻿using System;
+using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -75,14 +76,14 @@ public class Unit
 
     /// <summary>
     /// Максимальное количество очков здоровья.
-    /// todo Рассчитывать, зависит от уровня и эффектов типа эликсира.
+    /// TODO Также зависит от эликсиров.
     /// </summary>
-    public int MaxHitPoints => UnitType.HitPoints;
+    public int MaxHitPoints => UnitType.HitPoints + CalculateLevelUpgrade(ulu => ulu.HitPoints);
 
     /// <summary>
     /// Базовая броня юнита.
     /// </summary>
-    public int BaseArmor => UnitType.Armor;
+    public int BaseArmor => UnitType.Armor + CalculateLevelUpgrade(ulu => ulu.Armor);
 
     /// <summary>
     /// Модификатор брони.
@@ -97,11 +98,10 @@ public class Unit
 
     /// <summary>
     /// Базовое значение силы первой атаки.
-    /// todo Рассчитывать, зависит от уровня.
     /// </summary>
     public int BaseFirstAttackPower => UnitType.MainAttack.HealPower > 0
-        ? UnitType.MainAttack.HealPower
-        : UnitType.MainAttack.DamagePower;
+        ? UnitType.MainAttack.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower)
+        : UnitType.MainAttack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower);
 
     /// <summary>
     /// Модификатор значения силы первой атаки.
@@ -116,20 +116,18 @@ public class Unit
 
     /// <summary>
     /// Базовое значение силы второй атаки.
-    /// todo Рассчитывать, зависит от уровня.
     /// </summary>
     /// <remarks>
     /// На вторую атаку модификаторы не распространяются.
     /// </remarks>
     public int? SecondAttackPower => UnitType.SecondaryAttack?.HealPower > 0
-        ? UnitType.SecondaryAttack?.HealPower
-        : UnitType.SecondaryAttack?.DamagePower;
+        ? UnitType.SecondaryAttack?.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower)
+        : UnitType.SecondaryAttack?.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower);
 
     /// <summary>
     /// Базовое значение точности первой атаки.
-    /// todo Рассчитывать, зависит от уровня.
     /// </summary>
-    public int BaseFirstAttackAccuracy => UnitType.MainAttack.Accuracy;
+    public int BaseFirstAttackAccuracy => UnitType.MainAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
 
     /// <summary>
     /// Модификатор точности первой атаки.
@@ -144,17 +142,16 @@ public class Unit
 
     /// <summary>
     /// Значение точности второй атаки.
-    /// todo Рассчитывать, зависит от уровня.
     /// </summary>
     /// <remarks>
     /// На вторую атаку модификаторы не распространяются.
     /// </remarks>
-    public int? SecondaryAttackAccuracy => UnitType.SecondaryAttack?.Accuracy;
+    public int? SecondaryAttackAccuracy => UnitType.SecondaryAttack?.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
 
     /// <summary>
     /// Базовая инициатива.
     /// </summary>
-    public int BaseInitiative => UnitType.MainAttack.Initiative;
+    public int BaseInitiative => UnitType.MainAttack.Initiative + CalculateLevelUpgrade(ulu => ulu.Initiative);
 
     /// <summary>
     /// Модификатор инициативы.
@@ -176,4 +173,19 @@ public class Unit
     /// Эффекты, воздействующие на юнита.
     /// </summary>
     public UnitEffects Effects { get; }
+
+    /// <summary>
+    /// Рассчитать повышение значения в зависимости от уровня юнита.
+    /// </summary>
+    private int CalculateLevelUpgrade(Func<UnitLevelUpgrade, int> propertyGetter)
+    {
+        var levelDiff = Level - UnitType.Level;
+        var lowLevelDiff = Math.Min(levelDiff, UnitType.UpgradeChangeLevel - 1);
+        var highLevelDiff = Math.Max(0, levelDiff - lowLevelDiff);
+
+        return
+            propertyGetter.Invoke(UnitType.LowLevelUpgrade) * lowLevelDiff
+            +
+            propertyGetter.Invoke(UnitType.HighLevelUpgrade) * highLevelDiff;
+    }
 }
