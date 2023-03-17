@@ -3,7 +3,9 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.ResourceProvider;
 
 namespace Disciples.Scene.Battle.Providers;
 
@@ -13,13 +15,18 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
+    private readonly UnitFaceImagesExtractor _unitFaceExtractor;
 
     /// <inheritdoc />
-    public BattleInterfaceProvider(IBitmapFactory bitmapFactory, IInterfaceProvider interfaceProvider, IBattleResourceProvider battleResourceProvider)
+    public BattleInterfaceProvider(IBitmapFactory bitmapFactory,
+        IInterfaceProvider interfaceProvider,
+        IBattleResourceProvider battleResourceProvider,
+        UnitFaceImagesExtractor unitFaceExtractor)
     {
         _bitmapFactory = bitmapFactory;
         _interfaceProvider = interfaceProvider;
         _battleResourceProvider = battleResourceProvider;
+        _unitFaceExtractor = unitFaceExtractor;
     }
 
     /// <inheritdoc />
@@ -48,8 +55,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         RightPanel = battleIcons["DLG_BATTLE_A_RUNITGROUP"];
         BottomPanel = battleIcons["DLG_BATTLE_A_MAINCOMBATBG"];
         PanelSeparator = battleIcons["DLG_BATTLE_A_SPLITLRG"];
-        // todo Не смог найти эту картинку в ресурсах игры. Скачал другую где-то на просторах интернета.
-        DeathSkull = _bitmapFactory.FromFile(Path.Combine(Directory.GetCurrentDirectory(), "Resources\\Common\\Skull.png"));
+        DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS")).Bitmap;
+        DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL")).Bitmap;
         UnitInfoBackground = _interfaceProvider.GetImage("_PG0500IX");
 
         BlueLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL1").Bitmap;
@@ -86,7 +93,10 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     public IBitmap PanelSeparator { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IBitmap DeathSkull { get; private set; } = null!;
+    public IBitmap DeathSkullSmall { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap DeathSkullBig { get; private set; } = null!;
 
     /// <inheritdoc />
     public IBitmap UnitInfoBackground { get; private set; } = null!;

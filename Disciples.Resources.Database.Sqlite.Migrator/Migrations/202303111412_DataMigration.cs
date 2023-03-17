@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using Disciples.Resources.Database.Components;
+using Disciples.Resources.Database.Dbf;
+using Disciples.Resources.Database.Dbf.Components;
 using FluentMigrator;
 
 namespace Disciples.Resources.Database.Sqlite.Migrator.Migrations;
@@ -16,7 +17,7 @@ public class DataMigration : Migration
     /// <inheritdoc />
     public override void Up()
     {
-        var database = new Database("Resources");
+        var database = new GameDataContext("Resources");
 
         Execute.Sql("PRAGMA foreign_keys = OFF;");
 

@@ -6,6 +6,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Providers;
 using Disciples.Engine.Implementation.Extensions;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Settings;
 using Disciples.Resources.Database.Sqlite;
 using DryIoc;
@@ -23,6 +24,12 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<ILogger, Logger>(Reuse.Singleton);
 
         containerRegistrator.RegisterMany<GameController>(Reuse.Singleton);
+
+        containerRegistrator.Register<BattleImagesExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<BattleUnitImagesExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<InterfaceImagesExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<UnitFaceImagesExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<UnitPortraitImagesExtractor>(Reuse.Singleton);
 
         containerRegistrator.Register<ITextProvider, TextProvider>(Reuse.Singleton);
         containerRegistrator.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);

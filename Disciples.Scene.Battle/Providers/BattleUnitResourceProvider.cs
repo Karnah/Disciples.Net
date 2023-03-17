@@ -3,8 +3,8 @@ using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.ResourceProvider;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 
@@ -28,16 +28,21 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
+    private readonly BattleUnitImagesExtractor _extractor;
 
-    private ImagesExtractor _extractor = null!;
     private SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = null!;
 
     /// <inheritdoc />
-    public BattleUnitResourceProvider(IBitmapFactory bitmapFactory, IUnitInfoProvider unitInfoProvider, IBattleResourceProvider battleResourceProvider)
+    public BattleUnitResourceProvider(
+        IBitmapFactory bitmapFactory,
+        IUnitInfoProvider unitInfoProvider,
+        IBattleResourceProvider battleResourceProvider,
+        BattleUnitImagesExtractor extractor)
     {
         _bitmapFactory = bitmapFactory;
         _unitInfoProvider = unitInfoProvider;
         _battleResourceProvider = battleResourceProvider;
+        _extractor = extractor;
     }
 
     /// <inheritdoc />
@@ -74,7 +79,6 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\BatUnits.ff");
         _unitsAnimations = new SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
     }
 

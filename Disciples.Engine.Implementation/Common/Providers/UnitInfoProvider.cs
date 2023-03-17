@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AutoMapper;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.ResourceProvider;
 using Disciples.Resources.Database.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using UnitType = Disciples.Engine.Common.Models.UnitType;
@@ -20,8 +19,8 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IMapper _mapper;
     private readonly GameDataContextFactory _gameDataContextFactory;
-    private readonly ImagesExtractor _facesExtractor;
-    private readonly ImagesExtractor _portraitExtractor;
+    private readonly UnitFaceImagesExtractor _unitFaceExtractor;
+    private readonly UnitPortraitImagesExtractor _unitPortraitExtractor;
 
     private readonly Dictionary<string, UnitType> _unitTypes = new();
     private readonly Dictionary<string, IBitmap> _unitFaces = new();
@@ -31,14 +30,17 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     /// <summary>
     /// Создать объект типа <see cref="UnitInfoProvider" />.
     /// </summary>
-    public UnitInfoProvider(IBitmapFactory bitmapFactory, IMapper mapper, GameDataContextFactory gameDataContextFactory)
+    public UnitInfoProvider(IBitmapFactory bitmapFactory,
+        IMapper mapper,
+        GameDataContextFactory gameDataContextFactory,
+        UnitFaceImagesExtractor unitFaceExtractor,
+        UnitPortraitImagesExtractor unitPortraitExtractor)
     {
         _bitmapFactory = bitmapFactory;
         _mapper = mapper;
         _gameDataContextFactory = gameDataContextFactory;
-
-        _facesExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff");
-        _portraitExtractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Events.ff");
+        _unitFaceExtractor = unitFaceExtractor;
+        _unitPortraitExtractor = unitPortraitExtractor;
     }
 
 
@@ -63,7 +65,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         if (!_unitFaces.TryGetValue(unitTypeId, out var unitFace))
         {
-            unitFace = _bitmapFactory.FromByteArray(_facesExtractor.GetFileContent($"{unitTypeId}FACE"));
+            unitFace = _bitmapFactory.FromByteArray(_unitFaceExtractor.GetFileContent($"{unitTypeId}FACE"));
             _unitFaces.Add(unitTypeId, unitFace);
         }
 
@@ -75,7 +77,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         if (!_unitBattleFaces.TryGetValue(unitTypeId, out var unitBattleFace))
         {
-            unitBattleFace = _bitmapFactory.FromRawToBitmap(_facesExtractor.GetImage($"{unitTypeId}FACEB"));
+            unitBattleFace = _bitmapFactory.FromRawToBitmap(_unitFaceExtractor.GetImage($"{unitTypeId}FACEB"));
             _unitBattleFaces.Add(unitTypeId, unitBattleFace);
         }
 
@@ -87,7 +89,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         if (!_unitPortraits.TryGetValue(unitTypeId, out var unitPortrait))
         {
-            unitPortrait = _bitmapFactory.FromRawToOriginalBitmap(_portraitExtractor.GetImage(unitTypeId.ToUpper()));
+            unitPortrait = _bitmapFactory.FromRawToOriginalBitmap(_unitPortraitExtractor.GetImage(unitTypeId.ToUpper()));
             _unitPortraits.Add(unitTypeId, unitPortrait);
         }
 

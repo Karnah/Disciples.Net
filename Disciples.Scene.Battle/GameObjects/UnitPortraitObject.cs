@@ -263,11 +263,10 @@ internal class UnitPortraitObject : GameObject
         {
             if (_deathIcon == null)
             {
-                // Картинку выравниваем по ширине.
-                var deathScull = _battleInterfaceProvider.DeathSkull;
-                var widthOffset = (Width - deathScull.Width) / 2;
-                _deathIcon = _sceneObjectContainer.AddImage(_battleInterfaceProvider.DeathSkull, X + widthOffset, Y,
-                    INTERFACE_LAYER + 3);
+                var deathScull = Unit.UnitType.IsSmall
+                    ? _battleInterfaceProvider.DeathSkullSmall
+                    : _battleInterfaceProvider.DeathSkullBig;
+                _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, INTERFACE_LAYER + 3);
                 _unitHitpoints.Text = $"0/{Unit.MaxHitPoints}";
 
                 RemoveSceneObject(ref _unitDamageForeground);
@@ -416,7 +415,7 @@ internal class UnitPortraitObject : GameObject
         return _sceneObjectContainer.AddImage(
             icon,
             X + (Width - icon.Width) / 2,
-            Y + Height - icon.Height,
+            Y + icon.Height / 2,
             INTERFACE_LAYER + 4);
     }
 

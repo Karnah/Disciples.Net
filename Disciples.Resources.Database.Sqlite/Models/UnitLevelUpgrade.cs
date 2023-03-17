@@ -63,9 +63,9 @@ public class UnitLevelUpgrade : IEntity
     public int? LeaderMovePoints { get; init; }
 
     /// <summary>
-    /// TODO Умение вести переговоры? Что-то для воров?
+    /// Рост снижения шанса успеха, когда вор применяет навык на отряд этого героя.
     /// </summary>
-    public int? LeaderNegotiate { get; init; }
+    public int? LeaderThiefProtection { get; init; }
 
     /// <summary>
     /// Рост наносимого урона.

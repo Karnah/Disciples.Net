@@ -2,26 +2,26 @@
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Models;
-using Disciples.ResourceProvider;
 
 namespace Disciples.Scene.Battle.Providers;
 
 /// <inheritdoc cref="IBattleResourceProvider" />
 internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvider
 {
+    private readonly BattleImagesExtractor _extractor;
     private readonly IBitmapFactory _bitmapFactory;
 
     private readonly IDictionary<string, IReadOnlyList<Frame>> _animations;
     private readonly IDictionary<string, Frame> _images;
 
-    private ImagesExtractor _extractor = null!;
-
     /// <inheritdoc />
-    public BattleResourceProvider(IBitmapFactory bitmapFactory)
+    public BattleResourceProvider(BattleImagesExtractor extractor, IBitmapFactory bitmapFactory)
     {
         _bitmapFactory = bitmapFactory;
+        _extractor = extractor;
         _animations = new SortedDictionary<string, IReadOnlyList<Frame>>();
         _images = new SortedDictionary<string, Frame>();
     }
@@ -32,7 +32,6 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Battle.ff");
     }
 
     /// <inheritdoc />

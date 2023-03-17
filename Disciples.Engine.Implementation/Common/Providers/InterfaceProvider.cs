@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.ResourceProvider;
 using Disciples.ResourceProvider.Models;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
@@ -15,15 +14,16 @@ namespace Disciples.Engine.Implementation.Common.Providers;
 /// <inheritdoc cref="IInterfaceProvider" />
 public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
 {
+    private readonly InterfaceImagesExtractor _interfaceImagesExtractor;
     private readonly IBitmapFactory _bitmapFactory;
-
-    private ImagesExtractor _extractor = null!;
-    private Dictionary<GameColor, IBitmap> _gameColors = null!;
+    private readonly Dictionary<GameColor, IBitmap> _gameColors;
 
     /// <inheritdoc />
-    public InterfaceProvider(IBitmapFactory bitmapFactory)
+    public InterfaceProvider(InterfaceImagesExtractor interfaceImagesExtractor, IBitmapFactory bitmapFactory)
     {
+        _interfaceImagesExtractor = interfaceImagesExtractor;
         _bitmapFactory = bitmapFactory;
+        _gameColors = GetGameColors();
     }
 
     /// <inheritdoc />
@@ -32,13 +32,13 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     public IBitmap GetImage(string imageName)
     {
-        return _bitmapFactory.FromRawToBitmap(_extractor.GetImage(imageName));
+        return _bitmapFactory.FromRawToBitmap(_interfaceImagesExtractor.GetImage(imageName));
     }
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, IBitmap> GetImageParts(string imageName)
     {
-        var imageParts = _extractor.GetImageParts(imageName);
+        var imageParts = _interfaceImagesExtractor.GetImageParts(imageName);
 
         return imageParts
             .Select(ip => new KeyValuePair<string, IBitmap>(ip.Key, _bitmapFactory.FromRawToBitmap(ip.Value)))
@@ -54,8 +54,6 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _extractor = new ImagesExtractor($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.ff");
-        _gameColors = GetGameColors();
     }
 
     /// <inheritdoc />

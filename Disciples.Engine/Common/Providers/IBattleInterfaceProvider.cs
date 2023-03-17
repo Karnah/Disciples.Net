@@ -32,9 +32,14 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IBitmap PanelSeparator { get; }
 
     /// <summary>
-    /// Иконка умершего юнита.
+    /// Иконка умершего обычного юнита.
     /// </summary>
-    IBitmap DeathSkull { get; }
+    IBitmap DeathSkullSmall { get; }
+
+    /// <summary>
+    /// Иконка умершего большого юнита.
+    /// </summary>
+    IBitmap DeathSkullBig { get; }
 
     /// <summary>
     /// Задний фон для подробной информации о юните (раскрытый свиток).

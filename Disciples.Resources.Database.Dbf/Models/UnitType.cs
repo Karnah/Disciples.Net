@@ -209,10 +209,10 @@ public class UnitType : IEntity
     public int? Leadership { get; init; }
 
     /// <summary>
-    /// TODO Умение вести переговоры? Что-то для воров?
+    /// Снижение шанса успеха, когда вор применяет навык на отряд этого героя.
     /// </summary>
     [Column("NEGOTIATE")]
-    public int? LeaderNegotiate { get; init; }
+    public int? LeaderThiefProtection { get; init; }
 
     /// <summary>
     /// Категория лидера.

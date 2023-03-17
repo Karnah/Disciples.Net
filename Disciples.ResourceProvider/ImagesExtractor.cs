@@ -519,7 +519,7 @@ public class ImagesExtractor
             safeName.StartsWith("MRK") || safeName.StartsWith("DEATH"))
             return ImageType.Aura;
 
-        if (safeName.EndsWith("S1A00") || safeName.EndsWith("S1D00"))
+        if (safeName.EndsWith("S1A00") || safeName.EndsWith("S1D00") || safeName.StartsWith("MASKDEAD"))
             return ImageType.Shadow;
 
         return ImageType.Simple;
