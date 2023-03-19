@@ -5,7 +5,6 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.ResourceProvider;
 
 namespace Disciples.Scene.Battle.Providers;
 

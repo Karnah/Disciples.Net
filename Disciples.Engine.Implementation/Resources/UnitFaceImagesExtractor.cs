@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using Disciples.ResourceProvider;
+using Disciples.Resources.Images;
 
 namespace Disciples.Engine.Implementation.Resources;
 

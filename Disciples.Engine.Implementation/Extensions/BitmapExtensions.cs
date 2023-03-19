@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Models;
-using Disciples.ResourceProvider.Models;
+using Disciples.Resources.Images.Models;
 
 namespace Disciples.Engine.Implementation.Extensions;
 

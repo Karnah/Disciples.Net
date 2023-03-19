@@ -201,7 +201,7 @@ internal class UnitPortraitObject : GameObject
                     throw new ArgumentOutOfRangeException();
             }
 
-            _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.UnitType.HitPoints}";
+            _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
             return;
         }
 

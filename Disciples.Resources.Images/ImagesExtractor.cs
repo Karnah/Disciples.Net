@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using Disciples.Resources.Images.Enums;
+using Disciples.Resources.Images.Helpers;
+using Disciples.Resources.Images.Models;
 using ImageMagick;
-using Disciples.ResourceProvider.Enums;
-using Disciples.ResourceProvider.Helpers;
-using Disciples.ResourceProvider.Models;
-using File = Disciples.ResourceProvider.Models.File;
+using File = Disciples.Resources.Images.Models.File;
 
-namespace Disciples.ResourceProvider;
+namespace Disciples.Resources.Images;
 
 /// <summary>
 /// Класс для извлечения изображений из ресурсов.

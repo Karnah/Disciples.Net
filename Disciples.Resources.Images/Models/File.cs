@@ -1,4 +1,4 @@
-﻿namespace Disciples.ResourceProvider.Models;
+﻿namespace Disciples.Resources.Images.Models;
 
 /// <summary>
 /// Файл в ресурсах игры.

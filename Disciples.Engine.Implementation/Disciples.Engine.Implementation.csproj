@@ -18,9 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Common\Disciples.Common.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
-    <ProjectReference Include="..\Disciples.ResourceProvider\Disciples.ResourceProvider.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
     <ProjectReference Include="..\Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Images\Disciples.Resources.Images.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Sounds\Disciples.Resources.Sounds.csproj" />
   </ItemGroup>
 
   <ItemGroup>

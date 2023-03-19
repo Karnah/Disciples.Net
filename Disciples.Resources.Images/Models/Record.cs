@@ -1,4 +1,4 @@
-﻿namespace Disciples.ResourceProvider.Models;
+﻿namespace Disciples.Resources.Images.Models;
 
 internal class Record
 {

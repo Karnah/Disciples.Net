@@ -7,7 +7,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.ResourceProvider.Models;
+using Disciples.Resources.Images.Models;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
 

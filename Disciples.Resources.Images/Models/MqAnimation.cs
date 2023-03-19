@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Disciples.ResourceProvider.Models;
+﻿namespace Disciples.Resources.Images.Models;
 
 internal class MqAnimation
 {

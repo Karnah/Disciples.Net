@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Models;
-using Disciples.ResourceProvider.Models;
+using Disciples.Resources.Images.Models;
 
 namespace Disciples.Engine.Platform.Factories;
 

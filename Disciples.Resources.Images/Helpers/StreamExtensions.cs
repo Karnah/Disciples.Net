@@ -1,8 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
-namespace Disciples.ResourceProvider.Helpers;
+namespace Disciples.Resources.Images.Helpers;
 
 /// <summary>
 /// Набор методов для взаимодействием с потоком.

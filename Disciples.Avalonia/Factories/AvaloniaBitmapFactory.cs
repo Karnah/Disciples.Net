@@ -9,7 +9,7 @@ using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Engine.Platform.Models;
-using Disciples.ResourceProvider.Models;
+using Disciples.Resources.Images.Models;
 using IBitmap = Disciples.Engine.IBitmap;
 
 namespace Disciples.Avalonia.Factories;

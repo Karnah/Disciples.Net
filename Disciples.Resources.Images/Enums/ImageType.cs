@@ -1,4 +1,4 @@
-﻿namespace Disciples.ResourceProvider.Enums;
+﻿namespace Disciples.Resources.Images.Enums;
 
 /// <summary>
 /// Тип изображения в ресурсах.
