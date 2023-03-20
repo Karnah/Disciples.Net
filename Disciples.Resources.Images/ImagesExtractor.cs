@@ -2,6 +2,7 @@
 using Disciples.Resources.Images.Helpers;
 using Disciples.Resources.Images.Models;
 using ImageMagick;
+using SubstreamSharp;
 using File = Disciples.Resources.Images.Models.File;
 
 namespace Disciples.Resources.Images;
@@ -344,17 +345,22 @@ public class ImagesExtractor
     private IReadOnlyCollection<RawBitmap> GetAnimationFramesInternal(MqAnimation animation)
     {
         var result = new List<RawBitmap>(animation.Frames.Count);
+
         // Обычно анимация "нарезается" из одного базового изображения,
         // Однако это не всегда. Поэтому необходимо иметь возможность кэшировать несколько изображений.
         var baseImages = new Dictionary<int, RawBitmap>();
 
-        foreach (var frame in animation.Frames) {
-            var fileId = frame.FileId;
-            if (baseImages.ContainsKey(frame.FileId) == false) {
-                baseImages.Add(fileId, PrepareImage(_filesById[fileId]));
-            }
+        // Нарезаем все кадры так, чтобы у них были одинаковые размеры.
+        // Так удобнее работать.
+        var animationBounds = GetAnimationBounds(animation.Frames);
 
-            result.Add(BuildImage(baseImages[fileId], frame));
+        foreach (var frame in animation.Frames)
+        {
+            var fileId = frame.FileId;
+            if (!baseImages.ContainsKey(frame.FileId))
+                baseImages.Add(fileId, PrepareImage(_filesById[fileId]));
+
+            result.Add(BuildImage(baseImages[fileId], frame, animationBounds));
         }
 
         return result;
@@ -367,26 +373,80 @@ public class ImagesExtractor
     /// <param name="mqImage">Информация о новом изображении.</param>
     private static RawBitmap BuildImage(RawBitmap baseImage, MqImage mqImage)
     {
+        var bounds = GetImageBounds(mqImage);
+        return BuildImage(baseImage, mqImage, bounds);
+    }
+
+    /// <summary>
+    /// Получить общие границы для анимации.
+    /// </summary>
+    private static Bounds GetAnimationBounds(IReadOnlyCollection<MqImage> images)
+    {
         int minRow = int.MaxValue, maxRow = int.MinValue;
         int minColumn = int.MaxValue, maxColumn = int.MinValue;
-        var imageData = new byte[mqImage.Width * mqImage.Height * 4];
 
-        foreach (var framePart in mqImage.ImagePieces) {
-            var partWidth = framePart.Width << 2;
-            for (int row = 0; row < framePart.Height; ++row) {
-                var posS = ((framePart.DestY + row) * baseImage.Width + framePart.DestX) << 2;
-                var posT = ((framePart.SourceY + row) * mqImage.Width + framePart.SourceX) << 2;
+        foreach (var framePart in images)
+        {
+            var frameBounds = GetImageBounds(framePart);
+            minRow = Math.Min(minRow, frameBounds.MinRow);
+            maxRow = Math.Max(maxRow, frameBounds.MaxRow);
+            minColumn = Math.Min(minColumn, frameBounds.MinColumn);
+            maxColumn = Math.Max(maxColumn, frameBounds.MaxColumn);
+        }
 
-                Buffer.BlockCopy(baseImage.Data, posS, imageData, posT, partWidth);
-            }
+        return new Bounds(minRow, maxRow, minColumn, maxColumn);
+    }
 
+    /// <summary>
+    /// Получить заполненную область изображения.
+    /// </summary>
+    private static Bounds GetImageBounds(MqImage mqImage)
+    {
+        int minRow = int.MaxValue, maxRow = int.MinValue;
+        int minColumn = int.MaxValue, maxColumn = int.MinValue;
+
+        foreach (var framePart in mqImage.ImagePieces)
+        {
             minRow = Math.Min(minRow, framePart.SourceY);
             maxRow = Math.Max(maxRow, framePart.SourceY + framePart.Height);
             minColumn = Math.Min(minColumn, framePart.SourceX);
             maxColumn = Math.Max(maxColumn, framePart.SourceX + framePart.Width);
         }
 
-        return new RawBitmap(minRow, maxRow, minColumn, maxColumn, mqImage.Width, mqImage.Height, imageData);
+        return new Bounds(minRow, maxRow, minColumn, maxColumn);
+    }
+
+    /// <summary>
+    /// Создать новое изображение из частей базового.
+    /// </summary>
+    /// <param name="baseImage">Базовое изображение.</param>
+    /// <param name="mqImage">Информация о новом изображении.</param>
+    /// <param name="bounds">Границы изображения.</param>
+    private static RawBitmap BuildImage(RawBitmap baseImage, MqImage mqImage, Bounds bounds)
+    {
+        var imageHeight = bounds.Height;
+        var imageWidth = bounds.Width;
+        var imageData = new byte[imageHeight * imageWidth * 4];
+
+        foreach (var framePart in mqImage.ImagePieces)
+        {
+            var partWidth = framePart.Width << 2;
+            for (int row = 0; row < framePart.Height; ++row)
+            {
+                var sourcePosition = ((framePart.DestY + row) * baseImage.OriginalWidth + framePart.DestX) << 2;
+                var destinationPosition = ((framePart.SourceY + row - bounds.MinRow) * imageWidth + framePart.SourceX - bounds.MinColumn) << 2;
+
+                Buffer.BlockCopy(baseImage.Data, sourcePosition, imageData, destinationPosition, partWidth);
+            }
+        }
+
+        return new RawBitmap
+        {
+            OriginalWidth = mqImage.Width,
+            OriginalHeight = mqImage.Height,
+            Bounds = bounds,
+            Data = imageData
+        };
     }
 
     /// <summary>
@@ -397,10 +457,16 @@ public class ImagesExtractor
     private RawBitmap PrepareImage(File file)
     {
         MagickImage magickImage;
-        try {
-            magickImage = new MagickImage(GetFileContent(file));
+        try
+        {
+            using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+            using (var streamReader = new Substream(fileStream, file.Offset, file.Size))
+            {
+                magickImage = new MagickImage(streamReader, MagickFormat.Png);
+            }
         }
-        catch (MagickCoderErrorException) {
+        catch (MagickCoderErrorException)
+        {
             // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты.
             // Нужно получить решение.
             Console.WriteLine($"Corrupted image: {_path}\\{file.Name}");
@@ -410,38 +476,45 @@ public class ImagesExtractor
         var colorMap = new Dictionary<int, byte>();
         var safeName = Path.GetFileNameWithoutExtension(file.Name);
         var imageType = GetImageType(safeName);
-        if (imageType == ImageType.Aura) {
+        if (imageType == ImageType.Aura)
+        {
             // Если файл содержит ауру, то создаём полупрозрачное изображение.
             // Пока берём прозрачность равную индексу цвета в палитре,
             // Но такое чувство, что есть более четкая зависимость.
-            for (int i = 0; i < 256; ++i) {
-                unchecked {
+            for (int i = 0; i < 256; ++i)
+            {
+                unchecked
+                {
                     var color = magickImage.GetColormapColor(i);
-                    var index = ((byte) color.B << 16) + ((byte) color.G << 8) + (byte) color.R;
+                    var index = ((byte)color.B << 16) + ((byte)color.G << 8) + (byte)color.R;
 
-                    colorMap[index] = (byte) i;
+                    colorMap[index] = (byte)i;
                 }
             }
         }
 
         var pixels = magickImage.GetPixels().ToByteArray("BGRA");
         var transparentColor = magickImage.GetColormapColor(0);
-        if (transparentColor == null) {
+        if (transparentColor == null)
+        {
             transparentColor = MagickColor.FromRgb(255, 0, 255);
         }
 
-        unchecked {
-            var tcBlue = (byte) transparentColor.B;
-            var tcGreen = (byte) transparentColor.G;
-            var tcRed = (byte) transparentColor.R;
+        unchecked
+        {
+            var tcBlue = (byte)transparentColor.B;
+            var tcGreen = (byte)transparentColor.G;
+            var tcRed = (byte)transparentColor.R;
 
-            var atcBlue = (byte) _additionalTransparentColor.B;
-            var atcGreen = (byte) _additionalTransparentColor.G;
-            var atcRed = (byte) _additionalTransparentColor.R;
+            var atcBlue = (byte)_additionalTransparentColor.B;
+            var atcGreen = (byte)_additionalTransparentColor.G;
+            var atcRed = (byte)_additionalTransparentColor.R;
 
-            for (int i = 0; i < pixels.Length; i += 4) {
+            for (int i = 0; i < pixels.Length; i += 4)
+            {
                 // Проверяем прозрачную область.
-                if (pixels[i] == tcBlue && pixels[i + 1] == tcGreen && pixels[i + 2] == tcRed) {
+                if (pixels[i] == tcBlue && pixels[i + 1] == tcGreen && pixels[i + 2] == tcRed)
+                {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;
                     pixels[i + 2] = 0;
@@ -452,7 +525,8 @@ public class ImagesExtractor
 
                 // Проверяем прозрачную область с помощью альтернативной кисти.
                 // Так как иначе будут оставаться розовые пятна на правой панели с юнитами.
-                if (pixels[i] == atcBlue && pixels[i + 1] == atcGreen && pixels[i + 2] == atcRed) {
+                if (pixels[i] == atcBlue && pixels[i + 1] == atcGreen && pixels[i + 2] == atcRed)
+                {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;
                     pixels[i + 2] = 0;
@@ -462,9 +536,11 @@ public class ImagesExtractor
                 }
 
                 // Если файл - аура, то определяем прозрачность по словарю.
-                if (imageType == ImageType.Aura) {
+                if (imageType == ImageType.Aura)
+                {
                     var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
-                    if (colorMap.TryGetValue(index, out var alphaChannel)) {
+                    if (colorMap.TryGetValue(index, out var alphaChannel))
+                    {
                         pixels[i + 3] = alphaChannel;
                     }
 
@@ -472,8 +548,10 @@ public class ImagesExtractor
                 }
 
                 // Если файл тень, то делаем его полупрозрачным.
-                if (imageType == ImageType.Shadow) {
-                    if (pixels[i + 3] != 0) {
+                if (imageType == ImageType.Shadow)
+                {
+                    if (pixels[i + 3] != 0)
+                    {
                         pixels[i + 3] = 128;
                     }
 
@@ -482,7 +560,13 @@ public class ImagesExtractor
             }
         }
 
-        return new RawBitmap(0, magickImage.Height, 0, magickImage.Width, magickImage.Width, magickImage.Height, pixels);
+        return new RawBitmap
+        {
+            OriginalWidth = magickImage.Width,
+            OriginalHeight = magickImage.Height,
+            Bounds = new Bounds(magickImage.Width, magickImage.Height),
+            Data = pixels
+        };
     }
 
     /// <summary>
@@ -491,7 +575,8 @@ public class ImagesExtractor
     private byte[] GetFileContent(File file)
     {
         var fileContent = new byte[file.Size];
-        using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
+        using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+        {
             fileStream.Seek(file.Offset, SeekOrigin.Begin);
             fileStream.Read(fileContent, 0, file.Size);
         }

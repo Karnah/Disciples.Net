@@ -85,7 +85,13 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            var rawBitmap = new RawBitmap(0, 1, 0, 1, 1, 1, colorBytes);
+            var rawBitmap = new RawBitmap
+            {
+                OriginalWidth = 1,
+                OriginalHeight = 1,
+                Bounds = new Bounds(1, 1),
+                Data = colorBytes
+            };
             var bitmap = _bitmapFactory.FromRawToBitmap(rawBitmap);
             gameColors.Add(color, bitmap);
         }

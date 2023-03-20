@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
 using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
-using Disciples.Engine.Platform.Models;
 using Disciples.Resources.Images.Models;
 using Disciples.WPF.Models;
 
@@ -47,35 +44,26 @@ public class WpfBitmapFactory : IBitmapFactory
     /// <inheritdoc />
     public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null)
     {
-        // Если границы не указаны явно, то берём наименьшее возможное изображение.
-        if (bounds == null)
-            bounds = new Bounds(rawBitmap.MinRow, rawBitmap.MaxRow, rawBitmap.MinColumn, rawBitmap.MaxColumn);
-
-        var width = bounds.MaxColumn - bounds.MinColumn;
-        var height = bounds.MaxRow - bounds.MinRow;
-
+        var resultBounds = bounds ?? rawBitmap.Bounds;
+        var width = resultBounds.Width;
+        var height = resultBounds.Height;
         var pixelFormat = PixelFormats.Bgra32;
+        var dpi = 96;
+
         // Размер строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
-        int stride = width << 2;
+        var stride = width << 2;
 
-        var data = new byte[stride * height];
-        for (int row = bounds.MinRow; row < bounds.MaxRow; ++row)
-        {
-            var begin = (row * rawBitmap.Width + bounds.MinColumn) << 2;
-            Buffer.BlockCopy(rawBitmap.Data, begin, data, (row - bounds.MinRow) * stride, stride);
-        }
-
-        var bitmapSource = BitmapSource.Create(width, height, 96, 96, pixelFormat, null, data, stride);
+        var bitmapSource = BitmapSource.Create(width, height, dpi, dpi, pixelFormat, null, GetBitmapByteArray(rawBitmap, resultBounds), stride);
         bitmapSource.Freeze();
 
-        var offsetX = bounds.MinColumn;
-        var offsetY = bounds.MinRow;
+        var offsetX = resultBounds.MinColumn;
+        var offsetY = resultBounds.MinRow;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
         // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
-        if (Math.Abs(rawBitmap.Width - GameInfo.OriginalWidth) < float.Epsilon
-            && Math.Abs(rawBitmap.Height - GameInfo.OriginalHeight) < float.Epsilon)
+        if (Math.Abs(rawBitmap.OriginalWidth - GameInfo.OriginalWidth) < float.Epsilon
+            && Math.Abs(rawBitmap.OriginalHeight - GameInfo.OriginalHeight) < float.Epsilon)
         {
             offsetX -= BIG_FRAME_OFFSET_X;
             offsetY -= BIG_FRAME_OFFSET_Y;
@@ -83,7 +71,6 @@ public class WpfBitmapFactory : IBitmapFactory
 
         return new Frame(width, height, offsetX, offsetY, new WpfBitmap(bitmapSource));
     }
-
 
     /// <inheritdoc />
     public void SaveToFile(IBitmap bitmap, string filePath)
@@ -104,5 +91,46 @@ public class WpfBitmapFactory : IBitmapFactory
             encoder.Frames.Add(bitmapFrame);
             encoder.Save(fileStream);
         }
+    }
+
+    /// <summary>
+    /// Получить результирующий массив данных.
+    /// </summary>
+    private static byte[] GetBitmapByteArray(RawBitmap rawBitmap, Bounds resultBounds)
+    {
+        if (rawBitmap.Bounds == resultBounds)
+            return rawBitmap.Data;
+
+        var width = resultBounds.Width;
+        var height = resultBounds.Height;
+        var stride = width << 2;
+
+        var data = new byte[stride * height];
+        var unionBounds = new Bounds
+        {
+            MinRow = Math.Max(resultBounds.MinRow, rawBitmap.Bounds.MinRow),
+            MaxRow = Math.Min(resultBounds.MaxRow, rawBitmap.Bounds.MaxRow),
+            MinColumn = Math.Max(resultBounds.MinColumn, rawBitmap.Bounds.MinColumn),
+            MaxColumn = Math.Min(resultBounds.MaxColumn, rawBitmap.Bounds.MaxColumn)
+        };
+
+        // Размер итоговой строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
+        var destinationRowLength = width * 4;
+
+        // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
+        var sourceOffsetColumnPixels = unionBounds.MinColumn - rawBitmap.Bounds.MinColumn;
+
+        // Сколько байт в каждой строке нужно копировать в итоговый массив.
+        var copyRowLength = unionBounds.Width * 4;
+
+        for (int row = unionBounds.MinRow; row < unionBounds.MaxRow; ++row)
+        {
+            var begin = (row * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+
+            Buffer.BlockCopy(rawBitmap.Data, begin, data,
+                (row - resultBounds.MinRow) * destinationRowLength, copyRowLength);
+        }
+
+        return data;
     }
 }

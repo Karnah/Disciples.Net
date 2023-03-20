@@ -8,7 +8,6 @@ using Disciples.Avalonia.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
-using Disciples.Engine.Platform.Models;
 using Disciples.Resources.Images.Models;
 using IBitmap = Disciples.Engine.IBitmap;
 
@@ -25,7 +24,6 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     /// Уменьшение смещение для больших изображений по оси Y.
     /// </summary>
     private const int BIG_FRAME_OFFSET_Y = 410;
-
 
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
@@ -47,37 +45,55 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     /// <inheritdoc />
     public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null)
     {
-        // Если границы не указаны явно, то берём наименьшее возможное изображение.
-        if (bounds == null)
-            bounds = new Bounds(rawBitmap.MinRow, rawBitmap.MaxRow, rawBitmap.MinColumn, rawBitmap.MaxColumn);
-
-        var width = bounds.MaxColumn - bounds.MinColumn;
-        var height = bounds.MaxRow - bounds.MinRow;
+        var resultBounds = bounds ?? rawBitmap.Bounds;
+        var width = resultBounds.Width;
+        var height = resultBounds.Height;
         var dpi = new Vector(96, 96);
 
         var bitmap = new WriteableBitmap(new PixelSize(width, height), dpi, PixelFormat.Bgra8888, AlphaFormat.Unpremul);
         using (var l = bitmap.Lock())
         {
-            // Размер строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
-            var stride = width * 4;
-
-            for (int row = bounds.MinRow; row < bounds.MaxRow; ++row)
+            if (bounds == null || bounds.Value == rawBitmap.Bounds)
             {
-                var begin = (row * rawBitmap.Width + bounds.MinColumn) * 4;
+                Marshal.Copy(rawBitmap.Data, 0, new IntPtr(l.Address.ToInt64()), rawBitmap.Data.Length);
+            }
+            else
+            {
+                var unionBounds = new Bounds
+                {
+                    MinRow = Math.Max(resultBounds.MinRow, rawBitmap.Bounds.MinRow),
+                    MaxRow = Math.Min(resultBounds.MaxRow, rawBitmap.Bounds.MaxRow),
+                    MinColumn = Math.Max(resultBounds.MinColumn, rawBitmap.Bounds.MinColumn),
+                    MaxColumn = Math.Min(resultBounds.MaxColumn, rawBitmap.Bounds.MaxColumn)
+                };
 
-                Marshal.Copy(rawBitmap.Data, begin,
-                    new IntPtr(l.Address.ToInt64() + (row - bounds.MinRow) * stride), stride);
+                // Размер итоговой строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
+                var destinationRowLength = width * 4;
+
+                // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
+                var sourceOffsetColumnPixels = unionBounds.MinColumn - rawBitmap.Bounds.MinColumn;
+
+                // Сколько байт в каждой строке нужно копировать в итоговый массив.
+                var copyRowLength = unionBounds.Width * 4;
+
+                for (int row = unionBounds.MinRow; row < unionBounds.MaxRow; ++row)
+                {
+                    var begin = (row * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+
+                    Marshal.Copy(rawBitmap.Data, begin,
+                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.MinRow) * destinationRowLength), copyRowLength);
+                }
             }
         }
 
-        var offsetX = bounds.MinColumn;
-        var offsetY = bounds.MinRow;
+        var offsetX = resultBounds.MinColumn;
+        var offsetY = resultBounds.MinRow;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
         // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
-        if (Math.Abs(rawBitmap.Width - GameInfo.OriginalWidth) < float.Epsilon
-            && Math.Abs(rawBitmap.Height - GameInfo.OriginalHeight) < float.Epsilon)
+        if (Math.Abs(rawBitmap.OriginalWidth - GameInfo.OriginalWidth) < float.Epsilon
+            && Math.Abs(rawBitmap.OriginalHeight - GameInfo.OriginalHeight) < float.Epsilon)
         {
             offsetX -= BIG_FRAME_OFFSET_X;
             offsetY -= BIG_FRAME_OFFSET_Y;

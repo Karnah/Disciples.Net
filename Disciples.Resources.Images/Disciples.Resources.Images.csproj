@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.0.0" />
+    <PackageReference Include="SubstreamSharp" Version="1.0.3" />
   </ItemGroup>
 
 </Project>
