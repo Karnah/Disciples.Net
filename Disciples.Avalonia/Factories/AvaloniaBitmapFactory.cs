@@ -78,7 +78,7 @@ public class AvaloniaBitmapFactory : IBitmapFactory
 
                 for (int row = unionBounds.MinRow; row < unionBounds.MaxRow; ++row)
                 {
-                    var begin = (row * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+                    var begin = ((row - rawBitmap.Bounds.MinRow) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
                     Marshal.Copy(rawBitmap.Data, begin,
                         new IntPtr(l.Address.ToInt64() + (row - resultBounds.MinRow) * destinationRowLength), copyRowLength);

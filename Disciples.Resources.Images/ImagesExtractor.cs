@@ -1,4 +1,5 @@
-﻿using Disciples.Resources.Images.Enums;
+﻿using System.Buffers;
+using Disciples.Resources.Images.Enums;
 using Disciples.Resources.Images.Helpers;
 using Disciples.Resources.Images.Models;
 using ImageMagick;
@@ -16,7 +17,7 @@ namespace Disciples.Resources.Images;
 public class ImagesExtractor
 {
     // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным.
-    private readonly MagickColor _additionalTransparentColor = MagickColor.FromRgb(252, 2, 252);
+    private readonly int _additionalTransparentColor = GetColor(252, 2, 252);
 
     private readonly string _path;
 
@@ -26,7 +27,6 @@ public class ImagesExtractor
 
     private IDictionary<string, MqImage>? _mqImages;
     private IDictionary<string, MqAnimation>? _mqAnimations;
-
 
     /// <summary>
     /// Создать объект типа <see cref="ImagesExtractor" />.
@@ -485,47 +485,28 @@ public class ImagesExtractor
             {
                 unchecked
                 {
-                    var color = magickImage.GetColormapColor(i);
-                    var index = ((byte)color.B << 16) + ((byte)color.G << 8) + (byte)color.R;
+                    var color = magickImage.GetColormapColor(i)!;
+                    var index = GetColor(color.B, color.G, color.R);
 
                     colorMap[index] = (byte)i;
                 }
             }
         }
 
-        var pixels = magickImage.GetPixels().ToByteArray("BGRA");
-        var transparentColor = magickImage.GetColormapColor(0);
-        if (transparentColor == null)
-        {
-            transparentColor = MagickColor.FromRgb(255, 0, 255);
-        }
+        var pixels = magickImage.GetPixels().ToByteArray("BGRA")!;
+        var zeroColor = magickImage.GetColormapColor(0);
+        var mainTransparentColor = zeroColor == null
+            ? GetColor(255, 0, 255)
+            : GetColor(zeroColor.B, zeroColor.G, zeroColor.R);
 
         unchecked
         {
-            var tcBlue = (byte)transparentColor.B;
-            var tcGreen = (byte)transparentColor.G;
-            var tcRed = (byte)transparentColor.R;
-
-            var atcBlue = (byte)_additionalTransparentColor.B;
-            var atcGreen = (byte)_additionalTransparentColor.G;
-            var atcRed = (byte)_additionalTransparentColor.R;
-
             for (int i = 0; i < pixels.Length; i += 4)
             {
+                var color = GetColor(pixels[i], pixels[i+1], pixels[i+2]);
+
                 // Проверяем прозрачную область.
-                if (pixels[i] == tcBlue && pixels[i + 1] == tcGreen && pixels[i + 2] == tcRed)
-                {
-                    pixels[i] = 0;
-                    pixels[i + 1] = 0;
-                    pixels[i + 2] = 0;
-                    pixels[i + 3] = 0;
-
-                    continue;
-                }
-
-                // Проверяем прозрачную область с помощью альтернативной кисти.
-                // Так как иначе будут оставаться розовые пятна на правой панели с юнитами.
-                if (pixels[i] == atcBlue && pixels[i + 1] == atcGreen && pixels[i + 2] == atcRed)
+                if (color == mainTransparentColor || color == _additionalTransparentColor)
                 {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;
@@ -538,11 +519,8 @@ public class ImagesExtractor
                 // Если файл - аура, то определяем прозрачность по словарю.
                 if (imageType == ImageType.Aura)
                 {
-                    var index = (pixels[i] << 16) + (pixels[i + 1] << 8) + pixels[i + 2];
-                    if (colorMap.TryGetValue(index, out var alphaChannel))
-                    {
+                    if (colorMap.TryGetValue(color, out var alphaChannel))
                         pixels[i + 3] = alphaChannel;
-                    }
 
                     continue;
                 }
@@ -551,9 +529,7 @@ public class ImagesExtractor
                 if (imageType == ImageType.Shadow)
                 {
                     if (pixels[i + 3] != 0)
-                    {
                         pixels[i + 3] = 128;
-                    }
 
                     continue;
                 }
@@ -567,6 +543,16 @@ public class ImagesExtractor
             Bounds = new Bounds(magickImage.Width, magickImage.Height),
             Data = pixels
         };
+    }
+
+    /// <summary>
+    /// Получить цвет пикселя.
+    /// </summary>
+    private static int GetColor(uint blue, uint green, uint red)
+    {
+        return ((byte)blue << 16)
+               | ((byte)green << 8)
+               | (byte)red;
     }
 
     /// <summary>
