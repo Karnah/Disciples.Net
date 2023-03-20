@@ -140,7 +140,7 @@ public class InitialMigration : Migration
             .WithColumn("UpgradeChangeLevel").AsInt32().NotNullable().WithColumnDescription("оследний уровень, когда рост характеристик рассчитывается по формуле LowLevelUpgradeId")
             .WithColumn("HighLevelUpgradeId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня сверх UpgradeChangeLevel").ForeignKey("UnitLevelUpgrade", "Id")
             .WithColumn("IsLeaderWaterOnly").AsBoolean().NotNullable().WithColumnDescription("Признак, что юнит перемещается только по воде")
-            .WithColumn("DeathAnimation").AsInt32().NotNullable().WithColumnDescription("Анимация, которая отображается при смерти юнита")
+            .WithColumn("DeathAnimationType").AsInt32().NotNullable().WithColumnDescription("Анимация, которая отображается при смерти юнита")
             ;
     }
 

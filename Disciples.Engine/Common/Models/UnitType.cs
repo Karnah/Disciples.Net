@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
@@ -215,9 +216,8 @@ public class UnitType
 
     /// <summary>
     /// Анимация, которая отображается при смерти юнита.
-    /// TODO Enum?
     /// </summary>
-    public int DeathAnimation { get; init; }
+    public UnitDeathAnimationType DeathAnimationType { get; init; }
 
     /// <summary>
     /// Защита от источников атак.

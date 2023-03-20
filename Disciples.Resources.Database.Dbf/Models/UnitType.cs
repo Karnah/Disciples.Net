@@ -254,8 +254,7 @@ public class UnitType : IEntity
 
     /// <summary>
     /// Анимация, которая отображается при смерти юнита.
-    /// TODO Enum?
     /// </summary>
     [Column("DEATH_ANIM")]
-    public int DeathAnimation { get; init; }
+    public UnitDeathAnimationType DeathAnimationType { get; init; }
 }

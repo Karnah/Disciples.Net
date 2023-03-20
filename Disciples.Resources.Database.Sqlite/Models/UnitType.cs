@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Disciples.Resources.Database.Sqlite.Components;
+﻿using Disciples.Resources.Database.Sqlite.Components;
 using Disciples.Resources.Database.Sqlite.Enums;
 
 namespace Disciples.Resources.Database.Sqlite.Models;
@@ -216,9 +215,8 @@ public class UnitType : IEntity
 
     /// <summary>
     /// Анимация, которая отображается при смерти юнита.
-    /// TODO Enum?
     /// </summary>
-    public int DeathAnimation { get; init; }
+    public UnitDeathAnimationType DeathAnimationType { get; init; }
 
     /// <summary>
     /// Защита юнита от источников атак.

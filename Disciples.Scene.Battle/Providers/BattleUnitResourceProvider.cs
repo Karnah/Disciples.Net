@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
@@ -7,24 +8,14 @@ using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Resources;
+using Disciples.Scene.Battle.Resources.Enum;
 
 namespace Disciples.Scene.Battle.Providers;
 
 /// <inheritdoc cref="IBattleUnitResourceProvider" />
 internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResourceProvider
 {
-    private readonly string[] _deathAnimationNames = {
-        string.Empty,
-        "DEATH_HUMAN_S13",
-        "DEATH_HERETIC_S13",
-        "DEATH_DWARF_S15",
-        "DEATH_UNDEAD_S15",
-        "DEATH_NEUTRAL_S10",
-        "DEATH_DRAGON_S15",
-        "DEATH_GHOST_S15",
-        "DEATH_ELF_S15"
-    };
-
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
@@ -90,11 +81,11 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Извлечь анимации юнита.
     /// </summary>
-    /// <param name="unitId">Идентификатор типа юнита.</param>
+    /// <param name="unitTypeId">Идентификатор типа юнита.</param>
     /// <param name="direction">Направление юнита.</param>
-    private BattleUnitAnimation ExtractUnitAnimation(string unitId, BattleDirection direction)
+    private BattleUnitAnimation ExtractUnitAnimation(string unitTypeId, BattleDirection direction)
     {
-        var unitType = _unitInfoProvider.GetUnitType(unitId);
+        var unitType = _unitInfoProvider.GetUnitType(unitTypeId);
         // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
         var unitFrames = new Dictionary<BattleUnitState, BattleUnitFrames>
         {
@@ -106,100 +97,75 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
             if (action == BattleUnitState.Dead)
                 continue;
 
-            unitFrames.Add(action, GetUnitFrames(unitId, direction, action));
+            unitFrames.Add(action, GetUnitFrames(unitTypeId, direction, action));
         }
 
-        // Методом перебора смотрим, есть ли кадры атаки, применяемые к одному юниту.
-        var singleTargetFrames =
-            // Анимация зависит от положения.
-            GetAnimationFrames($"{unitId.ToUpper()}TUCHA1{GetDirectionResourceKey(direction)}00") ??
-            // Анимация симметрична.
-            GetAnimationFrames($"{unitId.ToUpper()}TUCHA1B00");
-        BattleUnitTargetAnimation? unitTargetAnimation = null;
-        if (singleTargetFrames != null)
-        {
-            unitTargetAnimation = new BattleUnitTargetAnimation(true, singleTargetFrames);
-        }
-        else
-        {
-            // Кадры атаки, которые применяется целиком на площадь.
-            var areaTargetFrames =
-                // Анимация зависит от положения.
-                GetAnimationFrames($"{unitId.ToUpper()}HEFFA1{GetDirectionResourceKey(direction)}00") ??
-                // Анимация симметрична.
-                GetAnimationFrames($"{unitId.ToUpper()}HEFFA1B00");
-
-            if (areaTargetFrames != null)
-            {
-                unitTargetAnimation = new BattleUnitTargetAnimation(false, areaTargetFrames);
-            }
-        }
-
-        var deathAnimation = GetDeathFrames(unitType.DeathAnimation);
+        var unitTargetAnimation = GetUnitTargetAnimation(unitTypeId);
+        var deathAnimation = GetDeathFrames(unitType.DeathAnimationType);
         return new BattleUnitAnimation(unitFrames, unitTargetAnimation, deathAnimation);
     }
 
-
-    // g000uu0015 - ид в верхнем регистре.
-    // HHIT - юнита ударили | HMOVE - атакует | IDLE - ждёт | STIL - замер(например, паралич) | TUCH - бьёт 1 врага | HEFF - бьёт площадь
-    // A - объект или аура | S - тень
-    // 1 - объект | 2 -аура
-    // A - атакующий, лицом | D - защищающийся, спиной | B - симметрично
-    // 00
-    private BattleUnitFrames GetUnitFrames(string unitId, BattleDirection direction, BattleUnitState unitState)
+    /// <summary>
+    /// Получить анимацию юнита.
+    /// </summary>
+    private BattleUnitFrames GetUnitFrames(string unitTypeId, BattleDirection direction, BattleUnitState unitState)
     {
-        var shadowImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}S1{GetDirectionResourceKey(direction)}00";
-        var shadowFrames = GetAnimationFrames(shadowImagesName);
+        var shadowKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Shadow);
+        var shadowFrames = GetAnimationFrames(shadowKey);
 
-        var unitImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}A1{GetDirectionResourceKey(direction)}00";
-        var unitFrames = GetAnimationFrames(unitImagesName);
+        var bodyKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Body);
+        var unitFrames = GetAnimationFrames(bodyKey);
         if (unitFrames == null)
-            throw new ArgumentException($"Отсутствует анимация для юнита: {unitImagesName}");
+            throw new ArgumentException($"Отсутствует анимация для юнита: {bodyKey.Key}");
 
-        var auraImagesName = $"{unitId.ToUpper()}{GetUnitStateResourceKey(unitState)}A2{GetDirectionResourceKey(direction)}00";
-        var auraFrames = GetAnimationFrames(auraImagesName);
+        var auraKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Aura);
+        var auraFrames = GetAnimationFrames(auraKey);
 
         return new BattleUnitFrames(shadowFrames, unitFrames, auraFrames);
     }
 
     /// <summary>
+    /// Получить анимацию, которая применяется к атакуемым юнитам.
+    /// </summary>
+    private BattleUnitTargetAnimation? GetUnitTargetAnimation(string unitTypeId)
+    {
+        // В начале пытаемся достать анимацию для одного юнита.
+        // Если её нет, то для площади.
+        // Если и для площади нет, то просто вернётся null.
+        return GetUnitTargetAnimation(unitTypeId, UnitTargetAnimationType.Single)
+               ?? GetUnitTargetAnimation(unitTypeId, UnitTargetAnimationType.Area);
+    }
+
+    /// <summary>
+    /// Получить анимацию, которая применяется к атакуемым юнитам.
+    /// </summary>
+    private BattleUnitTargetAnimation? GetUnitTargetAnimation(string unitTypeId, UnitTargetAnimationType animationType)
+    {
+        var isSingle = animationType == UnitTargetAnimationType.Single;
+
+        // Проверяем анимацию на одну цель, которая не зависит от направления.
+        var targetWithoutDirectionFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, null));
+        if (targetWithoutDirectionFrames != null)
+            return new BattleUnitTargetAnimation(isSingle, targetWithoutDirectionFrames, targetWithoutDirectionFrames);
+
+        var targetAttackingFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleDirection.Attacker));
+        var targetDefenderFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleDirection.Defender));
+        if (targetAttackingFrames != null && targetDefenderFrames != null)
+            return new BattleUnitTargetAnimation(isSingle, targetAttackingFrames, targetDefenderFrames);
+
+        return null;
+    }
+
+    /// <summary>
     /// Получить кадры анимации.
     /// </summary>
-    private IReadOnlyList<Frame>? GetAnimationFrames(string fileName)
+    private IReadOnlyList<Frame>? GetAnimationFrames(BaseImageKey key)
     {
-        var images = _extractor.GetAnimationFrames(fileName);
+        var images = _extractor.GetAnimationFrames(key.Key);
         if (images == null)
             return null;
 
         return _bitmapFactory.ConvertToFrames(images);
-    }
-
-    /// <summary>
-    /// Получить ключ ресурсах, которое соответствует определённому действию.
-    /// </summary>
-    private static string GetUnitStateResourceKey(BattleUnitState unitState)
-    {
-        return unitState switch
-        {
-            BattleUnitState.Waiting => "IDLE",
-            BattleUnitState.Attacking => "HMOV",
-            BattleUnitState.TakingDamage => "HHIT",
-            BattleUnitState.Paralyzed => "STIL",
-            _ => throw new ArgumentOutOfRangeException(nameof(unitState), unitState, null)
-        };
-    }
-
-    /// <summary>
-    /// Получить ключ ресурсах, которое соответствует определённому положению.
-    /// </summary>
-    private static string GetDirectionResourceKey(BattleDirection direction)
-    {
-        return direction switch
-        {
-            BattleDirection.Attacker => "A",
-            BattleDirection.Defender => "D",
-            _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
-        };
     }
 
     /// <summary>
@@ -210,9 +176,9 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </remarks>
     private IReadOnlyList<Frame> GetDeadFrames(bool isSmall)
     {
-        var sizeChar = isSmall ? 'S' : 'L';
         var imageIndex = RandomGenerator.Get(2);
-        var deadFrame = _battleResourceProvider.GetBattleFrame($"DEAD_HUMAN_{sizeChar}A{imageIndex:00}");
+        var resourceKey = new UnitDeadBodyResourceKey(isSmall, imageIndex);
+        var deadFrame = _battleResourceProvider.GetBattleFrame(resourceKey.Key);
 
         // Необходимо задать дополнительно смещение, чтобы кости оказались в нужном месте.
         var frame = new Frame(
@@ -228,8 +194,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Получить анимацию смерти юнита.
     /// </summary>
-    private IReadOnlyList<Frame> GetDeathFrames(int deathAnimationId)
+    private IReadOnlyList<Frame> GetDeathFrames(UnitDeathAnimationType animationType)
     {
-        return _battleResourceProvider.GetBattleAnimation(_deathAnimationNames[deathAnimationId]);
+        return _battleResourceProvider.GetBattleAnimation(new UnitDeathAnimationResourceKey(animationType).Key);
     }
 }

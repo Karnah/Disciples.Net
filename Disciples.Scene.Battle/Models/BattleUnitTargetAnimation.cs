@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Models;
+using Disciples.Scene.Battle.Enums;
 
 namespace Disciples.Scene.Battle.Models;
 
@@ -7,12 +8,15 @@ namespace Disciples.Scene.Battle.Models;
 /// </summary>
 internal class BattleUnitTargetAnimation
 {
-    public BattleUnitTargetAnimation(bool isSingle, IReadOnlyList<Frame> frames)
+    /// <summary>
+    /// Создать объект типа <see cref="BattleUnitTargetAnimation" />.
+    /// </summary>
+    public BattleUnitTargetAnimation(bool isSingle, IReadOnlyList<Frame> attackerDirectionFrames, IReadOnlyList<Frame> defenderDirectionFrames)
     {
         IsSingle = isSingle;
-        Frames = frames;
+        AttackerDirectionFrames = attackerDirectionFrames;
+        DefenderDirectionFrames = defenderDirectionFrames;
     }
-
 
     /// <summary>
     /// Анимация применяется к одному юниту, а не к площади.
@@ -20,7 +24,12 @@ internal class BattleUnitTargetAnimation
     public bool IsSingle { get; }
 
     /// <summary>
-    /// Кадры анимации.
+    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleDirection.Attacker" />.
     /// </summary>
-    public IReadOnlyList<Frame> Frames { get; }
+    public IReadOnlyList<Frame> AttackerDirectionFrames { get; }
+
+    /// <summary>
+    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleDirection.Defender" />.
+    /// </summary>
+    public IReadOnlyList<Frame> DefenderDirectionFrames { get; }
 }

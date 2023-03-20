@@ -399,8 +399,11 @@ internal class BattleController : BaseSupportLoading, IBattleController
             var isTargetAttacker = targetBattleUnits.First().IsAttacker;
             var (x, y) = BattleUnit.GetSceneUnitPosition(isTargetAttacker, 0.5, 1);
 
+            var targetAnimationFrames = isTargetAttacker
+                ? currentUnitAnimation.BattleUnitAnimation.TargetAnimation.AttackerDirectionFrames
+                : currentUnitAnimation.BattleUnitAnimation.TargetAnimation.DefenderDirectionFrames;
             var areaAnimation = _battleGameObjectContainer.AddAnimation(
-                currentUnitAnimation.BattleUnitAnimation.TargetAnimation.Frames,
+                targetAnimationFrames,
                 x,
                 y,
                 ABOVE_ALL_UNITS_LAYER,
@@ -541,8 +544,11 @@ internal class BattleController : BaseSupportLoading, IBattleController
         var targetUnitAnimation = attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
         if (isMainAttack && targetUnitAnimation?.IsSingle == true)
         {
+            var targetAnimationFrames = targetUnit.IsAttacker
+                ? targetUnitAnimation.AttackerDirectionFrames
+                : targetUnitAnimation.DefenderDirectionFrames;
             var targetAnimation = _battleGameObjectContainer.AddAnimation(
-                targetUnitAnimation.Frames,
+                targetAnimationFrames,
                 targetUnit.X,
                 targetUnit.Y,
                 targetUnit.AnimationComponent.Layer + 2,
