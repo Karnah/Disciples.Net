@@ -21,7 +21,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly IBattleResourceProvider _battleResourceProvider;
     private readonly BattleUnitImagesExtractor _extractor;
 
-    private SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = null!;
+    private Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = null!;
+    private Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = null!;
 
     /// <inheritdoc />
     public BattleUnitResourceProvider(
@@ -61,16 +62,28 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     public BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction)
     {
         var unitTypeId = unitType.Id;
-        if (!_unitsAnimations.ContainsKey((unitTypeId, direction)))
-            _unitsAnimations[(unitTypeId, direction)] = ExtractUnitAnimation(unitTypeId, direction);
+        var animationKey = (unitTypeId, direction);
+        if (!_unitsAnimations.ContainsKey(animationKey))
+            _unitsAnimations[animationKey] = ExtractUnitAnimation(unitTypeId, direction);
 
-        return _unitsAnimations[(unitTypeId, direction)];
+        return _unitsAnimations[animationKey];
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<Frame> GetEffectAnimation(UnitBattleEffectType effectType, bool isSmall)
+    {
+        var animationKey = (effectType, isSmall);
+        if (!_effectsAnimation.ContainsKey(animationKey))
+            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectType, isSmall).Key);
+
+        return _effectsAnimation[animationKey];
     }
 
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _unitsAnimations = new SortedDictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
+        _unitsAnimations = new Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
+        _effectsAnimation = new Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>>();
     }
 
     /// <inheritdoc />
@@ -101,7 +114,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         }
 
         var unitTargetAnimation = GetUnitTargetAnimation(unitTypeId);
-        var deathAnimation = GetDeathFrames(unitType.DeathAnimationType);
+        var deathAnimation = GetDeathAnimation(unitType.DeathAnimationType);
         return new BattleUnitAnimation(unitFrames, unitTargetAnimation, deathAnimation);
     }
 
@@ -194,7 +207,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Получить анимацию смерти юнита.
     /// </summary>
-    private IReadOnlyList<Frame> GetDeathFrames(UnitDeathAnimationType animationType)
+    private IReadOnlyList<Frame> GetDeathAnimation(UnitDeathAnimationType animationType)
     {
         return _battleResourceProvider.GetBattleAnimation(new UnitDeathAnimationResourceKey(animationType).Key);
     }

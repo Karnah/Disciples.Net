@@ -73,6 +73,9 @@ public class AvaloniaBitmapFactory : IBitmapFactory
                 // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
                 var sourceOffsetColumnPixels = unionBounds.MinColumn - rawBitmap.Bounds.MinColumn;
 
+                // Сколько в каждой строке в итоговом массиве нужно пропускать байт.
+                var targetOffsetColumnBytes = (unionBounds.MinColumn - resultBounds.MinColumn) * 4;
+
                 // Сколько байт в каждой строке нужно копировать в итоговый массив.
                 var copyRowLength = unionBounds.Width * 4;
 
@@ -81,7 +84,7 @@ public class AvaloniaBitmapFactory : IBitmapFactory
                     var begin = ((row - rawBitmap.Bounds.MinRow) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
                     Marshal.Copy(rawBitmap.Data, begin,
-                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.MinRow) * destinationRowLength), copyRowLength);
+                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.MinRow) * destinationRowLength + targetOffsetColumnBytes), copyRowLength);
                 }
             }
         }

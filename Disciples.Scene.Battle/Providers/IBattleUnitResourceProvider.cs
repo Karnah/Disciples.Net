@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -35,4 +36,9 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// <param name="unitType">Тип юнита.</param>
     /// <param name="direction">Направление положения юнита.</param>
     BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction);
+
+    /// <summary>
+    /// Получить анимацию эффекта, применяемую к юниту.
+    /// </summary>
+    IReadOnlyList<Frame> GetEffectAnimation(UnitBattleEffectType effectType, bool isSmall);
 }

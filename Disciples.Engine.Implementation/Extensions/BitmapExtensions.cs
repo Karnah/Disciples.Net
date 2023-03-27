@@ -25,7 +25,7 @@ public static class BitmapExtensions
     /// </summary>
     public static IBitmap FromRawToOriginalBitmap(this IBitmapFactory bitmapFactory, RawBitmap image)
     {
-        var bounds = new Bounds(image.OriginalWidth, image.OriginalWidth);
+        var bounds = new Bounds(image.OriginalWidth, image.OriginalHeight);
         return bitmapFactory.FromRawBitmap(image, bounds).Bitmap;
     }
 

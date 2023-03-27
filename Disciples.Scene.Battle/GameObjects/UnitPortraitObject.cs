@@ -221,6 +221,7 @@ internal class UnitPortraitObject : GameObject
             case UnitActionType.Dying:
                 break;
             case UnitActionType.UnderEffect:
+                _instantaneousEffectText = AddText(_textProvider.GetText(GetEffectText(((EffectUnitBattleAction)unitAction).AttackType)));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -374,6 +375,41 @@ internal class UnitPortraitObject : GameObject
             UnitBattleEffectType.Poison => GameColor.Green,
             UnitBattleEffectType.Frostbite => GameColor.Blue,
             _ => null
+        };
+    }
+
+    /// <summary>
+    /// Получить наименования эффекта, что воздействует на юнита.
+    /// </summary>
+    private static string GetEffectText(UnitAttackType attackType)
+    {
+        // TODO Взял из описания типов атак. Возможно, что неправильно.
+        return attackType switch
+        {
+            UnitAttackType.Damage => "X005TA0791",
+            UnitAttackType.Drain => "X005TA0792",
+            UnitAttackType.Paralyze => "X005TA0789",
+            UnitAttackType.Heal => "X005TA0802",
+            UnitAttackType.Fear => "X005TA0794",
+            UnitAttackType.BoostDamage => "X005TA0795",
+            UnitAttackType.Petrify => "X005TA0790",
+            UnitAttackType.LowerDamage => "X005TA0796",
+            UnitAttackType.LowerInitiative => "X005TA0797",
+            UnitAttackType.Poison => "X005TA0798",
+            UnitAttackType.Frostbite => "X005TA0799",
+            UnitAttackType.Revive => "X005TA0800",
+            UnitAttackType.DrainOverflow => "X005TA0801", // TODO перепроверить.
+            UnitAttackType.Cure => "X005TA0793",
+            UnitAttackType.Summon => "X005TA0803",
+            UnitAttackType.DrainLevel => "X005TA0804",
+            UnitAttackType.GiveAttack => "X005TA0805",
+            UnitAttackType.Doppelganger => "X005TA0806",
+            UnitAttackType.TransformSelf => "X005TA0807",
+            UnitAttackType.TransformOther => "X005TA0808",
+            UnitAttackType.Blister => "X160TA0012",
+            UnitAttackType.BestowWards => "X160TA0014",
+            UnitAttackType.Shatter => "X160TA0020",
+            _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
     }
 

@@ -1,4 +1,6 @@
-﻿namespace Disciples.Scene.Battle.Resources;
+﻿using Disciples.Scene.Battle.Resources.Extensions;
+
+namespace Disciples.Scene.Battle.Resources;
 
 /// <summary>
 /// Ключ для поиска изображения мёртвого тела на поле боя.
@@ -12,8 +14,7 @@ internal class UnitDeadBodyResourceKey : BaseImageKey
     {
         if (imageIndex < 0 || imageIndex > 1)
             throw new ArgumentOutOfRangeException(nameof(imageIndex), "Индекс должен равняться 0 или 1");
-        var sizeChar = isSmall ? 'S' : 'L';
-        Key = $"DEAD_HUMAN_{sizeChar}A{imageIndex:00}";
+        Key = $"DEAD_HUMAN_{isSmall.GetIsSmallResourceKey()}A{imageIndex:00}";
     }
 
     /// <inheritdoc />

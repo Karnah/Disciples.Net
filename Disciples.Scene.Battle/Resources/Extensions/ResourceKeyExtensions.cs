@@ -92,4 +92,28 @@ internal static class ResourceKeyExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(animationType), animationType, null)
         };
     }
+
+    /// <summary>
+    /// Получить ключ в ресурсах, который соответствует определённой анимации атаки.
+    /// </summary>
+    public static string GetResourceKey(this UnitBattleEffectType effectType)
+    {
+        return effectType switch
+        {
+            UnitBattleEffectType.Poison => "POISONANIM",
+            UnitBattleEffectType.Frostbite => "FROSTBITEANIM",
+            UnitBattleEffectType.Blister => "BLISTERANIM",
+            _ => throw new ArgumentOutOfRangeException(nameof(effectType), effectType, null)
+        };
+    }
+
+    /// <summary>
+    /// Получить ключ в ресурсах, который соответствует определённой анимации атаки.
+    /// </summary>
+    public static string GetIsSmallResourceKey(this bool isSmall)
+    {
+        return isSmall
+            ? "S"
+            : "L";
+    }
 }
