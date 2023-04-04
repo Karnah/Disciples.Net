@@ -161,8 +161,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         if (targetWithoutDirectionFrames != null)
             return new BattleUnitTargetAnimation(isSingle, targetWithoutDirectionFrames, targetWithoutDirectionFrames);
 
-        var targetAttackingFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleDirection.Attacker));
-        var targetDefenderFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleDirection.Defender));
+        var targetAttackingFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleSquadPosition.Attacker));
+        var targetDefenderFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleSquadPosition.Defender));
         if (targetAttackingFrames != null && targetDefenderFrames != null)
             return new BattleUnitTargetAnimation(isSingle, targetAttackingFrames, targetDefenderFrames);
 

@@ -24,12 +24,12 @@ internal class BattleUnitTargetAnimation
     public bool IsSingle { get; }
 
     /// <summary>
-    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleDirection.Attacker" />.
+    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Attacker" />.
     /// </summary>
     public IReadOnlyList<Frame> AttackerDirectionFrames { get; }
 
     /// <summary>
-    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleDirection.Defender" />.
+    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Defender" />.
     /// </summary>
     public IReadOnlyList<Frame> DefenderDirectionFrames { get; }
 }

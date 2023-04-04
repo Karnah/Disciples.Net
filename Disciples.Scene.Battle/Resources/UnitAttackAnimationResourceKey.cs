@@ -12,9 +12,9 @@ internal class UnitAttackAnimationResourceKey : BaseImageKey
     /// <summary>
     /// Создать объект типа <see cref="UnitAttackAnimationResourceKey" />.
     /// </summary>
-    public UnitAttackAnimationResourceKey(string unitTypeId, UnitTargetAnimationType animationType, BattleDirection? direction)
+    public UnitAttackAnimationResourceKey(string unitTypeId, UnitTargetAnimationType animationType, BattleSquadPosition? squadPosition)
     {
-        Key = $"{unitTypeId}{animationType.GetResourceKey()}1{direction.GetResourceKey()}00";
+        Key = $"{unitTypeId}{animationType.GetResourceKey()}1{squadPosition.GetResourceKey()}00";
     }
 
     /// <inheritdoc />

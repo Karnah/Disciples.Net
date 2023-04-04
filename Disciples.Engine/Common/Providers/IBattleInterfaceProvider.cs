@@ -17,6 +17,11 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IReadOnlyList<IBitmap> Battleground { get; }
 
     /// <summary>
+    /// Картинка левой панели с юнитами.
+    /// </summary>
+    IBitmap LeftPanel { get; }
+
+    /// <summary>
     /// Картинка правой панели с юнитами.
     /// </summary>
     IBitmap RightPanel { get; }

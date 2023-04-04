@@ -51,6 +51,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
         var battleIcons = _interfaceProvider.GetImageParts("DLG_BATTLE_A.PNG");
 
+        LeftPanel = battleIcons["DLG_BATTLE_A_LUNITGROUP"];
         RightPanel = battleIcons["DLG_BATTLE_A_RUNITGROUP"];
         BottomPanel = battleIcons["DLG_BATTLE_A_MAINCOMBATBG"];
         PanelSeparator = battleIcons["DLG_BATTLE_A_SPLITLRG"];
@@ -81,6 +82,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
     /// <inheritdoc />
     public IReadOnlyList<IBitmap> Battleground { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap LeftPanel { get; private set; } = null!;
 
     /// <inheritdoc />
     public IBitmap RightPanel { get; private set; } = null!;

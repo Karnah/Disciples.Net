@@ -31,9 +31,12 @@ internal class BattleUnit : GameObject
     {
         Unit = unit;
         IsAttacker = isAttacker;
+        SquadPosition = isAttacker
+            ? BattleSquadPosition.Attacker
+            : BattleSquadPosition.Defender;
         Direction = isAttacker
-            ? BattleDirection.Attacker
-            : BattleDirection.Defender;
+            ? BattleDirection.Face
+            : BattleDirection.Back;
         UnitState = BattleUnitState.Waiting;
 
         AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
@@ -62,6 +65,11 @@ internal class BattleUnit : GameObject
     /// Принадлежит ли юнит атакующему отряду.
     /// </summary>
     public bool IsAttacker { get; }
+
+    /// <summary>
+    /// Направление, куда смотрит юнит.
+    /// </summary>
+    public BattleSquadPosition SquadPosition { get; set; }
 
     /// <summary>
     /// Направление, куда смотрит юнит.

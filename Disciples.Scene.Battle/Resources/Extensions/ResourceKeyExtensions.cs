@@ -43,20 +43,25 @@ internal static class ResourceKeyExtensions
     /// </summary>
     public static string GetResourceKey(this BattleDirection direction)
     {
-        return GetResourceKey((BattleDirection?)direction);
+        return direction switch
+        {
+            BattleDirection.Face => "A",
+            BattleDirection.Back => "D",
+            _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+        };
     }
 
     /// <summary>
-    /// Получить ключ в ресурсах, который соответствует определённому положению.
+    /// Получить ключ в ресурсах, который соответствует определённому положению отряда.
     /// </summary>
-    public static string GetResourceKey(this BattleDirection? direction)
+    public static string GetResourceKey(this BattleSquadPosition? squadPosition)
     {
-        return direction switch
+        return squadPosition switch
         {
-            BattleDirection.Attacker => "A",
-            BattleDirection.Defender => "D",
+            BattleSquadPosition.Attacker => "A",
+            BattleSquadPosition.Defender => "D",
             null => "B", // Симметричная анимация.
-            _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(squadPosition), squadPosition, null)
         };
     }
 
