@@ -4,12 +4,12 @@ using Disciples.Scene.Battle.GameObjects;
 namespace Disciples.Scene.Battle.Models.BattleActions;
 
 /// <summary>
-/// Атака юнита.
+/// Нанесение урона юниту.
 /// </summary>
-internal class AttackUnitBattleAction : UnitBattleAction
+internal class GetHitUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public AttackUnitBattleAction(BattleUnit targetUnit, int power, UnitAttackType attackType) : base(targetUnit, Enums.UnitActionType.GetHit)
+    public GetHitUnitBattleAction(BattleUnit targetUnit, int power, UnitAttackType attackType) : base(targetUnit, Enums.UnitActionType.GetHit)
     {
         Power = power;
         AttackType = attackType;

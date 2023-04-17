@@ -83,6 +83,47 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
 
     /// <summary>
+    /// Обработать положение курсора.
+    /// </summary>
+    public void ProcessMousePosition(Point mousePosition)
+    {
+        var isMainRightPanel = _initialSquadPosition == BattleSquadPosition.Attacker;
+
+        if (IsDisplayingBothPanels)
+        {
+            var isNeedHideOppositePanel = isMainRightPanel
+                ? mousePosition.X > _leftPanel.PanelImage!.Width
+                : mousePosition.X < GameInfo.OriginalWidth - _rightPanel.PanelImage!.Width;
+            if (isNeedHideOppositePanel)
+            {
+                IsDisplayingBothPanels = false;
+
+                RemovePanel(!isMainRightPanel);
+
+                ArrangePortraits(_displayingSquad!.Value, isMainRightPanel);
+                ArrangeBorders(isMainRightPanel);
+            }
+        }
+        else
+        {
+            var isNeedDisplayOppositePanel = isMainRightPanel
+                ? mousePosition.X < 10
+                : mousePosition.X > GameInfo.OriginalWidth - 10;
+            if (isNeedDisplayOppositePanel)
+            {
+                IsDisplayingBothPanels = true;
+
+                ArrangePortraits(BattleSquadPosition.Attacker, false);
+                ArrangeBorders(false);
+
+                // TODO Возможно, его нужно закрывать дополнительно.
+                ArrangePortraits(BattleSquadPosition.Defender, true);
+                ArrangeBorders(true);
+            }
+        }
+    }
+
+    /// <summary>
     /// Разрешить переключать юнитов на панели.
     /// </summary>
     public void EnablePanelSwitch(BattleSquadPosition displayingSquad)
@@ -173,11 +214,48 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     {
         // Смена отряда не работает, если отображаются обе панели.
         if (IsDisplayingBothPanels)
+        {
+            // TODO Смена состояния кнопки происходит в самой кнопке. Здесь мы возвращаем его обратно.
+            // Думаю, требуется другой механизм для обработки этого.
+            _reflectPanelButton.SetState(_displayingSquad == BattleSquadPosition.Attacker);
             return;
+        }
 
         SetDisplayingSquad(_displayingSquad == BattleSquadPosition.Defender
             ? BattleSquadPosition.Attacker
             : BattleSquadPosition.Defender);
+    }
+
+    /// <summary>
+    /// Удалить целиком панель.
+    /// </summary>
+    /// <param name="isRightPanel">
+    /// <see langword="true"/>, если нужно инициализировать юнитов на ПРАВОЙ панели.
+    /// <see langword="false"/>, если нужно инициализировать юнитов на ЛЕВОЙ панели.
+    /// </param>
+    private void RemovePanel(bool isRightPanel)
+    {
+        var panel = isRightPanel
+            ? _rightPanel
+            : _leftPanel;
+
+        _sceneObjectContainer.RemoveSceneObject(panel.PanelImage);
+
+        foreach (var unitPortrait in panel.UnitPortraits)
+        {
+            unitPortrait.Destroy();
+        }
+
+        foreach (var borderAnimation in panel.BorderAnimations)
+        {
+            borderAnimation.Destroy();
+        }
+
+        panel.PanelImage = null;
+        panel.PanelSquadDirection = null;
+        panel.BattleUnits = Array.Empty<BattleUnit>();
+        panel.UnitPortraits = Array.Empty<UnitPortraitObject>();
+        panel.BorderAnimations = Array.Empty<AnimationObject>();
     }
 
     /// <summary>
@@ -290,6 +368,10 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             return;
 
         CleanAnimationsOnUnitsPanel(panel);
+
+        // Если битва закончена, никаких дополнительных рамок не нужно.
+        if (_context.BattleState == BattleState.WaitExit)
+            return;
 
         var currentUnit = CurrentBattleUnit.Unit;
         var unitPanelAnimations = new List<AnimationObject>();

@@ -33,11 +33,7 @@ internal class MainAttackBattleAction : AnimationBattleAction
     /// </remarks>
     private static int CalculateEndFrameIndex(BattleUnit unit)
     {
-        // Обязательно обновляем состояние компонента, чтобы он был в актуальном состоянии.
-        var animationComponent = unit.AnimationComponent;
-        animationComponent.Update(0);
-
-        var framesCount = animationComponent.FramesCount;
+        var framesCount = unit.AnimationComponent.FramesCount;
 
         return unit.Unit.UnitType.Id switch
         {

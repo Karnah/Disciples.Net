@@ -1,0 +1,87 @@
+﻿using Disciples.Scene.Battle.Controllers.UnitActions;
+using Disciples.Scene.Battle.GameObjects;
+using Disciples.Scene.Battle.Models;
+
+namespace Disciples.Scene.Battle.Controllers;
+
+/// <summary>
+/// Контроллер для запуска действий юнитов.
+/// </summary>
+internal class BattleUnitActionController
+{
+    private readonly BattleContext _battleContext;
+    private readonly BattleProcessor _battleProcessor;
+    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
+    private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+
+    /// <summary>
+    /// Создать объект типа <see cref="BattleUnitActionController" />.
+    /// </summary>
+    public BattleUnitActionController(
+        BattleContext battleContext,
+        BattleProcessor battleProcessor,
+        IBattleGameObjectContainer battleGameObjectContainer,
+        BattleUnitPortraitPanelController unitPortraitPanelController)
+    {
+        _battleContext = battleContext;
+        _battleProcessor = battleProcessor;
+        _battleGameObjectContainer = battleGameObjectContainer;
+        _unitPortraitPanelController = unitPortraitPanelController;
+    }
+
+    /// <summary>
+    /// Обработать атаку текущего юнита на указанного.
+    /// </summary>
+    public void BeginMainAttack(BattleUnit targetBattleUnit)
+    {
+        var mainAttack = new MainAttackUnitAction(
+            _battleContext,
+            _battleProcessor,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController,
+            targetBattleUnit,
+            this);
+        _battleContext.AddUnitAction(mainAttack);
+    }
+
+    /// <summary>
+    /// Обработать результат второй атаки текущего юнита.
+    /// </summary>
+    public void BeginSecondaryAttack(BattleUnit attackerBattleUnit, IReadOnlyList<BattleUnit> targetBattleUnits, int? power, bool shouldPassTurn)
+    {
+        var secondaryAttack = new SecondaryAttackUnitAction(
+            _battleContext,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController,
+            _battleProcessor,
+            attackerBattleUnit,
+            targetBattleUnits,
+            power,
+            shouldPassTurn);
+        _battleContext.AddUnitAction(secondaryAttack);
+    }
+
+    /// <summary>
+    /// Защита юнита.
+    /// </summary>
+    public void Defend()
+    {
+        var defend = new DefendUnitAction(
+            _battleContext,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController);
+        _battleContext.AddUnitAction(defend);
+    }
+
+    /// <summary>
+    /// Ожидание юнита.
+    /// </summary>
+    public void Wait()
+    {
+        var defend = new WaitUnitAction(
+            _battleContext,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController);
+        _battleContext.AddUnitAction(defend);
+    }
+}

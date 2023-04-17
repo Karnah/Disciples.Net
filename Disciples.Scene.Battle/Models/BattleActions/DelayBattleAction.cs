@@ -3,7 +3,7 @@
 /// <summary>
 /// После завершения последнего действия выполняется небольшая задержка перед тем, как будет разблокирован интерфейс.
 /// </summary>
-internal class DelayLastBattleAction : BaseTimerBattleAction
+internal class DelayBattleAction : BaseTimerBattleAction
 {
     /// <summary>
     /// Задержка после завершения всех действий, прежде чем ход перейдёт к следующему юниту.
@@ -11,9 +11,9 @@ internal class DelayLastBattleAction : BaseTimerBattleAction
     private const long ACTION_DELAY = 250;
 
     /// <summary>
-    /// Создать объект типа <see cref="DelayLastBattleAction" />.
+    /// Создать объект типа <see cref="DelayBattleAction" />.
     /// </summary>
-    public DelayLastBattleAction() : base(ACTION_DELAY)
+    public DelayBattleAction() : base(ACTION_DELAY)
     {
     }
 }

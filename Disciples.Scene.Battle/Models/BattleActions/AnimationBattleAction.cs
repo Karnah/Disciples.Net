@@ -42,9 +42,6 @@ internal class AnimationBattleAction : IBattleAction
     /// </summary>
     private static int GetAnimationComponentEndIndex(BaseAnimationComponent animationComponent)
     {
-        // Обязательно обновляем состояние компонента, чтобы он был в актуальном состоянии.
-        animationComponent.Update(0);
-
         return animationComponent.FramesCount - 1;
     }
 }

@@ -185,7 +185,7 @@ internal class UnitPortraitObject : GameObject
     public void ProcessBeginUnitAction(UnitBattleAction unitAction)
     {
         // Обрабатываем попадание в юнита.
-        if (unitAction is AttackUnitBattleAction attackUnitAction)
+        if (unitAction is GetHitUnitBattleAction attackUnitAction)
         {
             switch (attackUnitAction.AttackType)
             {

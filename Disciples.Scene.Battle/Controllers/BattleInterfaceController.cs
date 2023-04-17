@@ -10,11 +10,11 @@ using Disciples.Engine.Enums;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
+using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
@@ -35,6 +35,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly BattleProcessor _battleProcessor;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly BattleUnitActionController _unitActionController;
 
     private IImageSceneObject _currentUnitFace = null!;
     private BattleUnitInfoGameObject _currentUnitTextInfoObject = null!;
@@ -86,7 +87,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         BattleContext context,
         BattleProcessor battleProcessor,
         ISceneObjectContainer sceneObjectContainer,
-        BattleUnitPortraitPanelController unitPortraitPanelController)
+        BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleUnitActionController unitActionController)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
@@ -96,6 +98,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _battleProcessor = battleProcessor;
         _sceneObjectContainer = sceneObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _unitActionController = unitActionController;
     }
 
     /// <inheritdoc />
@@ -131,14 +134,11 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
 
-    /// <summary>
-    /// Список всех действий на поле боя.
-    /// </summary>
-    private BattleActionContainer Actions => _context.Actions;
-
     /// <inheritdoc />
     public void BeforeSceneUpdate()
     {
+        _unitPortraitPanelController.ProcessMousePosition(_context.MousePosition);
+
         foreach (var inputDeviceEvent in _context.InputDeviceEvents)
         {
             ProcessInputDeviceEvent(inputDeviceEvent);
@@ -151,24 +151,19 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </remarks>
     public void AfterSceneUpdate()
     {
-        if (Actions.IsActionsBeginThisUpdate)
+        switch (_context.BattleState)
         {
-            ProcessActionsBegin();
-        }
+            case BattleState.BeginUnitAction:
+                ProcessActionsBegin();
+                break;
 
-        foreach (var beginAction in Actions.New)
-        {
-            ProcessBeginAction(beginAction);
-        }
+            case BattleState.CompletedUnitAction:
+                ProcessActionsCompleted();
+                break;
 
-        foreach (var beginAction in Actions.Completed)
-        {
-            ProcessCompletedAction(beginAction);
-        }
-
-        if (Actions.IsAllActionsCompletedThisUpdate)
-        {
-            ProcessActionsCompleted();
+            case BattleState.CompletedBattle:
+                ProcessBattleCompleted();
+                break;
         }
     }
 
@@ -181,7 +176,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _unitPortraitPanelController.Load();
 
         var displayingSquad = GetPanelDisplayingSquad();
-        if (Actions.IsNoActions)
+        if (_context.BattleState == BattleState.WaitPlayerTurn)
             _unitPortraitPanelController.EnablePanelSwitch(displayingSquad);
         else
             _unitPortraitPanelController.DisablePanelSwitch(displayingSquad);
@@ -239,7 +234,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private void InitializeButtons()
     {
         _defendButton = _battleGameObjectContainer.AddButton(_interfaceProvider.DefendButton, () => {
-            Actions.Add(new DefendBattleAction());
+            _unitActionController.Defend();
         }, 380, 504, INTERFACE_LAYER + 2, KeyboardButton.D);
 
         _retreatButton = _battleGameObjectContainer.AddButton(_interfaceProvider.RetreatButton, () => {
@@ -247,7 +242,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }, 343, 524, INTERFACE_LAYER + 2, KeyboardButton.R);
 
         _waitButton = _battleGameObjectContainer.AddButton(_interfaceProvider.WaitButton, () => {
-            Actions.Add(new WaitingBattleAction());
+            _unitActionController.Wait();
         }, 419, 524, INTERFACE_LAYER + 2, KeyboardButton.W);
 
         _instantResolveButton = _battleGameObjectContainer.AddButton(_interfaceProvider.InstantResolveButton, () => {
@@ -263,7 +258,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         ActivateButtons(_instantResolveButton, _autoBattleButton);
 
         // Эти кнопки могут быть недоступны, если первый ход - компьютера.
-        if (Actions.IsAllActionsCompleted)
+        if (_context.BattleState == BattleState.WaitPlayerTurn)
             ActivateButtons(_defendButton, _retreatButton, _waitButton);
     }
 
@@ -430,7 +425,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 return;
 
             if (CanAttack(targetUnitGameObject))
-                Actions.Add(new BeginAttackUnitBattleAction(targetUnitGameObject));
+                _unitActionController.BeginMainAttack(targetUnitGameObject);
         }
         else if (gameObject is UnitPortraitObject unitPortrait)
         {
@@ -439,7 +434,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
             var targetUnitObject = _context.GetBattleUnit(unitPortrait.Unit);
             if (CanAttack(targetUnitObject))
-                Actions.Add(new BeginAttackUnitBattleAction(targetUnitObject));
+                _unitActionController.BeginMainAttack(targetUnitObject);
         }
         else if (gameObject is ButtonObject button)
         {
@@ -507,8 +502,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         _isAnimating = true;
 
-        var attackAction = Actions.New.OfType<BeginAttackUnitBattleAction>().FirstOrDefault();
-        var displayingSquad = attackAction != null
+        var displayingSquad = _context.UnitAction is MainAttackUnitAction attackAction
             // Показываем отряд атакуемого юнита.
             ? attackAction.TargetBattleUnit.SquadPosition
             // Иначе это защита/ожидания и другое действие. Показываем отряд текущего юнита.
@@ -546,46 +540,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     /// <summary>
-    /// Обработать начало нового действия.
-    /// </summary>
-    private void ProcessBeginAction(IBattleAction action)
-    {
-        if (action is UnitBattleAction unitBattleAction)
-        {
-            var portrait = _unitPortraitPanelController.GetUnitPortrait(unitBattleAction.TargetUnit);
-            if (portrait == null)
-                return;
-
-            portrait.ProcessBeginUnitAction(unitBattleAction);
-        }
-
-        if (action is BattleCompletedAction)
-        {
-            ProcessBattleCompleted();
-        }
-    }
-
-    /// <summary>
-    /// Обработать завершение действия.
-    /// </summary>
-    private void ProcessCompletedAction(IBattleAction action)
-    {
-        if (action is UnitBattleAction unitBattleAction)
-        {
-            var portrait = _unitPortraitPanelController.GetUnitPortrait(unitBattleAction.TargetUnit);
-            if (portrait == null)
-                return;
-
-            portrait.ProcessCompletedUnitAction();
-        }
-    }
-
-    /// <summary>
     /// Обработать завершение битвы.
     /// </summary>
     private void ProcessBattleCompleted()
     {
         // BUG. Не работает информация о юните после завершения битвы.
+
+        IsAutoBattle = false;
 
         _isAnimating = false;
 

@@ -113,8 +113,8 @@ internal class BattleScene : BaseScene, IBattleScene
     /// <inheritdoc />
     protected override void AfterSceneUpdate()
     {
+        _battleContext.AfterSceneUpdate();
         _battleController.AfterSceneUpdate();
         _battleInterfaceController.AfterSceneUpdate();
-        _battleContext.AfterSceneUpdate();
     }
 }

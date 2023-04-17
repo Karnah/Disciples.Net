@@ -22,6 +22,8 @@ internal class BattleUnit : GameObject
     /// </summary>
     private const int BATTLE_UNIT_HEIGHT = 100;
 
+    private BattleUnitState _unitState;
+
     public BattleUnit(
         ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
@@ -79,7 +81,20 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Действие, которое выполняет юнит в данный момент.
     /// </summary>
-    public BattleUnitState UnitState { get; set; }
+    public BattleUnitState UnitState
+    {
+        get => _unitState;
+        set
+        {
+            if (_unitState == value)
+                return;
+
+            _unitState = value;
+
+            // Сразу после смены состояния нужно обновить состояние анимаций.
+            AnimationComponent.Update(0);
+        }
+    }
 
 
     /// <summary>

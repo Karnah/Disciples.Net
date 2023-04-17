@@ -108,9 +108,12 @@ public class GameController : IGameController
 
             try
             {
-                CheckInputDeviceSelection();
+                var platformMousePosition = _inputManager.MousePosition;
+                var mousePosition = new Point(platformMousePosition.X, platformMousePosition.Y);
 
-                var data = new UpdateSceneData(ticksCount, _inputDeviceEvents);
+                CheckInputDeviceSelection(mousePosition);
+
+                var data = new UpdateSceneData(ticksCount, mousePosition, _inputDeviceEvents);
                 _currentScene?.UpdateScene(data);
             }
             catch (Exception e)
@@ -127,9 +130,8 @@ public class GameController : IGameController
     /// <summary>
     /// Проверить, если было изменение выделенного объекта.
     /// </summary>
-    private void CheckInputDeviceSelection()
+    private void CheckInputDeviceSelection(Point mousePosition)
     {
-        var mousePosition = _inputManager.MousePosition;
         var selectedGameObject = GameObjects
             .OrderBy(go => go.Y)
             .FirstOrDefault(go => go.IsInteractive &&
