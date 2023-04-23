@@ -2,6 +2,7 @@
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActions;
 
@@ -23,12 +24,13 @@ internal class SecondaryAttackUnitAction : BaseBattleUnitAction
         BattleContext context,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        IBattleUnitResourceProvider unitResourceProvider,
         BattleProcessor battleProcessor,
         BattleUnit attackerBattleUnit,
         IReadOnlyList<BattleUnit> targetBattleUnits,
         int? power,
         bool shouldPassTurn
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController)
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
     {
         _battleProcessor = battleProcessor;
         _attackerBattleUnit = attackerBattleUnit;

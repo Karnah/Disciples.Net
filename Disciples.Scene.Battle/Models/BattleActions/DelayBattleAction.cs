@@ -16,4 +16,11 @@ internal class DelayBattleAction : BaseTimerBattleAction
     public DelayBattleAction() : base(ACTION_DELAY)
     {
     }
+
+    /// <summary>
+    /// Создать объект типа <see cref="DelayBattleAction" />.
+    /// </summary>
+    public DelayBattleAction(int delay) : base(delay)
+    {
+    }
 }

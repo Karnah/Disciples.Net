@@ -47,5 +47,13 @@ public enum GameColor
     /// <summary>
     /// Зелёный.
     /// </summary>
-    Green
+    Green,
+
+    /// <summary>
+    /// Зелёный.
+    /// </summary>
+    /// <remarks>
+    /// Используется для ожога.
+    /// </remarks>>
+    Orange
 }

@@ -16,9 +16,6 @@ namespace Disciples.Resources.Images;
 /// </remarks>
 public class ImagesExtractor
 {
-    // Помимо "обычного" розового, существует еще такой, который также должен считать прозрачным.
-    private readonly int _additionalTransparentColor = GetColor(252, 2, 252);
-
     private readonly string _path;
 
     private IDictionary<int, Record> _records = null!;
@@ -503,10 +500,11 @@ public class ImagesExtractor
         {
             for (int i = 0; i < pixels.Length; i += 4)
             {
-                var color = GetColor(pixels[i], pixels[i+1], pixels[i+2]);
+                var color = GetColor(pixels[i], pixels[i + 1], pixels[i + 2]);
 
                 // Проверяем прозрачную область.
-                if (color == mainTransparentColor || color == _additionalTransparentColor)
+                // Вторая проверка нужна потому, что по какой-то причине есть еще несколько дополнительных прозрачных цветов.
+                if (color == mainTransparentColor || (pixels[i] > 251 && pixels[i + 1] < 4 && pixels[i + 2] > 251))
                 {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;

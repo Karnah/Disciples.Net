@@ -32,6 +32,11 @@ public class UnitBattleEffect
     public UnitBattleEffectType EffectType { get; }
 
     /// <summary>
+    /// Раунд, в котором эффект сработал в последний раз.
+    /// </summary>
+    public int RoundTriggered { get; set; }
+
+    /// <summary>
     /// Длительность эффекта в раундах.
     /// </summary>
     public int RoundDuration { get; set; }

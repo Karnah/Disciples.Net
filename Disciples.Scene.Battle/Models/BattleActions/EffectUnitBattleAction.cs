@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
 namespace Disciples.Scene.Battle.Models.BattleActions;
@@ -9,33 +10,23 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class EffectUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType) : base(targetUnit, Enums.UnitActionType.UnderEffect)
+    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, int roundDuration, int? power, AnimationBattleAction? animationBattleAction)
+        : base(targetUnit, UnitActionType.UnderEffect, attackType, power, animationBattleAction)
     {
-        AttackType = attackType;
-    }
-
-    /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, int roundDuration, int? power)
-        : base(targetUnit, Enums.UnitActionType.UnderEffect)
-    {
-        AttackType = attackType;
         RoundDuration = roundDuration;
-        Power = power;
     }
-
-
-    /// <summary>
-    /// Атака из-за которой был наложен эффект.
-    /// </summary>
-    public UnitAttackType AttackType { get; }
 
     /// <summary>
     /// Продолжительность эффекта в раундах.
     /// </summary>
     public int RoundDuration { get; }
 
-    /// <summary>
-    /// Сила эффекта.
-    /// </summary>
-    public int? Power { get; }
+    /// <inheritdoc />
+    /// <remarks>
+    /// Когда эффект наложен, сила эффекта на портрете не отображается.
+    /// </remarks>
+    public override BattleUnitPortraitEventData GetUnitPortraitEventData()
+    {
+        return new BattleUnitPortraitEventData(ActionType, AttackType, null);
+    }
 }

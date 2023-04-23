@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Disciples.Engine.Common.Enums;
 
@@ -14,10 +15,18 @@ public class UnitEffects
     /// </summary>
     private readonly Dictionary<UnitBattleEffectType, UnitBattleEffect> _battleEffects;
 
+    /// <summary>
+    /// Создать объект типа <see cref="UnitEffects" />.
+    /// </summary>
     public UnitEffects()
     {
         _battleEffects = new Dictionary<UnitBattleEffectType, UnitBattleEffect>();
     }
+
+    /// <summary>
+    /// Есть ли на юните эффекты, которые наложены во время битвы.
+    /// </summary>
+    public bool HasBattleEffects => _battleEffects.Count > 0;
 
     /// <summary>
     /// Добавить эффект в поединке.
@@ -40,7 +49,7 @@ public class UnitEffects
     /// </summary>
     public IReadOnlyList<UnitBattleEffect> GetBattleEffects()
     {
-        return _battleEffects.Select(be => be.Value).ToList();
+        return _battleEffects.Values.ToArray();
     }
 
     /// <summary>
@@ -52,17 +61,64 @@ public class UnitEffects
     }
 
     /// <summary>
-    /// Уменьшить длительность всех эффектов в схватке на единицу.
+    /// Получить эффект, который срабатывает при ходе юнита.
     /// </summary>
-    public void OnUnitTurn()
+    public IReadOnlyList<UnitBattleEffect> GetTurnUnitBattleEffect(int currentRound)
     {
-        foreach (var battleEffect in _battleEffects)
-            battleEffect.Value.RoundDuration -= 1;
+        if (_battleEffects.Count == 0)
+            return Array.Empty<UnitBattleEffect>();
 
-        var expiredEffects = _battleEffects
-            .Where(be => be.Value.RoundDuration <= 0)
-            .ToList();
-        foreach (var expiredEffect in expiredEffects)
-            _battleEffects.Remove(expiredEffect.Key);
+        ProcessCommonBattleEffects(currentRound);
+        return GetProcessingBattleEffect(currentRound);
+    }
+
+    /// <summary>
+    /// Обработать все эффекты, которые не требуют отдельной обработки.
+    /// </summary>
+    private void ProcessCommonBattleEffects(int currentRound)
+    {
+        // TODO Избавиться от ToList().
+        foreach (var battleEffect in _battleEffects.Values.ToList())
+        {
+            if (ShouldProcessEffectType(battleEffect.EffectType))
+                continue;
+
+            battleEffect.RoundTriggered = currentRound;
+            battleEffect.RoundDuration -= 1;
+
+            if (battleEffect.RoundDuration <= 0)
+                _battleEffects.Remove(battleEffect.EffectType);
+        }
+    }
+
+    /// <summary>
+    /// Добавить обрабатываемые эффект юнита.
+    /// </summary>
+    private IReadOnlyList<UnitBattleEffect> GetProcessingBattleEffect(int currentRound)
+    {
+        var processingBattleEffects = _battleEffects
+            .Values
+            .Where(be => be.RoundDuration > 0 && be.RoundTriggered < currentRound && ShouldProcessEffectType(be.EffectType))
+            .ToArray();
+        foreach (var battleEffect in processingBattleEffects)
+        {
+            battleEffect.RoundTriggered = currentRound;
+            battleEffect.RoundDuration -= 1;
+
+            if (battleEffect.RoundDuration <= 0)
+                _battleEffects.Remove(battleEffect.EffectType);
+        }
+
+        return processingBattleEffects;
+    }
+
+    /// <summary>
+    /// Проверить, необходимо ли отдельно обрабатывать эффект битвы.
+    /// </summary>
+    private static bool ShouldProcessEffectType(UnitBattleEffectType effectType)
+    {
+        return effectType is UnitBattleEffectType.Poison
+            or UnitBattleEffectType.Frostbite
+            or UnitBattleEffectType.Blister;
     }
 }

@@ -37,6 +37,11 @@ internal class AnimationBattleAction : IBattleAction
     /// </summary>
     public int EndFrameIndex { get; }
 
+    /// <inheritdoc />
+    public void UpdateTime(long ticks)
+    {
+    }
+
     /// <summary>
     /// Получить индекс последнего кадра в анимации.
     /// </summary>

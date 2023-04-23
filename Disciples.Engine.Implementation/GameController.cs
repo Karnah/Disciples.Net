@@ -187,11 +187,13 @@ public class GameController : IGameController
     /// </summary>
     public GameContext LoadGame()
     {
+        const string saveFolder = "Saves";
         const string gameContextFileName = "save.json";
+        var path = Path.Combine(Directory.GetCurrentDirectory(), saveFolder, gameContextFileName);
         try
         {
             return File
-                .ReadAllText(gameContextFileName)
+                .ReadAllText(path)
                 .DeserializeFromJson<GameContext>();
         }
         catch (Exception e)

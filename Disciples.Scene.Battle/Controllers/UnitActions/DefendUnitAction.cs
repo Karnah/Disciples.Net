@@ -3,6 +3,7 @@ using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActions;
 
@@ -17,8 +18,9 @@ internal class DefendUnitAction : BaseBattleUnitAction
     public DefendUnitAction(
         BattleContext context,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleUnitPortraitPanelController unitPortraitPanelController
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController)
+        BattleUnitPortraitPanelController unitPortraitPanelController,
+        IBattleUnitResourceProvider unitResourceProvider
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
     {
     }
 

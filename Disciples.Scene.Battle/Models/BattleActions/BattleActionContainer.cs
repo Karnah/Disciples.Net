@@ -44,10 +44,9 @@ internal class BattleActionContainer
     /// </summary>
     public void BeforeSceneUpdate(long ticksCount)
     {
-        // Если действие завязано на времени, то обновляем счётчик.
-        foreach (var timerBattleAction in _activeActions.OfType<BaseTimerBattleAction>())
+        foreach (var battleAction in _activeActions)
         {
-            timerBattleAction.UpdateTime(ticksCount);
+            battleAction.UpdateTime(ticksCount);
         }
 
         Completed = _activeActions.Where(ba => ba.IsCompleted).ToArray();

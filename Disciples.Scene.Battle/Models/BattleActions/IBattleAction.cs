@@ -9,4 +9,9 @@ internal interface IBattleAction
     /// Признак, что действие завершилось.
     /// </summary>
     bool IsCompleted { get; }
+
+    /// <summary>
+    /// Обновить счетчик прошедшего времени.
+    /// </summary>
+    void UpdateTime(long ticks);
 }

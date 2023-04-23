@@ -15,27 +15,19 @@ public class GameColorToBrushConverter : BaseValueConverterExtension
     public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var gameColor = value as GameColor?;
-        switch (gameColor)
+        return gameColor switch
         {
-            case GameColor.Black:
-                return BuildBrush(Colors.Black);
-            case GameColor.White:
-                return BuildBrush(Colors.White);
-            case GameColor.Red:
-                return BuildBrush(Colors.Red, 128);
-            case GameColor.Yellow:
-                return BuildBrush(Colors.Yellow, 128);
-            case GameColor.Blue:
-                return BuildBrush(Colors.Blue, 128);
-            case GameColor.Gray:
-                return BuildBrush(Colors.Gray, 128);
-            case GameColor.Green:
-                return BuildBrush(Colors.Green, 128);
-            case null:
-                return BuildBrush(Colors.Black);
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            GameColor.Black => BuildBrush(Colors.Black),
+            GameColor.White => BuildBrush(Colors.White),
+            GameColor.Red => BuildBrush(Colors.Red, 128),
+            GameColor.Yellow => BuildBrush(Colors.Yellow, 128),
+            GameColor.Blue => BuildBrush(Colors.Blue, 128),
+            GameColor.Gray => BuildBrush(Colors.Gray, 128),
+            GameColor.Green => BuildBrush(Colors.Green, 128),
+            GameColor.Orange => BuildBrush(Colors.Orange, 128),
+            null => BuildBrush(Colors.Black),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     /// <summary>

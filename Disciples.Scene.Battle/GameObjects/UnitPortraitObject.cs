@@ -7,7 +7,7 @@ using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Scene.Battle.Enums;
-using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
@@ -180,49 +180,75 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Обработать начала действия юнита.
+    /// Обработать событие, произошедшее с юнитом.
     /// </summary>
-    public void ProcessBeginUnitAction(UnitBattleAction unitAction)
+    public void ProcessBeginUnitPortraitEvent(BattleUnitPortraitEventData eventData)
     {
-        // Обрабатываем попадание в юнита.
-        if (unitAction is GetHitUnitBattleAction attackUnitAction)
+        if (_instantaneousEffectText != null || _instantaneousEffectImage != null)
         {
-            switch (attackUnitAction.AttackType)
-            {
-                case UnitAttackType.Damage:
-                    _instantaneousEffectImage = AddColorImage(GameColor.Red);
-                    _instantaneousEffectText = AddText($"-{attackUnitAction.Power}");
-                    break;
-                case UnitAttackType.Heal:
-                    _instantaneousEffectImage = AddColorImage(GameColor.Blue);
-                    _instantaneousEffectText = AddText($"+{attackUnitAction.Power}");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
-            return;
+            // TODO Fatal в лог.
+            RemoveSceneObject(ref _instantaneousEffectImage);
+            RemoveSceneObject(ref _instantaneousEffectText);
         }
 
-        // Обрабатываем другие действия над юнитом.
-        switch (unitAction.UnitActionType)
+        switch (eventData.UnitActionType)
         {
+            case UnitActionType.GetHit:
+                switch (eventData.AttackType)
+                {
+                    case UnitAttackType.Damage:
+                        _instantaneousEffectImage = AddColorImage(GameColor.Red);
+                        _instantaneousEffectText = AddText($"-{eventData.Power!.Value}");
+                        break;
+                    case UnitAttackType.Heal:
+                        _instantaneousEffectImage = AddColorImage(GameColor.Blue);
+                        _instantaneousEffectText = AddText($"+{eventData.Power!.Value}");
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
+                break;
+
             case UnitActionType.Dodge:
                 _instantaneousEffectImage = AddColorImage(GameColor.Yellow);
                 _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
                 break;
+
             case UnitActionType.Defend:
                 _instantaneousEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
                 break;
+
             case UnitActionType.Waiting:
                 _instantaneousEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
                 break;
+
             case UnitActionType.Dying:
                 break;
+
             case UnitActionType.UnderEffect:
-                _instantaneousEffectText = AddText(_textProvider.GetText(GetEffectText(((EffectUnitBattleAction)unitAction).AttackType)));
+            {
+                var effectColor = GetEffectTypeColor((UnitBattleEffectType)eventData.AttackType!.Value);
+                if (effectColor != null)
+                    _instantaneousEffectImage = AddColorImage(effectColor.Value, false);
+
+                var underEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value));
+                _instantaneousEffectText = AddText(underEffectText);
+
                 break;
+            }
+
+            case UnitActionType.TriggeredEffect:
+            {
+                var triggeredEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value));
+                _instantaneousEffectText = AddText(eventData.Power == null
+                    ? triggeredEffectText
+                    : $"{triggeredEffectText} (-{eventData.Power})");
+
+                break;
+            }
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -231,7 +257,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Обработать завершение действия юнита.
     /// </summary>
-    public void ProcessCompletedUnitAction()
+    public void ProcessCompletedUnitPortraitEvent()
     {
         RemoveSceneObject(ref _instantaneousEffectImage);
         RemoveSceneObject(ref _instantaneousEffectText);
@@ -246,8 +272,6 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private void UpdateUnitEffects()
     {
-        ProcessBattleEffects();
-
         var levelDiff = Unit.Level - Unit.UnitType.Level;
         if (levelDiff != _lastLevelDiff)
         {
@@ -260,6 +284,8 @@ internal class UnitPortraitObject : GameObject
         if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
             return;
 
+        ProcessBattleEffects();
+
         if (Unit.IsDead)
         {
             if (_deathIcon == null)
@@ -271,6 +297,7 @@ internal class UnitPortraitObject : GameObject
                 _unitHitpoints.Text = $"0/{Unit.MaxHitPoints}";
 
                 RemoveSceneObject(ref _unitDamageForeground);
+                RemoveBattleEffectsForegrounds();
             }
         }
         else if (_lastUnitHitPoints != Unit.HitPoints)
@@ -284,11 +311,10 @@ internal class UnitPortraitObject : GameObject
             if (height > 0)
             {
                 var width = Width;
-                var x = _unitPortrait!.X;
+                var x = _unitPortrait.X;
                 var y = _unitPortrait.Y + (Height - height);
 
-                _unitDamageForeground =
-                    _sceneObjectContainer.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                _unitDamageForeground = _sceneObjectContainer.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
             }
         }
     }
@@ -324,29 +350,30 @@ internal class UnitPortraitObject : GameObject
         {
             if (!_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
             {
-                var icon = _battleInterfaceProvider.UnitBattleEffectsIcon[battleEffect.EffectType];
-
-                // Иконку "Защиты" располагаем по центру.
-                if (battleEffect.EffectType == UnitBattleEffectType.Defend)
+                if (_battleInterfaceProvider.UnitBattleEffectsIcon.TryGetValue(battleEffect.EffectType, out var icon))
                 {
-                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
-                        icon,
-                        X + (Width - icon.Width) / 2,
-                        Y + Height - icon.Height,
-                        INTERFACE_LAYER + 4));
-                }
-                else
-                {
-                    // Иконки остальных эффектов располагаются справа.
-                    var iconsCount = _battleEffectsIcons.Keys
-                        .Where(be => be != UnitBattleEffectType.Defend)
-                        .GroupBy(be => be)
-                        .Count();
-                    _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
-                        icon,
-                        X + Width - icon.Width,
-                        Y + Height - icon.Height * (iconsCount + 1),
-                        INTERFACE_LAYER + 4));
+                    // Иконку "Защиты" располагаем по центру.
+                    if (battleEffect.EffectType == UnitBattleEffectType.Defend)
+                    {
+                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
+                            icon,
+                            X + (Width - icon.Width) / 2,
+                            Y + Height - icon.Height,
+                            INTERFACE_LAYER + 4));
+                    }
+                    else
+                    {
+                        // Иконки остальных эффектов располагаются справа.
+                        var iconsCount = _battleEffectsIcons.Keys
+                            .Where(be => be != UnitBattleEffectType.Defend)
+                            .GroupBy(be => be)
+                            .Count();
+                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
+                            icon,
+                            X + Width - icon.Width,
+                            Y + Height - icon.Height * (iconsCount + 1),
+                            INTERFACE_LAYER + 4));
+                    }
                 }
             }
 
@@ -369,11 +396,11 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private static GameColor? GetEffectTypeColor(UnitBattleEffectType unitBattleEffectType)
     {
-        // TODO Ожог.
         return unitBattleEffectType switch
         {
             UnitBattleEffectType.Poison => GameColor.Green,
             UnitBattleEffectType.Frostbite => GameColor.Blue,
+            UnitBattleEffectType.Blister => GameColor.Orange,
             _ => null
         };
     }
@@ -420,7 +447,10 @@ internal class UnitPortraitObject : GameObject
     {
         // Если мы добавляем изображение поверх портрета, то в некоторых случаях должны на время очистить изображение с % здоровья.
         if (shouldRemoveDamageImage)
+        {
             RemoveSceneObject(ref _unitDamageForeground);
+            RemoveBattleEffectsForegrounds();
+        }
 
         return _sceneObjectContainer.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
     }
@@ -453,6 +483,17 @@ internal class UnitPortraitObject : GameObject
             X + (Width - icon.Width) / 2,
             Y + icon.Height / 2,
             INTERFACE_LAYER + 4);
+    }
+
+    /// <summary>
+    /// Очистить фоны эффектов битвы.
+    /// </summary>
+    private void RemoveBattleEffectsForegrounds()
+    {
+        foreach (var battleEffectsForeground in _battleEffectsForegrounds)
+            _sceneObjectContainer.RemoveSceneObject(battleEffectsForeground.Value);
+
+        _battleEffectsForegrounds.Clear();
     }
 
     /// <summary>

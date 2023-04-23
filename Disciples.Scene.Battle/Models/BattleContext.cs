@@ -40,6 +40,11 @@ internal class BattleContext : BaseSupportLoading
     public IReadOnlyList<InputDeviceEvent> InputDeviceEvents { get; private set; }
 
     /// <summary>
+    /// Номер раунда битвы.
+    /// </summary>
+    public int Round { get; set; }
+
+    /// <summary>
     /// Атакующий отряд
     /// </summary>
     public Squad AttackingSquad { get; set; } = null!;

@@ -168,6 +168,24 @@ internal class BattleProcessor
     }
 
     /// <summary>
+    /// Обработать действие эффекта.
+    /// </summary>
+    public BattleProcessorAttackResult? ProcessEffect(Unit targetUnit, UnitBattleEffect effect)
+    {
+        switch (effect.EffectType)
+        {
+            case UnitBattleEffectType.Poison:
+            case UnitBattleEffectType.Frostbite:
+            case UnitBattleEffectType.Blister:
+                var damage = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
+                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, (UnitAttackType)effect.EffectType);
+
+            default:
+                return null;
+        }
+    }
+
+    /// <summary>
     /// Обработать действие одного юнита на другого.
     /// </summary>
     /// <param name="targetUnit">Юнит, на которого воздействует.</param>

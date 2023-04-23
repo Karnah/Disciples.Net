@@ -107,6 +107,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     // Начать новый раунд.
     private void StartNewRound()
     {
+        ++_context.Round;
         var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad);
         var nextUnit = _context.UnitTurnQueue.NextRound(turnOrder);
         BeginUnitTurn(nextUnit);
@@ -179,8 +180,13 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private void BeginUnitTurn(Unit unit)
     {
         CurrentBattleUnit = _context.GetBattleUnit(unit);
-        CurrentBattleUnit.Unit.Effects.OnUnitTurn();
 
-        CheckAndProcessIfAiTurn();
+        // Запускаем обработку эффектов на юните.
+        if (CurrentBattleUnit.Unit.Effects.HasBattleEffects)
+            _unitActionController.UnitTurn();
+
+        // Если после этого не появилось нового действия, значит нет эффектов для обработки.
+        if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
+            CheckAndProcessIfAiTurn();
     }
 }

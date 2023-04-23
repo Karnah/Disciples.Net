@@ -3,6 +3,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActions;
 
@@ -28,9 +29,10 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         BattleProcessor battleProcessor,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        IBattleUnitResourceProvider unitResourceProvider,
         BattleUnit targetBattleUnit,
         BattleUnitActionController unitActionController
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController)
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
     {
         _context = context;
         _battleProcessor = battleProcessor;
@@ -178,7 +180,12 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         // Если у атакующего юнита есть вторая атака и есть хотя бы одно успешное попадание, добавляем обработки второй атаки.
         // Она начнёт выполняться позже, после завершения всех анимаций, связанных с первой.
         if (secondaryAttackUnits.Count > 0)
-            _unitActionController.BeginSecondaryAttack(CurrentBattleUnit, secondaryAttackUnits, damage, ShouldPassTurn);
+        {
+            var secondAttackPower = shouldCalculateDamage
+                ? damage
+                : (int?)null;
+            _unitActionController.BeginSecondaryAttack(CurrentBattleUnit, secondaryAttackUnits, secondAttackPower, ShouldPassTurn);
+        }
 
         // TODO Добавить обработка выпить жизнь.
         // По идее, нужно будет разделить урон на каждого юнита.

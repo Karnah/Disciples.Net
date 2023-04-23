@@ -5,6 +5,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Models.BattleActions;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActions;
 
@@ -16,6 +17,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     private readonly BattleContext _context;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly IBattleUnitResourceProvider _unitResourceProvider;
 
     private readonly BattleActionContainer _actions = new ();
 
@@ -25,11 +27,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     protected BaseBattleUnitAction(
         BattleContext context,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleUnitPortraitPanelController unitPortraitPanelController)
+        BattleUnitPortraitPanelController unitPortraitPanelController,
+        IBattleUnitResourceProvider unitResourceProvider)
     {
         _context = context;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _unitResourceProvider = unitResourceProvider;
     }
 
     /// <inheritdoc />
@@ -37,6 +41,11 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
     /// <inheritdoc />
     public abstract bool ShouldPassTurn { get; protected set; }
+
+    /// <summary>
+    /// Признак, что вообще в очереди никаких действий.
+    /// </summary>
+    protected bool IsNoActions => _actions.IsNoActions;
 
     /// <summary>
     /// Текущий юнит.
@@ -52,7 +61,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         InitializeInternal();
 
         // Если после инициализации нет действий, то больше ничего делать будет не нужно.
-        if (_actions.IsNoActions)
+        if (IsNoActions)
             IsCompleted = true;
     }
 
@@ -72,7 +81,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
         _actions.AfterSceneUpdate();
 
-        if (_actions.IsNoActions)
+        if (IsNoActions)
         {
             IsCompleted = true;
             OnCompleted();
@@ -127,19 +136,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
         // Обрабатываем смерть юнита.
         if (battleUnit.Unit.HitPoints == 0)
-        {
-            battleUnit.Unit.IsDead = true;
-            battleUnit.Unit.Effects.Clear();
-
-            var deathAnimation = _battleGameObjectContainer.AddAnimation(
-                battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
-                battleUnit.X,
-                battleUnit.Y,
-                battleUnit.AnimationComponent.Layer + 2,
-                false);
-            AddAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
-            AddAction(new UnitBattleAction(battleUnit, UnitActionType.Dying));
-        }
+            ProcessUnitDeath(battleUnit);
     }
 
     /// <summary>
@@ -151,7 +148,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (portrait == null)
             return;
 
-        portrait.ProcessBeginUnitAction(unitAction);
+        portrait.ProcessBeginUnitPortraitEvent(unitAction.GetUnitPortraitEventData());
     }
 
     /// <summary>
@@ -160,25 +157,24 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     protected virtual void ProcessCompletedUnitAction(UnitBattleAction unitAction)
     {
         // Если юнит умер, то превращаем его в кучу костей.
-        if (unitAction.UnitActionType == UnitActionType.Dying)
+        if (unitAction.ActionType == UnitActionType.Dying)
         {
             unitAction.TargetUnit.UnitState = BattleUnitState.Dead;
         }
 
         // На юнита наложен эффект.
-        if (unitAction.UnitActionType == UnitActionType.UnderEffect)
+        if (unitAction is EffectUnitBattleAction effectAction)
         {
-            var effectAction = (EffectUnitBattleAction)unitAction;
             effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
-                new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackType), effectAction.RoundDuration, effectAction.Power));
+                new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackType!.Value), effectAction.RoundDuration, effectAction.Power));
         }
 
         _unitPortraitPanelController
             .GetUnitPortrait(unitAction.TargetUnit)
-            ?.ProcessCompletedUnitAction();
+            ?.ProcessCompletedUnitPortraitEvent();
     }
 
-        /// <summary>
+    /// <summary>
     /// Обработать результат атаки.
     /// </summary>
     protected void ProcessAttackResult(BattleUnit attackerUnit,
@@ -210,7 +206,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 targetUnit.UnitState = BattleUnitState.TakingDamage;
 
                 AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));
-                AddAction(new GetHitUnitBattleAction(targetUnit, power, attackClass));
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GetHit, attackClass, power));
 
                 break;
             }
@@ -221,7 +217,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 var attackClass = attackResult.AttackType!.Value;
 
                 targetUnit.Unit.HitPoints += healPower;
-                AddAction(new GetHitUnitBattleAction(targetUnit, healPower, attackClass));
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GetHit, attackClass, healPower));
 
                 break;
             }
@@ -232,9 +228,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 var roundDuration = attackResult.RoundDuration!.Value;
                 var attackClass = attackResult.AttackType!.Value;
 
-                targetUnit.Unit.Effects.AddBattleEffect(
-                    new UnitBattleEffect(AttackClassToEffectType(attackClass), roundDuration, power));
-                AddAction(new EffectUnitBattleAction(targetUnit, attackClass));
+                var effectAnimationAction = ShouldShowEffectAnimation(attackClass)
+                    ? GetUnitEffectAnimationAction(targetUnit, attackClass)
+                    : null;
+                if (effectAnimationAction != null)
+                    AddAction(effectAnimationAction);
+
+                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, roundDuration, power, effectAnimationAction));
                 break;
             }
 
@@ -261,9 +261,43 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     }
 
     /// <summary>
+    /// Обработать смерть юнита.
+    /// </summary>
+    protected void ProcessUnitDeath(BattleUnit battleUnit)
+    {
+        battleUnit.Unit.IsDead = true;
+        battleUnit.Unit.Effects.Clear();
+
+        var deathAnimation = _battleGameObjectContainer.AddAnimation(
+            battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
+            battleUnit.X,
+            battleUnit.Y,
+            battleUnit.AnimationComponent.Layer + 2,
+            false);
+        AddAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
+        AddAction(new UnitBattleAction(battleUnit, UnitActionType.Dying));
+    }
+
+    /// <summary>
+    /// Получить анимацию эффекта.
+    /// </summary>
+    protected AnimationBattleAction? GetUnitEffectAnimationAction(BattleUnit battleUnit, UnitAttackType effectAttackType)
+    {
+        // TODO Анимации может не быть. Например, для паралича.
+        var animationFrames = _unitResourceProvider.GetEffectAnimation(AttackClassToEffectType(effectAttackType), battleUnit.Unit.UnitType.IsSmall);
+        var animation = _battleGameObjectContainer.AddAnimation(
+            animationFrames,
+            battleUnit.X,
+            battleUnit.Y,
+            battleUnit.AnimationComponent.Layer + 2,
+            false);
+        return new AnimationBattleAction(animation.AnimationComponent);
+    }
+
+    /// <summary>
     /// Получить тип эффекта в зависимости от типа атаки.
     /// </summary>
-    protected static UnitBattleEffectType AttackClassToEffectType(UnitAttackType attackType)
+    private static UnitBattleEffectType AttackClassToEffectType(UnitAttackType attackType)
     {
         return attackType switch
         {
@@ -272,5 +306,17 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             UnitAttackType.Blister => UnitBattleEffectType.Blister,
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
+    }
+
+    /// <summary>
+    /// Необходимо ли показывать анимацию при наложении эффекта.
+    /// </summary>
+    /// <remarks>
+    /// Некоторые эффекты (например, яд и обморожении) имеют анимацию срабатывания эффекта.
+    /// Но она не используется при наложении эффекта.
+    /// </remarks>
+    private static bool ShouldShowEffectAnimation(UnitAttackType attackType)
+    {
+        return attackType == UnitAttackType.Blister;
     }
 }

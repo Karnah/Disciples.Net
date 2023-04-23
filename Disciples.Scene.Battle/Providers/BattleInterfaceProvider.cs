@@ -68,7 +68,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
             { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
             { UnitBattleEffectType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
             { UnitBattleEffectType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
-            //{ UnitBattleEffectType.Blister, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
         };
 
         ToggleRightButton = GetButtonBitmaps(battleIcons, "TOGGLERIGHT");

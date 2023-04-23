@@ -36,5 +36,13 @@ internal enum UnitActionType
     /// <remarks>
     /// Отравления, усиления, проклятия и т.д.
     /// </remarks>
-    UnderEffect
+    UnderEffect,
+
+    /// <summary>
+    /// Срабатывание эффекта.
+    /// </summary>
+    /// <remarks>
+    /// Отравления, усиления, проклятия и т.д.
+    /// </remarks>
+    TriggeredEffect
 }

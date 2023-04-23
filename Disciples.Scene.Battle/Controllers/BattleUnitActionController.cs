@@ -1,6 +1,7 @@
 ﻿using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -13,6 +14,7 @@ internal class BattleUnitActionController
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly IBattleUnitResourceProvider _unitResourceProvider;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitActionController" />.
@@ -21,12 +23,14 @@ internal class BattleUnitActionController
         BattleContext battleContext,
         BattleProcessor battleProcessor,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleUnitPortraitPanelController unitPortraitPanelController)
+        BattleUnitPortraitPanelController unitPortraitPanelController,
+        IBattleUnitResourceProvider unitResourceProvider)
     {
         _battleContext = battleContext;
         _battleProcessor = battleProcessor;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _unitResourceProvider = unitResourceProvider;
     }
 
     /// <summary>
@@ -39,6 +43,7 @@ internal class BattleUnitActionController
             _battleProcessor,
             _battleGameObjectContainer,
             _unitPortraitPanelController,
+            _unitResourceProvider,
             targetBattleUnit,
             this);
         _battleContext.AddUnitAction(mainAttack);
@@ -53,6 +58,7 @@ internal class BattleUnitActionController
             _battleContext,
             _battleGameObjectContainer,
             _unitPortraitPanelController,
+            _unitResourceProvider,
             _battleProcessor,
             attackerBattleUnit,
             targetBattleUnits,
@@ -69,7 +75,8 @@ internal class BattleUnitActionController
         var defend = new DefendUnitAction(
             _battleContext,
             _battleGameObjectContainer,
-            _unitPortraitPanelController);
+            _unitPortraitPanelController,
+            _unitResourceProvider);
         _battleContext.AddUnitAction(defend);
     }
 
@@ -81,7 +88,22 @@ internal class BattleUnitActionController
         var defend = new WaitUnitAction(
             _battleContext,
             _battleGameObjectContainer,
-            _unitPortraitPanelController);
+            _unitPortraitPanelController,
+            _unitResourceProvider);
         _battleContext.AddUnitAction(defend);
+    }
+
+    /// <summary>
+    /// Обработать начало ход юнита.
+    /// </summary>
+    public void UnitTurn()
+    {
+        var turn = new TurnUnitAction(
+            _battleContext,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController,
+            _unitResourceProvider,
+            _battleProcessor);
+        _battleContext.AddUnitAction(turn);
     }
 }

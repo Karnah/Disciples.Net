@@ -20,9 +20,7 @@ internal abstract class BaseTimerBattleAction : IBattleAction
     /// <inheritdoc />
     public bool IsCompleted { get; private set; }
 
-    /// <summary>
-    /// Обновить счетчик прошедшего времени.
-    /// </summary>
+    /// <inheritdoc />
     public void UpdateTime(long ticks)
     {
         _time += ticks;
