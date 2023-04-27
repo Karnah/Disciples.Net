@@ -23,6 +23,7 @@ internal class BattleScene : BaseScene, IBattleScene
     private readonly IBattleController _battleController;
     private readonly IBattleInterfaceController _battleInterfaceController;
     private readonly BattleContext _battleContext;
+    private readonly BattleSoundController _battleSoundController;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleScene" />.
@@ -38,7 +39,8 @@ internal class BattleScene : BaseScene, IBattleScene
         IBattleUnitResourceProvider battleUnitResourceProvider,
         IBattleController battleController,
         IBattleInterfaceController battleInterfaceController,
-        BattleContext battleContext
+        BattleContext battleContext,
+        BattleSoundController battleSoundController
         ) : base(gameObjectContainer, sceneObjectContainer)
     {
         _textProvider = textProvider;
@@ -50,6 +52,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleController = battleController;
         _battleInterfaceController = battleInterfaceController;
         _battleContext = battleContext;
+        _battleSoundController = battleSoundController;
     }
 
     /// <inheritdoc />
@@ -74,6 +77,7 @@ internal class BattleScene : BaseScene, IBattleScene
 
         _battleController.Load();
         _battleInterfaceController.Load();
+        _battleSoundController.Load();
     }
 
     /// <inheritdoc />
@@ -89,7 +93,8 @@ internal class BattleScene : BaseScene, IBattleScene
             _battleInterfaceProvider,
             _battleUnitResourceProvider,
             _battleController,
-            _battleInterfaceController
+            _battleInterfaceController,
+            _battleSoundController
         };
 
         // Деинициализируем те компоненты, которые существует в рамках одной сцены.
@@ -108,6 +113,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleContext.BeforeSceneUpdate(data);
         _battleInterfaceController.BeforeSceneUpdate();
         _battleController.BeforeSceneUpdate();
+        _battleSoundController.BeforeSceneUpdate();
     }
 
     /// <inheritdoc />
@@ -116,5 +122,6 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleContext.AfterSceneUpdate();
         _battleController.AfterSceneUpdate();
         _battleInterfaceController.AfterSceneUpdate();
+        _battleSoundController.AfterSceneUpdate();
     }
 }

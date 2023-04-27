@@ -2,8 +2,10 @@
 using System.IO;
 using AutoMapper;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Implementation.Common.Providers;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
@@ -30,6 +32,11 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<InterfaceImagesExtractor>(Reuse.Singleton);
         containerRegistrator.Register<UnitFaceImagesExtractor>(Reuse.Singleton);
         containerRegistrator.Register<UnitPortraitImagesExtractor>(Reuse.Singleton);
+
+        containerRegistrator.Register<BattleSoundsMappingExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<BattleSoundsExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<ISoundController, BassSoundController>(Reuse.Singleton);
+        containerRegistrator.Register<ISoundProvider, SoundProvider>(Reuse.Singleton);
 
         containerRegistrator.Register<ITextProvider, TextProvider>(Reuse.Singleton);
         containerRegistrator.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);

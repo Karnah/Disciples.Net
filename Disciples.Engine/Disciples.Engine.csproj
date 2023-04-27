@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj" />
+    <ProjectReference Include="..\Disciples.Resources.Sounds\Disciples.Resources.Sounds.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -21,6 +22,9 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitActionController _unitActionController;
+    private readonly BattleSoundController _soundController;
+
+    private IPlayingSound? _unitAttackSound;
 
     /// <summary>
     /// Создать объект типа <see cref="MainAttackUnitAction" />.
@@ -31,6 +35,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         BattleUnitPortraitPanelController unitPortraitPanelController,
         IBattleUnitResourceProvider unitResourceProvider,
         BattleUnit targetBattleUnit,
+        BattleSoundController soundController,
         BattleUnitActionController unitActionController
         ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
     {
@@ -38,6 +43,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         _battleProcessor = battleProcessor;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitActionController = unitActionController;
+        _soundController = soundController;
 
         TargetBattleUnit = targetBattleUnit;
     }
@@ -59,6 +65,8 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
+        _unitAttackSound = _soundController.PlayUnitAttack(CurrentBattleUnit.Unit.UnitType.Id);
+
         // Если это первая атака юнита, который атакует дважды, то ход передавать не нужно.
         // Во всех остальных случаях, будет ход следующего юнита.
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
@@ -110,6 +118,8 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         // Если это уже была вторая атака, то нужно скинуть значение.
         if (CurrentBattleUnit.Unit.UnitType.IsAttackTwice)
             _context.IsSecondAttack = !_context.IsSecondAttack;
+
+        _unitAttackSound?.Stop();
     }
 
     /// <summary>

@@ -153,7 +153,7 @@ public class ImagesExtractor
     /// </summary>
     private void LoadRecords(Stream stream)
     {
-        _records = new SortedDictionary<int, Record>();
+        _records = new Dictionary<int, Record>();
         stream.Seek(28, SeekOrigin.Begin);
 
         while (true) {
@@ -187,7 +187,7 @@ public class ImagesExtractor
         stream.Seek(_records[2].Offset, SeekOrigin.Begin);
 
         var filesCount = stream.ReadInt();
-        _filesById = new SortedDictionary<int, File>();
+        _filesById = new Dictionary<int, File>();
         _filesByName = new Dictionary<string, File>();
 
         for (int i = 0; i < filesCount; ++i) {
@@ -201,7 +201,6 @@ public class ImagesExtractor
             _filesByName[fileName] = file;
         }
     }
-
 
     /// <summary>
     /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени).

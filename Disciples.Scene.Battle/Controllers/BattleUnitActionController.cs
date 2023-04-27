@@ -15,6 +15,7 @@ internal class BattleUnitActionController
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
+    private readonly BattleSoundController _soundController;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitActionController" />.
@@ -24,13 +25,15 @@ internal class BattleUnitActionController
         BattleProcessor battleProcessor,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        IBattleUnitResourceProvider unitResourceProvider)
+        IBattleUnitResourceProvider unitResourceProvider,
+        BattleSoundController soundController)
     {
         _battleContext = battleContext;
         _battleProcessor = battleProcessor;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
         _unitResourceProvider = unitResourceProvider;
+        _soundController = soundController;
     }
 
     /// <summary>
@@ -45,6 +48,7 @@ internal class BattleUnitActionController
             _unitPortraitPanelController,
             _unitResourceProvider,
             targetBattleUnit,
+            _soundController,
             this);
         _battleContext.AddUnitAction(mainAttack);
     }
