@@ -10,6 +10,8 @@ internal class BassPlayingSound : IPlayingSound
 {
     private readonly int _soundHandle;
 
+    private bool _isDisposed;
+
     /// <summary>
     /// Создать объект типа <see cref="BassPlayingSound" />.
     /// </summary>
@@ -19,16 +21,17 @@ internal class BassPlayingSound : IPlayingSound
     }
 
     /// <inheritdoc />
-    public bool IsCompleted => Bass.ChannelIsActive(_soundHandle) != PlaybackState.Playing;
+    public bool IsCompleted => _isDisposed || Bass.ChannelIsActive(_soundHandle) != PlaybackState.Playing;
 
     /// <inheritdoc />
     public void Stop()
     {
-        if (IsCompleted)
+        if (_isDisposed)
             return;
 
         // TODO Реализовать через IDisposable?
-        Bass.ChannelStop(_soundHandle);
         Bass.MusicFree(_soundHandle);
+
+        _isDisposed = true;
     }
 }

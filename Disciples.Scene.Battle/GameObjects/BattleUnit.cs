@@ -24,6 +24,9 @@ internal class BattleUnit : GameObject
 
     private BattleUnitState _unitState;
 
+    /// <summary>
+    /// Создать объект типа <see cref="BattleUnit" />.
+    /// </summary>
     public BattleUnit(
         ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
@@ -42,7 +45,8 @@ internal class BattleUnit : GameObject
         UnitState = BattleUnitState.Waiting;
 
         AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
-        this.Components = new IComponent[] { AnimationComponent };
+        SoundComponent = new BattleUnitSoundComponent(this, battleUnitResourceProvider);
+        this.Components = new IComponent[] { AnimationComponent, SoundComponent };
 
         Width = BATTLE_UNIT_WIDTH;
         Height = BATTLE_UNIT_HEIGHT;
@@ -57,6 +61,10 @@ internal class BattleUnit : GameObject
     /// </summary>
     public BattleUnitAnimationComponent AnimationComponent { get; }
 
+    /// <summary>
+    /// Компонент звуков юнита.
+    /// </summary>
+    public BattleUnitSoundComponent SoundComponent { get; }
 
     /// <summary>
     /// Информация о юните.

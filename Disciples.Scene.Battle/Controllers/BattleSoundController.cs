@@ -2,8 +2,8 @@
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
-using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Models;
+using Disciples.Resources.Sounds.Models;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -14,45 +14,33 @@ internal class BattleSoundController : BaseSupportLoading
 {
     private readonly ISoundController _soundController;
     private readonly ISoundProvider _soundProvider;
-    private readonly BattleSoundsExtractor _soundsExtractor;
 
     private IPlayingSound _backgroundSound = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleSoundController" />.
     /// </summary>
-    public BattleSoundController(ISoundController soundController, ISoundProvider soundProvider, BattleSoundsExtractor soundsExtractor)
+    public BattleSoundController(
+        ISoundController soundController,
+        ISoundProvider soundProvider)
     {
         _soundController = soundController;
         _soundProvider = soundProvider;
-        _soundsExtractor = soundsExtractor;
     }
 
     /// <inheritdoc />
     public override bool IsSharedBetweenScenes => false;
 
     /// <summary>
-    /// Проиграть звук атаки юнита.
+    /// Проиграть случайный звук из списка.
     /// </summary>
-    public IPlayingSound? PlayUnitAttack(string unitTypeId)
+    public IPlayingSound? PlayRandomSound(IReadOnlyList<RawSound> sounds)
     {
-        // TODO Использовать маппинг.
-        var soundName = unitTypeId switch
-        {
-            "G000UU0154" => "UNIT154",
-            "G000UU0002" => "ANIM2A", // ANIM2B, ANIM2C
-            "G000UU0003" => "ANIM03A", // ANIM03B, ANIM03C
-            _ => null
-        };
-
-        if (string.IsNullOrEmpty(soundName))
+        if (sounds.Count == 0)
             return null;
 
-        var rawSound = _soundsExtractor.GetSound(soundName);
-        if (rawSound == null)
-            return null;
-
-        return _soundController.PlaySound(rawSound);
+        var randomSoundIndex = RandomGenerator.Get(sounds.Count);
+        return _soundController.PlaySound(sounds[randomSoundIndex]);
     }
 
     /// <summary>

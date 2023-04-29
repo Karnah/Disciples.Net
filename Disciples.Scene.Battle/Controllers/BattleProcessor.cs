@@ -290,15 +290,20 @@ internal class BattleProcessor
     // TODO Если в отряде есть целитель, то перед завершением битвы ему даётся ход.
 
     /// <summary>
-    /// Проверить битва завершилась победой одной из сторон.
+    /// Получить победителя битвы.
+    /// <see langword="null" />, если битва еще не завершена.
     /// </summary>
     /// <param name="attackingSquad">Атакующий отряд.</param>
     /// <param name="defendingSquad">Защищающийся отряд.</param>
-    public bool IsBattleCompleted(Squad attackingSquad, Squad defendingSquad)
+    public Squad? GetBattleWinnerSquad(Squad attackingSquad, Squad defendingSquad)
     {
-        return
-            attackingSquad.Units.All(u => u.IsDead)
-            || defendingSquad.Units.All(u => u.IsDead);
+        if (attackingSquad.Units.All(u => u.IsDead))
+            return defendingSquad;
+
+        if (defendingSquad.Units.All(u => u.IsDead))
+            return attackingSquad;
+
+        return null;
     }
 
     #endregion

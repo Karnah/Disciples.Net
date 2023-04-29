@@ -31,10 +31,20 @@ public class BassSoundController : ISoundController
     {
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), BACKGROUND_SOUNDS_FOLDER, fileName);
         var soundHandle = Bass.CreateStream(filePath);
-        if (soundHandle == 0 || !Bass.ChannelPlay(soundHandle))
-            throw new Exception($"Не удалось проиграть {fileName}");
 
-        return new BassPlayingSound(soundHandle);
+        try
+        {
+            if (soundHandle == 0 || !Bass.ChannelPlay(soundHandle))
+                throw new Exception($"Не удалось проиграть {fileName}");
+
+            return new BassPlayingSound(soundHandle);
+        }
+        catch (Exception)
+        {
+            if (soundHandle != 0)
+                Bass.MusicFree(soundHandle);
+            throw;
+        }
     }
 
     /// <summary>
@@ -43,9 +53,19 @@ public class BassSoundController : ISoundController
     public IPlayingSound PlaySound(RawSound sound)
     {
         var soundHandle = Bass.CreateStream(sound.Data, 0, sound.Data.Length, BassFlags.Default);
-        if (soundHandle == 0 || !Bass.ChannelPlay(soundHandle))
-            throw new Exception($"Не удалось проиграть звук");
 
-        return new BassPlayingSound(soundHandle);
+        try
+        {
+            if (soundHandle == 0 || !Bass.ChannelPlay(soundHandle))
+                throw new Exception($"Не удалось проиграть звук");
+
+            return new BassPlayingSound(soundHandle);
+        }
+        catch (Exception)
+        {
+            if (soundHandle != 0)
+                Bass.MusicFree(soundHandle);
+            throw;
+        }
     }
 }

@@ -6,6 +6,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Resources;
@@ -19,22 +20,33 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly IBitmapFactory _bitmapFactory;
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
-    private readonly BattleUnitImagesExtractor _extractor;
+    private readonly BattleUnitImagesExtractor _imagesExtractor;
+    private readonly BattleSoundsExtractor _soundExtractor;
+    private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
-    private Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = null!;
-    private Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = null!;
+    private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
+    private readonly Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = new();
+    private readonly Dictionary<string, RawSound> _rawSounds;
+    private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
     public BattleUnitResourceProvider(
         IBitmapFactory bitmapFactory,
         IUnitInfoProvider unitInfoProvider,
         IBattleResourceProvider battleResourceProvider,
-        BattleUnitImagesExtractor extractor)
+        BattleUnitImagesExtractor imagesExtractor,
+        BattleSoundsExtractor soundExtractor,
+        BattleSoundsMappingExtractor soundMappingExtractor)
     {
         _bitmapFactory = bitmapFactory;
         _unitInfoProvider = unitInfoProvider;
         _battleResourceProvider = battleResourceProvider;
-        _extractor = extractor;
+        _imagesExtractor = imagesExtractor;
+        _soundExtractor = soundExtractor;
+        _soundMappingExtractor = soundMappingExtractor;
+
+        _rawSounds = new Dictionary<string, RawSound>();
+        _unitSounds = new Dictionary<string, BattleUnitSounds>();
     }
 
     /// <inheritdoc />
@@ -80,10 +92,20 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
+    public BattleUnitSounds GetBattleUnitSounds(UnitType unitType)
+    {
+        if (!_unitSounds.TryGetValue(unitType.Id, out var battleUnitSounds))
+        {
+            battleUnitSounds = ExtractUnitSounds(unitType.Id);
+            _unitSounds[unitType.Id] = battleUnitSounds;
+        }
+
+        return battleUnitSounds;
+    }
+
+    /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _unitsAnimations = new Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation>();
-        _effectsAnimation = new Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>>();
     }
 
     /// <inheritdoc />
@@ -174,7 +196,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </summary>
     private IReadOnlyList<Frame>? GetAnimationFrames(BaseImageKey key)
     {
-        var images = _extractor.GetAnimationFrames(key.Key);
+        var images = _imagesExtractor.GetAnimationFrames(key.Key);
         if (images == null)
             return null;
 
@@ -210,5 +232,51 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private IReadOnlyList<Frame> GetDeathAnimation(UnitDeathAnimationType animationType)
     {
         return _battleResourceProvider.GetBattleAnimation(new UnitDeathAnimationResourceKey(animationType).Key);
+    }
+
+    /// <summary>
+    /// Извлечь звуки для юнита.
+    /// </summary>
+    private BattleUnitSounds ExtractUnitSounds(string unitTypeId)
+    {
+        var unitTypeSounds = _soundMappingExtractor.GetUnitTypeSounds(unitTypeId);
+        return new BattleUnitSounds
+        {
+            AttackSounds = ExtractRawSounds(unitTypeSounds.AttackSounds),
+            BeginAttackSoundFrameIndex = unitTypeSounds.BeginAttackSoundFrameIndex,
+            EndAttackSoundFrameIndex = unitTypeSounds.EndAttackSoundFrameIndex,
+            HitTargetSounds = ExtractRawSounds(unitTypeSounds.HitTargetSounds),
+            BeginAttackHitSoundFrameIndex = unitTypeSounds.BeginAttackHitSoundFrameIndex,
+            EndAttackHitSoundFrameIndex = unitTypeSounds.EndAttackHitSoundFrameIndex,
+            DamagedSounds = ExtractRawSounds(unitTypeSounds.DamagedSounds)
+        };
+    }
+
+    /// <summary>
+    /// Извлечь звуки.
+    /// </summary>
+    private IReadOnlyList<RawSound> ExtractRawSounds(IReadOnlyList<string> soundNames)
+    {
+        return soundNames
+            .Select(ExtractRawSound)
+            .Where(rs => rs != null)
+            .ToArray()!;
+    }
+
+    /// <summary>
+    /// Извлечь звук по имени.
+    /// </summary>
+    private RawSound? ExtractRawSound(string soundName)
+    {
+        if (!_rawSounds.TryGetValue(soundName, out var rawSound))
+        {
+            rawSound = _soundExtractor.GetSound(soundName);
+            if (rawSound == null)
+                return null;
+
+            _rawSounds[soundName] = rawSound;
+        }
+
+        return rawSound;
     }
 }

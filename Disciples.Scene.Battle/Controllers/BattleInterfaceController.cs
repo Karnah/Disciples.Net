@@ -569,7 +569,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         // todo Создать две новые кнопки - "выйти" и "выйти и открыть" интерфейс.
 
         // Отображаем отряд победителя.
-        _unitPortraitPanelController.CompleteBattle(CurrentBattleUnit.SquadPosition);
+        _unitPortraitPanelController.CompleteBattle();
 
         if (_targetUnitObject != null)
             SelectTargetUnits();

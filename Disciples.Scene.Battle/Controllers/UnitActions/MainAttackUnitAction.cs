@@ -1,5 +1,4 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -22,9 +21,6 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitActionController _unitActionController;
-    private readonly BattleSoundController _soundController;
-
-    private IPlayingSound? _unitAttackSound;
 
     /// <summary>
     /// Создать объект типа <see cref="MainAttackUnitAction" />.
@@ -37,13 +33,12 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         BattleUnit targetBattleUnit,
         BattleSoundController soundController,
         BattleUnitActionController unitActionController
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider, soundController)
     {
         _context = context;
         _battleProcessor = battleProcessor;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitActionController = unitActionController;
-        _soundController = soundController;
 
         TargetBattleUnit = targetBattleUnit;
     }
@@ -65,8 +60,6 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
-        _unitAttackSound = _soundController.PlayUnitAttack(CurrentBattleUnit.Unit.UnitType.Id);
-
         // Если это первая атака юнита, который атакует дважды, то ход передавать не нужно.
         // Во всех остальных случаях, будет ход следующего юнита.
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
@@ -77,6 +70,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         CurrentBattleUnit.UnitState = BattleUnitState.Attacking;
 
         AddAction(new MainAttackBattleAction(CurrentBattleUnit, TargetBattleUnit));
+        AddAction(new MainAttackSoundBattleAction(CurrentBattleUnit));
     }
 
     /// <inheritdoc />
@@ -95,6 +89,10 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     {
         switch (battleAction)
         {
+            case MainAttackSoundBattleAction mainAttackSoundAction:
+                ProcessCompletedMainAttackSoundAction(mainAttackSoundAction);
+                return;
+
             case MainAttackBattleAction mainAttackAction:
                 ProcessCompletedMainAttackAction(mainAttackAction);
                 return;
@@ -118,8 +116,14 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         // Если это уже была вторая атака, то нужно скинуть значение.
         if (CurrentBattleUnit.Unit.UnitType.IsAttackTwice)
             _context.IsSecondAttack = !_context.IsSecondAttack;
+    }
 
-        _unitAttackSound?.Stop();
+    /// <summary>
+    /// Обработать завершения задержки для проигрывания звука атаки юнита.
+    /// </summary>
+    private void ProcessCompletedMainAttackSoundAction(MainAttackSoundBattleAction mainAttackSoundAction)
+    {
+        PlayRandomSound(mainAttackSoundAction.AttackSounds);
     }
 
     /// <summary>
@@ -145,6 +149,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         }
 
         var secondaryAttackUnits = new List<BattleUnit>();
+        var hasSuccessAttack = false;
 
         foreach (var targetBattleUnit in targetBattleUnits)
         {
@@ -159,8 +164,10 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
             if (attackResult.AttackResult == AttackResult.Attack)
                 damage += attackResult.Power!.Value;
 
-            // Сразу добавляем действие второй атаки, если первая была успешная.
             var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss;
+            hasSuccessAttack |= isSuccessAttack;
+
+            // Сразу добавляем действие второй атаки, если первая была успешная.
             if (unitSecondAttack != null && isSuccessAttack && !shouldCalculateDamage)
                 secondaryAttackUnits.Add(targetBattleUnit);
         }
@@ -186,6 +193,10 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
 
         // В любом случае дожидаемся завершения анимации атаки.
         AddAction(new AnimationBattleAction(currentUnitAnimation));
+
+        // Если было хотя бы одно успешное попадание, то добавляем звук удара.
+        if (hasSuccessAttack)
+            PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
 
         // Если у атакующего юнита есть вторая атака и есть хотя бы одно успешное попадание, добавляем обработки второй атаки.
         // Она начнёт выполняться позже, после завершения всех анимаций, связанных с первой.

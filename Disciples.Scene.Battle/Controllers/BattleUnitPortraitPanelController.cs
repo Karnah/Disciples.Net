@@ -153,10 +153,10 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Завершить битву.
     /// </summary>
-    public void CompleteBattle(BattleSquadPosition displayingSquad)
+    public void CompleteBattle()
     {
-        if (_displayingSquad != displayingSquad)
-            SetDisplayingSquad(displayingSquad);
+        if (_displayingSquad != _context.BattleWinnerSquad!.Value)
+            SetDisplayingSquad(_context.BattleWinnerSquad.Value);
 
         ActivateButtons(_reflectPanelButton);
         CleanAnimationsOnUnitsPanel(_rightPanel);

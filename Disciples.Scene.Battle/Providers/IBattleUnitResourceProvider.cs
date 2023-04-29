@@ -41,4 +41,9 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// Получить анимацию эффекта, применяемую к юниту.
     /// </summary>
     IReadOnlyList<Frame> GetEffectAnimation(UnitBattleEffectType effectType, bool isSmall);
+
+    /// <summary>
+    /// Получить звуки юнита в битве.
+    /// </summary>
+    BattleUnitSounds GetBattleUnitSounds(UnitType unitType);
 }

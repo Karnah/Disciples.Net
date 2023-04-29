@@ -25,12 +25,13 @@ internal class SecondaryAttackUnitAction : BaseBattleUnitAction
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         IBattleUnitResourceProvider unitResourceProvider,
+        BattleSoundController battleSoundController,
         BattleProcessor battleProcessor,
         BattleUnit attackerBattleUnit,
         IReadOnlyList<BattleUnit> targetBattleUnits,
         int? power,
         bool shouldPassTurn
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider, battleSoundController)
     {
         _battleProcessor = battleProcessor;
         _attackerBattleUnit = attackerBattleUnit;

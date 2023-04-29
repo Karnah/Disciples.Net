@@ -63,6 +63,7 @@ internal class BattleUnitActionController
             _battleGameObjectContainer,
             _unitPortraitPanelController,
             _unitResourceProvider,
+            _soundController,
             _battleProcessor,
             attackerBattleUnit,
             targetBattleUnits,
@@ -80,7 +81,8 @@ internal class BattleUnitActionController
             _battleContext,
             _battleGameObjectContainer,
             _unitPortraitPanelController,
-            _unitResourceProvider);
+            _unitResourceProvider,
+            _soundController);
         _battleContext.AddUnitAction(defend);
     }
 
@@ -93,7 +95,8 @@ internal class BattleUnitActionController
             _battleContext,
             _battleGameObjectContainer,
             _unitPortraitPanelController,
-            _unitResourceProvider);
+            _unitResourceProvider,
+            _soundController);
         _battleContext.AddUnitAction(defend);
     }
 
@@ -107,6 +110,7 @@ internal class BattleUnitActionController
             _battleGameObjectContainer,
             _unitPortraitPanelController,
             _unitResourceProvider,
+            _soundController,
             _battleProcessor);
         _battleContext.AddUnitAction(turn);
     }

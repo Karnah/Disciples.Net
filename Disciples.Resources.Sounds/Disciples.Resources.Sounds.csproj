@@ -10,4 +10,8 @@
     <None Include="Resources/**/*" LinkBase="folder3" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Disciples.Common\Disciples.Common.csproj" />
+  </ItemGroup>
+
 </Project>

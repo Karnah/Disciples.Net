@@ -26,8 +26,9 @@ internal class TurnUnitAction : BaseBattleUnitAction
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         IBattleUnitResourceProvider unitResourceProvider,
+        BattleSoundController battleSoundController,
         BattleProcessor battleProcessor
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider, battleSoundController)
     {
         _battleContext = context;
         _battleProcessor = battleProcessor;

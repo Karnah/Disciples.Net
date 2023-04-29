@@ -1,6 +1,8 @@
 ﻿using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Models;
+using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -18,8 +20,10 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
+    private readonly BattleSoundController _soundController;
 
     private readonly BattleActionContainer _actions = new ();
+    private readonly List<IPlayingSound> _playingSounds = new();
 
     /// <summary>
     /// Создать объект типа <see cref="BaseBattleUnitAction" />.
@@ -28,12 +32,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         BattleContext context,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        IBattleUnitResourceProvider unitResourceProvider)
+        IBattleUnitResourceProvider unitResourceProvider,
+        BattleSoundController soundController)
     {
         _context = context;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
         _unitResourceProvider = unitResourceProvider;
+        _soundController = soundController;
     }
 
     /// <inheritdoc />
@@ -84,6 +90,12 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (IsNoActions)
         {
             IsCompleted = true;
+
+            foreach (var playingSound in _playingSounds)
+            {
+                playingSound.Stop();
+            }
+
             OnCompleted();
         }
     }
@@ -208,6 +220,8 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));
                 AddAction(new UnitBattleAction(targetUnit, UnitActionType.GetHit, attackClass, power));
 
+                PlayRandomSound(targetUnit.SoundComponent.Sounds.DamagedSounds);
+
                 break;
             }
 
@@ -292,6 +306,18 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             battleUnit.AnimationComponent.Layer + 2,
             false);
         return new AnimationBattleAction(animation.AnimationComponent);
+    }
+
+    /// <summary>
+    /// Проиграть случайный звук.
+    /// </summary>
+    protected void PlayRandomSound(IReadOnlyList<RawSound> sounds)
+    {
+        var playingSound = _soundController.PlayRandomSound(sounds);
+        if (playingSound == null)
+            return;
+
+        _playingSounds.Add(playingSound);
     }
 
     /// <summary>

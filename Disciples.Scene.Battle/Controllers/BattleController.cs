@@ -61,9 +61,14 @@ internal class BattleController : BaseSupportLoading, IBattleController
     {
         if (_context.BattleState == BattleState.CompletedUnitAction)
         {
-            if (_battleProcessor.IsBattleCompleted(_context.AttackingSquad, _context.DefendingSquad))
+            var battleWinner = _battleProcessor.GetBattleWinnerSquad(_context.AttackingSquad, _context.DefendingSquad);
+            if (battleWinner != null)
             {
-                _context.SetBattleCompleted();
+                // TODO Снять все эффекты.
+                var battleWinnerSquad = _context.AttackingSquad == battleWinner
+                    ? BattleSquadPosition.Attacker
+                    : BattleSquadPosition.Defender;
+                _context.SetBattleCompleted(battleWinnerSquad);
             }
             else if (_context.CompletedUnitAction!.ShouldPassTurn)
             {
@@ -116,12 +121,6 @@ internal class BattleController : BaseSupportLoading, IBattleController
     // Передать ход следующему юниту.
     private void NextTurn()
     {
-        if (_battleProcessor.IsBattleCompleted(_context.AttackingSquad, _context.DefendingSquad))
-        {
-            // TODO Также должны быть сняты все эффекты с оставшихся юнитов.
-            return;
-        }
-
         var nextUnit = _context.UnitTurnQueue.GetNextUnit();
         if (nextUnit != null)
         {

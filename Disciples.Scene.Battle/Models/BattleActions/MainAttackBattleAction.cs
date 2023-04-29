@@ -9,7 +9,7 @@ internal class MainAttackBattleAction : AnimationBattleAction
 {
     /// <inheritdoc />
     public MainAttackBattleAction(BattleUnit attacker, BattleUnit target)
-        : base(attacker.AnimationComponent, CalculateEndFrameIndex(attacker))
+        : base(attacker.AnimationComponent, attacker.SoundComponent.Sounds.EndAttackSoundFrameIndex - 1)
     {
         Attacker = attacker;
         Target = target;
@@ -24,30 +24,4 @@ internal class MainAttackBattleAction : AnimationBattleAction
     /// Юнит, который являлся целью атаки.
     /// </summary>
     public BattleUnit Target { get; }
-
-    /// <summary>
-    /// Вычислить индекс завершения анимации.
-    /// </summary>
-    /// <remarks>
-    /// Этот метод нужен только потому, что я не смог найти связь между анимациями и моментом нанесения удара.
-    /// </remarks>
-    private static int CalculateEndFrameIndex(BattleUnit unit)
-    {
-        var framesCount = unit.AnimationComponent.FramesCount;
-
-        return unit.Unit.UnitType.Id switch
-        {
-            // Ассасин Империи, 41 фрейм.
-            "G000UU0154" => 12,
-            // Рыцарь, 31 фрейм.
-            "G000UU0002" => 12,
-            // Страж Горна, 31 фрейм.
-            "G000UU0162" => 26,
-            // Арбалетчик, 26 фреймов.
-            "G000UU0027" => 5,
-            // Мастер рун, 30 фреймов.
-            "G000UU0165" => 10,
-            _ => framesCount - 12
-        };
-    }
 }

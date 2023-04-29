@@ -19,8 +19,9 @@ internal class DefendUnitAction : BaseBattleUnitAction
         BattleContext context,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        IBattleUnitResourceProvider unitResourceProvider
-        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider)
+        IBattleUnitResourceProvider unitResourceProvider,
+        BattleSoundController battleSoundController
+        ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider, battleSoundController)
     {
     }
 

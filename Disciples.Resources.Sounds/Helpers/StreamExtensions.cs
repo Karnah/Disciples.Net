@@ -64,4 +64,22 @@ internal static class StreamExtensions
 
         return Encoding.ASCII.GetString(buffer);
     }
+
+    /// <summary>
+    /// Считать из потока строку до нулевого символа.
+    /// </summary>
+    public static string ReadString(this Stream stream)
+    {
+        var resultString = new StringBuilder();
+        while (stream.CanRead)
+        {
+            var ch = stream.ReadByte();
+            if (ch == 0)
+                return resultString.ToString();
+
+            resultString.Append((char)ch);
+        }
+
+        return resultString.ToString();
+    }
 }

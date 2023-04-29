@@ -81,6 +81,11 @@ internal class BattleContext : BaseSupportLoading
     public bool IsAutoBattle { get; set; }
 
     /// <summary>
+    /// Отряд, который победил в битве.
+    /// </summary>
+    public BattleSquadPosition? BattleWinnerSquad { get; private set; }
+
+    /// <summary>
     /// Все юниты.
     /// </summary>
     public IReadOnlyList<BattleUnit> BattleUnits { get; set; } = null!;
@@ -179,9 +184,10 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Установить, что битва завершена.
     /// </summary>
-    public void SetBattleCompleted()
+    public void SetBattleCompleted(BattleSquadPosition battleWinnerSquad)
     {
         BattleState = BattleState.CompletedBattle;
+        BattleWinnerSquad = battleWinnerSquad;
     }
 
     /// <inheritdoc />

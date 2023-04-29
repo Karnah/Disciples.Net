@@ -1,4 +1,5 @@
-﻿using Disciples.Resources.Sounds.Helpers;
+﻿using Disciples.Common.Models;
+using Disciples.Resources.Sounds.Helpers;
 using Disciples.Resources.Sounds.Models;
 using File = Disciples.Resources.Sounds.Models.File;
 
@@ -19,6 +20,7 @@ public class SoundsMappingExtractor
     private IDictionary<int, Record> _records = null!;
     private IDictionary<int, File> _filesById = null!;
     private IDictionary<string, File> _filesByName = null!;
+    private IDictionary<string, UnitTypeSounds> _unitTypeSounds = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="SoundsMappingExtractor" />.
@@ -29,6 +31,14 @@ public class SoundsMappingExtractor
         _path = path;
 
         Load();
+    }
+
+    /// <summary>
+    /// Получить информацию о звуках для указанного типа юнита.
+    /// </summary>
+    public UnitTypeSounds GetUnitTypeSounds(string unitTypeId)
+    {
+        return _unitTypeSounds[unitTypeId];
     }
 
     /// <summary>
@@ -44,8 +54,10 @@ public class SoundsMappingExtractor
 
             LoadRecords(stream);
             LoadFilesList(stream);
-            LoadIds(stream);
-            LoadSoundInfo(stream);
+
+            var soundInfoRecords = LoadSoundInfoRecords(stream);
+
+            _unitTypeSounds = LoadUnitTypeSounds(stream, soundInfoRecords);
         }
     }
 
@@ -111,6 +123,9 @@ public class SoundsMappingExtractor
     /// <summary>
     /// Загрузить маппинги.
     /// </summary>
+    /// <remarks>
+    /// В данном методе нет смысла, так как все идентификаторы содержатся в SNDINFO.DAT.
+    /// </remarks>
     private void LoadIds(Stream stream)
     {
         if (!_filesByName.TryGetValue("LSTIDS.DAT", out var file))
@@ -129,67 +144,118 @@ public class SoundsMappingExtractor
     /// <summary>
     /// Загрузить маппинги.
     /// </summary>
-    /// <remarks>
-    /// Как парсить Battle.wdt:
-    /// Коротко: по аналогии с .ff файлами:KEKW: 
-    /// Длинно:
-    /// 1. прочитать заголовок (первые 24 байта)
-    /// 2. прочитать следующие за заголовком 4 байта - смещение до таблицы содержания
-    /// 3. прочитать таблицу содержания
-    /// 4. найти по содержанию запись с id 2, так называемый "список имен"
-    /// 5. в списке имен найти "LSTIDS.DAT" и рядом будет его id для таблицы содержания
-    /// 6. найти данные LSTIDS.DAT через таблицу содержания, распарсить данные:
-    /// первые 4 байта - кол-во ID юнитов
-    /// затем массив ID юнитов в формате игры. "в формате игры" значит что они хранятся как 4-байтные числа, а не строки знакомые нам по таблицам из папки Globals. Как перевести ID из строки в формат игры или наоборот смотри здесь:
-    /// https://github.com/VladimirMakeev/D2RSG/blob/master/ScenarioGenerator/src/rsgid.cpp
-    /// 7. По аналогии найти в списке имен "SNDINFO.DAT", его id для таблицы содержимого и через нее сами данные, распарсить их:
-    /// - первые 4 байта - кол-во записей, назовем их SndInfo
-    /// - массив записей SndInfo, 192 байта каждая:
-    /// struct SndInfo
-    /// {
-    /// u32 id; // ID юнита в формате игры
-    /// char path1[16]; // путь к файлу .lst. Не уверен насчет длины, возможно 33
-    /// char unknown[20];
-    /// s32 data36; // Возможно кадр анимации когда начинать проигрывать звук
-    /// s32 data40; // Возможно кадр когда закончить проигрывать звук
-    /// char path2[33]; // путь к файлу .lst
-    /// char padding[3]; // не используется
-    /// s32 data80; // Когда начинать играть звук для файла из path2
-    /// s32 data84; // Когда закончить играть звук для файла из path2
-    /// char path3[33]; // путь к файлу .lst
-    /// char path4[33]; // путь к файлу .lst
-    /// char path5[33]; // путь к файлу .lst
-    /// char padding;   // не используется
-    /// };
-    /// </remarks>
-    private void LoadSoundInfo(Stream stream)
+    private IReadOnlyList<SoundInfoRecord> LoadSoundInfoRecords(Stream stream)
     {
         if (!_filesByName.TryGetValue("SNDINFO.DAT", out var file))
-            return;
+            return Array.Empty<SoundInfoRecord>();
 
         stream.Seek(file.Offset, SeekOrigin.Begin);
 
-        var idsCount = stream.ReadInt();
-        for (int i = 0; i < idsCount; i++)
+        var recordsCount = stream.ReadInt();
+        var soundInfoRecords = new List<SoundInfoRecord>(recordsCount);
+
+        for (int i = 0; i < recordsCount; i++)
         {
-            // 192.
+            var unitTypeId = stream.ReadInt();
 
-            var id = stream.ReadInt();
-
-            var attackListName = stream.ReadString(16);
-            stream.Skip(20);
+            var attackListName = stream.ReadString(33).ToUpperInvariant();
+            stream.Skip(3);
             var beginAttackSoundFrameIndex = stream.ReadInt();
             var endAttackSoundFrameIndex = stream.ReadInt();
 
+            var hitTargetFirstListName = stream.ReadString(33).ToUpperInvariant();
             stream.Skip(3);
             var beginAttackHitSoundFrameIndex = stream.ReadInt();
             var endAttackHitSoundFrameIndex = stream.ReadInt();
 
-            var getHitListName = stream.ReadString(33);
-            var globalMapWalkListName = stream.ReadString(33);
-            var listName = stream.ReadString(33);
+            var hitTargetSecondListName = stream.ReadString(33).ToUpperInvariant();
+            var damagedHitListName = stream.ReadString(33).ToUpperInvariant();
+            var globalMapWalkListName = stream.ReadString(33).ToUpperInvariant();
 
             stream.Skip(1);
+
+            soundInfoRecords.Add(new SoundInfoRecord
+            {
+                UnitTypeId = unitTypeId,
+                AttackListName = attackListName,
+                BeginAttackSoundFrameIndex = beginAttackSoundFrameIndex,
+                EndAttackSoundFrameIndex = endAttackSoundFrameIndex,
+                HitTargetListName = string.IsNullOrEmpty(hitTargetFirstListName) ? hitTargetSecondListName : hitTargetFirstListName,
+                BeginAttackHitSoundFrameIndex = beginAttackHitSoundFrameIndex,
+                EndAttackHitSoundFrameIndex = endAttackHitSoundFrameIndex,
+                DamagedListName = damagedHitListName,
+                GlobalMapWalkListName = globalMapWalkListName
+            });
         }
+
+        return soundInfoRecords;
+    }
+
+    /// <summary>
+    /// Загрузить список звуков для каждого типа юнита.
+    /// </summary>
+    private IDictionary<string, UnitTypeSounds> LoadUnitTypeSounds(Stream stream, IReadOnlyList<SoundInfoRecord> soundInfoRecords)
+    {
+        var soundLists = new Dictionary<string, IReadOnlyList<string>>();
+
+        IReadOnlyList<string> GetSoundList(string? soundListName)
+        {
+            if (string.IsNullOrEmpty(soundListName))
+                return Array.Empty<string>();
+
+            if (!soundLists.TryGetValue(soundListName, out var soundList))
+            {
+                soundList = LoadSoundList(soundListName, stream);
+                soundLists.Add(soundListName, soundList);
+            }
+
+            return soundList;
+        }
+
+        return soundInfoRecords
+            .Select(record => new UnitTypeSounds
+            {
+                UnitTypeId = new ObjectId(record.UnitTypeId).GetStringId(),
+                AttackSounds = GetSoundList(record.AttackListName),
+                BeginAttackSoundFrameIndex = record.BeginAttackSoundFrameIndex,
+                EndAttackSoundFrameIndex = record.EndAttackSoundFrameIndex,
+                HitTargetSounds = GetSoundList(record.HitTargetListName),
+                BeginAttackHitSoundFrameIndex = record.BeginAttackHitSoundFrameIndex,
+                EndAttackHitSoundFrameIndex = record.EndAttackHitSoundFrameIndex,
+                DamagedSounds = GetSoundList(record.DamagedListName),
+                GlobalMapWalkSounds = GetSoundList(record.GlobalMapWalkListName)
+            })
+            .ToDictionary(uts => uts.UnitTypeId, uts => uts);
+    }
+
+    /// <summary>
+    /// Загрузить файл, содержащий список звуков.
+    /// </summary>
+    private IReadOnlyList<string> LoadSoundList(string fileName, Stream stream)
+    {
+        if (!_filesByName.TryGetValue(fileName, out var file))
+        {
+            // По какой-то причине есть не все файлы.
+            return Array.Empty<string>();
+        }
+
+        stream.Seek(file.Offset, SeekOrigin.Begin);
+
+        var soundFileName = stream.ReadString();
+
+        stream.Skip(4);
+
+        var sounds = new List<string>();
+
+        while (true)
+        {
+            var soundName = stream.ReadString();
+            if (string.IsNullOrEmpty(soundName))
+                break;
+
+            sounds.Add(soundName.ToUpperInvariant());
+        }
+
+        return sounds;
     }
 }
