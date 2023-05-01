@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Resources;
 /// <summary>
 /// Ключ для поиска анимации смерти юнита на поле боя.
 /// </summary>
-internal class UnitDeathAnimationResourceKey : BaseImageKey
+internal class UnitDeathAnimationResourceKey : BaseResourceKey
 {
     /// <summary>
     /// Создать объект типа <see cref="UnitDeathAnimationResourceKey" />.

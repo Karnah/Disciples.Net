@@ -26,6 +26,15 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     private readonly List<IPlayingSound> _playingSounds = new();
 
     /// <summary>
+    /// Признак, что проигрывается звук типа атаки.
+    /// </summary>
+    private bool _isAttackSoundPlaying = false;
+    /// <summary>
+    /// Признак, что проигрывается звук смерти.
+    /// </summary>
+    private bool _isDeathSoundPlaying = false;
+
+    /// <summary>
     /// Создать объект типа <see cref="BaseBattleUnitAction" />.
     /// </summary>
     protected BaseBattleUnitAction(
@@ -218,9 +227,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 targetUnit.UnitState = BattleUnitState.TakingDamage;
 
                 AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GetHit, attackClass, power));
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Damaged, attackClass, power));
 
-                PlayRandomSound(targetUnit.SoundComponent.Sounds.DamagedSounds);
+                // Если будет задето несколько юнитов, то звук удара получит только первый из них.
+                if (!_isAttackSoundPlaying)
+                {
+                    PlayRandomSound(targetUnit.SoundComponent.Sounds.DamagedSounds);
+                    _isAttackSoundPlaying = true;
+                }
 
                 break;
             }
@@ -231,7 +245,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 var attackClass = attackResult.AttackType!.Value;
 
                 targetUnit.Unit.HitPoints += healPower;
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GetHit, attackClass, healPower));
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Healed, attackClass, healPower));
+
+                if (!isMainAttack && !_isAttackSoundPlaying)
+                {
+                    PlayAttackSound(attackClass);
+                    _isAttackSoundPlaying = true;
+                }
 
                 break;
             }
@@ -249,6 +269,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                     AddAction(effectAnimationAction);
 
                 AddAction(new EffectUnitBattleAction(targetUnit, attackClass, roundDuration, power, effectAnimationAction));
+
+                if (!isMainAttack && !_isAttackSoundPlaying)
+                {
+                    PlayAttackSound(attackClass);
+                    _isAttackSoundPlaying = true;
+                }
+
                 break;
             }
 
@@ -290,6 +317,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             false);
         AddAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
         AddAction(new UnitBattleAction(battleUnit, UnitActionType.Dying));
+
+        if (!_isDeathSoundPlaying)
+        {
+            var playingDeathSound = _soundController.PlayUnitDeathSound();
+            _playingSounds.Add(playingDeathSound);
+            _isDeathSoundPlaying = true;
+        }
     }
 
     /// <summary>
@@ -306,6 +340,18 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             battleUnit.AnimationComponent.Layer + 2,
             false);
         return new AnimationBattleAction(animation.AnimationComponent);
+    }
+
+    /// <summary>
+    /// Проиграть звук, соответствующий типу атаки (если такой есть).
+    /// </summary>
+    protected void PlayAttackSound(UnitAttackType attackType)
+    {
+        var playingSound = _soundController.PlayAttackSound(attackType);
+        if (playingSound == null)
+            return;
+
+        _playingSounds.Add(playingSound);
     }
 
     /// <summary>

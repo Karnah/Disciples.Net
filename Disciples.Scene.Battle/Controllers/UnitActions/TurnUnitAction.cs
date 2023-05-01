@@ -135,6 +135,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
                         AddAction(effectAnimationAction);
 
                     AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, attackResult.AttackType!.Value, attackResult.Power!.Value, animationBattleAction: effectAnimationAction));
+                    PlayAttackSound(attackResult.AttackType.Value);
                     break;
 
                 default:

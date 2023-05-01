@@ -193,21 +193,15 @@ internal class UnitPortraitObject : GameObject
 
         switch (eventData.UnitActionType)
         {
-            case UnitActionType.GetHit:
-                switch (eventData.AttackType)
-                {
-                    case UnitAttackType.Damage:
-                        _instantaneousEffectImage = AddColorImage(GameColor.Red);
-                        _instantaneousEffectText = AddText($"-{eventData.Power!.Value}");
-                        break;
-                    case UnitAttackType.Heal:
-                        _instantaneousEffectImage = AddColorImage(GameColor.Blue);
-                        _instantaneousEffectText = AddText($"+{eventData.Power!.Value}");
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+            case UnitActionType.Damaged:
+                _instantaneousEffectImage = AddColorImage(GameColor.Red);
+                _instantaneousEffectText = AddText($"-{eventData.Power!.Value}");
+                _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
+                break;
 
+            case UnitActionType.Healed:
+                _instantaneousEffectImage = AddColorImage(GameColor.Blue);
+                _instantaneousEffectText = AddText($"+{eventData.Power!.Value}");
                 _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
                 break;
 

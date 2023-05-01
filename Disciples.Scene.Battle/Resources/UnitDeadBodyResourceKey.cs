@@ -5,7 +5,7 @@ namespace Disciples.Scene.Battle.Resources;
 /// <summary>
 /// Ключ для поиска изображения мёртвого тела на поле боя.
 /// </summary>
-internal class UnitDeadBodyResourceKey : BaseImageKey
+internal class UnitDeadBodyResourceKey : BaseResourceKey
 {
     /// <summary>
     /// Создать объект типа <see cref="UnitDeadBodyResourceKey" />.

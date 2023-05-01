@@ -1,9 +1,11 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -14,6 +16,7 @@ internal class BattleSoundController : BaseSupportLoading
 {
     private readonly ISoundController _soundController;
     private readonly ISoundProvider _soundProvider;
+    private readonly IBattleResourceProvider _resourceProvider;
 
     private IPlayingSound _backgroundSound = null!;
 
@@ -22,14 +25,44 @@ internal class BattleSoundController : BaseSupportLoading
     /// </summary>
     public BattleSoundController(
         ISoundController soundController,
-        ISoundProvider soundProvider)
+        ISoundProvider soundProvider,
+        IBattleResourceProvider resourceProvider)
     {
         _soundController = soundController;
         _soundProvider = soundProvider;
+        _resourceProvider = resourceProvider;
     }
 
     /// <inheritdoc />
     public override bool IsSharedBetweenScenes => false;
+
+    /// <summary>
+    /// Проиграть звук.
+    /// </summary>
+    public IPlayingSound? PlaySound(RawSound sound)
+    {
+        return _soundController.PlaySound(sound);
+    }
+
+    /// <summary>
+    /// Проиграть звук.
+    /// </summary>
+    public IPlayingSound? PlayAttackSound(UnitAttackType attackType)
+    {
+        var attackSound = _resourceProvider.GetAttackTypeSound(attackType);
+        if (attackSound == null)
+            return null;
+
+        return _soundController.PlaySound(attackSound);
+    }
+
+    /// <summary>
+    /// Проиграть звук смерти юнита.
+    /// </summary>
+    public IPlayingSound PlayUnitDeathSound()
+    {
+        return _soundController.PlaySound(_resourceProvider.UnitDeathSound);
+    }
 
     /// <summary>
     /// Проиграть случайный звук из списка.

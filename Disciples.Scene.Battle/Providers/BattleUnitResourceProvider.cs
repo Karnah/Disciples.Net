@@ -21,12 +21,10 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
     private readonly BattleUnitImagesExtractor _imagesExtractor;
-    private readonly BattleSoundsExtractor _soundExtractor;
     private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
     private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
     private readonly Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = new();
-    private readonly Dictionary<string, RawSound> _rawSounds;
     private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
@@ -35,17 +33,14 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         IUnitInfoProvider unitInfoProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleUnitImagesExtractor imagesExtractor,
-        BattleSoundsExtractor soundExtractor,
         BattleSoundsMappingExtractor soundMappingExtractor)
     {
         _bitmapFactory = bitmapFactory;
         _unitInfoProvider = unitInfoProvider;
         _battleResourceProvider = battleResourceProvider;
         _imagesExtractor = imagesExtractor;
-        _soundExtractor = soundExtractor;
         _soundMappingExtractor = soundMappingExtractor;
 
-        _rawSounds = new Dictionary<string, RawSound>();
         _unitSounds = new Dictionary<string, BattleUnitSounds>();
     }
 
@@ -194,7 +189,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Получить кадры анимации.
     /// </summary>
-    private IReadOnlyList<Frame>? GetAnimationFrames(BaseImageKey key)
+    private IReadOnlyList<Frame>? GetAnimationFrames(BaseResourceKey key)
     {
         var images = _imagesExtractor.GetAnimationFrames(key.Key);
         if (images == null)
@@ -258,25 +253,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private IReadOnlyList<RawSound> ExtractRawSounds(IReadOnlyList<string> soundNames)
     {
         return soundNames
-            .Select(ExtractRawSound)
+            .Select(_battleResourceProvider.GetSound)
             .Where(rs => rs != null)
             .ToArray()!;
-    }
-
-    /// <summary>
-    /// Извлечь звук по имени.
-    /// </summary>
-    private RawSound? ExtractRawSound(string soundName)
-    {
-        if (!_rawSounds.TryGetValue(soundName, out var rawSound))
-        {
-            rawSound = _soundExtractor.GetSound(soundName);
-            if (rawSound == null)
-                return null;
-
-            _rawSounds[soundName] = rawSound;
-        }
-
-        return rawSound;
     }
 }

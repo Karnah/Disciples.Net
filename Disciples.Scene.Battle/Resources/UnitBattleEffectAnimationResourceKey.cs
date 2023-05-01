@@ -6,7 +6,7 @@ namespace Disciples.Scene.Battle.Resources;
 /// <summary>
 /// Ключ для поиска анимация применяемого на юнита эффекта на поле боя.
 /// </summary>
-internal class UnitBattleEffectAnimationResourceKey : BaseImageKey
+internal class UnitBattleEffectAnimationResourceKey : BaseResourceKey
 {
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffectAnimationResourceKey" />.

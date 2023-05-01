@@ -5,9 +5,9 @@ using Disciples.Scene.Battle.Resources.Enum;
 namespace Disciples.Scene.Battle.Resources.Extensions;
 
 /// <summary>
-/// Расширения для работы с ресурсами.
+/// Расширения для работы с ресурсами изображений.
 /// </summary>
-internal static class ResourceKeyExtensions
+internal static class ImageResourceKeyExtensions
 {
     /// <summary>
     /// Получить ключ в ресурсах, который соответствует определённому действию.

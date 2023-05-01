@@ -8,7 +8,12 @@ internal enum UnitActionType
     /// <summary>
     /// Попадание атаки в этого юнита.
     /// </summary>
-    GetHit,
+    Damaged,
+
+    /// <summary>
+    /// Юнит вылечен.
+    /// </summary>
+    Healed,
 
     /// <summary>
     /// Юнит уклонился от атаки (промах атакующего).

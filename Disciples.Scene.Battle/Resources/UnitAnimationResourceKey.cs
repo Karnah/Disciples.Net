@@ -7,7 +7,7 @@ namespace Disciples.Scene.Battle.Resources;
 /// <summary>
 /// Ключ для поиска анимация юнита на поле боя.
 /// </summary>
-internal class UnitAnimationResourceKey : BaseImageKey
+internal class UnitAnimationResourceKey : BaseResourceKey
 {
     /// <summary>
     /// Создать объект типа <see cref="UnitAnimationResourceKey" />.

@@ -1,9 +1,9 @@
 ﻿namespace Disciples.Scene.Battle.Resources;
 
 /// <summary>
-/// Ключ для поиска в ресурсах изображений.
+/// Ключ для поиска в ресурсах.
 /// </summary>
-internal abstract class BaseImageKey
+internal abstract class BaseResourceKey
 {
     /// <summary>
     /// Получить значение ключа.
