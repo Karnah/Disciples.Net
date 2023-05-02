@@ -1,0 +1,101 @@
+{
+  "Players": [
+    {
+      "Id": 1,
+      "IsComputer": false,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 2,
+              "Name": null,
+              "UnitTypeId": "G000UU0178", // тварь.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 4,
+              "Experience": 0,
+              "HitPoints": 105,
+              "IsDead": false
+            },
+            {
+              "Id": 3,
+              "Name": null,
+              "UnitTypeId": "G000UU8024", // часовой.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 0,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 120,
+              "IsDead": false
+            },
+            {
+              "Id": 5,
+              "Name": null,
+              "UnitTypeId": "G000UU0092", // оборотень.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 100,
+              "IsDead": false
+            },
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "IsComputer": true,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 7,
+              "Name": null,
+              "UnitTypeId": "G000UU0027", // арбалетчик.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 2,
+              "Experience": 0,
+              "HitPoints": 110,
+              "IsDead": false
+            },
+            {
+              "Id": 9,
+              "Name": null,
+              "UnitTypeId": "G000UU0029", // холмовой великан.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 210,
+              "IsDead": false
+            },
+            {
+              "Id": 10,
+              "Name": null,
+              "UnitTypeId": "G000UU0092", // оборотень.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 100,
+              "IsDead": false
+            },
+            {
+              "Id": 11,
+              "Name": null,
+              "UnitTypeId": "G000UU0039", // король гномов.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 0,
+              "Level": 5,
+              "Experience": 0,
+              "HitPoints": 250,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

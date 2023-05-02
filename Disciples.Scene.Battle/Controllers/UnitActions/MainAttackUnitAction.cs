@@ -164,7 +164,9 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
             if (attackResult.AttackResult == AttackResult.Attack)
                 damage += attackResult.Power!.Value;
 
-            var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss;
+            var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss
+                and not AttackResult.Ward
+                and not AttackResult.Immunity;
             hasSuccessAttack |= isSuccessAttack;
 
             // Сразу добавляем действие второй атаки, если первая была успешная.

@@ -19,12 +19,14 @@ internal class UnitBattleAction : ComplexBattleAction
         UnitActionType actionType,
         UnitAttackType? attackType = null,
         int? power = null,
-        AnimationBattleAction? animationBattleAction = null
+        AnimationBattleAction? animationBattleAction = null,
+        UnitAttackSource? attackSource = null
         ) : base(GetBattleActions(animationBattleAction))
     {
         TargetUnit = targetUnit;
         ActionType = actionType;
         AttackType = attackType;
+        AttackSource = attackSource;
         Power = power;
     }
 
@@ -42,6 +44,11 @@ internal class UnitBattleAction : ComplexBattleAction
     /// Тип атаки.
     /// </summary>
     public UnitAttackType? AttackType { get; }
+
+    /// <summary>
+    /// Источник атаки.
+    /// </summary>
+    public UnitAttackSource? AttackSource { get; }
 
     /// <summary>
     /// Сила воздействия.

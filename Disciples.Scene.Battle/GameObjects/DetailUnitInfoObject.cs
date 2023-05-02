@@ -167,8 +167,8 @@ internal class DetailUnitInfoObject : GameObject
             .Replace("%HP1%", Unit.HitPoints.ToString())
             .Replace("%HP2%", Unit.MaxHitPoints.ToString())
             .Replace("%ARMOR%", GetValueWithModifier(Unit.BaseArmor, Unit.ArmorModifier))
-            .Replace("%IMMU%", GetProtectionInfo(Unit.UnitType, ProtectionCategory.Immunity))
-            .Replace("%WARD%", GetProtectionInfo(Unit.UnitType, ProtectionCategory.Ward))
+            .Replace("%IMMU%", GetProtectionInfo(Unit, ProtectionCategory.Immunity))
+            .Replace("%WARD%", GetProtectionInfo(Unit, ProtectionCategory.Ward))
 
             .Replace("%TWICE%", Unit.UnitType.IsAttackTwice ? "(2x) " : string.Empty)
             .Replace("%ALTATTACK%", string.Empty) // todo Что это?
@@ -220,14 +220,14 @@ internal class DetailUnitInfoObject : GameObject
     /// <summary>
     /// Получить информацию о защитах юнита указанной категории.
     /// </summary>
-    private string GetProtectionInfo(UnitType unitType, ProtectionCategory protectionCategory)
+    private string GetProtectionInfo(Unit unit, ProtectionCategory protectionCategory)
     {
-        var attackSourceProtections = unitType
+        var attackSourceProtections = unit
             .AttackSourceProtections
             .Where(p => p.ProtectionCategory == protectionCategory)
             .OrderBy(p => p.UnitAttackSource)
             .ToList();
-        var attackTypeProtections = unitType
+        var attackTypeProtections = unit
             .AttackTypeProtections
             .Where(p => p.ProtectionCategory == protectionCategory)
             .OrderBy(p => p.UnitAttackType)

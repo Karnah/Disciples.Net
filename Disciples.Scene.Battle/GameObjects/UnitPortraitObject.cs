@@ -35,6 +35,14 @@ internal class UnitPortraitObject : GameObject
     /// Идентификатор в ресурсах с текстом "Ждать".
     /// </summary>
     private const string WAIT_TEXT_ID = "X008TA0020";
+    /// <summary>
+    /// Идентификатор в ресурсах с текстом "Защита".
+    /// </summary>
+    private const string WARD_TEXT_ID = "X008TA0011";
+    /// <summary>
+    /// Идентификатор в ресурсах с текстом "Иммунитет".
+    /// </summary>
+    private const string IMMUNITY_TEXT_ID = "X008TA0002";
 
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -242,6 +250,14 @@ internal class UnitPortraitObject : GameObject
 
                 break;
             }
+
+            case UnitActionType.Ward:
+                _instantaneousEffectText = AddText(_textProvider.GetText(WARD_TEXT_ID));
+                break;
+
+            case UnitActionType.Immunity:
+                _instantaneousEffectText = AddText(_textProvider.GetText(IMMUNITY_TEXT_ID));
+                break;
 
             default:
                 throw new ArgumentOutOfRangeException();

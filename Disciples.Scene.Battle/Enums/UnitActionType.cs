@@ -49,5 +49,15 @@ internal enum UnitActionType
     /// <remarks>
     /// Отравления, усиления, проклятия и т.д.
     /// </remarks>
-    TriggeredEffect
+    TriggeredEffect,
+
+    /// <summary>
+    /// Разовая защита от атаки
+    /// </summary>
+    Ward,
+
+    /// <summary>
+    /// Иммунитет от атаки.
+    /// </summary>
+    Immunity
 }

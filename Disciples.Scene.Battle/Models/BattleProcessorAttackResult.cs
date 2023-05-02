@@ -8,24 +8,45 @@ namespace Disciples.Scene.Battle.Models;
 /// </summary>
 internal class BattleProcessorAttackResult
 {
+    /// <summary>
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// </summary>
     public BattleProcessorAttackResult(AttackResult attackResult)
     {
         AttackResult = attackResult;
     }
 
-    public BattleProcessorAttackResult(AttackResult attackResult, int power, UnitAttackType attackType)
+    /// <summary>
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// </summary>
+    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource)
+    {
+        AttackResult = attackResult;
+        AttackType = attackType;
+        AttackSource = attackSource;
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// </summary>
+    public BattleProcessorAttackResult(AttackResult attackResult, int power, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         Power = power;
         AttackType = attackType;
+        AttackSource = attackSource;
     }
 
-    public BattleProcessorAttackResult(AttackResult attackResult, int? power, int roundDuration, UnitAttackType attackType)
+    /// <summary>
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// </summary>
+    public BattleProcessorAttackResult(AttackResult attackResult, int? power, int roundDuration, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         Power = power;
         RoundDuration = roundDuration;
         AttackType = attackType;
+        AttackSource = attackSource;
     }
 
     public AttackResult AttackResult { get; }
@@ -38,10 +59,15 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Длительность эффекта в раундах.
     /// </summary>
-    public int? RoundDuration { get; set; }
+    public int? RoundDuration { get; }
 
     /// <summary>
     /// Тип атаки.
     /// </summary>
     public UnitAttackType? AttackType { get; }
+
+    /// <summary>
+    /// Источник атаки.
+    /// </summary>
+    public UnitAttackSource? AttackSource { get; }
 }

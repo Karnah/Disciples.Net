@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.Models;
@@ -24,6 +26,9 @@ public class Unit
         Experience = 0;
         HitPoints = UnitType.HitPoints;
         Effects = new UnitEffects();
+
+        AttackSourceProtections = unitType.AttackSourceProtections.ToList();
+        AttackTypeProtections = unitType.AttackTypeProtections.ToList();
     }
 
     /// <summary>
@@ -173,6 +178,16 @@ public class Unit
     /// Эффекты, воздействующие на юнита.
     /// </summary>
     public UnitEffects Effects { get; }
+
+    /// <summary>
+    /// Защита от источников атак.
+    /// </summary>
+    public List<UnitAttackSourceProtection> AttackSourceProtections { get; init; }
+
+    /// <summary>
+    /// Защита от типов атак.
+    /// </summary>
+    public List<UnitAttackTypeProtection> AttackTypeProtections { get; init; }
 
     /// <summary>
     /// Рассчитать повышение значения в зависимости от уровня юнита.

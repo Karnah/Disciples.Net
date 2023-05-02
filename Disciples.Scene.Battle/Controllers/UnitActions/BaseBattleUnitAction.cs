@@ -190,6 +190,24 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackType!.Value), effectAction.RoundDuration, effectAction.Power));
         }
 
+        // Если была защита, то удаляем её из списка.
+        // TODO Не знаю, корректно это или нет. Но если есть защита и от типа, и от источника, то снимем сразу оба.
+        if (unitAction.ActionType == UnitActionType.Ward)
+        {
+            unitAction.TargetUnit
+                .Unit
+                .AttackTypeProtections
+                .RemoveAll(atp =>
+                    atp.UnitAttackType == unitAction.AttackType &&
+                    atp.ProtectionCategory == ProtectionCategory.Ward);
+            unitAction.TargetUnit
+                .Unit
+                .AttackSourceProtections
+                .RemoveAll(asp =>
+                    asp.UnitAttackSource == unitAction.AttackSource &&
+                    asp.ProtectionCategory == ProtectionCategory.Ward);
+        }
+
         _unitPortraitPanelController
             .GetUnitPortrait(unitAction.TargetUnit)
             ?.ProcessCompletedUnitPortraitEvent();
@@ -278,6 +296,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
                 break;
             }
+
+            case AttackResult.Ward:
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Ward, attackResult.AttackType!.Value, attackSource: attackResult.AttackSource!.Value));
+                break;
+
+            case AttackResult.Immunity:
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Immunity));
+                break;
 
             default:
                 throw new ArgumentOutOfRangeException();

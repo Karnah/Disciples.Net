@@ -178,7 +178,7 @@ internal class BattleProcessor
             case UnitBattleEffectType.Frostbite:
             case UnitBattleEffectType.Blister:
                 var damage = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
-                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, (UnitAttackType)effect.EffectType);
+                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, (UnitAttackType)effect.EffectType, UnitAttackSource.Death); // TODO UnitAttackSource протащить.
 
             default:
                 return null;
@@ -199,6 +199,28 @@ internal class BattleProcessor
             && attack.AttackType is not UnitAttackType.Revive or UnitAttackType.Summon)
         {
             return null;
+        }
+
+        var attackTypeProtection = targetUnit
+            .AttackTypeProtections
+            .FirstOrDefault(atp => atp.UnitAttackType == attack.AttackType);
+        if (attackTypeProtection != null)
+        {
+            var attackResult = attackTypeProtection.ProtectionCategory == ProtectionCategory.Ward
+                ? AttackResult.Ward
+                : AttackResult.Immunity;
+            return new BattleProcessorAttackResult(attackResult, attack.AttackType, attack.AttackSource);
+        }
+
+        var attackSourceProtection = targetUnit
+            .AttackSourceProtections
+            .FirstOrDefault(asp => asp.UnitAttackSource == attack.AttackSource);
+        if (attackSourceProtection != null)
+        {
+            var attackResult = attackSourceProtection.ProtectionCategory == ProtectionCategory.Ward
+                ? AttackResult.Ward
+                : AttackResult.Immunity;
+            return new BattleProcessorAttackResult(attackResult, attack.AttackType, attack.AttackSource);
         }
 
         // Проверяем меткость юнита.
@@ -229,7 +251,8 @@ internal class BattleProcessor
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
                     attackPower,
-                    attack.AttackType);
+                    attack.AttackType,
+                    attack.AttackSource);
 
             case UnitAttackType.Drain:
             case UnitAttackType.Paralyze:
@@ -242,7 +265,8 @@ internal class BattleProcessor
                     return new BattleProcessorAttackResult(
                         AttackResult.Heal,
                         healPower,
-                        attack.AttackType);
+                        attack.AttackType,
+                        attack.AttackSource);
                 }
 
                 break;
@@ -260,8 +284,9 @@ internal class BattleProcessor
                 return new BattleProcessorAttackResult(
                     AttackResult.Effect,
                     power,
-                    2,
-                    attack.AttackType);
+                    2, // TODO Длительность брать из ресурсов sqlite.
+                    attack.AttackType,
+                    attack.AttackSource);
 
             case UnitAttackType.Revive:
             case UnitAttackType.DrainOverflow:
