@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
-    <ProjectReference Include="..\Disciples.Resources.Images\Disciples.Resources.Images.csproj" />
+    <ProjectReference Include="..\Resources\Disciples.Resources.Images\Disciples.Resources.Images.csproj" />
   </ItemGroup>
 
 </Project>

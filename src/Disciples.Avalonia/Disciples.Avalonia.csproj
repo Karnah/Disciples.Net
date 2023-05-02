@@ -37,8 +37,8 @@
     <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
-    <ProjectReference Include="..\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
-    <ProjectReference Include="..\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="GameWindow.axaml.cs">

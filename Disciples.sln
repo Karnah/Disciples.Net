@@ -3,35 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine", "Disciples.Engine\Disciples.Engine.csproj", "{776E40D0-F4E1-4CE0-A408-6DD48B456805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine", "src\Disciples.Engine\Disciples.Engine.csproj", "{776E40D0-F4E1-4CE0-A408-6DD48B456805}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Implementation", "Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Implementation", "src\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Common", "Disciples.Common\Disciples.Common.csproj", "{672F5E77-50F0-49BD-8A6A-D93B5C59A660}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Common", "src\Disciples.Common\Disciples.Common.csproj", "{672F5E77-50F0-49BD-8A6A-D93B5C59A660}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Platform", "Disciples.Engine.Platform\Disciples.Engine.Platform.csproj", "{B140D92D-D12B-4524-A330-EC46A7784E59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Platform", "src\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj", "{B140D92D-D12B-4524-A330-EC46A7784E59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.WPF", "Disciples.WPF\Disciples.WPF.csproj", "{65A059DB-14F0-443D-9537-AE80B527213A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.WPF", "src\Disciples.WPF\Disciples.WPF.csproj", "{65A059DB-14F0-443D-9537-AE80B527213A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Avalonia", "Disciples.Avalonia\Disciples.Avalonia.csproj", "{5D79D303-F56F-4C54-AA0B-68944D6C8D03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Avalonia", "src\Disciples.Avalonia\Disciples.Avalonia.csproj", "{5D79D303-F56F-4C54-AA0B-68944D6C8D03}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scenes", "Scenes", "{EAEEE9BB-F500-4270-A2D9-23BFBB391D45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Loading", "Disciples.Scene.Loading\Disciples.Scene.Loading.csproj", "{D764FD71-7E95-49A4-BB3E-728E07CD88E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Loading", "src\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj", "{D764FD71-7E95-49A4-BB3E-728E07CD88E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Battle", "Disciples.Scene.Battle\Disciples.Scene.Battle.csproj", "{B37ABF40-108C-40C8-BAA0-43DEADE8E39A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Battle", "src\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj", "{B37ABF40-108C-40C8-BAA0-43DEADE8E39A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Dbf", "Disciples.Resources.Database.Dbf\Disciples.Resources.Database.Dbf.csproj", "{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Dbf", "src\Resources\Disciples.Resources.Database.Dbf\Disciples.Resources.Database.Dbf.csproj", "{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite", "Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj", "{70ADC080-BE40-45D5-82CF-DC4CABA22D13}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite", "src\Resources\Disciples.Resources.Database.Sqlite\Disciples.Resources.Database.Sqlite.csproj", "{70ADC080-BE40-45D5-82CF-DC4CABA22D13}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite.Migrator", "Disciples.Resources.Database.Sqlite.Migrator\Disciples.Resources.Database.Sqlite.Migrator.csproj", "{7478B22C-CB31-4093-AB9C-8E1C4E8DD968}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Database.Sqlite.Migrator", "src\Resources\Disciples.Resources.Database.Sqlite.Migrator\Disciples.Resources.Database.Sqlite.Migrator.csproj", "{7478B22C-CB31-4093-AB9C-8E1C4E8DD968}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Images", "Disciples.Resources.Images\Disciples.Resources.Images.csproj", "{C3F9BDC6-6C7D-4000-A3BD-B7F5C7015BEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Images", "src\Resources\Disciples.Resources.Images\Disciples.Resources.Images.csproj", "{C3F9BDC6-6C7D-4000-A3BD-B7F5C7015BEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Sounds", "Disciples.Resources.Sounds\Disciples.Resources.Sounds.csproj", "{E5453CD9-6587-484D-97E2-AE75206771F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Resources.Sounds", "src\Resources\Disciples.Resources.Sounds\Disciples.Resources.Sounds.csproj", "{E5453CD9-6587-484D-97E2-AE75206771F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
