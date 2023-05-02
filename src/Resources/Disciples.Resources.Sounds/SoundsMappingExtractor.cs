@@ -1,37 +1,29 @@
 ﻿using Disciples.Common.Models;
-using Disciples.Resources.Sounds.Helpers;
+using Disciples.Resources.Common;
+using Disciples.Resources.Common.Extensions;
+using Disciples.Resources.Common.Models;
 using Disciples.Resources.Sounds.Models;
-using File = Disciples.Resources.Sounds.Models.File;
+using File = Disciples.Resources.Common.Models.File;
 
 namespace Disciples.Resources.Sounds;
 
 /// <summary>
 /// Класс для извлечения звуков, которые соответствуют указанным юнитам/действиям.
 /// </summary>
-public class SoundsMappingExtractor
+public class SoundsMappingExtractor : BaseResourceExtractor
 {
-    /// <summary>
-    /// Идентификатор записи в которой лежат имена файлов.
-    /// </summary>
-    private const int FILE_NAMES_RECORD_ID = 2;
-
-    private readonly string _path;
-
-    private IDictionary<int, Record> _records = null!;
-    private IDictionary<int, File> _filesById = null!;
-    private IDictionary<string, File> _filesByName = null!;
     private IDictionary<string, UnitTypeSounds> _unitTypeSounds = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="SoundsMappingExtractor" />.
     /// </summary>
     /// <param name="path">Путь до ресурса со звуками.</param>
-    public SoundsMappingExtractor(string path)
+    public SoundsMappingExtractor(string path) : base(path)
     {
-        _path = path;
-
-        Load();
     }
+
+    /// <inheritdoc />
+    protected override int FilesRecordId => 2;
 
     /// <summary>
     /// Получить информацию о звуках для указанного типа юнита.
@@ -41,83 +33,30 @@ public class SoundsMappingExtractor
         return _unitTypeSounds[unitTypeId];
     }
 
-    /// <summary>
-    /// Извлечь все метаданные из файла ресурсов.
-    /// </summary>
-    private void Load()
+    /// <inheritdoc />
+    protected override IReadOnlyList<File> LoadFiles(Stream stream, Record fileListRecord, IReadOnlyDictionary<int, Record> records)
     {
-        using (var stream = new FileStream(_path, FileMode.Open, FileAccess.Read))
-        {
-            var mqdb = stream.ReadString(4);
-            if (mqdb != "MQDB")
-                throw new ArgumentException("Unknown format of file");
-
-            LoadRecords(stream);
-            LoadFilesList(stream);
-
-            var soundInfoRecords = LoadSoundInfoRecords(stream);
-
-            _unitTypeSounds = LoadUnitTypeSounds(stream, soundInfoRecords);
-        }
-    }
-
-    /// <summary>
-    /// Загрузка информации о записях.
-    /// </summary>
-    private void LoadRecords(Stream stream)
-    {
-        _records = new SortedDictionary<int, Record>();
-        stream.Seek(28, SeekOrigin.Begin);
-
-        while (true)
-        {
-            var header = stream.ReadString(4);
-            if (stream.Position >= stream.Length - 1 || header != "MQRC")
-                break;
-
-            stream.Skip(4);
-
-            var id = stream.ReadInt();
-            var size = stream.ReadInt();
-            var realFileSize = stream.ReadInt();
-            var isNotDeleted = stream.ReadInt();
-            var recordMagic = stream.ReadInt();
-
-            var offset = stream.Position;
-            var mqrc = new Record(id, size, offset);
-
-            stream.Skip(realFileSize);
-
-            _records[mqrc.Id] = mqrc;
-        }
-
-        if (_records.ContainsKey(FILE_NAMES_RECORD_ID) == false)
-            throw new ArgumentException($"Unknown file format: ID000{FILE_NAMES_RECORD_ID} was not found");
-    }
-
-    /// <summary>
-    /// Загрузка информации о файлах.
-    /// </summary>
-    private void LoadFilesList(Stream stream)
-    {
-        var fileNamesRecord = _records[FILE_NAMES_RECORD_ID];
-        stream.Seek(fileNamesRecord.Offset, SeekOrigin.Begin);
-
         var filesCount = stream.ReadInt();
-        _filesById = new Dictionary<int, File>();
-        _filesByName = new Dictionary<string, File>();
+        var files = new List<File>(filesCount);
 
         for (int i = 0; i < filesCount; ++i)
         {
             var fileName = stream.ReadString(256);
             var id = stream.ReadInt();
 
-            var record = _records[id];
+            var record = records[id];
             var file = new File(id, fileName, record.Size, record.Offset);
-
-            _filesById[id] = file;
-            _filesByName[fileName] = file;
+            files.Add(file);
         }
+
+        return files;
+    }
+
+    /// <inheritdoc />
+    protected override void LoadInternal(Stream stream)
+    {
+        var soundInfoRecords = LoadSoundInfoRecords(stream);
+        _unitTypeSounds = LoadUnitTypeSounds(stream, soundInfoRecords);
     }
 
     /// <summary>
@@ -126,10 +65,9 @@ public class SoundsMappingExtractor
     /// <remarks>
     /// В данном методе нет смысла, так как все идентификаторы содержатся в SNDINFO.DAT.
     /// </remarks>
-    private void LoadIds(Stream stream)
+    private IReadOnlyList<int> LoadIds(Stream stream)
     {
-        if (!_filesByName.TryGetValue("LSTIDS.DAT", out var file))
-            return;
+        var file = GetFile("LSTIDS.DAT");
 
         stream.Seek(file.Offset, SeekOrigin.Begin);
 
@@ -139,6 +77,8 @@ public class SoundsMappingExtractor
         {
             result[i] = stream.ReadInt();
         }
+
+        return result;
     }
 
     /// <summary>
@@ -146,8 +86,7 @@ public class SoundsMappingExtractor
     /// </summary>
     private IReadOnlyList<SoundInfoRecord> LoadSoundInfoRecords(Stream stream)
     {
-        if (!_filesByName.TryGetValue("SNDINFO.DAT", out var file))
-            return Array.Empty<SoundInfoRecord>();
+        var file = GetFile("SNDINFO.DAT");
 
         stream.Seek(file.Offset, SeekOrigin.Begin);
 
@@ -233,7 +172,8 @@ public class SoundsMappingExtractor
     /// </summary>
     private IReadOnlyList<string> LoadSoundList(string fileName, Stream stream)
     {
-        if (!_filesByName.TryGetValue(fileName, out var file))
+        var file = TryGetFile(fileName);
+        if (file == null)
         {
             // По какой-то причине есть не все файлы.
             return Array.Empty<string>();

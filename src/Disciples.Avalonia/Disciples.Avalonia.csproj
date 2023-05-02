@@ -34,11 +34,10 @@
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
-    <ProjectReference Include="..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
-    <ProjectReference Include="..\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="GameWindow.axaml.cs">

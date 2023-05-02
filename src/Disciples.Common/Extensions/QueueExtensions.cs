@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Disciples.Common.Helpers;
+namespace Disciples.Common.Extensions;
 
 /// <summary>
 /// Набор методов для работы с очередью.

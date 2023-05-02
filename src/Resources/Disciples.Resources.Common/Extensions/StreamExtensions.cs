@@ -1,12 +1,12 @@
 ﻿using System.Buffers;
 using System.Text;
 
-namespace Disciples.Resources.Sounds.Helpers;
+namespace Disciples.Resources.Common.Extensions;
 
 /// <summary>
 /// Набор методов для взаимодействием с потоком.
 /// </summary>
-internal static class StreamExtensions
+public static class StreamExtensions
 {
     /// <summary>
     /// Пропустить указанное количество байт.

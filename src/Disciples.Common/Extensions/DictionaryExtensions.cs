@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Disciples.Common.Helpers;
+namespace Disciples.Common.Extensions;
 
 /// <summary>
 /// Набор методов для работы со словарём.

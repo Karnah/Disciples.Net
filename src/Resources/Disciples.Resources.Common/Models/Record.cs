@@ -1,6 +1,9 @@
-﻿namespace Disciples.Resources.Images.Models;
+﻿namespace Disciples.Resources.Common.Models;
 
-internal class Record
+/// <summary>
+/// Запись в файле в ресурса.
+/// </summary>
+public class Record
 {
     public Record(int id, int size, long offset)
     {
@@ -8,7 +11,6 @@ internal class Record
         Size = size;
         Offset = offset;
     }
-
 
     /// <summary>
     /// Идентификатор записи

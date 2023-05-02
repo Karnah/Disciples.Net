@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DryIoc.dll" Version="5.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
+    <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
+  </ItemGroup>
+
+</Project>

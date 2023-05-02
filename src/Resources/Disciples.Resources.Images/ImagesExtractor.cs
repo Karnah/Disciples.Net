@@ -1,10 +1,11 @@
-﻿using System.Buffers;
+﻿using Disciples.Resources.Common;
+using Disciples.Resources.Common.Extensions;
+using Disciples.Resources.Common.Models;
 using Disciples.Resources.Images.Enums;
-using Disciples.Resources.Images.Helpers;
 using Disciples.Resources.Images.Models;
 using ImageMagick;
 using SubstreamSharp;
-using File = Disciples.Resources.Images.Models.File;
+using File = Disciples.Resources.Common.Models.File;
 
 namespace Disciples.Resources.Images;
 
@@ -14,27 +15,21 @@ namespace Disciples.Resources.Images;
 /// <remarks>
 /// TODO Разобраться с null.
 /// </remarks>
-public class ImagesExtractor
+public class ImagesExtractor : BaseResourceExtractor
 {
-    private readonly string _path;
-
-    private IDictionary<int, Record> _records = null!;
-    private IDictionary<int, File> _filesById = null!;
-    private IDictionary<string, File> _filesByName = null!;
-
-    private IDictionary<string, MqImage>? _mqImages;
-    private IDictionary<string, MqAnimation>? _mqAnimations;
+    private IReadOnlyDictionary<string, MqImage>? _mqImages;
+    private IReadOnlyDictionary<string, MqAnimation>? _mqAnimations;
 
     /// <summary>
     /// Создать объект типа <see cref="ImagesExtractor" />.
     /// </summary>
     /// <param name="path">Путь до ресурса с изображениями.</param>
-    public ImagesExtractor(string path)
+    public ImagesExtractor(string path) : base(path)
     {
-        _path = path;
-
-        Load();
     }
+
+    /// <inheritdoc />
+    protected override int FilesRecordId => 2;
 
     /// <summary>
     /// Получить кадры анимации по её имени.
@@ -61,11 +56,12 @@ public class ImagesExtractor
     /// </remarks>
     public IDictionary<string, RawBitmap> GetImageParts(string name)
     {
-        if (_filesByName?.ContainsKey(name) != true)
+        var file = TryGetFile(name);
+        if (file == null)
             return null;
 
         var result = new Dictionary<string, RawBitmap>();
-        var baseFile = _filesByName[name];
+        var baseFile = file;
         var baseImage = PrepareImage(baseFile);
         var parts = _mqImages.Select(i => i.Value).Where(i => i.FileId == baseFile.Id);
         foreach (var part in parts) {
@@ -84,13 +80,14 @@ public class ImagesExtractor
         if (_mqImages?.ContainsKey(name) == true)
         {
             var mqImage = _mqImages[name];
-            var baseImage = PrepareImage(_filesById[mqImage.FileId]);
+            var baseImage = PrepareImage(GetFile(mqImage.FileId));
 
             return BuildImage(baseImage, mqImage);
         }
 
         // Иначе мы ищем файл с таким именем. Его можно просто отдать целиком, предварительно избавившись от прозрачности.
-        if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var imageFile) == false)
+        var imageFile = TryGetFile($"{name.ToUpper()}.PNG");
+        if (imageFile == null)
             return null;
 
         return PrepareImage(imageFile);
@@ -101,10 +98,7 @@ public class ImagesExtractor
     /// </summary>
     public byte[] GetFileContent(string name)
     {
-        if (_filesByName.TryGetValue($"{name.ToUpper()}.PNG", out var file) == false)
-            throw new ArgumentException($"Файл {name} не найден");
-
-        return GetFileContent(file);
+        return GetFileContent(GetFile($"{name.ToUpper()}.PNG"));
     }
 
     /// <summary>
@@ -112,122 +106,73 @@ public class ImagesExtractor
     /// </summary>
     public IReadOnlyList<string> GetAllFilesNames()
     {
-        return _filesByName.Keys.ToList();
+        return FileNames;
     }
-
 
     #region LoadData
 
-    /// <summary>
-    /// Извлечь все метаданные из файла ресурсов.
-    /// </summary>
-    private void Load()
+    /// <inheritdoc />
+    protected override IReadOnlyList<File> LoadFiles(Stream stream, Record fileListRecord, IReadOnlyDictionary<int, Record> records)
     {
-        using (var stream = new FileStream(_path, FileMode.Open, FileAccess.Read))
-        {
-            var mqdb = stream.ReadString(4);
-            if (mqdb != "MQDB")
-                throw new ArgumentException("Unknown format of file");
+        var filesCount = stream.ReadInt();
+        var files = new List<File>(filesCount);
 
-            LoadRecords(stream);
-            LoadFilesList(stream);
+        for (int i = 0; i < filesCount; ++i)
+        {
+            var fileName = stream.ReadString(256);
+            var id = stream.ReadInt();
+
+            var record = records[id];
+            var file = new File(id, fileName, record.Size, record.Offset);
+            files.Add(file);
         }
 
-        var mqIndexes = LoadMqIndexes();
+        return files;
+    }
+
+    /// <inheritdoc />
+    protected override void LoadInternal(Stream stream)
+    {
+        var mqIndexes = LoadMqIndexes(stream);
         if (mqIndexes == null)
             return;
 
         // Конвертируем в другой словарь, чтобы после выкинуть все картинки, которые являются частями анимации.
         // Это позволит не хранить огромный словарь изображений.
-        var mqImages = LoadMqImages(mqIndexes)
-            .ToDictionary(mi => mi.Key, mi => new MqImageInfo(mi.Value));
+        var mqImages = LoadMqImages(stream, mqIndexes)
+            ?.ToDictionary(mi => mi.Key, mi => new MqImageInfo(mi.Value));
+        if (mqImages == null)
+            return;
 
-        _mqAnimations = LoadMqAnimations(mqImages);
+        _mqAnimations = LoadMqAnimations(stream, mqImages);
         _mqImages = mqImages
             .Where(mi => mi.Value.IsAnimationFrame == false)
             .ToDictionary(mi => mi.Key, mi => mi.Value.MqImage);
     }
 
     /// <summary>
-    /// Загрузка информации о записях.
-    /// </summary>
-    private void LoadRecords(Stream stream)
-    {
-        _records = new Dictionary<int, Record>();
-        stream.Seek(28, SeekOrigin.Begin);
-
-        while (true) {
-            var magic = stream.ReadString(4);
-            if (stream.Position >= stream.Length - 1 || magic != "MQRC")
-                break;
-
-            stream.Seek(4, SeekOrigin.Current);
-
-            var id = stream.ReadInt();
-            var size = stream.ReadInt();
-            stream.Seek(3 * 4, SeekOrigin.Current);
-            var offset = stream.Position;
-            var mqrc = new Record(id, size, offset);
-
-            stream.Seek(mqrc.Size, SeekOrigin.Current);
-
-            _records[mqrc.Id] = mqrc;
-        }
-
-        if (_records.ContainsKey(2) == false)
-            throw new ArgumentException("Unknown file format: ID0002 was not found");
-    }
-
-    /// <summary>
-    /// Загрузка информации о файлах.
-    /// </summary>
-    private void LoadFilesList(Stream stream)
-    {
-        // Информация о списке файлов лежит в записи с идентификатором 2.
-        stream.Seek(_records[2].Offset, SeekOrigin.Begin);
-
-        var filesCount = stream.ReadInt();
-        _filesById = new Dictionary<int, File>();
-        _filesByName = new Dictionary<string, File>();
-
-        for (int i = 0; i < filesCount; ++i) {
-            var fileName = stream.ReadString(256);
-            var id = stream.ReadInt();
-
-            var record = _records[id];
-            var file = new File(id, fileName, record.Size, record.Offset);
-
-            _filesById[id] = file;
-            _filesByName[fileName] = file;
-        }
-    }
-
-    /// <summary>
     /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени).
     /// </summary>
-    private IDictionary<string, MqIndex>? LoadMqIndexes()
+    private IDictionary<string, MqIndex>? LoadMqIndexes(Stream stream)
     {
-        _filesByName.TryGetValue("-INDEX.OPT", out var indexFile);
+        var indexFile = TryGetFile("-INDEX.OPT");
         if (indexFile == null)
             return null;
 
         var mqIndices = new Dictionary<string, MqIndex>();
-        using (var indicesStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+        stream.Seek(indexFile.Offset, SeekOrigin.Begin);
+
+        var framesCount = stream.ReadInt();
+        for (int frameIndex = 0; frameIndex < framesCount; ++frameIndex)
         {
-            indicesStream.Seek(indexFile.Offset, SeekOrigin.Begin);
+            var id = stream.ReadInt();
+            var name = stream.ReadString();
+            var unknownValue1 = stream.ReadInt();
+            var unknownValue2 = stream.ReadInt();
 
-            var framesCount = indicesStream.ReadInt();
-            for (int frameIndex = 0; frameIndex < framesCount; ++frameIndex)
-            {
-                var id = indicesStream.ReadInt();
-                var name = indicesStream.ReadString();
-                var unknownValue1 = indicesStream.ReadInt();
-                var unknownValue2 = indicesStream.ReadInt();
-
-                var mqIndex = new MqIndex(id, name, unknownValue1, unknownValue2);
-                // todo Возможно дублирование. WTF?
-                mqIndices.TryAdd(mqIndex.Name, mqIndex);
-            }
+            var mqIndex = new MqIndex(id, name, unknownValue1, unknownValue2);
+            // todo Возможно дублирование. WTF?
+            mqIndices.TryAdd(mqIndex.Name, mqIndex);
         }
 
         return mqIndices;
@@ -236,45 +181,46 @@ public class ImagesExtractor
     /// <summary>
     /// Загрузить изображения. Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую.
     /// </summary>
-    private IDictionary<string, MqImage> LoadMqImages(IDictionary<string, MqIndex> mqIndices)
+    private IDictionary<string, MqImage>? LoadMqImages(Stream stream, IDictionary<string, MqIndex> mqIndices)
     {
-        _filesByName.TryGetValue("-IMAGES.OPT", out var imagesFile);
+        var imagesFile = TryGetFile("-IMAGES.OPT");
         if (imagesFile == null)
             return null;
 
         var mqImages = new Dictionary<string, MqImage>();
-        using (var imagesStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
-            imagesStream.Seek(imagesFile.Offset, SeekOrigin.Begin);
+        stream.Seek(imagesFile.Offset, SeekOrigin.Begin);
 
-            var endOfFile = imagesFile.Offset + imagesFile.Size - 1;
-            while (imagesStream.Position < endOfFile) {
-                imagesStream.Seek(11 + 1024, SeekOrigin.Current);
+        var endOfFile = imagesFile.Offset + imagesFile.Size - 1;
+        while (stream.Position < endOfFile)
+        {
+            stream.Seek(11 + 1024, SeekOrigin.Current);
 
-                var fileFramesNumber = imagesStream.ReadInt();
-                for (int frameIndex = 0; frameIndex < fileFramesNumber; ++frameIndex) {
-                    var frameName = imagesStream.ReadString();
-                    var piecesCount = imagesStream.ReadInt();
-                    int width = imagesStream.ReadInt(),
-                        height = imagesStream.ReadInt();
+            var fileFramesNumber = stream.ReadInt();
+            for (int frameIndex = 0; frameIndex < fileFramesNumber; ++frameIndex)
+            {
+                var frameName = stream.ReadString();
+                var piecesCount = stream.ReadInt();
+                int width = stream.ReadInt(),
+                    height = stream.ReadInt();
 
-                    var pieces = new List<MqImagePiece>();
-                    for (int pieceIndex = 0; pieceIndex < piecesCount; ++pieceIndex) {
-                        int sourceX = imagesStream.ReadInt(),
-                            sourceY = imagesStream.ReadInt(),
-                            destX = imagesStream.ReadInt(),
-                            destY = imagesStream.ReadInt(),
-                            pieceWidth = imagesStream.ReadInt(),
-                            pieceHeight = imagesStream.ReadInt();
+                var pieces = new List<MqImagePiece>();
+                for (int pieceIndex = 0; pieceIndex < piecesCount; ++pieceIndex)
+                {
+                    int sourceX = stream.ReadInt(),
+                        sourceY = stream.ReadInt(),
+                        destX = stream.ReadInt(),
+                        destY = stream.ReadInt(),
+                        pieceWidth = stream.ReadInt(),
+                        pieceHeight = stream.ReadInt();
 
-                        var piece = new MqImagePiece(sourceX, sourceY, destX, destY, pieceWidth, pieceHeight);
-                        pieces.Add(piece);
-                    }
-
-                    var fileId = mqIndices[frameName].Id;
-                    var mqImage = new MqImage(frameName, fileId, width, height, pieces);
-                    // todo Возможно дублирование. WTF?
-                    mqImages.TryAdd(mqImage.Name, mqImage);
+                    var piece = new MqImagePiece(sourceX, sourceY, destX, destY, pieceWidth, pieceHeight);
+                    pieces.Add(piece);
                 }
+
+                var fileId = mqIndices[frameName].Id;
+                var mqImage = new MqImage(frameName, fileId, width, height, pieces);
+                // todo Возможно дублирование. WTF?
+                mqImages.TryAdd(mqImage.Name, mqImage);
             }
         }
 
@@ -284,38 +230,40 @@ public class ImagesExtractor
     /// <summary>
     /// Загрузить анимации. Анимации хранят информацию о изображениях из которых состоят.
     /// </summary>
-    private IDictionary<string, MqAnimation> LoadMqAnimations(IDictionary<string, MqImageInfo> mqImages)
+    private IReadOnlyDictionary<string, MqAnimation>? LoadMqAnimations(Stream stream, IDictionary<string, MqImageInfo> mqImages)
     {
-        _filesByName.TryGetValue("-ANIMS.OPT", out var animsFile);
+        var animsFile = TryGetFile("-ANIMS.OPT");
         if (animsFile == null)
             return null;
 
         var animationsInfo = new List<(int AnimationIndex, IReadOnlyCollection<MqImage> Frames)>();
-        using (var animsStream = new FileStream(_path, FileMode.Open, FileAccess.Read)) {
-            animsStream.Seek(animsFile.Offset, SeekOrigin.Begin);
+        stream.Seek(animsFile.Offset, SeekOrigin.Begin);
 
-            int animNumber = 0;
-            var endOfFile = animsFile.Offset + animsFile.Size - 1;
-            while (animsStream.Position < endOfFile) {
-                var fileAnimNumber = animsStream.ReadInt();
-                var frames = new List<MqImage>(fileAnimNumber);
-                for (int animIndex = 0; animIndex < fileAnimNumber; ++animIndex) {
-                    var animName = animsStream.ReadString();
-                    var mqImageInfo = mqImages[animName];
+        int animNumber = 0;
+        var endOfFile = animsFile.Offset + animsFile.Size - 1;
+        while (stream.Position < endOfFile)
+        {
+            var fileAnimNumber = stream.ReadInt();
+            var frames = new List<MqImage>(fileAnimNumber);
+            for (int animIndex = 0; animIndex < fileAnimNumber; ++animIndex)
+            {
+                var animName = stream.ReadString();
+                var mqImageInfo = mqImages[animName];
 
-                    mqImageInfo.IsAnimationFrame = true;
-                    frames.Add(mqImageInfo.MqImage);
-                }
-
-                animationsInfo.Add((animNumber, frames));
-                ++animNumber;
+                mqImageInfo.IsAnimationFrame = true;
+                frames.Add(mqImageInfo.MqImage);
             }
+
+            animationsInfo.Add((animNumber, frames));
+            ++animNumber;
         }
 
         var mqAnimations = new Dictionary<string, MqAnimation>();
-        foreach (var animationInfo in animationsInfo) {
-            foreach (var mqAnimationFrame in animationInfo.Frames) {
-                var safeFileName = Path.GetFileNameWithoutExtension(_filesById[mqAnimationFrame.FileId].Name);
+        foreach (var animationInfo in animationsInfo)
+        {
+            foreach (var mqAnimationFrame in animationInfo.Frames)
+            {
+                var safeFileName = Path.GetFileNameWithoutExtension(GetFile(mqAnimationFrame.FileId).Name);
                 var mqAnimation = new MqAnimation(animationInfo.AnimationIndex, safeFileName, animationInfo.Frames);
 
                 // Имя анимации - это имя базового изображения для первого фрейма.
@@ -329,7 +277,6 @@ public class ImagesExtractor
     }
 
     #endregion
-
 
     #region HelpMethods
 
@@ -354,7 +301,7 @@ public class ImagesExtractor
         {
             var fileId = frame.FileId;
             if (!baseImages.ContainsKey(frame.FileId))
-                baseImages.Add(fileId, PrepareImage(_filesById[fileId]));
+                baseImages.Add(fileId, PrepareImage(GetFile(fileId)));
 
             result.Add(BuildImage(baseImages[fileId], frame, animationBounds));
         }
@@ -455,7 +402,7 @@ public class ImagesExtractor
         MagickImage magickImage;
         try
         {
-            using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+            using (var fileStream = new FileStream(ResourceFilePath, FileMode.Open, FileAccess.Read))
             using (var streamReader = new Substream(fileStream, file.Offset, file.Size))
             {
                 magickImage = new MagickImage(streamReader, MagickFormat.Png);
@@ -465,7 +412,7 @@ public class ImagesExtractor
         {
             // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты.
             // Нужно получить решение.
-            Console.WriteLine($"Corrupted image: {_path}\\{file.Name}");
+            Console.WriteLine($"Corrupted image: {ResourceFilePath}\\{file.Name}");
             return null;
         }
 
@@ -558,7 +505,7 @@ public class ImagesExtractor
     private byte[] GetFileContent(File file)
     {
         var fileContent = new byte[file.Size];
-        using (var fileStream = new FileStream(_path, FileMode.Open, FileAccess.Read))
+        using (var fileStream = new FileStream(ResourceFilePath, FileMode.Open, FileAccess.Read))
         {
             fileStream.Seek(file.Offset, SeekOrigin.Begin);
             fileStream.Read(fileContent, 0, file.Size);

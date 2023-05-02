@@ -1,9 +1,9 @@
-﻿namespace Disciples.Resources.Images.Models;
+﻿namespace Disciples.Resources.Common.Models;
 
 /// <summary>
 /// Файл в ресурсах игры.
 /// </summary>
-internal class File
+public class File
 {
     /// <summary>
     /// Создать объект типа <see cref="File" />.

@@ -266,5 +266,8 @@ __pycache__/
 *.dbf
 *.dlg
 *.mft
+*.wav
+*.wdb
+*.wdt
 
 !Disciples.Resources.Database.Dbf/

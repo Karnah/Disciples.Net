@@ -15,4 +15,8 @@
     <PackageReference Include="SubstreamSharp" Version="1.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Disciples.Resources.Common\Disciples.Resources.Common.csproj" />
+  </ItemGroup>
+
 </Project>
