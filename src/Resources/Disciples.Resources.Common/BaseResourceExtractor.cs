@@ -30,8 +30,6 @@ public abstract class BaseResourceExtractor
     protected BaseResourceExtractor(string resourceFilePath)
     {
         ResourceFilePath = resourceFilePath;
-
-        Load();
     }
 
     /// <summary>

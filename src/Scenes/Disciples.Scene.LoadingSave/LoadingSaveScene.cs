@@ -9,6 +9,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
+using Disciples.Resources.Common;
 
 namespace Disciples.Scene.LoadingSave;
 
@@ -21,6 +22,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ITextProvider _textProvider;
+    private readonly IReadOnlyList<BaseResourceExtractor> _resourceExtractors;
 
     private string _savePath = null!;
 
@@ -36,7 +38,8 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         IGameController gameController,
         IUnitInfoProvider unitInfoProvider,
         IInterfaceProvider interfaceProvider,
-        ITextProvider textProvider
+        ITextProvider textProvider,
+        IReadOnlyList<BaseResourceExtractor> resourceExtractors
         ) : base(gameObjectContainer, sceneObjectContainer)
     {
         _gameObjectContainer = gameObjectContainer;
@@ -45,6 +48,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         _unitInfoProvider = unitInfoProvider;
         _interfaceProvider = interfaceProvider;
         _textProvider = textProvider;
+        _resourceExtractors = resourceExtractors;
     }
 
     /// <inheritdoc />
@@ -117,6 +121,11 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     /// </summary>
     private void LoadResources()
     {
+        foreach (var resourceExtractor in _resourceExtractors)
+        {
+            resourceExtractor.Load();
+        }
+
         _unitInfoProvider.Load();
     }
 

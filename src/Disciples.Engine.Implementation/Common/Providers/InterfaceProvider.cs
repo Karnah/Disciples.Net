@@ -65,6 +65,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     protected override void LoadInternal()
     {
+        _interfaceImagesExtractor.Load();
     }
 
     /// <inheritdoc />
