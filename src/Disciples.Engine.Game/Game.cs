@@ -4,7 +4,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle;
-using Disciples.Scene.Loading;
+using Disciples.Scene.LoadingGame;
 using DryIoc;
 
 namespace Disciples.Engine.Game;
@@ -48,7 +48,7 @@ public class Game
         _gameController.Start();
 
         // Сразу отображаем сцену загрузки.
-        _gameController.ChangeScene<ILoadingScene, SceneParameters>(SceneParameters.Empty);
+        _gameController.ChangeScene<ILoadingGameScene, SceneParameters>(SceneParameters.Empty);
 
         var gameContext = _gameController.LoadGame();
 
@@ -76,7 +76,7 @@ public class Game
         {
             new CommonModule(),
             new BattleSceneModule(),
-            new LoadingSceneModule(),
+            new LoadingGameSceneModule(),
             platformGameModule
         };
 

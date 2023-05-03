@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Avalonia", "src\D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scenes", "Scenes", "{EAEEE9BB-F500-4270-A2D9-23BFBB391D45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Loading", "src\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj", "{D764FD71-7E95-49A4-BB3E-728E07CD88E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.LoadingGame", "src\Scenes\Disciples.Scene.LoadingGame\Disciples.Scene.LoadingGame.csproj", "{D764FD71-7E95-49A4-BB3E-728E07CD88E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Battle", "src\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj", "{B37ABF40-108C-40C8-BAA0-43DEADE8E39A}"
 EndProject

@@ -4,10 +4,10 @@ using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 
-namespace Disciples.Scene.Loading;
+namespace Disciples.Scene.LoadingGame;
 
-/// <inheritdoc cref="ILoadingScene" />
-internal class LoadingScene : BaseScene, ILoadingScene
+/// <inheritdoc cref="ILoadingGameScene" />
+internal class LoadingGameScene : BaseScene, ILoadingGameScene
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IInterfaceProvider _interfaceProvider;
@@ -20,9 +20,9 @@ internal class LoadingScene : BaseScene, ILoadingScene
     private IImageSceneObject? _loadingSceneObject;
 
     /// <summary>
-    /// Создать объект типа <see cref="LoadingScene" />.
+    /// Создать объект типа <see cref="LoadingGameScene" />.
     /// </summary>
-    public LoadingScene(
+    public LoadingGameScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IInterfaceProvider interfaceProvider

@@ -14,7 +14,7 @@
     <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
     <ProjectReference Include="..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
-    <ProjectReference Include="..\Scenes\Disciples.Scene.Loading\Disciples.Scene.Loading.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.LoadingGame\Disciples.Scene.LoadingGame.csproj" />
   </ItemGroup>
 
 </Project>
