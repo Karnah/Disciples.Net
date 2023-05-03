@@ -23,7 +23,7 @@ public interface IGameController
     /// <summary>
     /// Загрузить данные игры.
     /// </summary>
-    public GameContext LoadGame();
+    public GameContext LoadGame(string savePath);
 
     /// <summary>
     /// Поменять сцену.

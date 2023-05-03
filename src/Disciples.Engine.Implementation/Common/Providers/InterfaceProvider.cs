@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
@@ -43,6 +44,16 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         return imageParts
             .Select(ip => new KeyValuePair<string, IBitmap>(ip.Key, _bitmapFactory.FromRawToBitmap(ip.Value)))
             .ToDictionary(ip => ip.Key, ip => ip.Value);
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<Frame> GetAnimation(string animationName)
+    {
+        var frames = _interfaceImagesExtractor.GetAnimationFrames(animationName);
+        if (frames == null)
+            throw new ArgumentException($"Не найдена анимация {animationName}", nameof(animationName));
+
+        return _bitmapFactory.ConvertToFrames(frames);
     }
 
     /// <inheritdoc />

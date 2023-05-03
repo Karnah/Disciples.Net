@@ -1,6 +1,7 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Scenes.Parameters;
 
-namespace Disciples.Scene.Battle;
+namespace Disciples.Engine.Scenes;
 
 /// <summary>
 /// Сцена битвы двух отрядов.

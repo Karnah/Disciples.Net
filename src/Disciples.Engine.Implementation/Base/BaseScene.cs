@@ -27,8 +27,22 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     public ISceneObjectContainer SceneObjectContainer { get; }
 
     /// <inheritdoc />
+    public void AfterSceneLoaded()
+    {
+        AfterSceneLoadedInternal();
+    }
+
+    /// <inheritdoc />
     protected override void LoadInternal()
     {
+    }
+
+    /// <summary>
+    /// Обработать загрузку сцены.
+    /// </summary>
+    protected virtual void AfterSceneLoadedInternal()
+    {
+
     }
 
     /// <inheritdoc />

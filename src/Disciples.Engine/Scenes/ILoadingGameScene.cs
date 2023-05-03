@@ -1,7 +1,7 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Models;
 
-namespace Disciples.Scene.LoadingGame;
+namespace Disciples.Engine.Scenes;
 
 /// <summary>
 /// Сцена загрузки игры.

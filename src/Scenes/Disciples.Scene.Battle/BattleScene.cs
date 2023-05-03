@@ -2,6 +2,8 @@
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
+using Disciples.Engine.Scenes;
+using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.Battle.Controllers;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;

@@ -1,10 +1,10 @@
 ﻿using Disciples.Engine.Common.Models;
 using Disciples.Engine.Models;
 
-namespace Disciples.Scene.Battle;
+namespace Disciples.Engine.Scenes.Parameters;
 
 /// <summary>
-/// Параметры, необходимые для инициализации сцены боя.
+/// Параметры, необходимые для инициализации сцены боя <see cref="IBattleScene" />.
 /// </summary>
 public class BattleSceneParameters : SceneParameters
 {

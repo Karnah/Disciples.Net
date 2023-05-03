@@ -1,10 +1,11 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Scenes;
 using DryIoc;
 
 namespace Disciples.Scene.LoadingGame;
 
 /// <summary>
-/// Модуль регистрации для сцены загрузки.
+/// Модуль регистрации для сцены загрузки игры.
 /// </summary>
 public class LoadingGameSceneModule : IGameModule
 {

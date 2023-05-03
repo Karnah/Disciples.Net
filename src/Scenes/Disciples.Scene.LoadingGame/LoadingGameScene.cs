@@ -3,6 +3,8 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
+using Disciples.Engine.Scenes;
+using Disciples.Engine.Scenes.Parameters;
 
 namespace Disciples.Scene.LoadingGame;
 
@@ -11,6 +13,8 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IInterfaceProvider _interfaceProvider;
+    private readonly IGameController _gameController;
+    private readonly ITextProvider _textProvider;
 
     /// <summary>
     /// Наименование картинки, которая содержит фон загрузки.
@@ -25,11 +29,15 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     public LoadingGameScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
-        IInterfaceProvider interfaceProvider
+        IInterfaceProvider interfaceProvider,
+        IGameController gameController,
+        ITextProvider textProvider
         ) : base(gameObjectContainer, sceneObjectContainer)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _interfaceProvider = interfaceProvider;
+        _gameController = gameController;
+        _textProvider = textProvider;
     }
 
     /// <inheritdoc />
@@ -49,12 +57,17 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     }
 
     /// <inheritdoc />
+    protected override void AfterSceneLoadedInternal()
+    {
+        base.AfterSceneLoadedInternal();
+
+        Task.Run(LoadGame);
+    }
+
+    /// <inheritdoc />
     protected override void UnloadInternal()
     {
         base.UnloadInternal();
-
-        if (!_interfaceProvider.IsSharedBetweenScenes)
-            _interfaceProvider.Load();
 
         _loadingSceneObject?.Destroy();
         _loadingSceneObject = null;
@@ -68,5 +81,38 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     /// <inheritdoc />
     protected override void AfterSceneUpdate()
     {
+    }
+
+    /// <summary>
+    /// Загрузить игру и её ресурсы.
+    /// </summary>
+    private void LoadGame()
+    {
+        LoadResources();
+        LoadSave();
+    }
+
+    /// <summary>
+    /// Загрузить необходимые ресурсы.
+    /// </summary>
+    private void LoadResources()
+    {
+        // TODO Добавить загрузку всех ресурсов, необходимых для меню.
+        _textProvider.Load();
+    }
+
+    /// <summary>
+    /// Загрузить сейв.
+    /// </summary>
+    private void LoadSave()
+    {
+        const string saveFolder = "Saves";
+        const string saveName = "save.json";
+        //const string saveName = "effectsSave.json";
+        //const string saveName = "wardImmunitySave.json";
+
+        var savePath = Path.Combine(Directory.GetCurrentDirectory(), saveFolder, saveName);
+        _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
+            new LoadingSaveSceneParameters(savePath));
     }
 }

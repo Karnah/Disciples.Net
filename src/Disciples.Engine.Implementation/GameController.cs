@@ -95,6 +95,49 @@ public class GameController : IGameController
         _gameTimer.TimerTick -= UpdateScene;
     }
 
+    /// <inheritdoc />
+    public GameContext LoadGame(string savePath)
+    {
+        var path = Path.Combine(savePath);
+        try
+        {
+            return File
+                .ReadAllText(path)
+                .DeserializeFromJson<GameContext>();
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Не удалось загрузить сейв-файл {savePath}", e);
+        }
+    }
+
+    /// <inheritdoc />
+    public async void ChangeScene<TScene, TData>(TData data)
+        where TScene : IScene, ISupportLoadingWithParameters<TData>
+        where TData : SceneParameters
+    {
+        // Старая сцена должна прекращать обработку всех событий на время загрузки новой.
+        _currentScene?.Unload();
+
+        _sceneResolverContext?.Dispose();
+        _sceneResolverContext = _container.OpenScope(typeof(TScene).Name);
+
+        var scene = _sceneResolverContext.Resolve<TScene>();
+
+        scene.InitializeParameters(data);
+
+        await Task.Run(scene.Load);
+
+        _currentScene = scene;
+
+        // TODO Вынести в сцену.
+        CurrentSceneContainer!.UpdateContainer();
+
+        SceneChanged?.Invoke(this, EventArgs.Empty);
+
+        scene.AfterSceneLoaded();
+    }
+
     /// <summary>
     /// Обновить состояние сцены.
     /// </summary>
@@ -180,53 +223,5 @@ public class GameController : IGameController
             return;
 
         _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.UiButton, InputDeviceActionState.Activated, button));
-    }
-
-    /// <summary>
-    /// Загрузить данные игры.
-    /// </summary>
-    public GameContext LoadGame()
-    {
-        const string saveFolder = "Saves";
-        const string gameContextFileName = "save.json";
-        //const string gameContextFileName = "effectsSave.json";
-        //const string gameContextFileName = "wardImmunitySave.json";
-        var path = Path.Combine(Directory.GetCurrentDirectory(), saveFolder, gameContextFileName);
-        try
-        {
-            return File
-                .ReadAllText(path)
-                .DeserializeFromJson<GameContext>();
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"Не удалось загрузить сейв-файл {gameContextFileName}", e);
-        }
-    }
-
-    /// <inheritdoc />
-    public async void ChangeScene<TScene, TData>(TData data)
-        where TScene : IScene, ISupportLoadingWithParameters<TData>
-        where TData : SceneParameters
-    {
-        _currentScene?.Unload();
-
-        // todo сцена "подождите, идёт загрузка"?
-
-        _sceneResolverContext?.Dispose();
-        _sceneResolverContext = _container.OpenScope(typeof(TScene).Name);
-
-        var scene = _sceneResolverContext.Resolve<TScene>();
-
-        scene.InitializeParameters(data);
-
-        await Task.Run(scene.Load);
-
-        _currentScene = scene;
-
-        // TODO Вынести в сцену.
-        CurrentSceneContainer!.UpdateContainer();
-
-        SceneChanged?.Invoke(this, EventArgs.Empty);
     }
 }

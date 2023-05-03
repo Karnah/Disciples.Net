@@ -18,6 +18,11 @@ public interface IScene : ISupportLoading
     ISceneObjectContainer SceneObjectContainer { get; }
 
     /// <summary>
+    /// Обработать загрузку сцены.
+    /// </summary>
+    void AfterSceneLoaded();
+
+    /// <summary>
     /// Обновить сцену.
     /// </summary>
     void UpdateScene(UpdateSceneData data);

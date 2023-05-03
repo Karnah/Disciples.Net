@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.Providers;
 
@@ -19,6 +19,12 @@ public interface IInterfaceProvider : ISupportLoading
     /// Получить части из которых состоит изображение.
     /// </summary>
     IReadOnlyDictionary<string, IBitmap> GetImageParts(string imageName);
+
+    /// <summary>
+    /// Получить анимацию.
+    /// </summary>
+    /// <param name="animationName">Имя анимации.</param>
+    IReadOnlyList<Frame> GetAnimation(string animationName);
 
     /// <summary>
     /// Получить изображение указанного цвета.

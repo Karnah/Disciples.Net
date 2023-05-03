@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Controllers;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
