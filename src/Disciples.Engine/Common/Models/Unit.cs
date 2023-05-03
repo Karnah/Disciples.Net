@@ -195,7 +195,7 @@ public class Unit
     private int CalculateLevelUpgrade(Func<UnitLevelUpgrade, int> propertyGetter)
     {
         var levelDiff = Level - UnitType.Level;
-        var lowLevelDiff = Math.Min(levelDiff, UnitType.UpgradeChangeLevel - 1);
+        var lowLevelDiff = Math.Min(levelDiff, UnitType.UpgradeChangeLevel - UnitType.Level);
         var highLevelDiff = Math.Max(0, levelDiff - lowLevelDiff);
 
         return
