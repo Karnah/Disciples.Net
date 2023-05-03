@@ -1,8 +1,9 @@
 ﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Resources.Enum;
 
-namespace Disciples.Scene.Battle.Resources.Extensions;
+namespace Disciples.Scene.Battle.Resources.ImageKeys.Extensions;
 
 /// <summary>
 /// Расширения для работы с ресурсами изображений.
@@ -101,14 +102,14 @@ internal static class ImageResourceKeyExtensions
     /// <summary>
     /// Получить ключ в ресурсах, который соответствует определённой анимации атаки.
     /// </summary>
-    public static string GetResourceKey(this UnitBattleEffectType effectType)
+    public static string GetResourceKey(this UnitAttackType effectAttackType)
     {
-        return effectType switch
+        return effectAttackType switch
         {
-            UnitBattleEffectType.Poison => "POISONANIM",
-            UnitBattleEffectType.Frostbite => "FROSTBITEANIM",
-            UnitBattleEffectType.Blister => "BLISTERANIM",
-            _ => throw new ArgumentOutOfRangeException(nameof(effectType), effectType, null)
+            UnitAttackType.Poison => "POISONANIM",
+            UnitAttackType.Frostbite => "FROSTBITEANIM",
+            UnitAttackType.Blister => "BLISTERANIM",
+            _ => throw new ArgumentOutOfRangeException(nameof(effectAttackType), effectAttackType, null)
         };
     }
 

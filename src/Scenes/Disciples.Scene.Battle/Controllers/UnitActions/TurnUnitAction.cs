@@ -48,7 +48,11 @@ internal class TurnUnitAction : BaseBattleUnitAction
     {
         _unitEffects = CurrentBattleUnit.Unit.Effects.GetTurnUnitBattleEffect(_battleContext.Round);
 
-        ProcessNextBattleEffect();
+        var hasBattleEffects = ProcessNextBattleEffect();
+
+        // Сбрасываем признак защиты.
+        if (!hasBattleEffects)
+            CurrentBattleUnit.Unit.IsDefended = false;
     }
 
     /// <inheritdoc />
@@ -100,6 +104,8 @@ internal class TurnUnitAction : BaseBattleUnitAction
             if (ProcessNextBattleEffect())
                 return;
 
+            CurrentBattleUnit.Unit.IsDefended = false;
+
             // Если все эффекты были обработаны, до ждём немного и завершаем действие.
             AddAction(new DelayBattleAction());
         }
@@ -121,11 +127,11 @@ internal class TurnUnitAction : BaseBattleUnitAction
                 return false;
 
             var unitEffect = _unitEffects[_currentUnitEffectIndex.Value];
-            switch (unitEffect.EffectType)
+            switch (unitEffect.AttackType)
             {
-                case UnitBattleEffectType.Poison:
-                case UnitBattleEffectType.Frostbite:
-                case UnitBattleEffectType.Blister:
+                case UnitAttackType.Poison:
+                case UnitAttackType.Frostbite:
+                case UnitAttackType.Blister:
                     var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect);
                     if (attackResult == null)
                         continue;

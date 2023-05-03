@@ -187,7 +187,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (unitAction is EffectUnitBattleAction effectAction)
         {
             effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
-                new UnitBattleEffect(AttackClassToEffectType(effectAction.AttackType!.Value), effectAction.RoundDuration, effectAction.Power));
+                new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.RoundDuration, effectAction.Power));
         }
 
         // Если была защита, то удаляем её из списка.
@@ -279,6 +279,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 var power = attackResult.Power;
                 var roundDuration = attackResult.RoundDuration!.Value;
                 var attackClass = attackResult.AttackType!.Value;
+                var attackSource = attackResult.AttackSource!.Value;
 
                 var effectAnimationAction = ShouldShowEffectAnimation(attackClass)
                     ? GetUnitEffectAnimationAction(targetUnit, attackClass)
@@ -286,7 +287,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 if (effectAnimationAction != null)
                     AddAction(effectAnimationAction);
 
-                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, roundDuration, power, effectAnimationAction));
+                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, attackSource, roundDuration, power, effectAnimationAction));
 
                 if (!isMainAttack && !_isAttackSoundPlaying)
                 {
@@ -358,7 +359,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     protected AnimationBattleAction? GetUnitEffectAnimationAction(BattleUnit battleUnit, UnitAttackType effectAttackType)
     {
         // TODO Анимации может не быть. Например, для паралича.
-        var animationFrames = _unitResourceProvider.GetEffectAnimation(AttackClassToEffectType(effectAttackType), battleUnit.Unit.UnitType.IsSmall);
+        var animationFrames = _unitResourceProvider.GetEffectAnimation(effectAttackType, battleUnit.Unit.UnitType.IsSmall);
         var animation = _battleGameObjectContainer.AddAnimation(
             animationFrames,
             battleUnit.X,
@@ -390,20 +391,6 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             return;
 
         _playingSounds.Add(playingSound);
-    }
-
-    /// <summary>
-    /// Получить тип эффекта в зависимости от типа атаки.
-    /// </summary>
-    private static UnitBattleEffectType AttackClassToEffectType(UnitAttackType attackType)
-    {
-        return attackType switch
-        {
-            UnitAttackType.Poison => UnitBattleEffectType.Poison,
-            UnitAttackType.Frostbite => UnitBattleEffectType.Frostbite,
-            UnitAttackType.Blister => UnitBattleEffectType.Blister,
-            _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
-        };
     }
 
     /// <summary>

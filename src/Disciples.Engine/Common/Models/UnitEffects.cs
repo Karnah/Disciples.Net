@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -13,14 +13,14 @@ public class UnitEffects
     /// <summary>
     /// Эффекты, которые наложены и действуют во время схватки.
     /// </summary>
-    private readonly Dictionary<UnitBattleEffectType, UnitBattleEffect> _battleEffects;
+    private readonly Dictionary<UnitAttackType, UnitBattleEffect> _battleEffects;
 
     /// <summary>
     /// Создать объект типа <see cref="UnitEffects" />.
     /// </summary>
     public UnitEffects()
     {
-        _battleEffects = new Dictionary<UnitBattleEffectType, UnitBattleEffect>();
+        _battleEffects = new Dictionary<UnitAttackType, UnitBattleEffect>();
     }
 
     /// <summary>
@@ -33,15 +33,15 @@ public class UnitEffects
     /// </summary>
     public void AddBattleEffect(UnitBattleEffect battleEffect)
     {
-        _battleEffects[battleEffect.EffectType] = battleEffect;
+        _battleEffects[battleEffect.AttackType] = battleEffect;
     }
 
     /// <summary>
     /// Проверить, что на юнита наложен эффект указанного типа.
     /// </summary>
-    public bool ExistsBattleEffect(UnitBattleEffectType effectType)
+    public bool ExistsBattleEffect(UnitAttackType effectAttackType)
     {
-        return _battleEffects.ContainsKey(effectType);
+        return _battleEffects.ContainsKey(effectAttackType);
     }
 
     /// <summary>
@@ -80,14 +80,14 @@ public class UnitEffects
         // TODO Избавиться от ToList().
         foreach (var battleEffect in _battleEffects.Values.ToList())
         {
-            if (ShouldProcessEffectType(battleEffect.EffectType))
+            if (ShouldProcessEffectType(battleEffect.AttackType))
                 continue;
 
             battleEffect.RoundTriggered = currentRound;
             battleEffect.RoundDuration -= 1;
 
             if (battleEffect.RoundDuration <= 0)
-                _battleEffects.Remove(battleEffect.EffectType);
+                _battleEffects.Remove(battleEffect.AttackType);
         }
     }
 
@@ -98,7 +98,7 @@ public class UnitEffects
     {
         var processingBattleEffects = _battleEffects
             .Values
-            .Where(be => be.RoundDuration > 0 && be.RoundTriggered < currentRound && ShouldProcessEffectType(be.EffectType))
+            .Where(be => be.RoundDuration > 0 && be.RoundTriggered < currentRound && ShouldProcessEffectType(be.AttackType))
             .ToArray();
         foreach (var battleEffect in processingBattleEffects)
         {
@@ -106,7 +106,7 @@ public class UnitEffects
             battleEffect.RoundDuration -= 1;
 
             if (battleEffect.RoundDuration <= 0)
-                _battleEffects.Remove(battleEffect.EffectType);
+                _battleEffects.Remove(battleEffect.AttackType);
         }
 
         return processingBattleEffects;
@@ -115,10 +115,10 @@ public class UnitEffects
     /// <summary>
     /// Проверить, необходимо ли отдельно обрабатывать эффект битвы.
     /// </summary>
-    private static bool ShouldProcessEffectType(UnitBattleEffectType effectType)
+    private static bool ShouldProcessEffectType(UnitAttackType effectAttackType)
     {
-        return effectType is UnitBattleEffectType.Poison
-            or UnitBattleEffectType.Frostbite
-            or UnitBattleEffectType.Blister;
+        return effectAttackType is UnitAttackType.Poison
+            or UnitAttackType.Frostbite
+            or UnitAttackType.Blister;
     }
 }

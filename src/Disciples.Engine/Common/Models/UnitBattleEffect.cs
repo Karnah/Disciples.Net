@@ -1,4 +1,4 @@
-﻿using Disciples.Engine.Common.Enums;
+﻿using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -10,18 +10,20 @@ public class UnitBattleEffect
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, int roundDuration)
     {
-        EffectType = effectType;
+        AttackType = attackType;
+        AttackSource = attackSource;
         RoundDuration = roundDuration;
     }
 
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitBattleEffectType effectType, int roundDuration, int? power)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, int roundDuration, int? power)
     {
-        EffectType = effectType;
+        AttackType = attackType;
+        AttackSource = attackSource;
         RoundDuration = roundDuration;
         Power = power;
     }
@@ -29,7 +31,12 @@ public class UnitBattleEffect
     /// <summary>
     /// Тип эффекта, оказываемого на юнита.
     /// </summary>
-    public UnitBattleEffectType EffectType { get; }
+    public UnitAttackType AttackType { get; }
+
+    /// <summary>
+    /// Источник эффекта.
+    /// </summary>
+    public UnitAttackSource AttackSource { get; }
 
     /// <summary>
     /// Раунд, в котором эффект сработал в последний раз.

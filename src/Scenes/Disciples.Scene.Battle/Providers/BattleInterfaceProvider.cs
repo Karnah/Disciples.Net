@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
@@ -63,11 +64,11 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         OrangeLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL2").Bitmap;
         RedLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL3").Bitmap;
 
-        UnitBattleEffectsIcon = new Dictionary<UnitBattleEffectType, IBitmap>
+        UnitPortraitDefendIcon = _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap;
+        UnitBattleEffectsIcon = new Dictionary<UnitAttackType, IBitmap>
         {
-            { UnitBattleEffectType.Defend, _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap },
-            { UnitBattleEffectType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
-            { UnitBattleEffectType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
+            { UnitAttackType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
+            { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
         };
 
         ToggleRightButton = GetButtonBitmaps(battleIcons, "TOGGLERIGHT");
@@ -114,7 +115,10 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
+    public IBitmap UnitPortraitDefendIcon { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
 
 
     #region Buttons

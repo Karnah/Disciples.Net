@@ -1,8 +1,8 @@
 ﻿using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Resources.Enum;
-using Disciples.Scene.Battle.Resources.Extensions;
+using Disciples.Scene.Battle.Resources.ImageKeys.Extensions;
 
-namespace Disciples.Scene.Battle.Resources;
+namespace Disciples.Scene.Battle.Resources.ImageKeys;
 
 /// <summary>
 /// Ключ для поиска анимация юнита на поле боя.

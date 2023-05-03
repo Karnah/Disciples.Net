@@ -1,7 +1,7 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
-using Disciples.Scene.Battle.Resources.Extensions;
+using Disciples.Scene.Battle.Resources.SoundKeys.Extensions;
 
-namespace Disciples.Scene.Battle.Resources;
+namespace Disciples.Scene.Battle.Resources.SoundKeys;
 
 /// <summary>
 /// Ключ для поиска звука типа атаки.

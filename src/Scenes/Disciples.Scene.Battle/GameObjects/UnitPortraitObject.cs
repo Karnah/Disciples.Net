@@ -84,13 +84,17 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private IImageSceneObject? _highLevelUnitIcon;
     /// <summary>
+    /// Иконка, если юнит защитился.
+    /// </summary>
+    private IImageSceneObject? _defendIcon;
+    /// <summary>
     /// Иконки эффектов, которые воздействуют на юнита.
     /// </summary>
-    private readonly Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsIcons;
+    private readonly Dictionary<UnitAttackType, IImageSceneObject> _battleEffectsIcons;
     /// <summary>
     /// Передний фон эффектов, которые воздействуют на юнита.
     /// </summary>
-    private readonly Dictionary<UnitBattleEffectType, IImageSceneObject> _battleEffectsForegrounds;
+    private readonly Dictionary<UnitAttackType, IImageSceneObject> _battleEffectsForegrounds;
     /// <summary>
     /// Количество ОЗ, которое было при предыдущей проверке.
     /// </summary>
@@ -125,8 +129,8 @@ internal class UnitPortraitObject : GameObject
         Width = _unitFaceBitmap.Width;
         Height = _unitFaceBitmap.Height;
 
-        _battleEffectsIcons = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
-        _battleEffectsForegrounds = new Dictionary<UnitBattleEffectType, IImageSceneObject>();
+        _battleEffectsIcons = new Dictionary<UnitAttackType, IImageSceneObject>();
+        _battleEffectsForegrounds = new Dictionary<UnitAttackType, IImageSceneObject>();
     }
 
     /// <inheritdoc />
@@ -177,6 +181,7 @@ internal class UnitPortraitObject : GameObject
         RemoveSceneObject(ref _unitDamageForeground);
         RemoveSceneObject(ref _unitPanelSeparator);
         RemoveSceneObject(ref _highLevelUnitIcon);
+        RemoveSceneObject(ref _defendIcon);
 
         foreach (var battleEffectsIcon in _battleEffectsIcons)
             _sceneObjectContainer.RemoveSceneObject(battleEffectsIcon.Value);
@@ -231,7 +236,7 @@ internal class UnitPortraitObject : GameObject
 
             case UnitActionType.UnderEffect:
             {
-                var effectColor = GetEffectTypeColor((UnitBattleEffectType)eventData.AttackType!.Value);
+                var effectColor = GetEffectTypeColor(eventData.AttackType!.Value);
                 if (effectColor != null)
                     _instantaneousEffectImage = AddColorImage(effectColor.Value, false);
 
@@ -334,11 +339,26 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private void ProcessBattleEffects()
     {
+        // Иконку "Защиты" располагаем по центру.
+        if (Unit.IsDefended && _defendIcon == null)
+        {
+            var icon = _battleInterfaceProvider.UnitPortraitDefendIcon;
+            _defendIcon = _sceneObjectContainer.AddImage(
+                icon,
+                X + (Width - icon.Width) / 2,
+                Y + Height - icon.Height,
+                INTERFACE_LAYER + 4);
+        }
+        else if (!Unit.IsDefended && _defendIcon != null)
+        {
+            RemoveSceneObject(ref _defendIcon);
+        }
+
         var battleEffects = Unit.Effects.GetBattleEffects();
 
         // Удаляем иконки тех эффектов, действие которых закончилось.
         var expiredEffects = _battleEffectsIcons
-            .Where(bei => battleEffects.All(be => be.EffectType != bei.Key))
+            .Where(bei => battleEffects.All(be => be.AttackType != bei.Key))
             .ToList();
         foreach (var expiredEffect in expiredEffects)
         {
@@ -358,43 +378,30 @@ internal class UnitPortraitObject : GameObject
         // Добавляем иконки новых эффектов.
         foreach (var battleEffect in battleEffects)
         {
-            if (!_battleEffectsIcons.ContainsKey(battleEffect.EffectType))
+            if (!_battleEffectsIcons.ContainsKey(battleEffect.AttackType))
             {
-                if (_battleInterfaceProvider.UnitBattleEffectsIcon.TryGetValue(battleEffect.EffectType, out var icon))
+                if (_battleInterfaceProvider.UnitBattleEffectsIcon.TryGetValue(battleEffect.AttackType, out var icon))
                 {
-                    // Иконку "Защиты" располагаем по центру.
-                    if (battleEffect.EffectType == UnitBattleEffectType.Defend)
-                    {
-                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
-                            icon,
-                            X + (Width - icon.Width) / 2,
-                            Y + Height - icon.Height,
-                            INTERFACE_LAYER + 4));
-                    }
-                    else
-                    {
-                        // Иконки остальных эффектов располагаются справа.
-                        var iconsCount = _battleEffectsIcons.Keys
-                            .Where(be => be != UnitBattleEffectType.Defend)
-                            .GroupBy(be => be)
-                            .Count();
-                        _battleEffectsIcons.Add(battleEffect.EffectType, _sceneObjectContainer.AddImage(
-                            icon,
-                            X + Width - icon.Width,
-                            Y + Height - icon.Height * (iconsCount + 1),
-                            INTERFACE_LAYER + 4));
-                    }
+                    // Иконки остальных эффектов располагаются справа.
+                    var iconsCount = _battleEffectsIcons.Keys
+                        .GroupBy(be => be)
+                        .Count();
+                    _battleEffectsIcons.Add(battleEffect.AttackType, _sceneObjectContainer.AddImage(
+                        icon,
+                        X + Width - icon.Width,
+                        Y + Height - icon.Height * (iconsCount + 1),
+                        INTERFACE_LAYER + 4));
                 }
             }
 
             // Добавляем фон, связанный с воздействием эффекта яда и заморозки.
-            if (!_battleEffectsForegrounds.ContainsKey(battleEffect.EffectType))
+            if (!_battleEffectsForegrounds.ContainsKey(battleEffect.AttackType))
             {
-                var effectTypeColor = GetEffectTypeColor(battleEffect.EffectType);
+                var effectTypeColor = GetEffectTypeColor(battleEffect.AttackType);
                 if (effectTypeColor != null)
                 {
                     _battleEffectsForegrounds.Add(
-                        battleEffect.EffectType,
+                        battleEffect.AttackType,
                         AddColorImage(effectTypeColor.Value, false));
                 }
             }
@@ -404,13 +411,13 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить цвет эффекта.
     /// </summary>
-    private static GameColor? GetEffectTypeColor(UnitBattleEffectType unitBattleEffectType)
+    private static GameColor? GetEffectTypeColor(UnitAttackType unitEffectAttackType)
     {
-        return unitBattleEffectType switch
+        return unitEffectAttackType switch
         {
-            UnitBattleEffectType.Poison => GameColor.Green,
-            UnitBattleEffectType.Frostbite => GameColor.Blue,
-            UnitBattleEffectType.Blister => GameColor.Orange,
+            UnitAttackType.Poison => GameColor.Green,
+            UnitAttackType.Frostbite => GameColor.Blue,
+            UnitAttackType.Blister => GameColor.Orange,
             _ => null
         };
     }

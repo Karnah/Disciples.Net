@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
@@ -11,6 +12,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Resources;
 using Disciples.Scene.Battle.Resources.Enum;
+using Disciples.Scene.Battle.Resources.ImageKeys;
 
 namespace Disciples.Scene.Battle.Providers;
 
@@ -24,7 +26,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
     private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
-    private readonly Dictionary<(UnitBattleEffectType effectType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = new();
+    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = new();
     private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
@@ -77,11 +79,11 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetEffectAnimation(UnitBattleEffectType effectType, bool isSmall)
+    public IReadOnlyList<Frame> GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall)
     {
-        var animationKey = (effectType, isSmall);
+        var animationKey = (effectAttackType, isSmall);
         if (!_effectsAnimation.ContainsKey(animationKey))
-            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectType, isSmall).Key);
+            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmall).Key);
 
         return _effectsAnimation[animationKey];
     }

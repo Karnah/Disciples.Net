@@ -172,13 +172,13 @@ internal class BattleProcessor
     /// </summary>
     public BattleProcessorAttackResult? ProcessEffect(Unit targetUnit, UnitBattleEffect effect)
     {
-        switch (effect.EffectType)
+        switch (effect.AttackType)
         {
-            case UnitBattleEffectType.Poison:
-            case UnitBattleEffectType.Frostbite:
-            case UnitBattleEffectType.Blister:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.Blister:
                 var damage = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
-                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, (UnitAttackType)effect.EffectType, UnitAttackSource.Death); // TODO UnitAttackSource протащить.
+                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, effect.AttackType, effect.AttackSource);
 
             default:
                 return null;
@@ -241,10 +241,8 @@ internal class BattleProcessor
                 attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
 
                 // Если юнит защитился, то урон уменьшается в два раза.
-                if (targetUnit.Effects.ExistsBattleEffect(UnitBattleEffectType.Defend))
-                {
+                if (targetUnit.IsDefended)
                     attackPower /= 2;
-                }
 
                 // Мы не можем нанести урон больше, чем осталось очков здоровья.
                 attackPower = Math.Min(attackPower, targetUnit.HitPoints);

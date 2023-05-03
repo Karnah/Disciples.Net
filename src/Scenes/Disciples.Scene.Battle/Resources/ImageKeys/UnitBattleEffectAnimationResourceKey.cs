@@ -1,7 +1,7 @@
-﻿using Disciples.Engine.Common.Enums;
-using Disciples.Scene.Battle.Resources.Extensions;
+﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Scene.Battle.Resources.ImageKeys.Extensions;
 
-namespace Disciples.Scene.Battle.Resources;
+namespace Disciples.Scene.Battle.Resources.ImageKeys;
 
 /// <summary>
 /// Ключ для поиска анимация применяемого на юнита эффекта на поле боя.
@@ -11,9 +11,9 @@ internal class UnitBattleEffectAnimationResourceKey : BaseResourceKey
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffectAnimationResourceKey" />.
     /// </summary>
-    public UnitBattleEffectAnimationResourceKey(UnitBattleEffectType effectType, bool isSmall)
+    public UnitBattleEffectAnimationResourceKey(UnitAttackType effectAttackType, bool isSmall)
     {
-        Key = $"{effectType.GetResourceKey()}{isSmall.GetIsSmallResourceKey()}";
+        Key = $"{effectAttackType.GetResourceKey()}{isSmall.GetIsSmallResourceKey()}";
     }
 
     /// <inheritdoc />

@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 
-namespace Disciples.Scene.Battle.Resources.Extensions;
+namespace Disciples.Scene.Battle.Resources.SoundKeys.Extensions;
 
 /// <summary>
 /// Расширения для работы с ресурсами звуков.

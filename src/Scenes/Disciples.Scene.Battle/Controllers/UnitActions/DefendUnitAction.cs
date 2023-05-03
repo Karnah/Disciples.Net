@@ -67,7 +67,7 @@ internal class DefendUnitAction : BaseBattleUnitAction
     {
         base.ProcessCompletedUnitAction(unitAction);
 
-        CurrentBattleUnit.Unit.Effects.AddBattleEffect(new UnitBattleEffect(UnitBattleEffectType.Defend, 1));
+        CurrentBattleUnit.Unit.IsDefended = true;
         AddAction(new DelayBattleAction());
     }
 }

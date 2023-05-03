@@ -7,8 +7,8 @@ using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Images.Models;
 using Disciples.Resources.Sounds.Models;
-using Disciples.Scene.Battle.Resources;
-using Disciples.Scene.Battle.Resources.Extensions;
+using Disciples.Scene.Battle.Resources.SoundKeys;
+using Disciples.Scene.Battle.Resources.SoundKeys.Extensions;
 
 namespace Disciples.Scene.Battle.Providers;
 

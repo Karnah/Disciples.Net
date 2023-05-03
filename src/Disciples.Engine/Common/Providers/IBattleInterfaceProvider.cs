@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.Providers;
@@ -67,9 +68,14 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IBitmap RedLevelIcon { get; }
 
     /// <summary>
+    /// Иконка защиты юнита.
+    /// </summary>
+    IBitmap UnitPortraitDefendIcon { get; }
+
+    /// <summary>
     /// Иконки для эффектов, воздействующих на юнита.
     /// </summary>
-    IDictionary<UnitBattleEffectType, IBitmap> UnitBattleEffectsIcon { get; }
+    IDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; }
 
 
     /// <summary>

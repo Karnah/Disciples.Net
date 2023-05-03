@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -40,7 +40,7 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// <summary>
     /// Получить анимацию эффекта, применяемую к юниту.
     /// </summary>
-    IReadOnlyList<Frame> GetEffectAnimation(UnitBattleEffectType effectType, bool isSmall);
+    IReadOnlyList<Frame> GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall);
 
     /// <summary>
     /// Получить звуки юнита в битве.

@@ -1,4 +1,4 @@
-﻿namespace Disciples.Scene.Battle.Resources;
+﻿namespace Disciples.Scene.Battle.Resources.SoundKeys;
 
 /// <summary>
 /// Ключ для извлечения звука смерти юнита.

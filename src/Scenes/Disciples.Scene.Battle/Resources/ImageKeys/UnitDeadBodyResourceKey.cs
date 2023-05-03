@@ -1,6 +1,6 @@
-﻿using Disciples.Scene.Battle.Resources.Extensions;
+﻿using Disciples.Scene.Battle.Resources.ImageKeys.Extensions;
 
-namespace Disciples.Scene.Battle.Resources;
+namespace Disciples.Scene.Battle.Resources.ImageKeys;
 
 /// <summary>
 /// Ключ для поиска изображения мёртвого тела на поле боя.
