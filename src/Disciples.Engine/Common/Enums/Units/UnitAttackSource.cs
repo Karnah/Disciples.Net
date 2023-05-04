@@ -13,35 +13,35 @@ public enum UnitAttackSource
     /// <summary>
     /// Разум.
     /// </summary>
-    Mind,
+    Mind = 1,
 
     /// <summary>
     /// Жизнь.
     /// </summary>
-    Life,
+    Life = 2,
 
     /// <summary>
     /// Смерть.
     /// </summary>
-    Death,
+    Death = 3,
 
     /// <summary>
     /// Огонь.
     /// </summary>
-    Fire,
+    Fire = 4,
 
     /// <summary>
     /// Вода.
     /// </summary>
-    Water,
+    Water = 5,
 
     /// <summary>
     /// Земля.
     /// </summary>
-    Earth,
+    Earth = 6,
 
     /// <summary>
     /// Воздух.
     /// </summary>
-    Air
+    Air = 7
 }

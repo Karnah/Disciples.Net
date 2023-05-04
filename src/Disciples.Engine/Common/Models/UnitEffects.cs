@@ -84,9 +84,9 @@ public class UnitEffects
                 continue;
 
             battleEffect.RoundTriggered = currentRound;
-            battleEffect.RoundDuration -= 1;
+            battleEffect.Duration.DecreaseTurn();
 
-            if (battleEffect.RoundDuration <= 0)
+            if (battleEffect.Duration.IsCompleted)
                 _battleEffects.Remove(battleEffect.AttackType);
         }
     }
@@ -98,14 +98,14 @@ public class UnitEffects
     {
         var processingBattleEffects = _battleEffects
             .Values
-            .Where(be => be.RoundDuration > 0 && be.RoundTriggered < currentRound && ShouldProcessEffectType(be.AttackType))
+            .Where(be => !be.Duration.IsCompleted && be.RoundTriggered < currentRound && ShouldProcessEffectType(be.AttackType))
             .ToArray();
         foreach (var battleEffect in processingBattleEffects)
         {
             battleEffect.RoundTriggered = currentRound;
-            battleEffect.RoundDuration -= 1;
+            battleEffect.Duration.DecreaseTurn();
 
-            if (battleEffect.RoundDuration <= 0)
+            if (battleEffect.Duration.IsCompleted)
                 _battleEffects.Remove(battleEffect.AttackType);
         }
 

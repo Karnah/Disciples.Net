@@ -187,7 +187,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (unitAction is EffectUnitBattleAction effectAction)
         {
             effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
-                new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.RoundDuration, effectAction.Power));
+                new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.Duration, effectAction.Power));
         }
 
         // Если была защита, то удаляем её из списка.
@@ -277,7 +277,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             case AttackResult.Effect:
             {
                 var power = attackResult.Power;
-                var roundDuration = attackResult.RoundDuration!.Value;
+                var effectDuration = attackResult.EffectDuration!;
                 var attackClass = attackResult.AttackType!.Value;
                 var attackSource = attackResult.AttackSource!.Value;
 
@@ -287,7 +287,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 if (effectAnimationAction != null)
                     AddAction(effectAnimationAction);
 
-                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, attackSource, roundDuration, power, effectAnimationAction));
+                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, attackSource, effectDuration, power, effectAnimationAction));
 
                 if (!isMainAttack && !_isAttackSoundPlaying)
                 {

@@ -10,21 +10,21 @@ public class UnitBattleEffect
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, int roundDuration)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration)
     {
         AttackType = attackType;
         AttackSource = attackSource;
-        RoundDuration = roundDuration;
+        Duration = duration;
     }
 
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, int roundDuration, int? power)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, int? power)
     {
         AttackType = attackType;
         AttackSource = attackSource;
-        RoundDuration = roundDuration;
+        Duration = duration;
         Power = power;
     }
 
@@ -44,9 +44,9 @@ public class UnitBattleEffect
     public int RoundTriggered { get; set; }
 
     /// <summary>
-    /// Длительность эффекта в раундах.
+    /// Длительность эффекта.
     /// </summary>
-    public int RoundDuration { get; set; }
+    public EffectDuration Duration { get; }
 
     /// <summary>
     /// Сила эффекта.

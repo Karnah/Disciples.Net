@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -10,16 +11,16 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class EffectUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, UnitAttackSource attackSource, int roundDuration, int? power, AnimationBattleAction? animationBattleAction)
+    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, int? power, AnimationBattleAction? animationBattleAction)
         : base(targetUnit, UnitActionType.UnderEffect, attackType, power, animationBattleAction, attackSource)
     {
-        RoundDuration = roundDuration;
+        Duration = duration;
     }
 
     /// <summary>
-    /// Продолжительность эффекта в раундах.
+    /// Продолжительность эффекта.
     /// </summary>
-    public int RoundDuration { get; }
+    public EffectDuration Duration { get; }
 
     /// <inheritdoc />
     /// <remarks>

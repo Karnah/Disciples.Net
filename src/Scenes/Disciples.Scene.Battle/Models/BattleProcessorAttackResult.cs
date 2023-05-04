@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 
 namespace Disciples.Scene.Battle.Models;
@@ -40,11 +41,11 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, int? power, int roundDuration, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, int? power, EffectDuration effectDuration, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         Power = power;
-        RoundDuration = roundDuration;
+        EffectDuration = effectDuration;
         AttackType = attackType;
         AttackSource = attackSource;
     }
@@ -57,9 +58,9 @@ internal class BattleProcessorAttackResult
     public int? Power { get; }
 
     /// <summary>
-    /// Длительность эффекта в раундах.
+    /// Длительность эффекта.
     /// </summary>
-    public int? RoundDuration { get; }
+    public EffectDuration? EffectDuration { get; }
 
     /// <summary>
     /// Тип атаки.

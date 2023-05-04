@@ -178,7 +178,7 @@ internal class BattleProcessor
             case UnitAttackType.Frostbite:
             case UnitAttackType.Blister:
                 var damage = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
-                return new BattleProcessorAttackResult(AttackResult.Effect, damage, 1, effect.AttackType, effect.AttackSource);
+                return new BattleProcessorAttackResult(AttackResult.Effect, damage, effect.Duration, effect.AttackType, effect.AttackSource);
 
             default:
                 return null;
@@ -282,7 +282,7 @@ internal class BattleProcessor
                 return new BattleProcessorAttackResult(
                     AttackResult.Effect,
                     power,
-                    2, // TODO Длительность брать из ресурсов sqlite.
+                    GetEffectDuration(attack),
                     attack.AttackType,
                     attack.AttackSource);
 
@@ -304,6 +304,57 @@ internal class BattleProcessor
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Получить длительность эффекта в раундах.
+    /// </summary>
+    private static EffectDuration GetEffectDuration(UnitAttack attack)
+    {
+        switch (attack.AttackType)
+        {
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.TransformOther:
+                return attack.IsInfinitive
+                    ? EffectDuration.CreateRandom(1, 3)
+                    : EffectDuration.Create(1);
+
+            case UnitAttackType.BoostDamage:
+            case UnitAttackType.LowerDamage:
+            case UnitAttackType.Summon:
+            case UnitAttackType.DrainLevel:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.BestowWards:
+            case UnitAttackType.Shatter:
+                return attack.IsInfinitive
+                    ? EffectDuration.CreateInfinitive()
+                    : EffectDuration.Create(1);
+
+            case UnitAttackType.LowerInitiative:
+                return attack.IsInfinitive
+                    ? EffectDuration.CreateInfinitive()
+                    : EffectDuration.CreateRandom(2, 4);
+
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.Blister:
+                return attack.IsInfinitive
+                    ? EffectDuration.CreateRandom(2, 4)
+                    : EffectDuration.Create(1);
+
+            case UnitAttackType.Damage:
+            case UnitAttackType.Drain:
+            case UnitAttackType.Heal:
+            case UnitAttackType.Fear:
+            case UnitAttackType.Revive:
+            case UnitAttackType.DrainOverflow:
+            case UnitAttackType.Cure:
+            case UnitAttackType.GiveAttack:
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     #endregion

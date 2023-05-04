@@ -11,7 +11,7 @@ public enum UnitAttackType
     Damage = 1,
 
     /// <summary>
-    /// Истощение.
+    /// Выпить жизненную силу и передать себе.
     /// </summary>
     Drain = 2,
 
@@ -66,7 +66,7 @@ public enum UnitAttackType
     Revive = 14,
 
     /// <summary>
-    /// Выпить жизненную силу.
+    /// Выпить жизненную силу и передать себе и/или союзникам.
     /// </summary>
     DrainOverflow = 15,
 
@@ -91,7 +91,7 @@ public enum UnitAttackType
     GiveAttack = 19,
 
     /// <summary>
-    /// Передать жизненную силу.
+    /// Превратить себя в выбранного юнита на поле боя.
     /// </summary>
     Doppelganger = 20,
 
