@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.Providers;
@@ -29,5 +29,5 @@ public interface IInterfaceProvider : ISupportLoading
     /// <summary>
     /// Получить изображение указанного цвета.
     /// </summary>
-    IBitmap GetColorBitmap(GameColor color);
+    IBitmap GetColorBitmap(Color color);
 }

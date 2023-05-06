@@ -237,7 +237,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             {
                 // Если промахнулись дополнительно атакой, то "Промах" выводить не нужно.
                 if (isMainAttack)
-                    AddAction(new UnitBattleAction(targetUnit, UnitActionType.Dodge));
+                    AddAction(new UnitBattleAction(targetUnit, UnitActionType.Miss));
 
                 break;
             }

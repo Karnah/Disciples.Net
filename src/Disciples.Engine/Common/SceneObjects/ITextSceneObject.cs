@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums;
+﻿using System.Drawing;
+using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.SceneObjects;
 
@@ -30,5 +31,5 @@ public interface ITextSceneObject : ISceneObject
     /// <summary>
     /// Цвет текста.
     /// </summary>
-    GameColor Foreground { get; }
+    Color Foreground { get; }
 }

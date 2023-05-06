@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Avalonia.Collections;
 using Disciples.Avalonia.SceneObjects;
@@ -47,7 +48,7 @@ public class AvaloniaSceneObjectContainer : IPlatformSceneObjectContainer
         double width,
         TextAlignment textAlignment = TextAlignment.Center,
         bool isBold = false,
-        GameColor? foregroundColor = null)
+        Color? foregroundColor = null)
     {
         return AddSceneObject(new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor));
     }

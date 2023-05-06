@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -45,7 +46,7 @@ public interface IPlatformSceneObjectContainer
         double width,
         TextAlignment textAlignment = TextAlignment.Center,
         bool isBold = false,
-        GameColor? foregroundColor = null);
+        Color? foregroundColor = null);
 
     /// <summary>
     /// Удалить объект со сцены.

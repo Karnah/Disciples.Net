@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Controllers;
+﻿using System.Drawing;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -49,7 +50,7 @@ public interface ISceneObjectContainer
     /// <param name="x">Положение изображения, координата X.</param>
     /// <param name="y">Положение изображения, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-    IImageSceneObject AddColorImage(GameColor color, double width, double height, double x, double y, int layer);
+    IImageSceneObject AddColorImage(Color color, double width, double height, double x, double y, int layer);
 
     /// <summary>
     /// Добавить текст на сцену.
@@ -75,7 +76,7 @@ public interface ISceneObjectContainer
     /// <param name="isBold">Использовать жирный шрифт.</param>
     /// <param name="foregroundColor">Цвет текста.</param>
     ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null);
+        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null);
 
     /// <summary>
     /// Удалить объект со сцены.

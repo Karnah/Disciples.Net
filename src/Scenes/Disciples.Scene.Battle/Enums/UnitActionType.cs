@@ -18,7 +18,7 @@ internal enum UnitActionType
     /// <summary>
     /// Юнит уклонился от атаки (промах атакующего).
     /// </summary>
-    Dodge,
+    Miss,
 
     /// <summary>
     /// Защита.

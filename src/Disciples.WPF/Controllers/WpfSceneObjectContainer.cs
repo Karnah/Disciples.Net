@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using DynamicData;
 using Disciples.Engine.Common.Controllers;
@@ -43,7 +44,7 @@ public class WpfSceneObjectContainer : IPlatformSceneObjectContainer
 
     /// <inheritdoc />
     public ITextSceneObject AddTextSceneObject(string text, double fontSize, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null)
+        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
     {
         return AddSceneObject(new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor));
     }

@@ -1,11 +1,13 @@
-﻿using Disciples.Engine;
+﻿using System.Drawing;
+using Disciples.Engine;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
@@ -207,19 +209,19 @@ internal class UnitPortraitObject : GameObject
         switch (eventData.UnitActionType)
         {
             case UnitActionType.Damaged:
-                _instantaneousEffectImage = AddColorImage(GameColor.Red);
+                _instantaneousEffectImage = AddColorImage(BattleColors.Damage);
                 _instantaneousEffectText = AddText($"-{eventData.Power!.Value}");
                 _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
                 break;
 
             case UnitActionType.Healed:
-                _instantaneousEffectImage = AddColorImage(GameColor.Blue);
+                _instantaneousEffectImage = AddColorImage(BattleColors.Heal);
                 _instantaneousEffectText = AddText($"+{eventData.Power!.Value}");
                 _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
                 break;
 
-            case UnitActionType.Dodge:
-                _instantaneousEffectImage = AddColorImage(GameColor.Yellow);
+            case UnitActionType.Miss:
+                _instantaneousEffectImage = AddColorImage(BattleColors.Miss);
                 _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
                 break;
 
@@ -329,7 +331,7 @@ internal class UnitPortraitObject : GameObject
                 var x = _unitPortrait.X;
                 var y = _unitPortrait.Y + (Height - height);
 
-                _unitDamageForeground = _sceneObjectContainer.AddColorImage(GameColor.Red, width, height, x, y, INTERFACE_LAYER + 3);
+                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, width, height, x, y, INTERFACE_LAYER + 3);
             }
         }
     }
@@ -411,14 +413,14 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить цвет эффекта.
     /// </summary>
-    private static GameColor? GetEffectTypeColor(UnitAttackType unitEffectAttackType)
+    private static Color? GetEffectTypeColor(UnitAttackType unitEffectAttackType)
     {
         return unitEffectAttackType switch
         {
-            UnitAttackType.Paralyze => GameColor.Paralyze,
-            UnitAttackType.Poison => GameColor.Green,
-            UnitAttackType.Frostbite => GameColor.Blue,
-            UnitAttackType.Blister => GameColor.Orange,
+            UnitAttackType.Paralyze => BattleColors.Paralyze,
+            UnitAttackType.Poison => BattleColors.Poison,
+            UnitAttackType.Frostbite => BattleColors.Frostbite,
+            UnitAttackType.Blister => BattleColors.Blister,
             _ => null
         };
     }
@@ -459,7 +461,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Добавить на портрет изображение указанного цвета.
     /// </summary>
-    private IImageSceneObject AddColorImage(GameColor color, bool shouldRemoveDamageImage = true)
+    private IImageSceneObject AddColorImage(Color color, bool shouldRemoveDamageImage = true)
     {
         // Если мы добавляем изображение поверх портрета, то в некоторых случаях должны на время очистить изображение с % здоровья.
         if (shouldRemoveDamageImage)
@@ -476,7 +478,7 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private ITextSceneObject AddText(string text)
     {
-        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColor.White);
+        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColors.White);
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
-﻿using Disciples.Engine.Common.Enums;
+﻿using System.Drawing;
+using Disciples.Engine.Common.Constants;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 using ReactiveUI.Fody.Helpers;
 
@@ -17,14 +19,13 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     /// <summary>
     /// Создать объект типа <see cref="TextSceneObject" />.
     /// </summary>
-    public TextSceneObject(
-        string text,
+    public TextSceneObject(string text,
         double fontSize,
         int layer,
         double width,
         TextAlignment textAlignment = TextAlignment.Center,
         bool isBold = false,
-        GameColor? foregroundColor = null) : base(layer)
+        Color? foregroundColor = null) : base(layer)
     {
         Text = text;
         FontSize = fontSize;
@@ -32,7 +33,7 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
         Width = width;
         Height = double.NaN;
         TextAlignment = textAlignment;
-        Foreground = foregroundColor ?? GameColor.Black;
+        Foreground = foregroundColor ?? GameColors.Black;
     }
 
 
@@ -50,5 +51,5 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     public TextAlignment TextAlignment { get; }
 
     /// <inheritdoc />
-    public GameColor Foreground { get; }
+    public Color Foreground { get; }
 }

@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
@@ -80,7 +80,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
             1,
             GameInfo.OriginalWidth,
             isBold: true,
-            foregroundColor: GameColor.White);
+            foregroundColor: GameColors.White);
     }
 
     /// <inheritdoc />

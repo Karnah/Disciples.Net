@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using System.Drawing;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
@@ -52,7 +53,7 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     }
 
     /// <inheritdoc />
-    public IImageSceneObject AddColorImage(GameColor color, double width, double height, double x, double y, int layer)
+    public IImageSceneObject AddColorImage(Color color, double width, double height, double x, double y, int layer)
     {
         return AddImage(_interfaceProvider.GetColorBitmap(color), width, height, x, y, layer);
     }
@@ -65,7 +66,7 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
 
     /// <inheritdoc />
     public ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, GameColor? foregroundColor = null)
+        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
     {
         var textVisual = PlatformSceneObjectContainer.AddTextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);
         textVisual.X = x;
