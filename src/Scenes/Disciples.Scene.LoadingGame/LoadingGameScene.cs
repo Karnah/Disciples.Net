@@ -110,6 +110,7 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
         const string saveName = "save.json";
         //const string saveName = "effectsSave.json";
         //const string saveName = "wardImmunitySave.json";
+        //const string saveName = "paralyzeSave.json";
 
         var savePath = Path.Combine(Directory.GetCurrentDirectory(), saveFolder, saveName);
         _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(

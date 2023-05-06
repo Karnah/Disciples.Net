@@ -161,9 +161,13 @@ internal class BattleContext : BaseSupportLoading
     {
         if (UnitAction == null)
         {
-            unitAction.Initialize();
-            if (unitAction.IsCompleted)
-                return;
+            // Если только идёт загрузка битвы, действие не будет инициализировано.
+            if (IsLoaded)
+            {
+                unitAction.Initialize();
+                if (unitAction.IsCompleted)
+                    return;
+            }
 
             BattleState = CompletedUnitAction == null
                 ? BattleState.BeginUnitAction
@@ -193,6 +197,7 @@ internal class BattleContext : BaseSupportLoading
     /// <inheritdoc />
     protected override void LoadInternal()
     {
+        UnitAction?.Initialize();
     }
 
     /// <inheritdoc />

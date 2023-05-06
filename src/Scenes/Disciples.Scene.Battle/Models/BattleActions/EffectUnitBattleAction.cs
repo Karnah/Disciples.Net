@@ -28,6 +28,6 @@ internal class EffectUnitBattleAction : UnitBattleAction
     /// </remarks>
     public override BattleUnitPortraitEventData GetUnitPortraitEventData()
     {
-        return new BattleUnitPortraitEventData(ActionType, AttackType, null);
+        return new BattleUnitPortraitEventData(ActionType, AttackType);
     }
 }

@@ -80,6 +80,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleController.Load();
         _battleInterfaceController.Load();
         _battleSoundController.Load();
+        _battleContext.Load();
     }
 
     /// <inheritdoc />

@@ -25,6 +25,7 @@ public class GameColorToBrushConverter : IValueConverter
             GameColor.Gray => new SolidColorBrush(Colors.Gray, 128),
             GameColor.Green => new SolidColorBrush(Colors.Green, 128),
             GameColor.Orange => new SolidColorBrush(Colors.Orange, 128),
+            GameColor.Paralyze => new SolidColorBrush(Colors.White, 64),
             null => new SolidColorBrush(Colors.Black),
             _ => throw new ArgumentOutOfRangeException()
         };

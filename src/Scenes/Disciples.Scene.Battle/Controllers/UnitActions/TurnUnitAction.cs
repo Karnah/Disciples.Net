@@ -46,13 +46,13 @@ internal class TurnUnitAction : BaseBattleUnitAction
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
-        _unitEffects = CurrentBattleUnit.Unit.Effects.GetTurnUnitBattleEffect(_battleContext.Round);
+        _unitEffects = CurrentBattleUnit.Unit.Effects.GetBattleEffects();
 
         var hasBattleEffects = ProcessNextBattleEffect();
 
         // Сбрасываем признак защиты.
         if (!hasBattleEffects)
-            CurrentBattleUnit.Unit.IsDefended = false;
+            CurrentBattleUnit.Unit.Effects.IsDefended = false;
     }
 
     /// <inheritdoc />
@@ -104,7 +104,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
             if (ProcessNextBattleEffect())
                 return;
 
-            CurrentBattleUnit.Unit.IsDefended = false;
+            CurrentBattleUnit.Unit.Effects.IsDefended = false;
 
             // Если все эффекты были обработаны, до ждём немного и завершаем действие.
             AddAction(new DelayBattleAction());
@@ -127,25 +127,42 @@ internal class TurnUnitAction : BaseBattleUnitAction
                 return false;
 
             var unitEffect = _unitEffects[_currentUnitEffectIndex.Value];
+            var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect, _battleContext.Round);
+            if (attackResult == null)
+                continue;
+
+            // Если эффект закончился, то удаляем его.
+            if (unitEffect.Duration.IsCompleted)
+                CurrentBattleUnit.Unit.Effects.Remove(unitEffect.AttackType);
+
             switch (unitEffect.AttackType)
             {
+                case UnitAttackType.Paralyze:
+                case UnitAttackType.Petrify:
+                    // Если закончились все парализующие эффекты, то юнит снова начинает двигаться.
+                    if (!CurrentBattleUnit.Unit.Effects.IsParalyzed)
+                        CurrentBattleUnit.UnitState = BattleUnitState.Waiting;
+
+                    // При любом эффекте паралича, юнит пропускает ход.
+                    ShouldPassTurn = true;
+
+                    AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, unitEffect.AttackType, unitEffect.Power, unitEffect.Duration));
+                    PlayAttackSound(unitEffect.AttackType);
+                    break;
+
                 case UnitAttackType.Poison:
                 case UnitAttackType.Frostbite:
                 case UnitAttackType.Blister:
-                    var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect);
-                    if (attackResult == null)
-                        continue;
-
                     var effectAnimationAction = GetUnitEffectAnimationAction(CurrentBattleUnit, attackResult.AttackType!.Value);
                     if (effectAnimationAction != null)
                         AddAction(effectAnimationAction);
 
-                    AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, attackResult.AttackType!.Value, attackResult.Power!.Value, animationBattleAction: effectAnimationAction));
+                    AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, attackResult.AttackType!.Value, attackResult.Power!.Value, unitEffect.Duration, animationBattleAction: effectAnimationAction));
                     PlayAttackSound(attackResult.AttackType.Value);
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    continue;
             }
 
             return true;

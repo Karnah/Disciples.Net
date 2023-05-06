@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Saves\paralyzeSave.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Saves\effectsSave.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

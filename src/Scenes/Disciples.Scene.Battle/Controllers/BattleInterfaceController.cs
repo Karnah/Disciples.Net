@@ -175,11 +175,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         _unitPortraitPanelController.Load();
 
+        // Проверяем, если первый ход ИИ.
+        _isAnimating = _context.BattleState != BattleState.WaitPlayerTurn;
+
         var displayingSquad = GetPanelDisplayingSquad();
-        if (_context.BattleState == BattleState.WaitPlayerTurn)
-            _unitPortraitPanelController.EnablePanelSwitch(displayingSquad);
-        else
+        if (_isAnimating)
             _unitPortraitPanelController.DisablePanelSwitch(displayingSquad);
+        else
+            _unitPortraitPanelController.EnablePanelSwitch(displayingSquad);
 
         AttachSelectedAnimation(CurrentBattleUnit);
     }
@@ -586,12 +589,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         DetachSelectedAnimation();
 
+        if (_isAnimating)
+            return;
+
         var frames = _battleResourceProvider.GetBattleAnimation(
             battleUnit.Unit.UnitType.IsSmall
                 ? "MRKCURSMALLA"
                 : "MRKCURLARGEA");
-
-
         // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде.
         _currentUnitSelectionAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
     }

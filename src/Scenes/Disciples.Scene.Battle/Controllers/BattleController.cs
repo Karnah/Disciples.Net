@@ -181,7 +181,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         CurrentBattleUnit = _context.GetBattleUnit(unit);
 
         // Запускаем обработку эффектов на юните.
-        if (CurrentBattleUnit.Unit.IsDefended || CurrentBattleUnit.Unit.Effects.HasBattleEffects)
+        if (CurrentBattleUnit.Unit.Effects.HasBattleEffects)
             _unitActionController.UnitTurn();
 
         // Если после этого не появилось нового действия, значит нет эффектов для обработки.

@@ -10,10 +10,10 @@ internal interface IBattleController : ISupportLoading
     /// <summary>
     /// Обновить состояние объектов на сцене.
     /// </summary>
-    public void BeforeSceneUpdate();
+    void BeforeSceneUpdate();
 
     /// <summary>
     /// Обновить состояние объектов на сцене.
     /// </summary>
-    public void AfterSceneUpdate();
+    void AfterSceneUpdate();
 }

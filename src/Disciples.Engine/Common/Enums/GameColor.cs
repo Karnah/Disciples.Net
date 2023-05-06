@@ -55,5 +55,10 @@ public enum GameColor
     /// <remarks>
     /// Используется для ожога.
     /// </remarks>>
-    Orange
+    Orange,
+
+    /// <summary>
+    /// Белый паралич.
+    /// </summary>
+    Paralyze
 }

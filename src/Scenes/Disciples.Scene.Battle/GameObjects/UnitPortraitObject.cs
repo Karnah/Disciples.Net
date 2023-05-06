@@ -240,7 +240,7 @@ internal class UnitPortraitObject : GameObject
                 if (effectColor != null)
                     _instantaneousEffectImage = AddColorImage(effectColor.Value, false);
 
-                var underEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value));
+                var underEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value, false));
                 _instantaneousEffectText = AddText(underEffectText);
 
                 break;
@@ -248,7 +248,7 @@ internal class UnitPortraitObject : GameObject
 
             case UnitActionType.TriggeredEffect:
             {
-                var triggeredEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value));
+                var triggeredEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted));
                 _instantaneousEffectText = AddText(eventData.Power == null
                     ? triggeredEffectText
                     : $"{triggeredEffectText} (-{eventData.Power})");
@@ -340,7 +340,7 @@ internal class UnitPortraitObject : GameObject
     private void ProcessBattleEffects()
     {
         // Иконку "Защиты" располагаем по центру.
-        if (Unit.IsDefended && _defendIcon == null)
+        if (Unit.Effects.IsDefended && _defendIcon == null)
         {
             var icon = _battleInterfaceProvider.UnitPortraitDefendIcon;
             _defendIcon = _sceneObjectContainer.AddImage(
@@ -349,7 +349,7 @@ internal class UnitPortraitObject : GameObject
                 Y + Height - icon.Height,
                 INTERFACE_LAYER + 4);
         }
-        else if (!Unit.IsDefended && _defendIcon != null)
+        else if (!Unit.Effects.IsDefended && _defendIcon != null)
         {
             RemoveSceneObject(ref _defendIcon);
         }
@@ -415,6 +415,7 @@ internal class UnitPortraitObject : GameObject
     {
         return unitEffectAttackType switch
         {
+            UnitAttackType.Paralyze => GameColor.Paralyze,
             UnitAttackType.Poison => GameColor.Green,
             UnitAttackType.Frostbite => GameColor.Blue,
             UnitAttackType.Blister => GameColor.Orange,
@@ -425,26 +426,24 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить наименования эффекта, что воздействует на юнита.
     /// </summary>
-    private static string GetEffectText(UnitAttackType attackType)
+    private static string GetEffectText(UnitAttackType attackType, bool isEffectCompleted)
     {
-        // TODO Взял из описания типов атак. Возможно, что неправильно.
         return attackType switch
         {
-            UnitAttackType.Damage => "X005TA0791",
-            UnitAttackType.Drain => "X005TA0792",
-            UnitAttackType.Paralyze => "X005TA0789",
-            UnitAttackType.Heal => "X005TA0802",
+            UnitAttackType.Paralyze => isEffectCompleted
+                ? "X008TA0024"
+                : "X005TA0789",
             UnitAttackType.Fear => "X005TA0794",
             UnitAttackType.BoostDamage => "X005TA0795",
-            UnitAttackType.Petrify => "X005TA0790",
+            UnitAttackType.Petrify => isEffectCompleted
+                ? "X008TA0025"
+                : "X008TA0009",
             UnitAttackType.LowerDamage => "X005TA0796",
             UnitAttackType.LowerInitiative => "X005TA0797",
             UnitAttackType.Poison => "X005TA0798",
             UnitAttackType.Frostbite => "X005TA0799",
             UnitAttackType.Revive => "X005TA0800",
-            UnitAttackType.DrainOverflow => "X005TA0801", // TODO перепроверить.
             UnitAttackType.Cure => "X005TA0793",
-            UnitAttackType.Summon => "X005TA0803",
             UnitAttackType.DrainLevel => "X005TA0804",
             UnitAttackType.GiveAttack => "X005TA0805",
             UnitAttackType.Doppelganger => "X005TA0806",

@@ -95,6 +95,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
                 GameColor.Black => new byte[] { 0, 0, 0, 255 },
                 GameColor.White => new byte[] { 255, 255, 255, 255 },
                 GameColor.Orange => new byte[] { 0, 102, 255, 128 },
+                GameColor.Paralyze => new byte[] { 255, 255, 255, 64 },
                 _ => throw new ArgumentOutOfRangeException()
             };
 

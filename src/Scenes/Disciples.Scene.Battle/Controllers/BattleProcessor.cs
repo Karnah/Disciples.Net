@@ -170,19 +170,26 @@ internal class BattleProcessor
     /// <summary>
     /// Обработать действие эффекта.
     /// </summary>
-    public BattleProcessorAttackResult? ProcessEffect(Unit targetUnit, UnitBattleEffect effect)
+    public BattleProcessorAttackResult? ProcessEffect(Unit targetUnit, UnitBattleEffect effect, int roundNumber)
     {
-        switch (effect.AttackType)
-        {
-            case UnitAttackType.Poison:
-            case UnitAttackType.Frostbite:
-            case UnitAttackType.Blister:
-                var damage = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
-                return new BattleProcessorAttackResult(AttackResult.Effect, damage, effect.Duration, effect.AttackType, effect.AttackSource);
+        int? power = null;
 
-            default:
+        // Яд, заморозка и ожег единственный эффекты, которые наносят урон.
+        if (effect.AttackType is UnitAttackType.Poison or
+            UnitAttackType.Frostbite or
+            UnitAttackType.Blister)
+        {
+            // Если этот эффект уже срабатывал в этом ходу, то второго срабатывания не будет.
+            if (effect.RoundTriggered == roundNumber)
                 return null;
+
+            power = Math.Min(targetUnit.HitPoints, effect.Power!.Value);
         }
+
+        effect.RoundTriggered = roundNumber;
+        effect.Duration.DecreaseTurn();
+
+        return new BattleProcessorAttackResult(AttackResult.Effect, power, effect.Duration, effect.AttackType, effect.AttackSource);
     }
 
     /// <summary>
@@ -241,7 +248,7 @@ internal class BattleProcessor
                 attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
 
                 // Если юнит защитился, то урон уменьшается в два раза.
-                if (targetUnit.IsDefended)
+                if (targetUnit.Effects.IsDefended)
                     attackPower /= 2;
 
                 // Мы не можем нанести урон больше, чем осталось очков здоровья.
@@ -253,8 +260,16 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.Drain:
-            case UnitAttackType.Paralyze:
                 break;
+
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Petrify:
+                return new BattleProcessorAttackResult(
+                    AttackResult.Effect,
+                    null,
+                    GetEffectDuration(attack),
+                    attack.AttackType,
+                    attack.AttackSource);
 
             case UnitAttackType.Heal:
                 var healPower = Math.Min(power!.Value, targetUnit.MaxHitPoints - targetUnit.HitPoints);
@@ -271,10 +286,8 @@ internal class BattleProcessor
 
             case UnitAttackType.Fear:
             case UnitAttackType.BoostDamage:
-            case UnitAttackType.Petrify:
             case UnitAttackType.LowerDamage:
             case UnitAttackType.LowerInitiative:
-                break;
 
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:

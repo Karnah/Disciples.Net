@@ -25,6 +25,7 @@ public class GameColorToBrushConverter : BaseValueConverterExtension
             GameColor.Gray => BuildBrush(Colors.Gray, 128),
             GameColor.Green => BuildBrush(Colors.Green, 128),
             GameColor.Orange => BuildBrush(Colors.Orange, 128),
+            GameColor.Paralyze => BuildBrush(Colors.White, 64),
             null => BuildBrush(Colors.Black),
             _ => throw new ArgumentOutOfRangeException()
         };

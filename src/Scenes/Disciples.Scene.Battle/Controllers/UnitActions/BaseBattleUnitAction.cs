@@ -153,7 +153,9 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (animationAction.AnimationComponent.GameObject is not BattleUnit battleUnit)
             return;
 
-        battleUnit.UnitState = BattleUnitState.Waiting;
+        battleUnit.UnitState = battleUnit.Unit.Effects.IsParalyzed
+            ? BattleUnitState.Paralyzed
+            : BattleUnitState.Waiting;
 
         // Обрабатываем смерть юнита.
         if (battleUnit.Unit.HitPoints == 0)
@@ -166,10 +168,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     protected virtual void ProcessBeginUnitAction(UnitBattleAction unitAction)
     {
         var portrait = _unitPortraitPanelController.GetUnitPortrait(unitAction.TargetUnit);
-        if (portrait == null)
-            return;
+        portrait?.ProcessBeginUnitPortraitEvent(unitAction.GetUnitPortraitEventData());
 
-        portrait.ProcessBeginUnitPortraitEvent(unitAction.GetUnitPortraitEventData());
+        // При накладывании эффекта, сразу переводим в статус парализовано.
+        if (unitAction.ActionType == UnitActionType.UnderEffect &&
+            unitAction.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify)
+        {
+            unitAction.TargetUnit.UnitState = BattleUnitState.Paralyzed;
+        }
     }
 
     /// <summary>

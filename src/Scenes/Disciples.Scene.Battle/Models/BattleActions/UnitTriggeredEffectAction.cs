@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -12,8 +13,20 @@ internal class UnitTriggeredEffectAction : UnitBattleAction
     /// <summary>
     /// Создать объект типа <see cref="UnitTriggeredEffectAction" />.
     /// </summary>
-    public UnitTriggeredEffectAction(BattleUnit targetUnit, UnitAttackType attackType, int? power = null, AnimationBattleAction? animationBattleAction = null)
+    public UnitTriggeredEffectAction(BattleUnit targetUnit, UnitAttackType attackType, int? power, EffectDuration duration, AnimationBattleAction? animationBattleAction = null)
         : base(targetUnit, UnitActionType.TriggeredEffect, attackType, power, animationBattleAction)
     {
+        Duration = duration;
+    }
+
+    /// <summary>
+    /// Длительность эффекта после срабатывания.
+    /// </summary>
+    public EffectDuration Duration { get; }
+
+    /// <inheritdoc />
+    public override BattleUnitPortraitEventData GetUnitPortraitEventData()
+    {
+        return new BattleUnitPortraitEventData(ActionType, AttackType, Power, Duration);
     }
 }

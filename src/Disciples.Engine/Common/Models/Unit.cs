@@ -175,11 +175,6 @@ public class Unit
     public bool IsDead { get; set; }
 
     /// <summary>
-    /// Признак, что юнит защитился.
-    /// </summary>
-    public bool IsDefended { get; set; }
-
-    /// <summary>
     /// Эффекты, воздействующие на юнита.
     /// </summary>
     public UnitEffects Effects { get; }

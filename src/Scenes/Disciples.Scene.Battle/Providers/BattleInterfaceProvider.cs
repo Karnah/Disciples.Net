@@ -67,8 +67,12 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         UnitPortraitDefendIcon = _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap;
         UnitBattleEffectsIcon = new Dictionary<UnitAttackType, IBitmap>
         {
+            { UnitAttackType.Paralyze, _battleResourceProvider.GetBattleFrame("FIPARALYZE").Bitmap },
+            { UnitAttackType.Petrify, _battleResourceProvider.GetBattleFrame("FIPETRIFY").Bitmap },
             { UnitAttackType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
             { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
+            { UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleFrame("F1DRAINLEVEL").Bitmap },
+            { UnitAttackType.TransformOther, _battleResourceProvider.GetBattleFrame("FITRANSFORM").Bitmap },
         };
 
         ToggleRightButton = GetButtonBitmaps(battleIcons, "TOGGLERIGHT");
