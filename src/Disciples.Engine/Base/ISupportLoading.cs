@@ -11,12 +11,6 @@ public interface ISupportLoading
     bool IsLoaded { get; }
 
     /// <summary>
-    /// Обозначение того, что объект инициализируется один раз и не деинициализируется при смене сцен.
-    /// </summary>
-    bool IsSharedBetweenScenes { get; }
-
-
-    /// <summary>
     /// Инициализировать объект.
     /// </summary>
     void Load();

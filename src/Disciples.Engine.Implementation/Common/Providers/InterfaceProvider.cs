@@ -26,9 +26,6 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     }
 
     /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => true;
-
-    /// <inheritdoc />
     public IBitmap GetImage(string imageName)
     {
         return _bitmapFactory.FromRawToBitmap(_interfaceImagesExtractor.GetImage(imageName));

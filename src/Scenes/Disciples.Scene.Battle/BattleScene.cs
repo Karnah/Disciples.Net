@@ -88,26 +88,7 @@ internal class BattleScene : BaseScene, IBattleScene
     {
         base.UnloadInternal();
 
-        var components = new ISupportLoading[] {
-            _textProvider,
-            _unitInfoProvider,
-            _interfaceProvider,
-            _battleResourceProvider,
-            _battleInterfaceProvider,
-            _battleUnitResourceProvider,
-            _battleController,
-            _battleInterfaceController,
-            _battleSoundController
-        };
-
-        // Деинициализируем те компоненты, которые существует в рамках одной сцены.
-        foreach (var component in components)
-        {
-            if (component.IsSharedBetweenScenes)
-                continue;
-
-            component.Unload();
-        }
+        _battleSoundController.Unload();
     }
 
     /// <inheritdoc />

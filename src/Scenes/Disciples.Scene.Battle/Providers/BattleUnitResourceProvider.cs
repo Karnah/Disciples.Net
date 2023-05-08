@@ -47,9 +47,6 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
-    /// <inheritdoc />
     public IBitmap GetUnitFace(UnitType unitType)
     {
         return _unitInfoProvider.GetUnitFace(unitType.Id);

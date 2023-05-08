@@ -21,9 +21,6 @@ internal class BattleContext : BaseSupportLoading
         InputDeviceEvents = Array.Empty<InputDeviceEvent>();
     }
 
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
     /// <summary>
     /// Количество секунд, которое прошло с предыдущего обновления сцены.
     /// </summary>

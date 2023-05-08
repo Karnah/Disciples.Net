@@ -8,6 +8,11 @@ namespace Disciples.Engine.Common.Providers;
 public interface ISoundProvider
 {
     /// <summary>
+    /// Музыка, которая воспроизводится в главном меню.
+    /// </summary>
+    string MenuSound { get; }
+
+    /// <summary>
     /// Получить фоновые звуки битвы.
     /// </summary>
     IReadOnlyList<string> GetBackgroundBattleSounds();

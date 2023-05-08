@@ -64,9 +64,6 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         _sceneObjectContainer = sceneObjectContainer;
     }
 
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
     /// <summary>
     /// Признак, что отображаются обе панели (правая и левая).
     /// </summary>

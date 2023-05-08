@@ -43,11 +43,6 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
         _unitPortraitExtractor = unitPortraitExtractor;
     }
 
-
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => true;
-
-
     /// <inheritdoc />
     public UnitType GetUnitType(string unitTypeId)
     {

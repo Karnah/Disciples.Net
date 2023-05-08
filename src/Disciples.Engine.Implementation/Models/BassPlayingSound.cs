@@ -30,6 +30,7 @@ internal class BassPlayingSound : IPlayingSound
             return;
 
         // TODO Реализовать через IDisposable?
+        Bass.ChannelStop(_soundHandle);
         Bass.MusicFree(_soundHandle);
 
         _isDisposed = true;

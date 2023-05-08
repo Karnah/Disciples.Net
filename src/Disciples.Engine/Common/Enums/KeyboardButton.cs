@@ -43,5 +43,25 @@ public enum KeyboardButton
     /// <summary>
     /// Клавиша "Tab".
     /// </summary>
-    Tab
+    Tab,
+
+    /// <summary>
+    /// Клавиша "Escape".
+    /// </summary>
+    Escape,
+
+    /// <summary>
+    /// Клавиша "Enter".
+    /// </summary>
+    Enter,
+
+    /// <summary>
+    /// Клавиша "Up".
+    /// </summary>
+    Up,
+
+    /// <summary>
+    /// Клавиша "Down".
+    /// </summary>
+    Down
 }

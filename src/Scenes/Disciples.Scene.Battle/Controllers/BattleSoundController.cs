@@ -33,9 +33,6 @@ internal class BattleSoundController : BaseSupportLoading
         _resourceProvider = resourceProvider;
     }
 
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
     /// <summary>
     /// Проиграть звук.
     /// </summary>

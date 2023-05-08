@@ -5,6 +5,7 @@ using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle;
 using Disciples.Scene.LoadingGame;
 using Disciples.Scene.LoadingSave;
+using Disciples.Scene.LoadSaga;
 using DryIoc;
 
 namespace Disciples.Engine.Game;
@@ -63,6 +64,7 @@ public class Game
         {
             new CommonModule(),
             new LoadingGameSceneModule(),
+            new LoadSagaSceneModule(),
             new LoadingSaveSceneModule(),
             new BattleSceneModule(),
             platformGameModule

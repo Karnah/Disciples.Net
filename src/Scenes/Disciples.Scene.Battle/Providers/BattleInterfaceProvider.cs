@@ -30,9 +30,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     }
 
     /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
-    /// <inheritdoc />
     protected override void LoadInternal()
     {
         LoadBitmaps();

@@ -101,9 +101,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _unitActionController = unitActionController;
     }
 
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
     /// <summary>
     ///  Юнит, который выполняет свой ход.
     /// </summary>

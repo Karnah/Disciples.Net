@@ -108,6 +108,10 @@ public class AvaloniaInputManager : IInputManager
         return key switch
         {
             Key.Tab => KeyboardButton.Tab,
+            Key.Enter => KeyboardButton.Enter,
+            Key.Escape => KeyboardButton.Escape,
+            Key.Up => KeyboardButton.Up,
+            Key.Down => KeyboardButton.Down,
             Key.A => KeyboardButton.A,
             Key.D => KeyboardButton.D,
             Key.I => KeyboardButton.I,

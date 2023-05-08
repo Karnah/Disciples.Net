@@ -35,9 +35,6 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
         _rawSounds = new Dictionary<string, RawSound?>();
     }
 
-    /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
     #region Анимации
 
     /// <inheritdoc />

@@ -4,7 +4,6 @@ using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
-using Disciples.Engine.Scenes.Parameters;
 
 namespace Disciples.Scene.LoadingGame;
 
@@ -89,7 +88,8 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     private void LoadGame()
     {
         LoadResources();
-        LoadSave();
+
+        _gameController.ChangeScene<ILoadSagaScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>
@@ -99,21 +99,5 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     {
         // TODO Добавить загрузку всех ресурсов, необходимых для меню.
         _textProvider.Load();
-    }
-
-    /// <summary>
-    /// Загрузить сейв.
-    /// </summary>
-    private void LoadSave()
-    {
-        const string saveFolder = "Saves";
-        const string saveName = "save.json";
-        //const string saveName = "effectsSave.json";
-        //const string saveName = "wardImmunitySave.json";
-        //const string saveName = "paralyzeSave.json";
-
-        var savePath = Path.Combine(Directory.GetCurrentDirectory(), saveFolder, saveName);
-        _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
-            new LoadingSaveSceneParameters(savePath));
     }
 }

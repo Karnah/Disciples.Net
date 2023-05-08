@@ -8,6 +8,9 @@ namespace Disciples.Engine.Implementation.Common.Providers;
 internal class SoundProvider : ISoundProvider
 {
     /// <inheritdoc />
+    public string MenuSound { get; } = "menutrck.wav";
+
+    /// <inheritdoc />
     public IReadOnlyList<string> GetBackgroundBattleSounds()
     {
         return new[]

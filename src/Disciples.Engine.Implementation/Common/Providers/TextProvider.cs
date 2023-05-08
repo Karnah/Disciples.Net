@@ -23,10 +23,6 @@ public class TextProvider : BaseSupportLoading,  ITextProvider
     }
 
     /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => true;
-
-
-    /// <inheritdoc />
     public string GetText(string textId)
     {
         textId = textId.ToUpperInvariant();

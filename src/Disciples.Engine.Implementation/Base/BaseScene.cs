@@ -18,9 +18,6 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     }
 
     /// <inheritdoc />
-    public override bool IsSharedBetweenScenes => false;
-
-    /// <inheritdoc />
     public IGameObjectContainer GameObjectContainer { get; }
 
     /// <inheritdoc />
@@ -55,7 +52,13 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     {
         BeforeSceneUpdate(data);
         GameObjectContainer.UpdateGameObjects(data.TicksCount);
-        AfterSceneUpdate();
+
+        // При обработке событий от пользователя, может поменяться сцена.
+        // В таком случае дальше обновлять не нужно.
+        // TODO Вообще, это может стрельнуть где угодно. Нужно посмотреть, куда это лучше вынести.
+        if (IsLoaded)
+            AfterSceneUpdate();
+
         SceneObjectContainer.PlatformSceneObjectContainer.UpdateContainer();
     }
 

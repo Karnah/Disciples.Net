@@ -86,6 +86,9 @@ public class ButtonObject : GameObject
     /// </summary>
     public virtual void SetActive()
     {
+        if (ButtonState == SceneButtonState.Active)
+            return;
+
         ButtonState = SceneButtonState.Active;
         UpdateButtonVisualObject();
     }
@@ -95,6 +98,9 @@ public class ButtonObject : GameObject
     /// </summary>
     public virtual void SetDisabled()
     {
+        if (ButtonState == SceneButtonState.Disabled)
+            return;
+
         ButtonState = SceneButtonState.Disabled;
         UpdateButtonVisualObject();
     }

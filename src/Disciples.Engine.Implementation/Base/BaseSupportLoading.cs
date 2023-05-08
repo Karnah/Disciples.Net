@@ -8,9 +8,6 @@ public abstract class BaseSupportLoading : ISupportLoading
     /// <inheritdoc />
     public bool IsLoaded { get; private set; }
 
-    /// <inheritdoc />
-    public abstract bool IsSharedBetweenScenes { get; }
-
 
     /// <inheritdoc />
     public void Load()
