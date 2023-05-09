@@ -19,6 +19,7 @@ public class AvaloniaModule : IGameModule
     {
         // Регистрируем устройства ввода.
         containerRegistrator.Register<IInputManager, AvaloniaInputManager>(Reuse.Singleton);
+        containerRegistrator.Register<ICursorController, AvaloniaCursorController>(Reuse.Singleton);
 
         // Регистрируем таймер.
         containerRegistrator.Register<IGameTimer, AvaloniaGameTimer>(Reuse.Singleton);

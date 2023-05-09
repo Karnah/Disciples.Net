@@ -19,6 +19,7 @@ public class WpfModule : IGameModule
     {
         // Регистрируем устройства ввода.
         containerRegistrator.Register<IInputManager, WpfInputManager>(Reuse.Singleton);
+        containerRegistrator.Register<ICursorController, WpfCursorController>(Reuse.Singleton);
 
         // Регистрируем таймер.
         containerRegistrator.Register<IGameTimer, WpfGameTimer>(Reuse.Singleton);

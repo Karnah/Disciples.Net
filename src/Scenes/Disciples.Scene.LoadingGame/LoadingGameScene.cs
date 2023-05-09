@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
@@ -38,6 +39,9 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
         _gameController = gameController;
         _textProvider = textProvider;
     }
+
+    /// <inheritdoc />
+    public override CursorState DefaultCursorState => CursorState.None;
 
     /// <inheritdoc />
     public void InitializeParameters(SceneParameters parameters)

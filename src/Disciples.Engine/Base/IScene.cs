@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Models;
+﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Base;
 
@@ -16,6 +17,11 @@ public interface IScene : ISupportLoading
     /// Контейнер объектов сцены.
     /// </summary>
     ISceneObjectContainer SceneObjectContainer { get; }
+
+    /// <summary>
+    /// Состояние курсора на сцене по умолчанию.
+    /// </summary>
+    CursorState DefaultCursorState { get; }
 
     /// <summary>
     /// Обработать загрузку сцены.

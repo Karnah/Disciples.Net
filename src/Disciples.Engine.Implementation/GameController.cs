@@ -26,6 +26,7 @@ public class GameController : IGameController
     private readonly IGameTimer _gameTimer;
     private readonly ILogger _logger;
     private readonly IInputManager _inputManager;
+    private readonly ICursorController _cursorController;
 
     private readonly object _lock = new();
     private readonly Stopwatch _stopwatch = new();
@@ -47,12 +48,13 @@ public class GameController : IGameController
     /// <summary>
     /// Создать объект типа <see cref="GameController" />.
     /// </summary>
-    public GameController(IContainer container, IGameTimer gameTimer, ILogger logger, IInputManager inputManager)
+    public GameController(IContainer container, IGameTimer gameTimer, ILogger logger, IInputManager inputManager, ICursorController cursorController)
     {
         _container = container;
         _gameTimer = gameTimer;
         _logger = logger;
         _inputManager = inputManager;
+        _cursorController = cursorController;
 
         _inputDeviceEvents = new();
     }
@@ -128,6 +130,7 @@ public class GameController : IGameController
 
         await Task.Run(scene.Load);
 
+        _cursorController.SetCursorState(scene.DefaultCursorState);
         _currentScene = scene;
 
         // TODO Вынести в сцену.

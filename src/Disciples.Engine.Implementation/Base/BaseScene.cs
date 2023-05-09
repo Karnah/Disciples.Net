@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Implementation.Base;
@@ -22,6 +23,9 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
     /// <inheritdoc />
     public ISceneObjectContainer SceneObjectContainer { get; }
+
+    /// <inheritdoc />
+    public virtual CursorState DefaultCursorState => CursorState.Default;
 
     /// <inheritdoc />
     public void AfterSceneLoaded()
