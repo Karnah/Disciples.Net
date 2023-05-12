@@ -33,9 +33,6 @@ internal class BattleUnitInfoGameObject : GameObject
     public Unit? Unit { get; set; }
 
     /// <inheritdoc />
-    public override bool IsInteractive => false;
-
-    /// <inheritdoc />
     public override void Update(long ticksCount)
     {
         base.Update(ticksCount);

@@ -17,25 +17,34 @@ internal class BattleGameObjectContainer : IBattleGameObjectContainer
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly ITextProvider _textProvider;
+    private readonly Lazy<IBattleInterfaceController> _battleInterfaceController;
 
     public BattleGameObjectContainer(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
         IBattleInterfaceProvider battleInterfaceProvider,
-        ITextProvider textProvider)
+        ITextProvider textProvider,
+        Lazy<IBattleInterfaceController> battleInterfaceController)
     {
         _gameObjectContainer = gameObjectContainer;
         _sceneObjectContainer = sceneObjectContainer;
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _battleInterfaceProvider = battleInterfaceProvider;
         _textProvider = textProvider;
+        _battleInterfaceController = battleInterfaceController;
     }
 
     /// <inheritdoc />
     public BattleUnit AddBattleUnit(Unit unit, bool isAttacker)
     {
-        var battleUnit = new BattleUnit(_sceneObjectContainer, _battleUnitResourceProvider, unit, isAttacker);
+        var battleUnit = new BattleUnit(_sceneObjectContainer, _battleUnitResourceProvider, 
+            _battleInterfaceController.Value.BattleUnitSelected,
+            _battleInterfaceController.Value.BattleUnitUnselected,
+            _battleInterfaceController.Value.BattleUnitLeftMouseButtonClicked,
+            _battleInterfaceController.Value.BattleUnitRightMouseButtonPressed,
+            unit,
+            isAttacker);
         return AddObject(battleUnit);
     }
 
@@ -49,7 +58,11 @@ internal class BattleGameObjectContainer : IBattleGameObjectContainer
     /// <inheritdoc />
     public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
     {
-        var unitPortrait = new UnitPortraitObject(_textProvider, _sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider, unit, rightToLeft, x, y);
+        var unitPortrait = new UnitPortraitObject(_textProvider, _sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider,
+            _battleInterfaceController.Value.UnitPortraitSelected,
+            _battleInterfaceController.Value.UnitPortraitLeftMouseButtonClicked,
+            _battleInterfaceController.Value.UnitPortraitRightMouseButtonPressed,
+            unit, rightToLeft, x, y);
         return AddObject(unitPortrait);
     }
 

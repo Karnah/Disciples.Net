@@ -82,9 +82,6 @@ internal class DetailUnitInfoObject : GameObject
     public Unit Unit { get; }
 
     /// <inheritdoc />
-    public override bool IsInteractive => false;
-
-    /// <inheritdoc />
     public override void Initialize()
     {
         base.Initialize();

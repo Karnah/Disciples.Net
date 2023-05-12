@@ -6,10 +6,8 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
-using Disciples.Engine.Enums;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
-using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
@@ -36,26 +34,18 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly BattleUnitActionController _unitActionController;
+    private readonly BattleDialogController _dialogController;
 
     private IImageSceneObject _currentUnitFace = null!;
     private BattleUnitInfoGameObject _currentUnitTextInfoObject = null!;
     private IImageSceneObject? _targetUnitFace;
     private BattleUnitInfoGameObject? _targetUnitTextInfoObject;
     private BattleUnit? _targetUnitObject;
-    private DetailUnitInfoObject? _detailUnitInfoObject;
 
     /// <summary>
     /// Позволяет заблокировать действия пользователя на время анимации.
     /// </summary>
     private bool _isAnimating;
-    /// <summary>
-    /// Отображается ли подробная информация о юните в данный момент.
-    /// </summary>
-    private bool _isUnitInfoShowing;
-    /// <summary>
-    /// Объект, над которым была зажата кнопка мыши.
-    /// </summary>
-    private GameObject? _pressedObject;
 
     /// <summary>
     /// Игровой объект, отрисовывающий на текущем юните анимацию выделения.
@@ -88,7 +78,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         BattleProcessor battleProcessor,
         ISceneObjectContainer sceneObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        BattleUnitActionController unitActionController)
+        BattleUnitActionController unitActionController,
+        BattleDialogController dialogController)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
@@ -99,6 +90,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _sceneObjectContainer = sceneObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
         _unitActionController = unitActionController;
+        _dialogController = dialogController;
     }
 
     /// <summary>
@@ -135,11 +127,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     public void BeforeSceneUpdate()
     {
         _unitPortraitPanelController.ProcessMousePosition(_context.MousePosition);
-
-        foreach (var inputDeviceEvent in _context.InputDeviceEvents)
-        {
-            ProcessInputDeviceEvent(inputDeviceEvent);
-        }
     }
 
     /// <inheritdoc />
@@ -162,6 +149,57 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 ProcessBattleCompleted();
                 break;
         }
+    }
+
+    /// <inheritdoc />
+    public void BattleUnitSelected(BattleUnit battleUnit)
+    {
+        // Если выбрали кости юнита, то не нужно менять портрет.
+        if (battleUnit.Unit.IsDead)
+            return;
+
+        UpdateTargetUnit(battleUnit);
+    }
+
+    /// <inheritdoc />
+    public void BattleUnitUnselected(BattleUnit battleUnit)
+    {
+        UpdateTargetUnit(null);
+    }
+
+    /// <inheritdoc />
+    public void BattleUnitLeftMouseButtonClicked(BattleUnit battleUnit)
+    {
+        Attack(battleUnit);
+    }
+
+    /// <inheritdoc />
+    public void BattleUnitRightMouseButtonPressed(BattleUnit battleUnit)
+    {
+        ShowDetailUnitInfo(battleUnit.Unit);
+    }
+
+    /// <inheritdoc />
+    public void UnitPortraitSelected(UnitPortraitObject unitPortrait)
+    {
+        var targetBattleUnit = _context.GetBattleUnit(unitPortrait.Unit);
+        UpdateTargetUnit(targetBattleUnit, false);
+    }
+
+    /// <inheritdoc />
+    public void UnitPortraitLeftMouseButtonClicked(UnitPortraitObject unitPortrait)
+    {
+        var targetBattleUnit = _context.GetBattleUnit(unitPortrait.Unit);
+        Attack(targetBattleUnit);
+    }
+
+    /// <inheritdoc />
+    public void UnitPortraitRightMouseButtonPressed(UnitPortraitObject unitPortrait)
+    {
+        // todo Вообще, при наведении на портреты внизу по бокам тоже нужно показывать информацию.
+        // Но сейчас они позиционируются только как картинки, а не как объекты.
+
+        ShowDetailUnitInfo(unitPortrait.Unit);
     }
 
     /// <inheritdoc />
@@ -288,212 +326,25 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     /// <summary>
+    /// Атаковать указанного юнита.
+    /// </summary>
+    private void Attack(BattleUnit targetBattleUnit)
+    {
+        if (_isAnimating)
+            return;
+
+        if (CanAttack(targetBattleUnit))
+            _unitActionController.BeginMainAttack(targetBattleUnit);
+    }
+
+    /// <summary>
     /// Отобразить детальную информацию по указанному юниту.
     /// </summary>
     /// <param name="unit">Юнит, информацию о котором необходимо отобразить.</param>
     private void ShowDetailUnitInfo(Unit unit)
     {
-        _detailUnitInfoObject?.Destroy();
-        _detailUnitInfoObject = _battleGameObjectContainer.ShowDetailUnitInfo(unit);
+        _dialogController.ShowUnitDetailInfo(unit);
     }
-
-    /// <summary>
-    /// Прекратить отображение детальной информации по юниту.
-    /// </summary>
-    private void StopShowDetailUnitInfo()
-    {
-        _detailUnitInfoObject?.Destroy();
-        _detailUnitInfoObject = null;
-    }
-
-    #region Interaction
-
-    /// <summary>
-    /// Обработать событие воздействия с игровым объектом (наведение, клик мышью и т.д.).
-    /// </summary>
-    private void ProcessInputDeviceEvent(InputDeviceEvent inputDeviceEvent)
-    {
-        var actionType = inputDeviceEvent.ActionType;
-        var actionState = inputDeviceEvent.ActionState;
-        var gameObject = inputDeviceEvent.GameObject;
-
-        // Если отпустили ПКМ, то прекращаем отображать информацию о юните.
-        if (actionType == InputDeviceActionType.MouseRight && actionState == InputDeviceActionState.Deactivated)
-        {
-            GameObjectRightButtonReleased(gameObject);
-            return;
-        }
-
-        // Если ПКМ зажата, то не меняем выбранного юнита до тех пор, пока не будет отпущена кнопка.
-        if (_isUnitInfoShowing)
-            return;
-
-        switch (actionType)
-        {
-            case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Activated:
-                GameObjectSelected(gameObject);
-                break;
-            case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Deactivated:
-                GameObjectUnselected(gameObject);
-                break;
-
-            case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Activated:
-                GameObjectPressed(gameObject);
-                break;
-            case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Deactivated:
-                GameObjectClicked(gameObject);
-                break;
-
-            case InputDeviceActionType.MouseRight when actionState == InputDeviceActionState.Activated:
-                GameObjectRightButtonPressed(gameObject);
-                break;
-
-            case InputDeviceActionType.UiButton:
-                GameObjectPressed(gameObject);
-                GameObjectClicked(gameObject);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события, что игровой объект был выбран.
-    /// </summary>
-    private void GameObjectSelected(GameObject? gameObject)
-    {
-        if (gameObject is BattleUnit battleUnit)
-        {
-            // Если выбрали кости юнита, то не нужно менять портрет.
-            if (battleUnit.Unit.IsDead)
-                return;
-
-            UpdateTargetUnit(battleUnit);
-        }
-        else if (gameObject is UnitPortraitObject unitPortrait)
-        {
-            var targetBattleUnit = _context.GetBattleUnit(unitPortrait.Unit);
-            UpdateTargetUnit(targetBattleUnit, false);
-        }
-        else if (gameObject is ButtonObject button)
-        {
-            button.SetSelected();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события, что с игрового объекта был смещён фокус.
-    /// </summary>
-    private void GameObjectUnselected(GameObject? gameObject)
-    {
-        if (gameObject is BattleUnit)
-        {
-            UpdateTargetUnit(null);
-        }
-        else if (gameObject is ButtonObject button)
-        {
-            button.SetUnselected();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события, что на объект нажали мышью.
-    /// </summary>
-    private void GameObjectPressed(GameObject? gameObject)
-    {
-        if (gameObject == null)
-            return;
-
-        _pressedObject = gameObject;
-
-        if (gameObject is ButtonObject button)
-        {
-            button.Press();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события клика на игровом объекта.
-    /// </summary>
-    private void GameObjectClicked(GameObject? gameObject)
-    {
-        // В том случае, если нажали кнопку на одном объекте, а отпустили на другом, то ничего не делаем.
-        if (_pressedObject != gameObject)
-            return;
-
-        if (gameObject is BattleUnit targetUnitGameObject)
-        {
-            if (_isAnimating)
-                return;
-
-            if (CanAttack(targetUnitGameObject))
-                _unitActionController.BeginMainAttack(targetUnitGameObject);
-        }
-        else if (gameObject is UnitPortraitObject unitPortrait)
-        {
-            if (_isAnimating)
-                return;
-
-            var targetUnitObject = _context.GetBattleUnit(unitPortrait.Unit);
-            if (CanAttack(targetUnitObject))
-                _unitActionController.BeginMainAttack(targetUnitObject);
-        }
-        else if (gameObject is ButtonObject button)
-        {
-            // TODO Подумать над другим способом обработки.
-            button.Release();
-        }
-    }
-
-    /// <summary>
-    /// Обработать событие того, что на игровой объект нажали ПКМ.
-    /// </summary>
-    private void GameObjectRightButtonPressed(GameObject? gameObject)
-    {
-        Unit? unit = null;
-
-        if (gameObject is BattleUnit battleUnit)
-        {
-            unit = battleUnit.Unit;
-        }
-        else if (gameObject is UnitPortraitObject unitPortrait)
-        {
-            unit = unitPortrait.Unit;
-        }
-
-        // todo Вообще, при наведении на портреты внизу по бокам тоже нужно показывать информацию.
-        // Но сейчас они позиционируются только как картинки, а не как объекты.
-
-        // На ПКМ мы показываем только информацию о выбранном юните.
-        // Поэтому, если был выбран игровой объект, который никак не относится к юниту,
-        // То ничего не делам.
-        if (unit == null)
-            return;
-
-        _isUnitInfoShowing = true;
-        _pressedObject = gameObject;
-        ShowDetailUnitInfo(unit);
-    }
-
-    /// <summary>
-    /// Обработать событие того, что на игровой объект нажали ПКМ.
-    /// </summary>
-    private void GameObjectRightButtonReleased(GameObject? gameObject)
-    {
-        if (!_isUnitInfoShowing)
-            return;
-
-        _isUnitInfoShowing = false;
-        StopShowDetailUnitInfo();
-
-        // Если во время того, как отображалась информация о юните,
-        // Курсор мыши был перемещён, то после того, как отпустили ПКМ, мы должны выделить нового юнита.
-        if (_pressedObject != gameObject)
-        {
-            GameObjectUnselected(_pressedObject);
-            GameObjectSelected(gameObject);
-        }
-    }
-
-    #endregion
 
     /// <summary>
     /// Обработать начало действий на сцене.

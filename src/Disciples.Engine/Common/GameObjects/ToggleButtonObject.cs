@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
 
@@ -41,43 +40,33 @@ public class ToggleButtonObject : ButtonObject
     }
 
     /// <inheritdoc />
-    public override void SetSelected()
+    protected override void OnSelected()
     {
-        if (ButtonState == SceneButtonState.Pressed && IsChecked)
-            return;
-
-        base.SetSelected();
-    }
-
-    /// <inheritdoc />
-    public override void SetUnselected()
-    {
-        if (ButtonState == SceneButtonState.Pressed && IsChecked)
-            return;
-
-        base.SetUnselected();
-    }
-
-    /// <inheritdoc />
-    public override void Release()
-    {
-        // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
-        if (ButtonState != SceneButtonState.Pressed)
-            return;
-
+        // Если IsChecked=true, то кнопка находится в состоянии Pressed.
+        // В этом статусе выделение не применяется.
         if (IsChecked)
-            ButtonState = SceneButtonState.Selected;
+            return;
 
-        Click();
-        UpdateButtonVisualObject();
+        base.OnSelected();
     }
 
     /// <inheritdoc />
-    public override void Click()
+    protected override void OnUnselected()
+    {
+        // Если IsChecked=true, то кнопка находится в состоянии Pressed.
+        // В этом статусе выделение не применяется.
+        if (IsChecked)
+            return;
+
+        base.OnUnselected();
+    }
+
+    /// <inheritdoc />
+    protected override void ProcessClickInternal()
     {
         SetState(!IsChecked);
 
-        base.Click();
+        base.ProcessClickInternal();
     }
 
     /// <summary>
@@ -89,9 +78,8 @@ public class ToggleButtonObject : ButtonObject
             return;
 
         IsChecked = isChecked;
-        ButtonState = IsChecked
+        SetState(IsChecked
             ? SceneButtonState.Pressed
-            : SceneButtonState.Active;
-        UpdateButtonVisualObject();
+            : SceneButtonState.Active);
     }
 }

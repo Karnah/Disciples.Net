@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using System.Collections.Generic;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
-
 using Action = System.Action;
 
 namespace Disciples.Engine.Common.GameObjects;
@@ -37,14 +37,21 @@ public class ButtonObject : GameObject
         _buttonPressedAction = buttonPressedAction;
 
         ButtonState = SceneButtonState.Disabled;
-        Hotkey = hotkey;
         Layer = layer;
 
         var bitmap = _buttonStates[ButtonState];
         Width = bitmap.Width;
         Height = bitmap.Height;
-    }
 
+        var hotKeys = hotkey == null
+            ? Array.Empty<KeyboardButton>()
+            : new[] { hotkey.Value };
+        Components = new IComponent[]
+        {
+            new SelectionComponent(this, OnSelected, OnUnselected),
+            new MouseLeftButtonClickComponent(this, hotKeys, OnPressed, OnClicked)
+        };
+    }
 
     /// <summary>
     /// Состояние кнопки.
@@ -52,17 +59,9 @@ public class ButtonObject : GameObject
     public SceneButtonState ButtonState { get; protected set; }
 
     /// <summary>
-    /// Горячая клавиша для кнопки.
-    /// </summary>
-    public KeyboardButton? Hotkey { get; }
-
-    /// <summary>
     /// Слой на котором располагается кнопка.
     /// </summary>
     public int Layer { get; }
-
-    /// <inheritdoc />
-    public override bool IsInteractive => true;
 
 
     /// <inheritdoc />
@@ -86,11 +85,7 @@ public class ButtonObject : GameObject
     /// </summary>
     public virtual void SetActive()
     {
-        if (ButtonState == SceneButtonState.Active)
-            return;
-
-        ButtonState = SceneButtonState.Active;
-        UpdateButtonVisualObject();
+        SetState(SceneButtonState.Active);
     }
 
     /// <summary>
@@ -98,73 +93,75 @@ public class ButtonObject : GameObject
     /// </summary>
     public virtual void SetDisabled()
     {
-        if (ButtonState == SceneButtonState.Disabled)
-            return;
-
-        ButtonState = SceneButtonState.Disabled;
-        UpdateButtonVisualObject();
+        SetState(SceneButtonState.Disabled);
     }
 
     /// <summary>
     /// Обработка события наведения курсора на кнопку.
     /// </summary>
-    public virtual void SetSelected()
+    protected virtual void OnSelected()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        ButtonState = SceneButtonState.Selected;
-        UpdateButtonVisualObject();
+        SetState(SceneButtonState.Selected);
     }
 
     /// <summary>
     /// Обработка события перемещения курсора с кнопки.
     /// </summary>
-    public virtual void SetUnselected()
+    protected virtual void OnUnselected()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        ButtonState = SceneButtonState.Active;
-        UpdateButtonVisualObject();
+        SetState(SceneButtonState.Active);
     }
 
     /// <summary>
     /// Обработка события нажатия на кнопку.
     /// </summary>
-    public virtual void Press()
+    protected virtual void OnPressed()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        ButtonState = SceneButtonState.Pressed;
-        UpdateButtonVisualObject();
+        SetState(SceneButtonState.Pressed);
     }
 
     /// <summary>
     /// Обработка события клика на кнопку (мышь отпустили).
     /// </summary>
-    public virtual void Release()
+    protected virtual void OnClicked()
     {
-        // Отлавливаем ситуацию, когда кликнули, убрали мышь, вернули на место.
-        if (ButtonState != SceneButtonState.Pressed)
+        if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        Click();
-
-        // Если после клика состояние кнопки не изменилось, то делаем её просто выделенной.
-        if (ButtonState == SceneButtonState.Pressed)
-            ButtonState = SceneButtonState.Selected;
-
+        ProcessClickInternal();
         UpdateButtonVisualObject();
     }
 
     /// <summary>
     /// Обработать событие нажатия на кнопку.
     /// </summary>
-    public virtual void Click()
+    protected virtual void ProcessClickInternal()
     {
         _buttonPressedAction.Invoke();
+    }
+
+    /// <summary>
+    /// Установить состояние кнопки.
+    /// </summary>
+    protected virtual void SetState(SceneButtonState buttonState)
+    {
+        if (buttonState == SceneButtonState.Active && SelectionComponent!.IsSelected)
+            buttonState = SceneButtonState.Selected;
+
+        if (ButtonState == buttonState)
+            return;
+
+        ButtonState = buttonState;
+        UpdateButtonVisualObject();
     }
 
     /// <summary>

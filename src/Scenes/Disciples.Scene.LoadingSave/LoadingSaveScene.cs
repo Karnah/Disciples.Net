@@ -1,6 +1,7 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -36,12 +37,13 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     public LoadingSaveScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
+        IDialogController dialogController,
         IGameController gameController,
         IUnitInfoProvider unitInfoProvider,
         IInterfaceProvider interfaceProvider,
         ITextProvider textProvider,
         IReadOnlyList<BaseResourceExtractor> resourceExtractors
-        ) : base(gameObjectContainer, sceneObjectContainer)
+        ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _gameObjectContainer = gameObjectContainer;
         _sceneObjectContainer = sceneObjectContainer;

@@ -21,7 +21,7 @@ public enum InputDeviceActionType
     MouseRight,
 
     /// <summary>
-    /// Нажатие кнопки на экране.
+    /// Нажатие кнопки клавиатуры.
     /// </summary>
-    UiButton
+    KeyboardButton
 }

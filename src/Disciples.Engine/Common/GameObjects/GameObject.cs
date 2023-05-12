@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Disciples.Engine.Common.Components;
+using Disciples.Engine.Common.Exceptions;
 
 namespace Disciples.Engine.Common.GameObjects;
 
@@ -56,11 +57,6 @@ public abstract class GameObject
     public double Height { get; protected set; }
 
     /// <summary>
-    /// Возможно ли наведение/выбор объекта курсором.
-    /// </summary>
-    public abstract bool IsInteractive { get; }
-
-    /// <summary>
     /// Компоненты из которых состоит объект.
     /// </summary>
     public IReadOnlyCollection<IComponent> Components { get; protected set; }
@@ -75,6 +71,25 @@ public abstract class GameObject
     /// </summary>
     public bool IsDestroyed { get; private set; }
 
+    #region Components
+
+    /// <summary>
+    /// Компонент для игровых объектов, который могут быть выбраны в качестве цели.
+    /// </summary>
+    public SelectionComponent? SelectionComponent { get; private set; }
+
+    /// <summary>
+    /// Компонент для объектов, которые могут быть нажаты ЛКМ.
+    /// </summary>
+    public MouseLeftButtonClickComponent? MouseLeftButtonClickComponent { get; private set; }
+
+    /// <summary>
+    /// Компонент для объектов, которые могут быть нажаты ПКМ.
+    /// </summary>
+    public MouseRightButtonClickComponent? MouseRightButtonClickComponent { get; private set; }
+
+    #endregion
+
     /// <summary>
     /// Инициализировать игровой объект.
     /// </summary>
@@ -84,7 +99,16 @@ public abstract class GameObject
             throw new InvalidOperationException("Game object already initialized");
 
         foreach (var component in Components)
+        {
             component.Initialize();
+
+            if (component is SelectionComponent selectionComponent)
+                SelectionComponent = selectionComponent;
+            else if (component is MouseLeftButtonClickComponent mouseLeftButtonClickComponent)
+                MouseLeftButtonClickComponent = mouseLeftButtonClickComponent;
+            else if (component is MouseRightButtonClickComponent mouseRightButtonClickComponent)
+                MouseRightButtonClickComponent = mouseRightButtonClickComponent;
+        }
 
         IsInitialized = true;
     }
@@ -111,5 +135,53 @@ public abstract class GameObject
             component.Destroy();
 
         IsDestroyed = true;
+    }
+
+    /// <summary>
+    /// Получить компонент указанного типа.
+    /// </summary>
+    /// <typeparam name="TComponent">Тип искомого компонента.</typeparam>
+    public TComponent GetComponent<TComponent>()
+        where TComponent : IComponent
+    {
+        return (TComponent)GetComponent(typeof(TComponent));
+    }
+
+    /// <summary>
+    /// Получить компонент указанного типа.
+    /// </summary>
+    /// <typeparam name="TComponent">Тип искомого компонента.</typeparam>
+    public TComponent? TryGetComponent<TComponent>()
+        where TComponent : IComponent
+    {
+        return (TComponent?)TryGetComponent(typeof(TComponent));
+    }
+
+    /// <summary>
+    /// Получить компонент указанного типа.
+    /// </summary>
+    /// <param name="componentType">Тип искомого компонента.</param>
+    public object GetComponent(Type componentType)
+    {
+        var component = TryGetComponent(componentType);
+        if (component == null)
+            throw new ComponentNotFoundException(componentType);
+
+        return component;
+    }
+
+    /// <summary>
+    /// Получить компонент указанного типа.
+    /// </summary>
+    /// <param name="componentType">Тип искомого компонента.</param>
+    public object? TryGetComponent(Type componentType)
+    {
+        foreach (var component in Components)
+        {
+            if (componentType.IsInstanceOfType(component))
+                return component;
+        }
+
+        return null;
     }
 }

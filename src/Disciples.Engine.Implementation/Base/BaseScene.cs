@@ -1,6 +1,10 @@
-﻿using Disciples.Engine.Base;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Models;
+using Disciples.Engine.Enums;
 
 namespace Disciples.Engine.Implementation.Base;
 
@@ -9,13 +13,16 @@ namespace Disciples.Engine.Implementation.Base;
 /// </summary>
 public abstract class BaseScene : BaseSupportLoading, IScene
 {
+    private readonly IDialogController _dialogController;
+
     /// <summary>
     /// Создать объект типа <see cref="BaseScene" />.
     /// </summary>
-    protected BaseScene(IGameObjectContainer gameObjectContainer, ISceneObjectContainer sceneObjectContainer)
+    protected BaseScene(IGameObjectContainer gameObjectContainer, ISceneObjectContainer sceneObjectContainer, IDialogController dialogController)
     {
         GameObjectContainer = gameObjectContainer;
         SceneObjectContainer = sceneObjectContainer;
+        _dialogController = dialogController;
     }
 
     /// <inheritdoc />
@@ -26,6 +33,11 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
     /// <inheritdoc />
     public virtual CursorState DefaultCursorState => CursorState.Default;
+
+    /// <summary>
+    /// Признак, что базовый класс должен сам обрабатывать события ввода пользователя.
+    /// </summary>
+    protected virtual bool IsProcessInputDeviceEvents => true;
 
     /// <inheritdoc />
     public void AfterSceneLoaded()
@@ -55,6 +67,10 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     public void UpdateScene(UpdateSceneData data)
     {
         BeforeSceneUpdate(data);
+
+        if (IsProcessInputDeviceEvents)
+            ProcessInputDeviceEvents(data.InputDeviceEvents);
+
         GameObjectContainer.UpdateGameObjects(data.TicksCount);
 
         // При обработке событий от пользователя, может поменяться сцена.
@@ -75,4 +91,54 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     /// Выполнить действия после игровых объектов.
     /// </summary>
     protected abstract void AfterSceneUpdate();
+
+    /// <summary>
+    /// Обработать события ввода пользователя.
+    /// </summary>
+    protected virtual void ProcessInputDeviceEvents(IReadOnlyList<InputDeviceEvent> inputDeviceEvents)
+    {
+        // Если открыт диалог, то события обрабатывает он.
+        if (_dialogController.IsDialogShowing)
+        {
+            _dialogController.ProcessInputDeviceEvents(inputDeviceEvents);
+            return;
+        }
+
+        foreach (var inputDeviceEvent in inputDeviceEvents)
+        {
+            var inputDeviceGameObject = inputDeviceEvent.GameObject;
+
+            switch (inputDeviceEvent.ActionType)
+            {
+                case InputDeviceActionType.Selection when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
+                    inputDeviceGameObject?.SelectionComponent?.Selected();
+                    continue;
+                case InputDeviceActionType.Selection when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
+                    inputDeviceGameObject?.SelectionComponent?.Unselected();
+                    continue;
+
+                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
+                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Pressed();
+                    continue;
+                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
+                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Clicked();
+                    continue;
+
+                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
+                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Pressed();
+                    continue;
+                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
+                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Released();
+                    continue;
+
+                case InputDeviceActionType.KeyboardButton when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
+                    // TODO Оптимизация.
+                    foreach (var gameObject in GameObjectContainer.GameObjects.ToArray())
+                    {
+                        gameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
+                    }
+                    break;
+            }
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
@@ -20,10 +21,11 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
     public LoadSagaScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
+        IDialogController dialogController,
         LoadSagaInterfaceProvider interfaceProvider,
         LoadSagaInterfaceController interfaceController,
         LoadSagaSoundController soundController
-        ) : base(gameObjectContainer, sceneObjectContainer)
+        ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _interfaceProvider = interfaceProvider;
         _interfaceController = interfaceController;
@@ -56,7 +58,7 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
         _soundController.BeforeSceneUpdate();
-        _interfaceController.BeforeSceneUpdate(data.InputDeviceEvents);
+        _interfaceController.BeforeSceneUpdate();
     }
 
     /// <inheritdoc />

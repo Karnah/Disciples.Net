@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Enums;
 using Disciples.Engine.Implementation.Extensions;
@@ -180,7 +179,7 @@ public class GameController : IGameController
     {
         var selectedGameObject = GameObjects
             .OrderBy(go => go.Y)
-            .FirstOrDefault(go => go.IsInteractive &&
+            .FirstOrDefault(go => go.SelectionComponent != null &&
                                   go.X <= mousePosition.X && mousePosition.X < (go.X + go.Width) &&
                                   go.Y <= mousePosition.Y && mousePosition.Y < (go.Y + go.Height));
 
@@ -221,10 +220,6 @@ public class GameController : IGameController
         if (args.ButtonState != ButtonState.Pressed)
             return;
 
-        var button = GameObjects.OfType<ButtonObject>().FirstOrDefault(b => b.Hotkey == args.KeyboardButton);
-        if (button == null || button.ButtonState == SceneButtonState.Disabled)
-            return;
-
-        _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.UiButton, InputDeviceActionState.Activated, button));
+        _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.KeyboardButton, InputDeviceActionState.Activated, args.KeyboardButton));
     }
 }

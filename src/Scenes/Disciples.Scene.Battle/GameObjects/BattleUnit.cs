@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Components;
@@ -30,6 +31,10 @@ internal class BattleUnit : GameObject
     public BattleUnit(
         ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
+        Action<BattleUnit> onUnitSelected,
+        Action<BattleUnit> onUnitUnselected,
+        Action<BattleUnit> onUnitMouseRightButtonClicked,
+        Action<BattleUnit> onUnitMouseLeftButtonPressed,
         Unit unit,
         bool isAttacker
     ) : base(GetSceneUnitPosition(isAttacker, (int)unit.SquadLinePosition, (int)unit.SquadFlankPosition))
@@ -46,15 +51,21 @@ internal class BattleUnit : GameObject
 
         AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
         SoundComponent = new BattleUnitSoundComponent(this, battleUnitResourceProvider);
-        this.Components = new IComponent[] { AnimationComponent, SoundComponent };
+        this.Components = new IComponent[]
+        {
+            AnimationComponent,
+            SoundComponent,
+            new SelectionComponent(this,
+                () => onUnitSelected.Invoke(this),
+                () => onUnitUnselected.Invoke(this)),
+            new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onUnitMouseRightButtonClicked.Invoke(this)),
+            new MouseRightButtonClickComponent(this, () => onUnitMouseLeftButtonPressed.Invoke(this))
+        };
 
         Width = BATTLE_UNIT_WIDTH;
         Height = BATTLE_UNIT_HEIGHT;
     }
 
-
-    /// <inheritdoc />
-    public override bool IsInteractive => true;
 
     /// <summary>
     /// Компонент анимации юнита.

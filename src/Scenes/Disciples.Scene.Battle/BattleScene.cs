@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
@@ -33,6 +34,7 @@ internal class BattleScene : BaseScene, IBattleScene
     public BattleScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
+        IDialogController dialogController,
         ITextProvider textProvider,
         IUnitInfoProvider unitInfoProvider,
         IInterfaceProvider interfaceProvider,
@@ -43,7 +45,7 @@ internal class BattleScene : BaseScene, IBattleScene
         IBattleInterfaceController battleInterfaceController,
         BattleContext battleContext,
         BattleSoundController battleSoundController
-        ) : base(gameObjectContainer, sceneObjectContainer)
+        ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _textProvider = textProvider;
         _unitInfoProvider = unitInfoProvider;
@@ -56,6 +58,9 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleContext = battleContext;
         _battleSoundController = battleSoundController;
     }
+
+    /// <inheritdoc />
+    protected override bool IsProcessInputDeviceEvents => false;
 
     /// <inheritdoc />
     public void InitializeParameters(BattleSceneParameters parameters)
@@ -95,6 +100,9 @@ internal class BattleScene : BaseScene, IBattleScene
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
         _battleContext.BeforeSceneUpdate(data);
+
+        ProcessInputDeviceEvents(data.InputDeviceEvents);
+
         _battleInterfaceController.BeforeSceneUpdate();
         _battleController.BeforeSceneUpdate();
         _battleSoundController.BeforeSceneUpdate();

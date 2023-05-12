@@ -4,9 +4,7 @@ using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.SceneObjects;
-using Disciples.Engine.Enums;
 using Disciples.Engine.Implementation.Base;
-using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.LoadSaga.Models;
@@ -35,8 +33,6 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     private ButtonObject _saveUpButton = null!;
     private ButtonObject _saveDownButton = null!;
 
-    private GameObject? _pressedObject;
-
     /// <summary>
     /// Создать объект типа <see cref="LoadSagaInterfaceController" />.
     /// </summary>
@@ -57,12 +53,8 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <summary>
     /// Обработать события перед обновлением сцены.
     /// </summary>
-    public void BeforeSceneUpdate(IReadOnlyList<InputDeviceEvent> inputDeviceEvents)
+    public void BeforeSceneUpdate()
     {
-        foreach (var inputDeviceEvent in inputDeviceEvents)
-        {
-            ProcessInputDeviceEvent(inputDeviceEvent);
-        }
     }
 
     /// <summary>
@@ -193,91 +185,5 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             _saveDownButton.SetActive();
         else
             _saveDownButton.SetDisabled();
-    }
-
-    /// <summary>
-    /// Обработать событие воздействия с игровым объектом (наведение, клик мышью и т.д.).
-    /// </summary>
-    private void ProcessInputDeviceEvent(InputDeviceEvent inputDeviceEvent)
-    {
-        var actionType = inputDeviceEvent.ActionType;
-        var actionState = inputDeviceEvent.ActionState;
-        var gameObject = inputDeviceEvent.GameObject;
-
-        switch (actionType)
-        {
-            case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Activated:
-                GameObjectSelected(gameObject);
-                break;
-            case InputDeviceActionType.Selection when actionState == InputDeviceActionState.Deactivated:
-                GameObjectUnselected(gameObject);
-                break;
-
-            case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Activated:
-                GameObjectPressed(gameObject);
-                break;
-            case InputDeviceActionType.MouseLeft when actionState == InputDeviceActionState.Deactivated:
-                GameObjectClicked(gameObject);
-                break;
-
-            case InputDeviceActionType.UiButton:
-                GameObjectPressed(gameObject);
-                GameObjectClicked(gameObject);
-                break;
-        }
-    }
-
-        /// <summary>
-    /// Обработчик события, что игровой объект был выбран.
-    /// </summary>
-    private static void GameObjectSelected(GameObject? gameObject)
-    {
-        if (gameObject is ButtonObject button)
-        {
-            button.SetSelected();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события, что с игрового объекта был смещён фокус.
-    /// </summary>
-    private static void GameObjectUnselected(GameObject? gameObject)
-    {
-        if (gameObject is ButtonObject button)
-        {
-            button.SetUnselected();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события, что на объект нажали мышью.
-    /// </summary>
-    private void GameObjectPressed(GameObject? gameObject)
-    {
-        if (gameObject == null)
-            return;
-
-        _pressedObject = gameObject;
-
-        if (gameObject is ButtonObject button)
-        {
-            button.Press();
-        }
-    }
-
-    /// <summary>
-    /// Обработчик события клика на игровом объекта.
-    /// </summary>
-    private void GameObjectClicked(GameObject? gameObject)
-    {
-        // В том случае, если нажали кнопку на одном объекте, а отпустили на другом, то ничего не делаем.
-        if (_pressedObject != gameObject)
-            return;
-
-        if (gameObject is ButtonObject button)
-        {
-            // TODO Подумать над другим способом обработки.
-            button.Release();
-        }
     }
 }

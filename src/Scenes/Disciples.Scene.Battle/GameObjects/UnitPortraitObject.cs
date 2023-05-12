@@ -1,7 +1,9 @@
 ﻿using System.Drawing;
 using Disciples.Engine;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Constants;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -114,6 +116,9 @@ internal class UnitPortraitObject : GameObject
         ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         IBattleUnitResourceProvider battleUnitResourceProvider,
+        Action<UnitPortraitObject> onUnitPortraitSelected,
+        Action<UnitPortraitObject> onUnitPortraitRightMouseButtonClicked,
+        Action<UnitPortraitObject> onUnitPortraitMouseLeftButtonPressed,
         Unit unit,
         bool rightToLeft,
         double x,
@@ -133,10 +138,14 @@ internal class UnitPortraitObject : GameObject
 
         _battleEffectsIcons = new Dictionary<UnitAttackType, IImageSceneObject>();
         _battleEffectsForegrounds = new Dictionary<UnitAttackType, IImageSceneObject>();
-    }
 
-    /// <inheritdoc />
-    public override bool IsInteractive => true;
+        Components = new IComponent[]
+        {
+            new SelectionComponent(this, () => onUnitPortraitSelected.Invoke(this)),
+            new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onUnitPortraitRightMouseButtonClicked.Invoke(this)),
+            new MouseRightButtonClickComponent(this, () => onUnitPortraitMouseLeftButtonPressed.Invoke(this))
+        };
+    }
 
     /// <summary>
     /// Юнит.

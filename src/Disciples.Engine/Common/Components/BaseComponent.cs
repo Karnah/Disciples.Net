@@ -1,6 +1,4 @@
-﻿using System;
-using Disciples.Engine.Common.Exceptions;
-using Disciples.Engine.Common.GameObjects;
+﻿using Disciples.Engine.Common.GameObjects;
 
 namespace Disciples.Engine.Common.Components;
 
@@ -35,30 +33,5 @@ public abstract class BaseComponent : IComponent
     /// <inheritdoc />
     public virtual void Destroy()
     {
-    }
-
-    /// <summary>
-    /// Получить компонент указанного типа.
-    /// </summary>
-    /// <typeparam name="TComponent">Тип искомого компонента.</typeparam>
-    protected TComponent GetComponent<TComponent>()
-        where TComponent : IComponent
-    {
-        return (TComponent)GetComponent(typeof(TComponent));
-    }
-
-    /// <summary>
-    /// Получить компонент указанного типа.
-    /// </summary>
-    /// <param name="componentType">Тип искомого компонента.</param>
-    protected object GetComponent(Type componentType)
-    {
-        foreach (var component in GameObject.Components)
-        {
-            if (component.GetType() == componentType)
-                return component;
-        }
-
-        throw new ComponentNotFoundException(componentType);
     }
 }

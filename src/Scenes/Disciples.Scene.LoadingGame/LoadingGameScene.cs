@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
@@ -29,10 +30,11 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     public LoadingGameScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
+        IDialogController dialogController,
         IInterfaceProvider interfaceProvider,
         IGameController gameController,
         ITextProvider textProvider
-        ) : base(gameObjectContainer, sceneObjectContainer)
+        ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _interfaceProvider = interfaceProvider;

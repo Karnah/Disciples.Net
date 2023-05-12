@@ -43,9 +43,6 @@ public class AnimationObject : GameObject
     public bool Repeat { get; }
 
     /// <inheritdoc />
-    public override bool IsInteractive => false;
-
-    /// <inheritdoc />
     public override void Update(long ticksCount)
     {
         // Если анимация не зациклена, то объект уничтожает сам себя.
