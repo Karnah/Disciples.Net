@@ -1,8 +1,14 @@
 {
+  "SagaName": "Units with immunities and wards",
+  "SagaDescription": null,
+  "SagaType": 0,
+  "TurnNumber": 1,
+  "DifficultyLevel": 3,
   "Players": [
     {
       "Id": 1,
       "IsComputer": false,
+      "Race": 0,
       "Squads": [
         {
           "Units": [
@@ -38,7 +44,7 @@
               "Experience": 0,
               "HitPoints": 100,
               "IsDead": false
-            },
+            }
           ]
         }
       ]
@@ -46,6 +52,7 @@
     {
       "Id": 2,
       "IsComputer": true,
+      "Race": 1,
       "Squads": [
         {
           "Units": [
@@ -96,6 +103,18 @@
           ]
         }
       ]
+    },
+    {
+      "Id": 3,
+      "IsComputer": true,
+      "Race": 2,
+      "Squads": []
+    },
+    {
+      "Id": 4,
+      "IsComputer": true,
+      "Race": 3,
+      "Squads": []
     }
   ]
 }

@@ -1,8 +1,14 @@
 {
+  "SagaName": "Units with poison, frostbite and blister attacks",
+  "SagaDescription": "Test",
+  "SagaType": 0,
+  "TurnNumber": 1,
+  "DifficultyLevel": 0,
   "Players": [
     {
       "Id": 1,
       "IsComputer": false,
+      "Race": 5,
       "Squads": [
         {
           "Units": [
@@ -49,7 +55,7 @@
               "Experience": 0,
               "HitPoints": 418,
               "IsDead": false
-            },
+            }
           ]
         }
       ]
@@ -57,6 +63,7 @@
     {
       "Id": 2,
       "IsComputer": true,
+      "Race": 4,
       "Squads": [
         {
           "Units": [

@@ -10,7 +10,7 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class UnitBattleAction : ComplexBattleAction
 {
     /// <summary>
-    /// Продолжительность воздействия
+    /// Продолжительность воздействия.
     /// </summary>
     private const int TOUCH_UNIT_ACTION_DURATION = 1000;
 

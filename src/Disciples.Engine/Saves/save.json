@@ -1,8 +1,14 @@
 {
+  "SagaName": "Common battle",
+  "SagaDescription": null,
+  "SagaType": 0,
+  "TurnNumber": 1,
+  "DifficultyLevel": 2,
   "Players": [
     {
       "Id": 1,
       "IsComputer": false,
+      "Race": 0,
       "Squads": [
         {
           "Units": [
@@ -79,6 +85,7 @@
     {
       "Id": 2,
       "IsComputer": true,
+      "Race": 3,
       "Squads": [
         {
           "Units": [

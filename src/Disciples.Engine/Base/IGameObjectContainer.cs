@@ -35,7 +35,7 @@ public interface IGameObjectContainer
     /// <param name="y">Положение кнопки, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
     /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ButtonObject AddButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+    ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
     /// <summary>
     /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
@@ -46,7 +46,7 @@ public interface IGameObjectContainer
     /// <param name="y">Положение кнопки, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
     /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ToggleButtonObject AddToggleButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+    ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
     /// <summary>
     /// Добавить игровой объект.

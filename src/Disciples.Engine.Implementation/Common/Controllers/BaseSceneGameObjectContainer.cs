@@ -38,14 +38,14 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public ButtonObject AddButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
+    public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
         KeyboardButton? hotkey = null)
     {
         return GameObjectContainer.AddButton(buttonStates, buttonPressedAction, x, y, layer, hotkey);
     }
 
     /// <inheritdoc />
-    public ToggleButtonObject AddToggleButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
+    public ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
         KeyboardButton? hotkey = null)
     {
         return GameObjectContainer.AddToggleButton(buttonStates, buttonPressedAction, x, y, layer, hotkey);

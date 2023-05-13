@@ -119,28 +119,28 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     public IBitmap UnitPortraitDefendIcon { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
+    public IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
 
 
     #region Buttons
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; } = null!;
 
     /// <inheritdoc />
-    public IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; } = null!;
 
 
     /// <summary>
@@ -148,7 +148,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// </summary>
     /// <param name="battleIcons">Иконки битвы.</param>
     /// <param name="buttonName">Имя кнопки.</param>
-    private static IDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> battleIcons, string buttonName)
+    private static IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> battleIcons, string buttonName)
     {
         return new Dictionary<SceneButtonState, IBitmap>
         {

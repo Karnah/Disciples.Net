@@ -15,7 +15,7 @@ public class ToggleButtonObject : ButtonObject
     /// </summary>
     public ToggleButtonObject(
         ISceneObjectContainer sceneObjectContainer,
-        IDictionary<SceneButtonState, IBitmap> buttonStates,
+        IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates,
         Action buttonPressedAction,
         double x,
         double y,

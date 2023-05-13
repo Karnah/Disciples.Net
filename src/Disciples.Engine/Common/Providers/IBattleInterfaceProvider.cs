@@ -75,38 +75,38 @@ public interface IBattleInterfaceProvider : ISupportLoading
     /// <summary>
     /// Иконки для эффектов, воздействующих на юнита.
     /// </summary>
-    IDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; }
+    IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; }
 
 
     /// <summary>
     /// Иконки для кнопки переключения правой панели юнитов.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; }
 
     /// <summary>
     /// Иконки для кнопки защиты.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> DefendButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> DefendButton { get; }
 
     /// <summary>
     /// Иконки для кнопки отступления.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> RetreatButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> RetreatButton { get; }
 
     /// <summary>
     /// Иконки для кнопки ожидания.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> WaitButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> WaitButton { get; }
 
     /// <summary>
     /// Иконки для мгновенного завершения битвы.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; }
 
     /// <summary>
     /// Иконки для автоматической битвы.
     /// </summary>
-    IDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; }
+    IReadOnlyDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; }
 
 
     /// <summary>

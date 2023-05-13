@@ -14,7 +14,7 @@ namespace Disciples.Engine.Common.GameObjects;
 public class ButtonObject : GameObject
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
-    private readonly IDictionary<SceneButtonState, IBitmap> _buttonStates;
+    private readonly IReadOnlyDictionary<SceneButtonState, IBitmap> _buttonStates;
     private readonly Action _buttonPressedAction;
 
     private IImageSceneObject _buttonVisualObject = null!;
@@ -24,7 +24,7 @@ public class ButtonObject : GameObject
     /// </summary>
     public ButtonObject(
         ISceneObjectContainer sceneObjectContainer,
-        IDictionary<SceneButtonState, IBitmap> buttonStates,
+        IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates,
         Action buttonPressedAction,
         double x,
         double y,

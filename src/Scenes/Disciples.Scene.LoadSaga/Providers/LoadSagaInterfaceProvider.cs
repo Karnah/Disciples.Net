@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
@@ -34,22 +35,27 @@ internal class LoadSagaInterfaceProvider : BaseSupportLoading
     /// <summary>
     /// Кнопка для возврата назад.
     /// </summary>
-    public IDictionary<SceneButtonState, IBitmap> GoBackButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> GoBackButton { get; private set; } = null!;
 
     /// <summary>
     /// Кнопка для выбора файла сохранения.
     /// </summary>
-    public IDictionary<SceneButtonState, IBitmap> SelectSaveButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> SelectSaveButton { get; private set; } = null!;
 
     /// <summary>
     /// Кнопка для перемещения наверх.
     /// </summary>
-    public IDictionary<SceneButtonState, IBitmap> SaveUpButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> SaveUpButton { get; private set; } = null!;
 
     /// <summary>
     /// Кнопка для перемещения вниз.
     /// </summary>
-    public IDictionary<SceneButtonState, IBitmap> SaveDownButton { get; private set; } = null!;
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> SaveDownButton { get; private set; } = null!;
+
+    /// <summary>
+    /// Картинки рас.
+    /// </summary>
+    public IReadOnlyDictionary<RaceType, IBitmap> Races { get; private set; } = null!;
 
     /// <inheritdoc />
     protected override void LoadInternal()
@@ -64,6 +70,16 @@ internal class LoadSagaInterfaceProvider : BaseSupportLoading
         SaveDownButton = GetButtonBitmaps("_MENU_ARROW_DOWN");
 
         FireflyAnimation = _interfaceProvider.GetAnimation("_FIREFLY");
+
+        var races = _interfaceProvider.GetImageParts("GODFACES.PNG");
+        Races = new Dictionary<RaceType, IBitmap>
+        {
+            { RaceType.Human, races["GODHU"] },
+            { RaceType.Undead, races["GODUN"] },
+            { RaceType.Heretic, races["GODHE"] },
+            { RaceType.Dwarf, races["GODDW"] },
+            { RaceType.Elf, races["GODEL"] },
+        };
     }
 
     /// <inheritdoc />
@@ -76,7 +92,7 @@ internal class LoadSagaInterfaceProvider : BaseSupportLoading
     /// </summary>
     /// <param name="images">Изображения.</param>
     /// <param name="buttonName">Имя кнопки.</param>
-    private static IDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> images, string buttonName)
+    private static IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> images, string buttonName)
     {
         return new Dictionary<SceneButtonState, IBitmap>
         {
@@ -91,7 +107,7 @@ internal class LoadSagaInterfaceProvider : BaseSupportLoading
     /// Получить словарь с изображениями кнопки для каждого её состояния.
     /// </summary>
     /// <param name="buttonName">Имя кнопки.</param>
-    private IDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(string buttonName)
+    private IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(string buttonName)
     {
         return new Dictionary<SceneButtonState, IBitmap>
         {

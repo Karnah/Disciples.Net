@@ -42,7 +42,7 @@
 
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
-                    <Image Stretch="Fill"
+                    <Image Stretch="Fill" RenderOptions.BitmapInterpolationMode="HighQuality"
                            Source="{Binding Bitmap.BitmapData}"
                            Width="{Binding Width}"
                            Height="{Binding Height}"

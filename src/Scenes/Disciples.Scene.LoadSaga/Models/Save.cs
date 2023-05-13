@@ -1,4 +1,6 @@
-﻿namespace Disciples.Scene.LoadSaga.Models;
+﻿using Disciples.Engine.Common;
+
+namespace Disciples.Scene.LoadSaga.Models;
 
 /// <summary>
 /// Сохранённая игра пользователя.
@@ -14,4 +16,12 @@ internal class Save
     /// Путь до сейва.
     /// </summary>
     public string Path { get; init; } = null!;
+
+    /// <summary>
+    /// Данные игры.
+    /// </summary>
+    /// <remarks>
+    /// TODO Использовать более лёгкую модель.
+    /// </remarks>
+    public GameContext GameContext { get; init; } = null!;
 }

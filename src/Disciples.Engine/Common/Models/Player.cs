@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -16,6 +17,11 @@ public class Player
     /// Управляется ли игрок компьютером (ИИ).
     /// </summary>
     public bool IsComputer { get; init; }
+
+    /// <summary>
+    /// Раса игрока.
+    /// </summary>
+    public RaceType Race { get; init; }
 
     /// <summary>
     /// Отряды игрока.

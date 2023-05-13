@@ -1,8 +1,14 @@
 {
+  "SagaName": "Units with paralyze and petrify attacks",
+  "SagaDescription": null,
+  "SagaType": 1,
+  "TurnNumber": 10,
+  "DifficultyLevel": 1,
   "Players": [
     {
       "Id": 1,
       "IsComputer": false,
+      "Race": 1,
       "Squads": [
         {
           "Units": [
@@ -38,7 +44,7 @@
               "Experience": 0,
               "HitPoints": 320,
               "IsDead": false
-            },
+            }
           ]
         }
       ]
@@ -46,6 +52,7 @@
     {
       "Id": 2,
       "IsComputer": true,
+      "Race": 2,
       "Squads": [
         {
           "Units": [
