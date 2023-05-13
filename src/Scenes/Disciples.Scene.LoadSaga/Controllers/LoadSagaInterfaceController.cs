@@ -1,13 +1,12 @@
 ﻿using System.Drawing;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
-using Disciples.Scene.LoadSaga.Models;
+using Disciples.Scene.LoadSaga.GameObjects;
 using Disciples.Scene.LoadSaga.Providers;
 
 namespace Disciples.Scene.LoadSaga.Controllers;
@@ -17,14 +16,13 @@ namespace Disciples.Scene.LoadSaga.Controllers;
 /// </summary>
 internal class LoadSagaInterfaceController : BaseSupportLoading
 {
-    private readonly IGameObjectContainer _gameObjectContainer;
+    private readonly LoadSagaGameObjectContainer _gameObjectContainer;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly LoadSagaInterfaceProvider _interfaceProvider;
     private readonly SaveProvider _saveProvider;
     private readonly IGameController _gameController;
 
-    private IReadOnlyList<Save> _saves = null!;
-    private List<ITextSceneObject> _saveObjects = null!;
+    private List<SagaSaveObject> _sagaSaves = null!;
     private int? _selectedSaveIndex;
     private IImageSceneObject? _saveSelection = null;
 
@@ -37,7 +35,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// Создать объект типа <see cref="LoadSagaInterfaceController" />.
     /// </summary>
     public LoadSagaInterfaceController(
-        IGameObjectContainer gameObjectContainer,
+        LoadSagaGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         LoadSagaInterfaceProvider interfaceProvider,
         SaveProvider saveProvider,
@@ -64,6 +62,23 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     {
     }
 
+    /// <summary>
+    /// Обработать нажатие на файл сейва.
+    /// </summary>
+    public void OnSaveLeftMouseButtonPressed(SagaSaveObject sagaSave)
+    {
+        _selectedSaveIndex = _sagaSaves.IndexOf(sagaSave);
+        UpdateSelectedSave();
+    }
+
+    /// <summary>
+    /// Обработать двойной клик на файле с сейвом.
+    /// </summary>
+    public void OnSaveLeftMouseButtonDoubleClicked(SagaSaveObject sagaSave)
+    {
+        LoadSave(sagaSave);
+    }
+
     /// <inheritdoc />
     protected override void LoadInternal()
     {
@@ -74,30 +89,22 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             321,
             1);
 
-        _saves = _saveProvider.GetSaves();
-        _saveObjects = new List<ITextSceneObject>(_saves.Count);
-        if (_saves.Count > 0)
+        var saves = _saveProvider.GetSaves();
+        var sagaSaves = new List<SagaSaveObject>(saves.Count);
+        for (int saveIndex = 0; saveIndex < saves.Count; saveIndex++)
         {
+            var saveObject = _gameObjectContainer.AddSave(
+                saves[saveIndex],
+                550,
+                22 + saveIndex * 18);
+            sagaSaves.Add(saveObject);
+        }
+
+        _sagaSaves = sagaSaves;
+
+        if (_sagaSaves.Count > 0)
             _selectedSaveIndex = 0;
 
-            var saveIndex = 0;
-            foreach (var save in _saves)
-            {
-                var saveObject = _sceneObjectContainer.AddText(
-                    save.Name,
-                    12,
-                    550,
-                    22 + saveIndex * 18,
-                    2,
-                    300,
-                    TextAlignment.Left,
-                    false,
-                    foregroundColor: GameColors.Black);
-                _saveObjects.Add(saveObject);
-
-                saveIndex++;
-            }
-        }
 
         _goBackButton = _gameObjectContainer.AddButton(
             _interfaceProvider.GoBackButton,
@@ -110,15 +117,15 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             _interfaceProvider.SelectSaveButton,
             () =>
             {
-                var save = _saves[_selectedSaveIndex!.Value];
-                _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
-                    new LoadingSaveSceneParameters(save.Path));
+                var sagaSave = _sagaSaves[_selectedSaveIndex!.Value];
+                LoadSave(sagaSave);
             },
             730,
             553,
             1,
             KeyboardButton.Enter);
 
+        // TODO Эти кнопки должны быть типа RepeatButton.
         _saveUpButton = _gameObjectContainer.AddButton(
             _interfaceProvider.SaveUpButton,
             () =>
@@ -152,6 +159,15 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     }
 
     /// <summary>
+    /// Загрузить сейв.
+    /// </summary>
+    private void LoadSave(SagaSaveObject sagaSave)
+    {
+        _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
+            new LoadingSaveSceneParameters(sagaSave.Save.Path));
+    }
+
+    /// <summary>
     /// Обновить выбранный сейв-файл.
     /// </summary>
     private void UpdateSelectedSave()
@@ -181,7 +197,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         else
             _saveUpButton.SetDisabled();
 
-        if (_selectedSaveIndex != _saveObjects.Count - 1)
+        if (_selectedSaveIndex != _sagaSaves.Count - 1)
             _saveDownButton.SetActive();
         else
             _saveDownButton.SetDisabled();

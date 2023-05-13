@@ -19,6 +19,7 @@ public class LoadSagaSceneModule : IGameModule
         containerRegistrator.Register<LoadSagaInterfaceProvider>(loadingScopeReuse);
         containerRegistrator.Register<LoadSagaInterfaceController>(loadingScopeReuse);
         containerRegistrator.Register<LoadSagaSoundController>(loadingScopeReuse);
+        containerRegistrator.Register<LoadSagaGameObjectContainer>(loadingScopeReuse);
         containerRegistrator.Register<SaveProvider>(loadingScopeReuse);
     }
 }

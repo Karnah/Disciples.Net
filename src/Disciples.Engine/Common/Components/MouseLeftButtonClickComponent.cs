@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
@@ -11,6 +12,13 @@ namespace Disciples.Engine.Common.Components;
 /// </summary>
 public class MouseLeftButtonClickComponent : BaseComponent
 {
+    /// <summary>
+    /// Время между двумя кликами, чтобы это отработало как двойной клик.
+    /// </summary>
+    private const int DOUBLE_CLICK_TIME_MS = 300;
+
+    private readonly Stopwatch _lastClickStopwatch = Stopwatch.StartNew();
+
     private readonly Action? _onPressedAction;
     private readonly Action? _onClickedAction;
     private readonly Action? _onDoubleClickedAction;
@@ -61,15 +69,17 @@ public class MouseLeftButtonClickComponent : BaseComponent
             return;
 
         IsPressed = false;
-        _onClickedAction?.Invoke();
-    }
 
-    /// <summary>
-    /// Обработать двойной клик указателя над объектом.
-    /// </summary>
-    public void DoubleClicked()
-    {
-        _onDoubleClickedAction?.Invoke();
+        if (_lastClickStopwatch.ElapsedMilliseconds < DOUBLE_CLICK_TIME_MS && _onDoubleClickedAction != null)
+        {
+            _onDoubleClickedAction.Invoke();
+        }
+        else
+        {
+            _onClickedAction?.Invoke();
+        }
+
+        _lastClickStopwatch.Restart();
     }
 
     /// <summary>

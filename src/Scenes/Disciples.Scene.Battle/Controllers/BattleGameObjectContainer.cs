@@ -1,18 +1,15 @@
-﻿using Disciples.Engine;
-using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Common.GameObjects;
+﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
 /// <inheritdoc cref="IBattleGameObjectContainer" />
-internal class BattleGameObjectContainer : IBattleGameObjectContainer
+internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattleGameObjectContainer
 {
-    private readonly IGameObjectContainer _gameObjectContainer;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
@@ -25,9 +22,8 @@ internal class BattleGameObjectContainer : IBattleGameObjectContainer
         IBattleUnitResourceProvider battleUnitResourceProvider,
         IBattleInterfaceProvider battleInterfaceProvider,
         ITextProvider textProvider,
-        Lazy<IBattleInterfaceController> battleInterfaceController)
+        Lazy<IBattleInterfaceController> battleInterfaceController) : base(gameObjectContainer)
     {
-        _gameObjectContainer = gameObjectContainer;
         _sceneObjectContainer = sceneObjectContainer;
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _battleInterfaceProvider = battleInterfaceProvider;
@@ -72,43 +68,4 @@ internal class BattleGameObjectContainer : IBattleGameObjectContainer
         var detailUnitInfoObject = new DetailUnitInfoObject(_sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider, _textProvider, unit);
         return AddObject(detailUnitInfoObject);
     }
-
-    #region IGameObjectContainer
-
-    /// <inheritdoc />
-    public IReadOnlyCollection<GameObject> GameObjects => _gameObjectContainer.GameObjects;
-
-    /// <inheritdoc />
-    public AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
-    {
-        return _gameObjectContainer.AddAnimation(frames, x, y, layer, repeat);
-    }
-
-    /// <inheritdoc />
-    public ButtonObject AddButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
-        KeyboardButton? hotkey = null)
-    {
-        return _gameObjectContainer.AddButton(buttonStates, buttonPressedAction, x, y, layer, hotkey);
-    }
-
-    /// <inheritdoc />
-    public ToggleButtonObject AddToggleButton(IDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
-        KeyboardButton? hotkey = null)
-    {
-        return _gameObjectContainer.AddToggleButton(buttonStates, buttonPressedAction, x, y, layer, hotkey);
-    }
-
-    /// <inheritdoc />
-    public TGameObject AddObject<TGameObject>(TGameObject gameObject) where TGameObject : GameObject
-    {
-        return _gameObjectContainer.AddObject(gameObject);
-    }
-
-    /// <inheritdoc />
-    public void UpdateGameObjects(long ticksCount)
-    {
-        _gameObjectContainer.UpdateGameObjects(ticksCount);
-    }
-
-    #endregion
 }
