@@ -75,6 +75,6 @@ internal class BattleUnitInfoGameObject : GameObject
     private static string GetUnitNameAndHitPoints(Unit unit)
     {
         return $"{unit.UnitType.Name}{Environment.NewLine}" +
-               $"ОЗ : {unit.HitPoints}/{unit.UnitType.HitPoints}";
+               $"ОЗ : {unit.HitPoints}/{unit.MaxHitPoints}";
     }
 }

@@ -96,6 +96,15 @@ public class GameController : IGameController
         _gameTimer.TimerTick -= UpdateScene;
     }
 
+    /// <summary>
+    /// Выйти из игры.
+    /// </summary>
+    public void Exit()
+    {
+        Stop();
+        Environment.Exit(0);
+    }
+
     /// <inheritdoc />
     public GameContext LoadGame(string savePath)
     {

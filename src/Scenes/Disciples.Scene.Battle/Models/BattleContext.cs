@@ -78,6 +78,11 @@ internal class BattleContext : BaseSupportLoading
     public bool IsAutoBattle { get; set; }
 
     /// <summary>
+    /// Признак, что битву необходимо завершить в автоматическом режиме.
+    /// </summary>
+    public bool IsInstantBattle { get; set; }
+
+    /// <summary>
     /// Отряд, который победил в битве.
     /// </summary>
     public BattleSquadPosition? BattleWinnerSquad { get; private set; }
@@ -216,7 +221,7 @@ internal class BattleContext : BaseSupportLoading
             BattleState.WaitPlayerTurn => BattleState.WaitPlayerTurn,
             BattleState.BeginUnitAction => BattleState.ProcessingUnitAction,
             BattleState.ProcessingUnitAction => BattleState.ProcessingUnitAction,
-            BattleState.CompletedUnitAction => BattleState.ProcessingUnitAction,
+            BattleState.CompletedUnitAction => BattleState.WaitPlayerTurn,
             BattleState.CompletedBattle => BattleState.WaitExit,
             BattleState.WaitExit => BattleState.WaitExit,
             _ => throw new ArgumentOutOfRangeException(nameof(currentBattleState), currentBattleState, null)

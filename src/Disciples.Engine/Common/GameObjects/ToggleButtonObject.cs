@@ -20,8 +20,8 @@ public class ToggleButtonObject : ButtonObject
         double x,
         double y,
         int layer,
-        KeyboardButton? hotkey = null)
-        : base(sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotkey)
+        IReadOnlyList<KeyboardButton> hotKeys)
+        : base(sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotKeys)
     {
         IsChecked = false;
     }
@@ -62,11 +62,14 @@ public class ToggleButtonObject : ButtonObject
     }
 
     /// <inheritdoc />
-    protected override void ProcessClickInternal()
+    protected override SceneButtonState ProcessClickInternal()
     {
-        SetState(!IsChecked);
+        IsChecked = !IsChecked;
 
-        base.ProcessClickInternal();
+        var buttonState = base.ProcessClickInternal();
+        return IsChecked
+            ? SceneButtonState.Pressed
+            : buttonState;
     }
 
     /// <summary>

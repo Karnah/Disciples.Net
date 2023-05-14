@@ -38,14 +38,21 @@ public class GameObjectContainer : IGameObjectContainer
     /// <inheritdoc />
     public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
     {
-        var button = new ButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotkey);
+        return AddButton(buttonStates, buttonPressedAction, x, y, layer, hotkey == null ? Array.Empty<KeyboardButton>() : new []{ hotkey.Value });
+    }
+
+    /// <inheritdoc />
+    public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, IReadOnlyList<KeyboardButton> hotKeys)
+    {
+        var button = new ButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotKeys);
         return AddObject(button);
     }
 
     /// <inheritdoc />
     public ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
     {
-        var toggleButton = new ToggleButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotkey);
+        var toggleButton = new ToggleButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer,
+            hotkey == null ? Array.Empty<KeyboardButton>() : new []{ hotkey.Value });
         return AddObject(toggleButton);
     }
 

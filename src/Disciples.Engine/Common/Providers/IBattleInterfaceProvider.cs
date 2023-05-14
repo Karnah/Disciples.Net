@@ -108,6 +108,16 @@ public interface IBattleInterfaceProvider : ISupportLoading
     /// </summary>
     IReadOnlyDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; }
 
+    /// <summary>
+    /// Иконки для выхода из битвы и отображения интерфейса отряда.
+    /// </summary>
+    IReadOnlyDictionary<SceneButtonState, IBitmap> OpenSquadInventoryButton { get; }
+
+    /// <summary>
+    /// Иконки для выхода из битвы.
+    /// </summary>
+    IReadOnlyDictionary<SceneButtonState, IBitmap> ExitButton { get; }
+
 
     /// <summary>
     /// Получить анимацию рамки для юнита, которого можно атаковать.

@@ -6,6 +6,7 @@ using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
@@ -29,7 +30,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly LoadSagaInterfaceProvider _interfaceProvider;
     private readonly SaveProvider _saveProvider;
-    private readonly IGameController _gameController;
+    private readonly GameController _gameController;
     private readonly ITextProvider _textProvider;
 
     private List<SagaSaveObject> _sagaSaves = null!;
@@ -53,7 +54,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         ISceneObjectContainer sceneObjectContainer,
         LoadSagaInterfaceProvider interfaceProvider,
         SaveProvider saveProvider,
-        IGameController gameController,
+        GameController gameController,
         ITextProvider textProvider)
     {
         _gameObjectContainer = gameObjectContainer;
@@ -124,11 +125,12 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
 
         _goBackButton = _gameObjectContainer.AddButton(
             _interfaceProvider.GoBackButton,
-            () => { },
+            () => { _gameController.Exit(); },
             382,
             553,
             1,
             KeyboardButton.Escape);
+        _goBackButton.SetActive();
         _selectSaveButton = _gameObjectContainer.AddButton(
             _interfaceProvider.SelectSaveButton,
             () =>
@@ -285,7 +287,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             107);
         _saveSagaName = _sceneObjectContainer.AddText(
             save.GameContext.SagaName,
-            14,
+            12,
             420,
             475,
             2,

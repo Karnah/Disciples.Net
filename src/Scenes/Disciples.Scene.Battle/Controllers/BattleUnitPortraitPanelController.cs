@@ -8,6 +8,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -19,11 +20,6 @@ namespace Disciples.Scene.Battle.Controllers;
 /// </summary>
 internal class BattleUnitPortraitPanelController : BaseSupportLoading
 {
-    /// <summary>
-    /// Слой для расположения интерфейса.
-    /// </summary>
-    private const int INTERFACE_LAYER = 1000;
-
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly BattleContext _context;
@@ -176,7 +172,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             ? new Point(633, 402)
             : new Point(142, 402);
         _reflectPanelButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.ToggleRightButton,
-            ReflectUnitsPanel, buttonPosition.X, buttonPosition.Y, INTERFACE_LAYER + 2, KeyboardButton.Tab);
+            ReflectUnitsPanel, buttonPosition.X, buttonPosition.Y, BattleLayers.INTERFACE_LAYER, KeyboardButton.Tab);
     }
 
     /// <inheritdoc />
@@ -283,7 +279,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             var xPosition = isRightPanel
                 ? GameInfo.OriginalWidth - bitmap.Width
                 : 0;
-            var panelImage = _sceneObjectContainer.AddImage(bitmap, xPosition, 30, INTERFACE_LAYER);
+            var panelImage = _sceneObjectContainer.AddImage(bitmap, xPosition, 30, BattleLayers.PANEL_LAYER);
 
             panel.PanelImage = panelImage;
         }
@@ -383,7 +379,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                     _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.IsSmall),
                     position.X,
                     position.Y,
-                    INTERFACE_LAYER + 3));
+                    BattleLayers.INTERFACE_ANIMATION_LAYER));
         }
 
         // Если юнит бьёт по площади и цель юнита - отображаемый отряд, то добавляем одну большую рамку.
@@ -399,7 +395,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                         : _interfaceProvider.GetFieldAttackBorder(),
                     position.X,
                     position.Y,
-                    INTERFACE_LAYER + 3));
+                    BattleLayers.INTERFACE_ANIMATION_LAYER));
         }
         // Иначе добавляем рамку только тем юнитам, которых можно атаковать.
         else
@@ -418,7 +414,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                             : _interfaceProvider.GetUnitAttackBorder(targetBattleUnit.Unit.UnitType.IsSmall),
                         position.X,
                         position.Y,
-                        INTERFACE_LAYER + 3));
+                        BattleLayers.INTERFACE_ANIMATION_LAYER));
             }
         }
 

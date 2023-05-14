@@ -3,6 +3,7 @@ using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -119,7 +120,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
             : 3 - (int)battleUnit.Unit.SquadLinePosition;
         var flankPosition = 2 - (int)battleUnit.Unit.SquadFlankPosition;
 
-        return battleLine * 100 + flankPosition * 10 + 5;
+        return BattleLayers.UNIT_BASE_LAYER + battleLine * 100 + flankPosition * 10;
     }
 
     /// <summary>

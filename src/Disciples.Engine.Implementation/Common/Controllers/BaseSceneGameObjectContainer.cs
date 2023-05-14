@@ -45,6 +45,13 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
+    public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
+        IReadOnlyList<KeyboardButton> hotKeys)
+    {
+        return GameObjectContainer.AddButton(buttonStates, buttonPressedAction, x, y, layer, hotKeys);
+    }
+
+    /// <inheritdoc />
     public ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer,
         KeyboardButton? hotkey = null)
     {

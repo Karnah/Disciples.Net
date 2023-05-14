@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Enums;
@@ -29,8 +28,8 @@ public class ButtonObject : GameObject
         double x,
         double y,
         int layer,
-        KeyboardButton? hotkey = null
-    ) : base(x, y)
+        IReadOnlyList<KeyboardButton> hotKeys
+        ) : base(x, y)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _buttonStates = buttonStates;
@@ -43,9 +42,6 @@ public class ButtonObject : GameObject
         Width = bitmap.Width;
         Height = bitmap.Height;
 
-        var hotKeys = hotkey == null
-            ? Array.Empty<KeyboardButton>()
-            : new[] { hotkey.Value };
         Components = new IComponent[]
         {
             new SelectionComponent(this, OnSelected, OnUnselected),
@@ -137,16 +133,20 @@ public class ButtonObject : GameObject
         if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        ProcessClickInternal();
-        UpdateButtonVisualObject();
+        var newButtonState = ProcessClickInternal();
+        SetState(newButtonState);
     }
 
     /// <summary>
     /// Обработать событие нажатия на кнопку.
     /// </summary>
-    protected virtual void ProcessClickInternal()
+    protected virtual SceneButtonState ProcessClickInternal()
     {
         _buttonPressedAction.Invoke();
+
+        return SelectionComponent!.IsSelected
+            ? SceneButtonState.Selected
+            : SceneButtonState.Active;
     }
 
     /// <summary>

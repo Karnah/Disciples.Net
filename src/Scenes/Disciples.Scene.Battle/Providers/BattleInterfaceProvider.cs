@@ -78,6 +78,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         WaitButton = GetButtonBitmaps(battleIcons, "WAIT");
         InstantResolveButton = GetButtonBitmaps(battleIcons, "INSTANTRESOLVE");
         AutoBattleButton = GetButtonBitmaps(battleIcons, "AUTOB");
+        OpenSquadInventoryButton = GetButtonBitmaps(battleIcons, "MANAGESTACK");
+        ExitButton = GetButtonBitmaps(battleIcons, "RETURN");
     }
 
 
@@ -142,6 +144,11 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// <inheritdoc />
     public IReadOnlyDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; } = null!;
 
+    /// <inheritdoc />
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> OpenSquadInventoryButton { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<SceneButtonState, IBitmap> ExitButton { get; private set; } = null!;
 
     /// <summary>
     /// Получить словарь с изображениями кнопки для каждого её состояния.
@@ -150,12 +157,18 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// <param name="buttonName">Имя кнопки.</param>
     private static IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> battleIcons, string buttonName)
     {
+        // Для некоторых иконок не предусмотрен заблокированный вариант, поэтому используем TryGetValue.
+        battleIcons.TryGetValue($"DLG_BATTLE_A_{buttonName}_D", out var disabledState);
+        var activeState = battleIcons[$"DLG_BATTLE_A_{buttonName}_N"];
+        var selectedState = battleIcons[$"DLG_BATTLE_A_{buttonName}_H"];
+        var pressedState = battleIcons[$"DLG_BATTLE_A_{buttonName}_C"];
+
         return new Dictionary<SceneButtonState, IBitmap>
         {
-            { SceneButtonState.Disabled, battleIcons[$"DLG_BATTLE_A_{buttonName}_D"] },
-            { SceneButtonState.Active, battleIcons[$"DLG_BATTLE_A_{buttonName}_N"] },
-            { SceneButtonState.Selected, battleIcons[$"DLG_BATTLE_A_{buttonName}_H"] },
-            { SceneButtonState.Pressed, battleIcons[$"DLG_BATTLE_A_{buttonName}_C"] }
+            { SceneButtonState.Disabled, disabledState ?? activeState },
+            { SceneButtonState.Active, activeState },
+            { SceneButtonState.Selected, selectedState },
+            { SceneButtonState.Pressed, pressedState }
         };
     }
 

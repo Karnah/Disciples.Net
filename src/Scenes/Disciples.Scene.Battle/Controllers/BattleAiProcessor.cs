@@ -37,6 +37,45 @@ internal class BattleAiProcessor
     }
 
     /// <summary>
+    /// Быстрое завершение битвы
+    /// </summary>
+    /// <remarks>
+    /// TODO Просто оставляем всех атакующих юнитов с 1 ХП.
+    /// Нужно использовать последовательные выводы GetAiCommand и обработки атак/результатов.
+    /// Плюс получать очередность ходов в качестве параметра.
+    ///
+    /// TODO Также не очень хорошо, что меняется Unit напрямую. Хотя, может и норм.
+    /// </remarks>
+    /// <returns>Победивший отряд в битве.</returns>
+    public Squad ProcessInstantBattle(Squad attackingSquad, Squad defendingSquad)
+    {
+        if (attackingSquad.Units.All(u => u.IsDead))
+            return defendingSquad;
+
+        if (defendingSquad.Units.All(u => u.IsDead))
+            return attackingSquad;
+
+        foreach (var attackingSquadUnit in attackingSquad.Units)
+        {
+            if (attackingSquadUnit.IsDead)
+                continue;
+
+            attackingSquadUnit.HitPoints = 1;
+        }
+
+        foreach (var defendingSquadUnit in defendingSquad.Units)
+        {
+            if (defendingSquadUnit.IsDead)
+                continue;
+
+            defendingSquadUnit.HitPoints = 0;
+            defendingSquadUnit.IsDead = true;
+        }
+
+        return attackingSquad;
+    }
+
+    /// <summary>
     /// Получить команду для использования на союзниках.
     /// </summary>
     /// <param name="attackingUnit">Атакующий юнит.</param>

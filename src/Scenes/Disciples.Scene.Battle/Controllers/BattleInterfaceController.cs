@@ -1,6 +1,5 @@
 ﻿using Disciples.Engine;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -8,6 +7,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
@@ -20,11 +20,6 @@ namespace Disciples.Scene.Battle.Controllers;
 /// <inheritdoc cref="IBattleInterfaceController" />
 internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceController
 {
-    /// <summary>
-    /// Слой для расположения интерфейса.
-    /// </summary>
-    private const int INTERFACE_LAYER = 1000;
-
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly IBattleResourceProvider _battleResourceProvider;
@@ -35,6 +30,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly BattleUnitActionController _unitActionController;
     private readonly BattleDialogController _dialogController;
+    private readonly BattleBottomPanelController _bottomPanelController;
 
     private IImageSceneObject _currentUnitFace = null!;
     private BattleUnitInfoGameObject _currentUnitTextInfoObject = null!;
@@ -60,12 +56,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private bool _shouldAnimateTargets;
 
-    private ButtonObject? _defendButton;
-    private ButtonObject? _retreatButton;
-    private ButtonObject? _waitButton;
-    private ButtonObject? _instantResolveButton;
-    private ToggleButtonObject? _autoBattleButton;
-
     /// <summary>
     /// Создать объект типа <see cref="BattleInterfaceController" />.
     /// </summary>
@@ -79,7 +69,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         ISceneObjectContainer sceneObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleUnitActionController unitActionController,
-        BattleDialogController dialogController)
+        BattleDialogController dialogController,
+        BattleBottomPanelController bottomPanelController)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
@@ -91,32 +82,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _unitPortraitPanelController = unitPortraitPanelController;
         _unitActionController = unitActionController;
         _dialogController = dialogController;
+        _bottomPanelController = bottomPanelController;
     }
 
     /// <summary>
     ///  Юнит, который выполняет свой ход.
     /// </summary>
     private BattleUnit CurrentBattleUnit => _context.CurrentBattleUnit;
-
-    /// <summary>
-    /// Признак того, что юнит атакует второй раз за текущий ход.
-    /// </summary>
-    /// <remarks>Актуально только для юнитов, которые бьют дважды за ход.</remarks>
-    private bool IsSecondAttack => _context.IsSecondAttack;
-
-    /// <summary>
-    /// Признак, что ходит юнит, который "ждал" в этом раунде.
-    /// </summary>
-    private bool IsWaitingUnitTurn => _context.IsWaitingUnitTurn;
-
-    /// <summary>
-    /// Признак, что битва проходит в автоматическом режиме.
-    /// </summary>
-    private bool IsAutoBattle
-    {
-        get => _context.IsAutoBattle;
-        set => _context.IsAutoBattle = value;
-    }
 
     /// <summary>
     /// Список юнитов.
@@ -206,9 +178,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     protected override void LoadInternal()
     {
         InitializeMainInterface();
-        InitializeButtons();
 
         _unitPortraitPanelController.Load();
+        _bottomPanelController.Load();
 
         // Проверяем, если первый ход ИИ.
         _isAnimating = _context.BattleState != BattleState.WaitPlayerTurn;
@@ -226,8 +198,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     protected override void UnloadInternal()
     {
         _unitPortraitPanelController.Unload();
-
-        // todo Зачистить все элементы интерфейса.
+        _bottomPanelController.Unload();
     }
 
     /// <summary>
@@ -236,18 +207,16 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private void InitializeMainInterface()
     {
         foreach (var battleground in _interfaceProvider.Battleground)
-            _sceneObjectContainer.AddImage(battleground, 0, 0, 0);
-
-        _sceneObjectContainer.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, 1);
+            _sceneObjectContainer.AddImage(battleground, 0, 0, BattleLayers.BACKGROUND_LAYER);
 
         var currentUnitBattleFace = _battleUnitResourceProvider.GetUnitBattleFace(CurrentBattleUnit.Unit.UnitType);
         _currentUnitFace = _sceneObjectContainer.AddImage(
             currentUnitBattleFace,
             0,
             GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
-            INTERFACE_LAYER + 1);
+            BattleLayers.INTERFACE_LAYER);
 
-        _currentUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(190, 520, INTERFACE_LAYER + 1);
+        _currentUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(190, 520, BattleLayers.INTERFACE_LAYER);
         _currentUnitTextInfoObject.Unit = CurrentBattleUnit.Unit;
 
 
@@ -258,48 +227,12 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             currentUnitBattleFace.Height,
             GameInfo.OriginalWidth - currentUnitBattleFace.Width,
             GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
-            INTERFACE_LAYER + 1);
+            BattleLayers.INTERFACE_LAYER);
         // todo Добавить перегрузку в метод?
         _targetUnitFace.IsReflected = true;
 
-        _targetUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(510, 520, INTERFACE_LAYER + 1);
+        _targetUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(510, 520, BattleLayers.INTERFACE_LAYER);
     }
-
-
-    /// <summary>
-    /// Разместить на сцене кнопки.
-    /// </summary>
-    private void InitializeButtons()
-    {
-        _defendButton = _battleGameObjectContainer.AddButton(_interfaceProvider.DefendButton, () => {
-            _unitActionController.Defend();
-        }, 380, 504, INTERFACE_LAYER + 2, KeyboardButton.D);
-
-        _retreatButton = _battleGameObjectContainer.AddButton(_interfaceProvider.RetreatButton, () => {
-            //todo
-        }, 343, 524, INTERFACE_LAYER + 2, KeyboardButton.R);
-
-        _waitButton = _battleGameObjectContainer.AddButton(_interfaceProvider.WaitButton, () => {
-            _unitActionController.Wait();
-        }, 419, 524, INTERFACE_LAYER + 2, KeyboardButton.W);
-
-        _instantResolveButton = _battleGameObjectContainer.AddButton(_interfaceProvider.InstantResolveButton, () => {
-            // todo
-        }, 359, 563, INTERFACE_LAYER + 2, KeyboardButton.I);
-
-        _autoBattleButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.AutoBattleButton, () => {
-            IsAutoBattle = _autoBattleButton!.IsChecked;
-        }, 403, 563, INTERFACE_LAYER + 2, KeyboardButton.A);
-
-
-        // Эти кнопки доступны всегда.
-        ActivateButtons(_instantResolveButton, _autoBattleButton);
-
-        // Эти кнопки могут быть недоступны, если первый ход - компьютера.
-        if (_context.BattleState == BattleState.WaitPlayerTurn)
-            ActivateButtons(_defendButton, _retreatButton, _waitButton);
-    }
-
 
     /// <summary>
     /// Обновить цель.
@@ -360,7 +293,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             : CurrentBattleUnit.SquadPosition;
         _unitPortraitPanelController.DisablePanelSwitch(displayingSquad);
 
-        DisableButtons(_defendButton, _retreatButton, _waitButton);
+        _bottomPanelController.ProcessActionsBegin();
+
         DetachSelectedAnimation();
         DetachTargetAnimations();
     }
@@ -373,16 +307,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _isAnimating = false;
 
         _unitPortraitPanelController.EnablePanelSwitch(GetPanelDisplayingSquad());
-
-        // Если юнит наносит второй удар, то указанные кнопки активировать не нужно.
-        if (!IsSecondAttack)
-        {
-            ActivateButtons(_defendButton, _retreatButton);
-
-            // Если юнит уже ждал на этом ходу, то больше ждать не может.
-            if (!IsWaitingUnitTurn)
-                ActivateButtons(_waitButton);
-        }
+        _bottomPanelController.ProcessActionsCompleted();
 
         AttachSelectedAnimation(CurrentBattleUnit);
 
@@ -395,32 +320,16 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void ProcessBattleCompleted()
     {
-        // BUG. Не работает информация о юните после завершения битвы.
-
-        IsAutoBattle = false;
+        _context.IsAutoBattle = false;
+        _context.IsInstantBattle = false;
 
         _isAnimating = false;
 
-        _defendButton?.Destroy();
-        _defendButton = null;
-
-        _retreatButton?.Destroy();
-        _retreatButton = null;
-
-
-        _waitButton?.Destroy();
-        _waitButton = null;
-
-        _instantResolveButton?.Destroy();
-        _instantResolveButton = null;
-
-        _autoBattleButton?.Destroy();
-        _autoBattleButton = null;
-
-        // todo Создать две новые кнопки - "выйти" и "выйти и открыть" интерфейс.
-
         // Отображаем отряд победителя.
         _unitPortraitPanelController.CompleteBattle();
+        _bottomPanelController.ProcessBattleCompleted();
+
+        DetachSelectedAnimation();
 
         if (_targetUnitObject != null)
             SelectTargetUnits();
@@ -445,7 +354,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 ? "MRKCURSMALLA"
                 : "MRKCURLARGEA");
         // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде.
-        _currentUnitSelectionAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
+        _currentUnitSelectionAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, BattleLayers.UNIT_SELECTION_ANIMATION_LAYER);
     }
 
     /// <summary>
@@ -519,7 +428,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                     ? "MRKSMALLA"
                     : "MRKLARGEA");
 
-            var targetAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, 1);
+            var targetAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, BattleLayers.UNIT_SELECTION_ANIMATION_LAYER);
             _targetUnitsAnimations.Add(targetAnimation);
         }
     }
@@ -549,28 +458,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         return showEnemies
             ? CurrentBattleUnit.SquadPosition.GetOpposite()
             : CurrentBattleUnit.SquadPosition;
-    }
-
-    /// <summary>
-    /// Активировать указанные кнопки.
-    /// </summary>
-    private static void ActivateButtons(params ButtonObject?[] buttons)
-    {
-        foreach (var button in buttons)
-        {
-            button?.SetActive();
-        }
-    }
-
-    /// <summary>
-    /// Деактивировать указанные кнопки.
-    /// </summary>
-    private static void DisableButtons(params ButtonObject?[] buttons)
-    {
-        foreach (var button in buttons)
-        {
-            button?.SetDisabled();
-        }
     }
 
     /// <summary>

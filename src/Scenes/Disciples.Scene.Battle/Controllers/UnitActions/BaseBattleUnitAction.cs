@@ -1,5 +1,4 @@
-﻿using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Common.Enums.Units;
+﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;

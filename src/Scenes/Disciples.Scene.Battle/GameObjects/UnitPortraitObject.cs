@@ -21,11 +21,10 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// </summary>
 internal class UnitPortraitObject : GameObject
 {
-    /// <summary>
-    /// Слой для расположения интерфейса.
-    /// </summary>
-    // todo вынести это в одно место
-    private const int INTERFACE_LAYER = 1000;
+    private const int PANEL_SEPARATOR_LAYER_SHIFT = 1;
+    private const int FOREGROUND_LAYER_SHIFT = 1;
+    private const int TEXT_LAYER_SHIFT = 2;
+    private const int EFFECTS_LAYER_SHIFT = 3;
 
     /// <summary>
     /// Идентификатор в ресурсах с текстом "Промах".
@@ -34,13 +33,13 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Идентификатор в ресурсах с текстом "Защита".
     /// </summary>
-    private const string DEFEND_TEXT_ID = "X008TA0011";
+    private const string DEFEND_TEXT_ID = "X008TA0021";
     /// <summary>
     /// Идентификатор в ресурсах с текстом "Ждать".
     /// </summary>
     private const string WAIT_TEXT_ID = "X008TA0020";
     /// <summary>
-    /// Идентификатор в ресурсах с текстом "Защита".
+    /// Идентификатор в ресурсах с текстом "Защита" (от какого-то типа атаки).
     /// </summary>
     private const string WARD_TEXT_ID = "X008TA0011";
     /// <summary>
@@ -157,17 +156,17 @@ internal class UnitPortraitObject : GameObject
     {
         base.Initialize();
 
-        _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, X, Y, INTERFACE_LAYER + 2);
+        _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, X, Y, BattleLayers.INTERFACE_LAYER);
         _unitPortrait.IsReflected = _rightToLeft;
 
-        _unitHitpoints = _sceneObjectContainer.AddText(string.Empty, 11, X, Y + Height + 3, INTERFACE_LAYER + 3, Width, isBold: true);
+        _unitHitpoints = _sceneObjectContainer.AddText(string.Empty, 11, X, Y + Height + 3, BattleLayers.INTERFACE_LAYER, Width, isBold: true);
         // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
         if (!Unit.UnitType.IsSmall) {
             _unitPanelSeparator = _sceneObjectContainer.AddImage(
                 _battleInterfaceProvider.PanelSeparator,
                 X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
                 Y + Height - 1,
-                INTERFACE_LAYER);
+                BattleLayers.PANEL_LAYER + PANEL_SEPARATOR_LAYER_SHIFT);
         }
 
         UpdateUnitEffects();
@@ -319,7 +318,7 @@ internal class UnitPortraitObject : GameObject
                 var deathScull = Unit.UnitType.IsSmall
                     ? _battleInterfaceProvider.DeathSkullSmall
                     : _battleInterfaceProvider.DeathSkullBig;
-                _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, INTERFACE_LAYER + 3);
+                _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
                 _unitHitpoints.Text = $"0/{Unit.MaxHitPoints}";
 
                 RemoveSceneObject(ref _unitDamageForeground);
@@ -340,7 +339,7 @@ internal class UnitPortraitObject : GameObject
                 var x = _unitPortrait.X;
                 var y = _unitPortrait.Y + (Height - height);
 
-                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, width, height, x, y, INTERFACE_LAYER + 3);
+                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, width, height, x, y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
             }
         }
     }
@@ -358,7 +357,7 @@ internal class UnitPortraitObject : GameObject
                 icon,
                 X + (Width - icon.Width) / 2,
                 Y + Height - icon.Height,
-                INTERFACE_LAYER + 4);
+                BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
         }
         else if (!Unit.Effects.IsDefended && _defendIcon != null)
         {
@@ -401,7 +400,7 @@ internal class UnitPortraitObject : GameObject
                         icon,
                         X + Width - icon.Width,
                         Y + Height - icon.Height * (iconsCount + 1),
-                        INTERFACE_LAYER + 4));
+                        BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT));
                 }
             }
 
@@ -479,7 +478,7 @@ internal class UnitPortraitObject : GameObject
             RemoveBattleEffectsForegrounds();
         }
 
-        return _sceneObjectContainer.AddColorImage(color, Width, Height, X, Y, INTERFACE_LAYER + 2);
+        return _sceneObjectContainer.AddColorImage(color, Width, Height, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
     }
 
     /// <summary>
@@ -487,7 +486,7 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private ITextSceneObject AddText(string text)
     {
-        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, INTERFACE_LAYER + 3, Width, isBold: true, foregroundColor: GameColors.White);
+        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, BattleLayers.INTERFACE_LAYER + TEXT_LAYER_SHIFT, Width, isBold: true, foregroundColor: GameColors.White);
     }
 
     /// <summary>
@@ -509,7 +508,7 @@ internal class UnitPortraitObject : GameObject
             icon,
             X + (Width - icon.Width) / 2,
             Y + icon.Height / 2,
-            INTERFACE_LAYER + 4);
+            BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
     }
 
     /// <summary>

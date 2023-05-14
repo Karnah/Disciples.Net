@@ -8,11 +8,18 @@ public class Squad
     /// <summary>
     /// Создать объект типа <see cref="Squad" />.
     /// </summary>
+    /// <param name="player">Игрок, которому принадлежит отряд.</param>
     /// <param name="units">Юниты в отряде.</param>
-    public Squad(Unit[] units)
+    public Squad(Player player, Unit[] units)
     {
+        Player = player;
         Units = units;
     }
+
+    /// <summary>
+    /// Игрок, которому принадлежит отряд.
+    /// </summary>
+    public Player Player { get; }
 
     /// <summary>
     /// Юниты в отряде.

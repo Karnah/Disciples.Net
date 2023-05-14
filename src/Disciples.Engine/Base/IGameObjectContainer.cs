@@ -38,6 +38,17 @@ public interface IGameObjectContainer
     ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
     /// <summary>
+    /// Добавить кнопку на сцену.
+    /// </summary>
+    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
+    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
+    /// <param name="x">Положение кнопки, координата X.</param>
+    /// <param name="y">Положение кнопки, координата Y.</param>
+    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
+    /// <param name="hotKeys">Горячие клавиши для кнопки.</param>
+    ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, IReadOnlyList<KeyboardButton> hotKeys);
+
+    /// <summary>
     /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
     /// </summary>
     /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>

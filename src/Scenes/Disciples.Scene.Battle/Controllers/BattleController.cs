@@ -46,11 +46,25 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// </summary>
     private bool IsAutoBattle => _context.IsAutoBattle;
 
+    /// <summary>
+    /// Признак, что битву необходимо завершить в автоматическом режиме.
+    /// </summary>
+    private bool IsInstantBattle => _context.IsInstantBattle;
+
     /// <inheritdoc />
     public void BeforeSceneUpdate()
     {
-        if (IsAutoBattle && _context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
-            CheckAndProcessIfAiTurn();
+        if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
+        {
+            if (IsInstantBattle)
+            {
+                ProcessInstantBattle();
+            }
+            else if (IsAutoBattle)
+            {
+                CheckAndProcessIfAiTurn();
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -61,11 +75,11 @@ internal class BattleController : BaseSupportLoading, IBattleController
             var battleWinner = _battleProcessor.GetBattleWinnerSquad(_context.AttackingSquad, _context.DefendingSquad);
             if (battleWinner != null)
             {
-                // TODO Снять все эффекты.
-                var battleWinnerSquad = _context.AttackingSquad == battleWinner
-                    ? BattleSquadPosition.Attacker
-                    : BattleSquadPosition.Defender;
-                _context.SetBattleCompleted(battleWinnerSquad);
+                CompletedBattle(battleWinner);
+            }
+            else if (_context.IsInstantBattle)
+            {
+                ProcessInstantBattle();
             }
             else if (_context.CompletedUnitAction!.ShouldPassTurn)
             {
@@ -184,5 +198,33 @@ internal class BattleController : BaseSupportLoading, IBattleController
         // Если после этого не появилось нового действия, значит нет эффектов для обработки.
         if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
             CheckAndProcessIfAiTurn();
+    }
+
+    /// <summary>
+    /// Обработать быстрое завершение битвы.
+    /// </summary>
+    private void ProcessInstantBattle()
+    {
+        var battleWinner = _battleAiProcessor.ProcessInstantBattle(_context.AttackingSquad, _context.DefendingSquad);
+
+        foreach (var battleUnit in _context.BattleUnits)
+        {
+            if (battleUnit.Unit.IsDead && battleUnit.UnitState != BattleUnitState.Dead)
+                battleUnit.UnitState = BattleUnitState.Dead;
+        }
+
+        CompletedBattle(battleWinner);
+    }
+
+    /// <summary>
+    /// Обработать завершение битвы.
+    /// </summary>
+    private void CompletedBattle(Squad battleWinner)
+    {
+        // TODO Снять все эффекты.
+        var battleWinnerSquad = _context.AttackingSquad == battleWinner
+            ? BattleSquadPosition.Attacker
+            : BattleSquadPosition.Defender;
+        _context.SetBattleCompleted(battleWinnerSquad);
     }
 }
