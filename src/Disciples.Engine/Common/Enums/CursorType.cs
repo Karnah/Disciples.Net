@@ -1,9 +1,9 @@
 ﻿namespace Disciples.Engine.Common.Enums;
 
 /// <summary>
-/// Состояние курсора.
+/// Тип курсора.
 /// </summary>
-public enum CursorState
+public enum CursorType
 {
     /// <summary>
     /// Обычный курсор.

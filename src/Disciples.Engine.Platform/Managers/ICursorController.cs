@@ -10,5 +10,5 @@ public interface ICursorController
     /// <summary>
     /// Установить изображение для курсора.
     /// </summary>
-    void SetCursorState(CursorState cursorState);
+    void SetCursorState(CursorType cursorType);
 }

@@ -8,12 +8,12 @@ public enum KeyboardButton
     /// <summary>
     /// Клавиша "W" (Ц).
     /// </summary>
-    W,
+    W = 87,
 
     /// <summary>
     /// Клавиша "A" (Ф).
     /// </summary>
-    A,
+    A = 65,
 
     /// <summary>
     /// Клавиша "S" (Ы).
@@ -23,45 +23,45 @@ public enum KeyboardButton
     /// <summary>
     /// Клавиша "D" (В).
     /// </summary>
-    D,
+    D = 68,
 
     /// <summary>
     /// Клавиша "R" (К).
     /// </summary>
-    R,
+    R = 82,
 
     /// <summary>
     /// Клавиша "I" (Ш).
     /// </summary>
-    I,
+    I = 73,
 
     /// <summary>
     /// Клавиша "P" (З).
     /// </summary>
-    P,
+    P = 80,
 
     /// <summary>
     /// Клавиша "Tab".
     /// </summary>
-    Tab,
+    Tab = 9,
 
     /// <summary>
     /// Клавиша "Escape".
     /// </summary>
-    Escape,
+    Escape = 27,
 
     /// <summary>
     /// Клавиша "Enter".
     /// </summary>
-    Enter,
+    Enter = 13,
 
     /// <summary>
     /// Клавиша "Up".
     /// </summary>
-    Up,
+    Up = 38,
 
     /// <summary>
     /// Клавиша "Down".
     /// </summary>
-    Down
+    Down = 40
 }

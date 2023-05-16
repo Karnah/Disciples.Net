@@ -1,7 +1,8 @@
 {
   "SagaName": "Units with immunities and wards",
   "SagaDescription": null,
-  "SagaType": 0,
+  "GameType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 3,
   "Players": [

@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 
 namespace Disciples.Engine.Base;
@@ -31,6 +32,13 @@ public interface ISceneObjectContainer
     IImageSceneObject AddImage(IBitmap bitmap, double x, double y, int layer);
 
     /// <summary>
+    /// Добавить статичное изображение на сцену.
+    /// </summary>
+    /// <param name="imageSceneElement">Изображение.</param>
+    /// <param name="layer">Слой на котором будет отображаться изображение.</param>
+    IImageSceneObject AddImage(ImageSceneElement imageSceneElement, int layer);
+
+    /// <summary>
     /// Добавить статичное изображение указанных размеров на сцену.
     /// </summary>
     /// <param name="bitmap">Изображение.</param>
@@ -39,7 +47,7 @@ public interface ISceneObjectContainer
     /// <param name="x">Положение изображения, координата X.</param>
     /// <param name="y">Положение изображения, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-    IImageSceneObject AddImage(IBitmap bitmap, double width, double height, double x, double y, int layer);
+    IImageSceneObject AddImage(IBitmap? bitmap, double width, double height, double x, double y, int layer);
 
     /// <summary>
     /// Добавить прямоугольник указанного цвета и размеров на сцену.
@@ -61,7 +69,7 @@ public interface ISceneObjectContainer
     /// <param name="y">Положение текста, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
     /// <param name="isBold">Использовать жирный шрифт.</param>
-    ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, bool isBold = false);
+    ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, bool isBold = false);
 
     /// <summary>
     /// Добавить текст на сцену.
@@ -75,7 +83,7 @@ public interface ISceneObjectContainer
     /// <param name="textAlignment">Выравнивание текста.</param>
     /// <param name="isBold">Использовать жирный шрифт.</param>
     /// <param name="foregroundColor">Цвет текста.</param>
-    ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
+    ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, double width,
         TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null);
 
     /// <summary>

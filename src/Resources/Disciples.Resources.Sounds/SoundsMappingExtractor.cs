@@ -8,9 +8,9 @@ using File = Disciples.Resources.Common.Models.File;
 namespace Disciples.Resources.Sounds;
 
 /// <summary>
-/// Класс для извлечения звуков, которые соответствуют указанным юнитам/действиям.
+/// Класс для извлечения звуков, которые соответствуют указанным юнитам/действиям (.wdt).
 /// </summary>
-public class SoundsMappingExtractor : BaseResourceExtractor
+public class SoundsMappingExtractor : BaseMqdbResourceExtractor
 {
     private IDictionary<string, UnitTypeSounds> _unitTypeSounds = null!;
 

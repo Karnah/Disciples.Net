@@ -1,7 +1,8 @@
 {
   "SagaName": "Common battle",
   "SagaDescription": null,
-  "SagaType": 0,
+  "GameType": 0,
+  "MissionType": 0,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [

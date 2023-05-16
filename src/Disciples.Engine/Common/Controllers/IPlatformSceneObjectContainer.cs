@@ -28,7 +28,7 @@ public interface IPlatformSceneObjectContainer
     /// <param name="fontSize">Размер шрифта.</param>
     /// <param name="layer">Слой, на котором будет отображаться текст.</param>
     /// <param name="isBold">Использовать жирный шрифт.</param>
-    ITextSceneObject AddTextSceneObject(string text, double fontSize, int layer, bool isBold = false);
+    ITextSceneObject AddTextSceneObject(string? text, double fontSize, int layer, bool isBold = false);
 
     /// <summary>
     /// Создать текст, который будет отображаться на сцене.
@@ -40,7 +40,7 @@ public interface IPlatformSceneObjectContainer
     /// <param name="textAlignment">Выравнивание текста по ширине.</param>
     /// <param name="isBold">Использовать жирный шрифт.</param>
     /// <param name="foregroundColor">Цвет шрифта.</param>
-    ITextSceneObject AddTextSceneObject(string text,
+    ITextSceneObject AddTextSceneObject(string? text,
         double fontSize,
         int layer,
         double width,

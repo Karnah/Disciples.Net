@@ -4,6 +4,7 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 
@@ -15,7 +16,7 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly IGameController _gameController;
-    private readonly ITextProvider _textProvider;
+    private readonly InterfaceImagesExtractor _interfaceImagesExtractor;
 
     /// <summary>
     /// Наименование картинки, которая содержит фон загрузки.
@@ -33,17 +34,17 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
         IDialogController dialogController,
         IInterfaceProvider interfaceProvider,
         IGameController gameController,
-        ITextProvider textProvider
+        InterfaceImagesExtractor interfaceImagesExtractor
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _interfaceProvider = interfaceProvider;
         _gameController = gameController;
-        _textProvider = textProvider;
+        _interfaceImagesExtractor = interfaceImagesExtractor;
     }
 
     /// <inheritdoc />
-    public override CursorState DefaultCursorState => CursorState.None;
+    public override CursorType DefaultCursorType => CursorType.None;
 
     /// <inheritdoc />
     public void InitializeParameters(SceneParameters parameters)
@@ -55,7 +56,9 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     {
         base.LoadInternal();
 
-        _interfaceProvider.Load();
+        // IInterfaceProvider.GetImage внутри использует только InterfaceImagesExtractor.
+        // Загружаем в начале только его. Остальные зависимости будут дозагружены в LoadResources.
+        _interfaceImagesExtractor.Load();
 
         var loadingImage = _interfaceProvider.GetImage(LOADING_IMAGE_NAME);
         _loadingSceneObject = _sceneObjectContainer.AddImage(loadingImage, 0, 0, 0);
@@ -103,7 +106,6 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     /// </summary>
     private void LoadResources()
     {
-        // TODO Добавить загрузку всех ресурсов, необходимых для меню.
-        _textProvider.Load();
+        _interfaceProvider.Load();
     }
 }

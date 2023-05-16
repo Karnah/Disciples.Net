@@ -3,7 +3,7 @@
 /// <summary>
 /// Координата точки.
 /// </summary>
-public struct Point
+public readonly struct Point
 {
     /// <summary>
     /// Создать точку с указанными координатами.
@@ -17,10 +17,10 @@ public struct Point
     /// <summary>
     /// X-координата.
     /// </summary>
-    public double X { get; set; }
+    public double X { get; }
 
     /// <summary>
     /// Y-координата.
     /// </summary>
-    public double Y { get; set; }
+    public double Y { get; }
 }

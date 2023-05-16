@@ -1,4 +1,6 @@
-﻿namespace Disciples.Resources.Images.Models;
+﻿using Disciples.Common.Models;
+
+namespace Disciples.Resources.Images.Models;
 
 /// <summary>
 /// Изображение, представленное массивом пикселей.

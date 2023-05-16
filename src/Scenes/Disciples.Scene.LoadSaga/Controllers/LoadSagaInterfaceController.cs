@@ -4,6 +4,7 @@ using Disciples.Engine.Common;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation;
@@ -22,9 +23,13 @@ namespace Disciples.Scene.LoadSaga.Controllers;
 internal class LoadSagaInterfaceController : BaseSupportLoading
 {
     /// <summary>
-    /// Описание сейва.
+    /// Информация о сейве.
     /// </summary>
-    private const string SAVE_DESCRIPTION = "X005TA0665";
+    private const string SAVE_INFO = "X005TA0665";
+    /// <summary>
+    /// Имя и описание сейва.
+    /// </summary>
+    private const string SAVE_DESCRIPTION = "X005TA0664";
 
     private readonly LoadSagaGameObjectContainer _gameObjectContainer;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -35,14 +40,13 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
 
     private List<SagaSaveObject> _sagaSaves = null!;
     private int? _selectedSaveIndex;
-    private IImageSceneObject? _saveSelection = null;
-    private IReadOnlyList<IImageSceneObject> _saveRaces = Array.Empty<IImageSceneObject>();
-    private ITextSceneObject? _saveHeaderDescription;
-    private ITextSceneObject? _saveSagaName;
-    private ITextSceneObject? _saveSagaDescription;
+    private IImageSceneObject? _saveSelection;
+    private IReadOnlyList<ImageObject> _saveRaces = null!;
+    private TextBlockObject _saveInfo = null!;
+    private TextBlockObject _saveDescription = null!;
 
     private ButtonObject _goBackButton = null!;
-    private ButtonObject _selectSaveButton = null!;
+    private ButtonObject _continueButton = null!;
     private ButtonObject _saveUpButton = null!;
     private ButtonObject _saveDownButton = null!;
 
@@ -99,12 +103,9 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _sceneObjectContainer.AddImage(_interfaceProvider.Background, 0, 0, 0);
-        _gameObjectContainer.AddAnimation(
-            _interfaceProvider.FireflyAnimation,
-            74,
-            321,
-            1);
+        var sceneInterface = _interfaceProvider.SceneInterface;
+
+        AddInterfaceElements(sceneInterface);
 
         var saves = _saveProvider.GetSaves();
         var sagaSaves = new List<SagaSaveObject>(saves.Count);
@@ -122,50 +123,24 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         if (_sagaSaves.Count > 0)
             _selectedSaveIndex = 0;
 
-
-        _goBackButton = _gameObjectContainer.AddButton(
-            _interfaceProvider.GoBackButton,
-            () => { _gameController.Exit(); },
-            382,
-            553,
-            1,
-            KeyboardButton.Escape);
+        _goBackButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_BACK"], ExecuteBack, 1);
         _goBackButton.SetActive();
-        _selectSaveButton = _gameObjectContainer.AddButton(
-            _interfaceProvider.SelectSaveButton,
-            () =>
-            {
-                var sagaSave = _sagaSaves[_selectedSaveIndex!.Value];
-                LoadSave(sagaSave);
-            },
-            730,
-            553,
-            1,
-            KeyboardButton.Enter);
+        _continueButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_LOAD"], ExecuteContinue, 1);
 
-        // TODO Эти кнопки должны быть типа RepeatButton.
-        _saveUpButton = _gameObjectContainer.AddButton(
-            _interfaceProvider.SaveUpButton,
-            () =>
-            {
-                --_selectedSaveIndex;
-                UpdateSelectedSave();
-            },
-            500,
-            85,
-            1,
-            KeyboardButton.Up);
-        _saveDownButton = _gameObjectContainer.AddButton(
-            _interfaceProvider.SaveDownButton,
-            () =>
-            {
-                ++_selectedSaveIndex;
-                UpdateSelectedSave();
-            },
-            500,
-            245,
-            1,
-            KeyboardButton.Down);
+        _saveUpButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_GAME_LIST_UP"], ExecuteSaveUp, 1);
+        _saveDownButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_GAME_LIST_DOWN"], ExecuteSaveDown, 1);
+
+        _saveInfo = (TextBlockObject)_gameObjectContainer
+            .GameObjects
+            .First(go => go.Name == "TXT_INFO");
+        _saveDescription = (TextBlockObject)_gameObjectContainer
+            .GameObjects
+            .First(go => go.Name == "TXT_DESC");
+        _saveRaces = _gameObjectContainer
+            .GameObjects
+            .Where(go => go.Name?.StartsWith("IMG_RACE_") == true)
+            .OfType<ImageObject>()
+            .ToArray();
 
 
         UpdateSelectedSave();
@@ -174,6 +149,80 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
+    }
+
+    /// <summary>
+    /// Добавить элементы интерфейса.
+    /// </summary>
+    private void AddInterfaceElements(SceneInterface sceneInterface)
+    {
+        if (sceneInterface.Background != null)
+            _sceneObjectContainer.AddImage(sceneInterface.Background, 0, 0, 0);
+
+        foreach (var sceneElement in sceneInterface.Elements.Values)
+        {
+            switch (sceneElement.Type)
+            {
+                case SceneElementType.Image:
+                    var image = (ImageSceneElement)sceneElement;
+                    _gameObjectContainer.AddImage(image, 1);
+                    break;
+
+                case SceneElementType.Animation:
+                    var animation = (AnimationSceneElement)sceneElement;
+                    _gameObjectContainer.AddAnimation(animation, 1);
+                    break;
+
+                case SceneElementType.TextBlock:
+                    var textBlock = (TextBlockSceneElement)sceneElement;
+                    _gameObjectContainer.AddTextBlock(textBlock, 1);
+                    break;
+
+                case SceneElementType.Button:
+                case SceneElementType.ToggleButton:
+                case SceneElementType.RadioButton:
+                case SceneElementType.ListBox:
+                case SceneElementType.EditTextBox:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Вернуться на предыдущую страницу (закрыть приложение).
+    /// </summary>
+    private void ExecuteBack()
+    {
+        _gameController.Exit();
+    }
+
+    /// <summary>
+    /// Выбрать сейв выше.
+    /// </summary>
+    private void ExecuteSaveUp()
+    {
+        --_selectedSaveIndex;
+        UpdateSelectedSave();
+    }
+
+    /// <summary>
+    /// Выбрать сейв ниже.
+    /// </summary>
+    private void ExecuteSaveDown()
+    {
+        ++_selectedSaveIndex;
+        UpdateSelectedSave();
+    }
+
+    /// <summary>
+    /// Перейти на следующую страницу (загрузить сейв).
+    /// </summary>
+    private void ExecuteContinue()
+    {
+        var sagaSave = _sagaSaves[_selectedSaveIndex!.Value];
+        LoadSave(sagaSave);
     }
 
     /// <summary>
@@ -227,14 +276,14 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// </summary>
     private void UpdateButtonsState()
     {
-        _selectSaveButton.SetActive();
+        _continueButton.SetActive();
 
         if (_selectedSaveIndex > 0)
             _saveUpButton.SetActive();
         else
             _saveUpButton.SetDisabled();
 
-        if (_selectedSaveIndex != _sagaSaves.Count - 1)
+        if (_selectedSaveIndex < _sagaSaves.Count - 1)
             _saveDownButton.SetActive();
         else
             _saveDownButton.SetDisabled();
@@ -245,11 +294,6 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// </summary>
     private void UpdateSelectedSaveRaces(Save save)
     {
-        foreach (var saveRace in _saveRaces)
-        {
-            _sceneObjectContainer.RemoveSceneObject(saveRace);
-        }
-
         var races = save
             .GameContext
             .Players
@@ -257,15 +301,15 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             .Where(r => r != RaceType.Neutral)
             .OrderBy(r => r)
             .ToArray();
-        var racesImages = new List<IImageSceneObject>(races.Length);
-        for (int raceIndex = 0; raceIndex < races.Length; raceIndex++)
+        for (int raceIndex = 0; raceIndex < Math.Min(races.Length, _saveRaces.Count); raceIndex++)
         {
-            var raceImage = _sceneObjectContainer.AddImage(
-                _interfaceProvider.Races[races[raceIndex]], 548 + 58 * raceIndex, 388, 2);
-            racesImages.Add(raceImage);
+            _saveRaces[raceIndex].Bitmap = _interfaceProvider.Races[races[raceIndex]];
         }
 
-        _saveRaces = racesImages;
+        for (int raceIndex = races.Length; raceIndex < _saveRaces.Count; raceIndex++)
+        {
+            _saveRaces[raceIndex].Bitmap = null;
+        }
     }
 
     /// <summary>
@@ -273,52 +317,19 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// </summary>
     private void UpdateSelectedSaveDescription(Save save)
     {
-        _sceneObjectContainer.RemoveSceneObject(_saveHeaderDescription);
-        _sceneObjectContainer.RemoveSceneObject(_saveSagaName);
-        _sceneObjectContainer.RemoveSceneObject(_saveSagaDescription);
-
-        // TODO Нужно выравнивание по высоте.
-        _saveHeaderDescription = _sceneObjectContainer.AddText(
-            ReplacePlaceholders(_textProvider.GetText(SAVE_DESCRIPTION), save),
-            12,
-            425,
-            350,
-            2,
-            107);
-        _saveSagaName = _sceneObjectContainer.AddText(
-            save.GameContext.SagaName,
-            12,
-            420,
-            475,
-            2,
-            345,
-            isBold: true);
-        if (!string.IsNullOrEmpty(save.GameContext.SagaDescription))
-        {
-            _saveSagaDescription = _sceneObjectContainer.AddText(
-                save.GameContext.SagaDescription,
-                12,
-                420,
-                495,
-                2,
-                345);
-        }
+        _saveInfo.Text = ReplaceSaveInfoPlaceholders(_textProvider.GetText(SAVE_INFO), save);
+        _saveDescription.Text = ReplaceSaveDescriptionPlaceholders(_textProvider.GetText(SAVE_DESCRIPTION), save);
     }
 
     /// <summary>
     /// Заменить плейсхолдеры значениями из сейва.
     /// </summary>
-    private string ReplacePlaceholders(string value, Save save)
+    private string ReplaceSaveInfoPlaceholders(string value, Save save)
     {
-        // todo Модификаторы добавляются обычным цветом, а не зелёным/красном.
-        // Пробовал сделать контрол, который будет принимать текст, содержащий теги разметки/размеры шрифтов/цвет шрифта,
-        // Но он слишком медленно работал (StackPanel). Возможно, стоит дождаться TextBlock с поддержкой InlineUIContainer
-        // https://github.com/AvaloniaUI/Avalonia/pull/1689.
-
         var gameContext = save.GameContext;
         return value
             .Replace("\\n", Environment.NewLine)
-            .Replace("%TYPE%", GetSagaTypeText(gameContext.SagaType))
+            .Replace("%TYPE%", GetGameTypeText(gameContext.GameType))
             .Replace("%TYPEDESC%", GetTypeDescription(gameContext))
             .Replace("%TURN%", gameContext.TurnNumber.ToString())
             .Replace("%DIFF%", GetDifficultyLevelTitle(gameContext.DifficultyLevel))
@@ -326,14 +337,28 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Получить текст для типа саги.
+    /// Заменить плейсхолдеры значениями из сейва.
     /// </summary>
-    private string GetSagaTypeText(SagaType type)
+    private string ReplaceSaveDescriptionPlaceholders(string value, Save save)
+    {
+        var gameContext = save.GameContext;
+        return value
+                .Replace("\\n", Environment.NewLine)
+                .Replace("%NAME%", gameContext.SagaName)
+                .Replace("%TYPE%", GetMissionTypeText(gameContext.MissionType))
+                .Replace("%DESC%", gameContext.SagaDescription)
+            ;
+    }
+
+    /// <summary>
+    /// Получить текст для типа игры.
+    /// </summary>
+    private string GetGameTypeText(GameType type)
     {
         var textId = type switch
         {
-            SagaType.Normal => "X005TA0721",
-            SagaType.Hotseat => "X005TA0722",
+            GameType.SinglePlayer => "X005TA0721",
+            GameType.Hotseat => "X005TA0722",
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
@@ -384,6 +409,21 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
             DifficultyLevel.Hard => "X010TA0004",
             DifficultyLevel.VeryHard => "X010TA0005",
             _ => throw new ArgumentOutOfRangeException(nameof(difficultyLevel), difficultyLevel, null)
+        };
+
+        return _textProvider.GetText(textId);
+    }
+
+    /// <summary>
+    /// Получить текст для типа миссии.
+    /// </summary>
+    private string GetMissionTypeText(MissionType type)
+    {
+        var textId = type switch
+        {
+            MissionType.Saga => "X005TA0633",
+            MissionType.Quest => "X005TA0632",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
         return _textProvider.GetText(textId);

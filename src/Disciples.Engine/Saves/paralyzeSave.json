@@ -1,7 +1,8 @@
 {
   "SagaName": "Units with paralyze and petrify attacks",
   "SagaDescription": null,
-  "SagaType": 1,
+  "GameType": 1,
+  "MissionType": 0,
   "TurnNumber": 10,
   "DifficultyLevel": 1,
   "Players": [

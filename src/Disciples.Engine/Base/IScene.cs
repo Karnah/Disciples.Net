@@ -21,7 +21,7 @@ public interface IScene : ISupportLoading
     /// <summary>
     /// Состояние курсора на сцене по умолчанию.
     /// </summary>
-    CursorState DefaultCursorState { get; }
+    CursorType DefaultCursorType { get; }
 
     /// <summary>
     /// Обработать загрузку сцены.

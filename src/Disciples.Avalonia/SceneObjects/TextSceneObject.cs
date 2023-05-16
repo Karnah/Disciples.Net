@@ -12,14 +12,14 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     /// <summary>
     /// Создать объект типа <see cref="TextSceneObject" />.
     /// </summary>
-    public TextSceneObject(string text, double fontSize, int layer, bool isBold = false)
+    public TextSceneObject(string? text, double fontSize, int layer, bool isBold = false)
         : this(text, fontSize, layer, double.NaN, TextAlignment.Left, isBold)
     { }
 
     /// <summary>
     /// Создать объект типа <see cref="TextSceneObject" />.
     /// </summary>
-    public TextSceneObject(string text,
+    public TextSceneObject(string? text,
         double fontSize,
         int layer,
         double width,
@@ -39,7 +39,7 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
 
     /// <inheritdoc />
     [Reactive]
-    public string Text { get; set; }
+    public string? Text { get; set; }
 
     /// <inheritdoc />
     public double FontSize { get; }

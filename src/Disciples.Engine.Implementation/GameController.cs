@@ -138,7 +138,7 @@ public class GameController : IGameController
 
         await Task.Run(scene.Load);
 
-        _cursorController.SetCursorState(scene.DefaultCursorState);
+        _cursorController.SetCursorState(scene.DefaultCursorType);
         _currentScene = scene;
 
         // TODO Вынести в сцену.

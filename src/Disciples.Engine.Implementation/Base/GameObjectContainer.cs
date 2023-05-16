@@ -29,10 +29,31 @@ public class GameObjectContainer : IGameObjectContainer
     public IReadOnlyCollection<GameObject> GameObjects => _gameObjects;
 
     /// <inheritdoc />
+    public TextBlockObject AddTextBlock(TextBlockSceneElement textBlock, int layer)
+    {
+        var textBlockObject = new TextBlockObject(_sceneObjectContainer, textBlock, layer);
+        return AddObject(textBlockObject);
+    }
+
+    /// <inheritdoc />
+    public ImageObject AddImage(ImageSceneElement image, int layer)
+    {
+        var imageObject = new ImageObject(_sceneObjectContainer, image, layer);
+        return AddObject(imageObject);
+    }
+
+    /// <inheritdoc />
     public AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
     {
         var animation = new AnimationObject(_sceneObjectContainer, frames, x, y, layer, repeat);
         return AddObject(animation);
+    }
+
+    /// <inheritdoc />
+    public AnimationObject AddAnimation(AnimationSceneElement animation, int layer, bool repeat = true)
+    {
+        var animationObject = new AnimationObject(_sceneObjectContainer, animation, layer, repeat);
+        return AddObject(animationObject);
     }
 
     /// <inheritdoc />
@@ -46,6 +67,12 @@ public class GameObjectContainer : IGameObjectContainer
     {
         var button = new ButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotKeys);
         return AddObject(button);
+    }
+
+    /// <inheritdoc />
+    public ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer)
+    {
+        return AddButton(button.ButtonStates, buttonPressedAction, button.Position.Left, button.Position.Top, layer, button.HotKeys);
     }
 
     /// <inheritdoc />

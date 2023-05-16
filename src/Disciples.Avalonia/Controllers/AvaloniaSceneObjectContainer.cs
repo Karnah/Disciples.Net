@@ -36,13 +36,13 @@ public class AvaloniaSceneObjectContainer : IPlatformSceneObjectContainer
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string text, double fontSize, int layer, bool isBold = false)
+    public ITextSceneObject AddTextSceneObject(string? text, double fontSize, int layer, bool isBold = false)
     {
         return AddSceneObject(new TextSceneObject(text, fontSize, layer, isBold));
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string text,
+    public ITextSceneObject AddTextSceneObject(string? text,
         double fontSize,
         int layer,
         double width,

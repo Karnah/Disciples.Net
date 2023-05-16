@@ -1,7 +1,9 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -36,11 +38,21 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     /// <inheritdoc />
     public IImageSceneObject AddImage(IBitmap bitmap, double x, double y, int layer)
     {
+        if (bitmap == null)
+            throw new ArgumentNullException(nameof(bitmap));
+
         return AddImage(bitmap, bitmap.Width, bitmap.Height, x, y, layer);
     }
 
     /// <inheritdoc />
-    public IImageSceneObject AddImage(IBitmap bitmap, double width, double height, double x, double y, int layer)
+    public IImageSceneObject AddImage(ImageSceneElement imageSceneElement, int layer)
+    {
+        var bounds = imageSceneElement.Position;
+        return AddImage(imageSceneElement.ImageBitmap, bounds.Width, bounds.Height, bounds.Left, bounds.Top, layer);
+    }
+
+    /// <inheritdoc />
+    public IImageSceneObject AddImage(IBitmap? bitmap, double width, double height, double x, double y, int layer)
     {
         var imageVisual = PlatformSceneObjectContainer.AddImageSceneObject(layer);
         imageVisual.X = x;
@@ -59,13 +71,13 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, bool isBold = false)
+    public ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, bool isBold = false)
     {
         return AddText(text, fontSize, x, y, layer, double.NaN, TextAlignment.Left, isBold);
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(string text, double fontSize, double x, double y, int layer, double width,
+    public ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, double width,
         TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
     {
         var textVisual = PlatformSceneObjectContainer.AddTextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);

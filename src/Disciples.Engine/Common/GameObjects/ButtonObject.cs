@@ -144,6 +144,10 @@ public class ButtonObject : GameObject
     {
         _buttonPressedAction.Invoke();
 
+        // Во время клика могли изменить состояние кнопки.
+        if (ButtonState == SceneButtonState.Disabled)
+            return SceneButtonState.Disabled;
+
         return SelectionComponent!.IsSelected
             ? SceneButtonState.Selected
             : SceneButtonState.Active;

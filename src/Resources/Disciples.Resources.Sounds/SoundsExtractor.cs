@@ -7,9 +7,9 @@ using File = Disciples.Resources.Common.Models.File;
 namespace Disciples.Resources.Sounds;
 
 /// <summary>
-/// Класс для извлечения аудио из ресурсов.
+/// Класс для извлечения аудио из ресурсов (.wdb).
 /// </summary>
-public class SoundsExtractor : BaseResourceExtractor
+public class SoundsExtractor : BaseMqdbResourceExtractor
 {
     /// <summary>
     /// Создать объект типа <see cref="SoundsExtractor" />.

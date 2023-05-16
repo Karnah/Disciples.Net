@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Disciples.Common.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
@@ -56,8 +57,8 @@ public class WpfBitmapFactory : IBitmapFactory
         var bitmapSource = BitmapSource.Create(width, height, dpi, dpi, pixelFormat, null, GetBitmapByteArray(rawBitmap, resultBounds), stride);
         bitmapSource.Freeze();
 
-        var offsetX = resultBounds.MinColumn;
-        var offsetY = resultBounds.MinRow;
+        var offsetX = resultBounds.Left;
+        var offsetY = resultBounds.Bottom;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
@@ -108,27 +109,27 @@ public class WpfBitmapFactory : IBitmapFactory
         var data = new byte[stride * height];
         var unionBounds = new Bounds
         {
-            MinRow = Math.Max(resultBounds.MinRow, rawBitmap.Bounds.MinRow),
-            MaxRow = Math.Min(resultBounds.MaxRow, rawBitmap.Bounds.MaxRow),
-            MinColumn = Math.Max(resultBounds.MinColumn, rawBitmap.Bounds.MinColumn),
-            MaxColumn = Math.Min(resultBounds.MaxColumn, rawBitmap.Bounds.MaxColumn)
+            Bottom = Math.Max(resultBounds.Bottom, rawBitmap.Bounds.Bottom),
+            Top = Math.Min(resultBounds.Top, rawBitmap.Bounds.Top),
+            Left = Math.Max(resultBounds.Left, rawBitmap.Bounds.Left),
+            Right = Math.Min(resultBounds.Right, rawBitmap.Bounds.Right)
         };
 
         // Размер итоговой строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
         var destinationRowLength = width * 4;
 
         // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
-        var sourceOffsetColumnPixels = unionBounds.MinColumn - rawBitmap.Bounds.MinColumn;
+        var sourceOffsetColumnPixels = unionBounds.Left - rawBitmap.Bounds.Left;
 
         // Сколько байт в каждой строке нужно копировать в итоговый массив.
         var copyRowLength = unionBounds.Width * 4;
 
-        for (int row = unionBounds.MinRow; row < unionBounds.MaxRow; ++row)
+        for (int row = unionBounds.Bottom; row < unionBounds.Top; ++row)
         {
-            var begin = ((row - rawBitmap.Bounds.MinRow) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+            var begin = ((row - rawBitmap.Bounds.Bottom) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
             Buffer.BlockCopy(rawBitmap.Data, begin, data,
-                (row - resultBounds.MinRow) * destinationRowLength, copyRowLength);
+                (row - resultBounds.Bottom) * destinationRowLength, copyRowLength);
         }
 
         return data;

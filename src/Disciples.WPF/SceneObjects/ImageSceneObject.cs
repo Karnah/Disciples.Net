@@ -17,7 +17,7 @@ public class ImageSceneObject : BaseSceneObject, IImageSceneObject
 
     /// <inheritdoc />
     [Reactive]
-    public IBitmap Bitmap { get; set; }
+    public IBitmap? Bitmap { get; set; }
 
     /// <inheritdoc />
     [Reactive]

@@ -1,11 +1,11 @@
-﻿using Disciples.Engine;
+﻿using Disciples.Common.Models;
+using Disciples.Engine;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
-using Disciples.Resources.Images.Models;
 using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Resources.SoundKeys;
 using Disciples.Scene.Battle.Resources.SoundKeys.Extensions;

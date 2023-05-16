@@ -1,17 +1,14 @@
 ﻿namespace Disciples.Engine.Common.Enums;
 
 /// <summary>
-/// Тип саги.
+/// Тип игры.
 /// </summary>
-/// <remarks>
-/// TODO Уточнить, что это именно так.
-/// </remarks>
-public enum SagaType
+public enum GameType
 {
     /// <summary>
     /// Одиночная игра.
     /// </summary>
-    Normal,
+    SinglePlayer,
 
     /// <summary>
     /// Многопользовательская на одном устройстве.

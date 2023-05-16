@@ -10,7 +10,7 @@ public abstract class BaseCursorController : ICursorController
 {
     private readonly IInterfaceProvider _interfaceProvider;
 
-    private CursorState _currentCursorState;
+    private CursorType _currentCursorType;
 
     /// <summary>
     /// Создать объект типа <see cref="BaseCursorController" />.
@@ -21,31 +21,31 @@ public abstract class BaseCursorController : ICursorController
     }
 
     /// <inheritdoc />
-    public void SetCursorState(CursorState cursorState)
+    public void SetCursorState(CursorType cursorType)
     {
-        if (_currentCursorState == cursorState)
+        if (_currentCursorType == cursorType)
             return;
 
-        switch (cursorState)
+        switch (cursorType)
         {
-            case CursorState.Default:
+            case CursorType.Default:
                 SetDefaultCursorState();
                 break;
 
-            case CursorState.None:
+            case CursorType.None:
                 SetNoneCursorState();
                 break;
 
-            case CursorState.Enemy:
+            case CursorType.Enemy:
                 break;
-            case CursorState.Ally:
+            case CursorType.Ally:
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(cursorState), cursorState, null);
+                throw new ArgumentOutOfRangeException(nameof(cursorType), cursorType, null);
         }
 
-        _currentCursorState = cursorState;
+        _currentCursorType = cursorType;
     }
 
     /// <summary>

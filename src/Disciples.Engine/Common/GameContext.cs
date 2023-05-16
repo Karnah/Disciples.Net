@@ -20,9 +20,14 @@ public class GameContext
     public string? SagaDescription { get; init; }
 
     /// <summary>
-    /// Тип саги.
+    /// Тип игры.
     /// </summary>
-    public SagaType SagaType { get; init; }
+    public GameType GameType { get; init; }
+
+    /// <summary>
+    /// Тип миссии.
+    /// </summary>
+    public MissionType MissionType { get; init; }
 
     /// <summary>
     /// Номер хода.

@@ -17,6 +17,16 @@ public interface IGameObjectContainer
     IReadOnlyCollection<GameObject> GameObjects { get; }
 
     /// <summary>
+    /// Добавить текстовый блок.
+    /// </summary>
+    TextBlockObject AddTextBlock(TextBlockSceneElement textBlock, int layer);
+
+    /// <summary>
+    /// Добавить изображение на сцену.
+    /// </summary>
+    ImageObject AddImage(ImageSceneElement image, int layer);
+
+    /// <summary>
     /// Добавить анимацию на сцену.
     /// </summary>
     /// <param name="frames">Кадры анимации.</param>
@@ -25,6 +35,14 @@ public interface IGameObjectContainer
     /// <param name="layer">Слой на котором будет отображаться анимация.</param>
     /// <param name="repeat"><value>false</value>, если необходимо уничтожить объект после того, как анимация будет завершена.</param>
     AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true);
+
+    /// <summary>
+    /// Добавить анимацию на сцену.
+    /// </summary>
+    /// <param name="animation">Данные анимации.</param>
+    /// <param name="layer">Слой на котором будет отображаться анимация.</param>
+    /// <param name="repeat"><value>false</value>, если необходимо уничтожить объект после того, как анимация будет завершена.</param>
+    AnimationObject AddAnimation(AnimationSceneElement animation, int layer, bool repeat = true);
 
     /// <summary>
     /// Добавить кнопку на сцену.
@@ -47,6 +65,14 @@ public interface IGameObjectContainer
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
     /// <param name="hotKeys">Горячие клавиши для кнопки.</param>
     ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, IReadOnlyList<KeyboardButton> hotKeys);
+
+    /// <summary>
+    /// Добавить кнопку на сцену.
+    /// </summary>
+    /// <param name="button">Информация о кнопке.</param>
+    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
+    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
+    ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer);
 
     /// <summary>
     /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.

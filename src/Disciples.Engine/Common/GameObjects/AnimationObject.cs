@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Models;
@@ -11,6 +10,26 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public class AnimationObject : GameObject
 {
+    /// <summary>
+    /// Создать объект типа <see cref="AnimationObject" />.
+    /// </summary>
+    public AnimationObject(
+        ISceneObjectContainer sceneObjectContainer,
+        AnimationSceneElement animation,
+        int layer,
+        bool repeat = true
+        ) : base(animation)
+    {
+        AnimationComponent = new AnimationComponent(this, sceneObjectContainer, animation.Frames, layer);
+
+        Components = new IComponent[]
+        {
+            AnimationComponent
+        };
+
+        Repeat = repeat;
+    }
+
     /// <summary>
     /// Создать объект типа <see cref="AnimationObject" />.
     /// </summary>

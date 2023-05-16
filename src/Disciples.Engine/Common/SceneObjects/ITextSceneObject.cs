@@ -11,7 +11,7 @@ public interface ITextSceneObject : ISceneObject
     /// <summary>
     /// Текст, который необходимо отобразить.
     /// </summary>
-    string Text { get; set; }
+    string? Text { get; set; }
 
     /// <summary>
     /// Размер шрифта.

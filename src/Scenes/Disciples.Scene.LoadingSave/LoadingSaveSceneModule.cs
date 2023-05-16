@@ -16,7 +16,7 @@ public class LoadingSaveSceneModule : IGameModule
     {
         var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadingSaveScene));
         containerRegistrator.Register<ILoadingSaveScene, LoadingSaveScene>(loadingScopeReuse);
-        containerRegistrator.RegisterDelegate<IReadOnlyList<BaseResourceExtractor>>(context => new BaseResourceExtractor[]
+        containerRegistrator.RegisterDelegate<IReadOnlyList<BaseMqdbResourceExtractor>>(context => new BaseMqdbResourceExtractor[]
         {
             context.Resolve<BattleImagesExtractor>(),
             context.Resolve<BattleSoundsExtractor>(),

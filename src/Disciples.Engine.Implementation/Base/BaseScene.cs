@@ -32,7 +32,7 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     public ISceneObjectContainer SceneObjectContainer { get; }
 
     /// <inheritdoc />
-    public virtual CursorState DefaultCursorState => CursorState.Default;
+    public virtual CursorType DefaultCursorType => CursorType.Default;
 
     /// <summary>
     /// Признак, что базовый класс должен сам обрабатывать события ввода пользователя.

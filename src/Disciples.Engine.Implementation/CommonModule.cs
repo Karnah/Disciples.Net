@@ -32,6 +32,7 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<InterfaceImagesExtractor>(Reuse.Singleton);
         containerRegistrator.Register<UnitFaceImagesExtractor>(Reuse.Singleton);
         containerRegistrator.Register<UnitPortraitImagesExtractor>(Reuse.Singleton);
+        containerRegistrator.Register<SceneInterfaceExtractor>(Reuse.Singleton);
 
         containerRegistrator.Register<BattleSoundsMappingExtractor>(Reuse.Singleton);
         containerRegistrator.Register<BattleSoundsExtractor>(Reuse.Singleton);

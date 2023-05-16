@@ -1,4 +1,5 @@
-﻿using Disciples.Resources.Common;
+﻿using Disciples.Common.Models;
+using Disciples.Resources.Common;
 using Disciples.Resources.Common.Extensions;
 using Disciples.Resources.Common.Models;
 using Disciples.Resources.Images.Enums;
@@ -10,12 +11,12 @@ using File = Disciples.Resources.Common.Models.File;
 namespace Disciples.Resources.Images;
 
 /// <summary>
-/// Класс для извлечения изображений из ресурсов.
+/// Класс для извлечения изображений из ресурсов (.ff).
 /// </summary>
 /// <remarks>
 /// TODO Разобраться с null.
 /// </remarks>
-public class ImagesExtractor : BaseResourceExtractor
+public class ImagesExtractor : BaseMqdbResourceExtractor
 {
     private IReadOnlyDictionary<string, MqImage>? _mqImages;
     private IReadOnlyDictionary<string, MqAnimation>? _mqAnimations;
@@ -331,10 +332,10 @@ public class ImagesExtractor : BaseResourceExtractor
         foreach (var framePart in images)
         {
             var frameBounds = GetImageBounds(framePart);
-            minRow = Math.Min(minRow, frameBounds.MinRow);
-            maxRow = Math.Max(maxRow, frameBounds.MaxRow);
-            minColumn = Math.Min(minColumn, frameBounds.MinColumn);
-            maxColumn = Math.Max(maxColumn, frameBounds.MaxColumn);
+            minRow = Math.Min(minRow, frameBounds.Bottom);
+            maxRow = Math.Max(maxRow, frameBounds.Top);
+            minColumn = Math.Min(minColumn, frameBounds.Left);
+            maxColumn = Math.Max(maxColumn, frameBounds.Right);
         }
 
         return new Bounds(minRow, maxRow, minColumn, maxColumn);
@@ -377,7 +378,7 @@ public class ImagesExtractor : BaseResourceExtractor
             for (int row = 0; row < framePart.Height; ++row)
             {
                 var sourcePosition = ((framePart.DestY + row) * baseImage.OriginalWidth + framePart.DestX) << 2;
-                var destinationPosition = ((framePart.SourceY + row - bounds.MinRow) * imageWidth + framePart.SourceX - bounds.MinColumn) << 2;
+                var destinationPosition = ((framePart.SourceY + row - bounds.Bottom) * imageWidth + framePart.SourceX - bounds.Left) << 2;
 
                 Buffer.BlockCopy(baseImage.Data, sourcePosition, imageData, destinationPosition, partWidth);
             }

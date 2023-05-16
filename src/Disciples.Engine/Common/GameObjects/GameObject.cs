@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Exceptions;
+using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.GameObjects;
 
@@ -33,6 +34,23 @@ public abstract class GameObject
     protected GameObject((double X, double Y) position) : this(position.X, position.Y)
     {
     }
+
+    /// <summary>
+    /// Создать объект типа <see cref="GameObject" />.
+    /// </summary>
+    protected GameObject(SceneElement sceneElement) : this()
+    {
+        Name = sceneElement.Name;
+        X = sceneElement.Position.Left;
+        Y = sceneElement.Position.Top;
+        Width = sceneElement.Position.Width;
+        Height = sceneElement.Position.Height;
+    }
+
+    /// <summary>
+    /// Имя объекта.
+    /// </summary>
+    public string? Name { get; }
 
     /// <summary>
     /// Положение объекта на сцене, координата X.

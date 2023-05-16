@@ -11,6 +11,11 @@ namespace Disciples.Engine.Common.Providers;
 public interface IInterfaceProvider : ISupportLoading
 {
     /// <summary>
+    /// Получить данные интерфейса по него имени.
+    /// </summary>
+    SceneInterface GetSceneInterface(string name);
+
+    /// <summary>
     /// Получить изображение по имени.
     /// </summary>
     IBitmap GetImage(string imageName);

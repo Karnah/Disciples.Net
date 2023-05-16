@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Images.Models;

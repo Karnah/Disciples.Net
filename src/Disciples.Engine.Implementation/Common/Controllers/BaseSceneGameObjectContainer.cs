@@ -32,9 +32,27 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     public IReadOnlyCollection<GameObject> GameObjects => GameObjectContainer.GameObjects;
 
     /// <inheritdoc />
+    public TextBlockObject AddTextBlock(TextBlockSceneElement textBlock, int layer)
+    {
+        return GameObjectContainer.AddTextBlock(textBlock, layer);
+    }
+
+    /// <inheritdoc />
+    public ImageObject AddImage(ImageSceneElement image, int layer)
+    {
+        return GameObjectContainer.AddImage(image, layer);
+    }
+
+    /// <inheritdoc />
     public AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
     {
         return GameObjectContainer.AddAnimation(frames, x, y, layer, repeat);
+    }
+
+    /// <inheritdoc />
+    public AnimationObject AddAnimation(AnimationSceneElement animation, int layer, bool repeat = true)
+    {
+        return GameObjectContainer.AddAnimation(animation, layer, repeat);
     }
 
     /// <inheritdoc />
@@ -49,6 +67,12 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
         IReadOnlyList<KeyboardButton> hotKeys)
     {
         return GameObjectContainer.AddButton(buttonStates, buttonPressedAction, x, y, layer, hotKeys);
+    }
+
+    /// <inheritdoc />
+    public ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer)
+    {
+        return GameObjectContainer.AddButton(button, buttonPressedAction, layer);
     }
 
     /// <inheritdoc />

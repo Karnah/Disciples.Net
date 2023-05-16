@@ -24,7 +24,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ITextProvider _textProvider;
-    private readonly IReadOnlyList<BaseResourceExtractor> _resourceExtractors;
+    private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
 
     private string _savePath = null!;
 
@@ -42,7 +42,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         IUnitInfoProvider unitInfoProvider,
         IInterfaceProvider interfaceProvider,
         ITextProvider textProvider,
-        IReadOnlyList<BaseResourceExtractor> resourceExtractors
+        IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _gameObjectContainer = gameObjectContainer;
@@ -55,7 +55,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     }
 
     /// <inheritdoc />
-    public override CursorState DefaultCursorState => CursorState.None;
+    public override CursorType DefaultCursorType => CursorType.None;
 
     /// <inheritdoc />
     public void InitializeParameters(LoadingSaveSceneParameters parameters)
