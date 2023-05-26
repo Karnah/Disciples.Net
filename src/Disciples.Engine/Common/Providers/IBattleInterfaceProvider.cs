@@ -12,6 +12,11 @@ namespace Disciples.Engine.Common.Providers;
 public interface IBattleInterfaceProvider : ISupportLoading
 {
     /// <summary>
+    /// Интерфейс диалога с детальной информацией о юните.
+    /// </summary>
+    SceneInterface UnitDetailInfoInterface { get; }
+
+    /// <summary>
     /// Фон поля боя.
     /// </summary>
     /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>
@@ -46,11 +51,6 @@ public interface IBattleInterfaceProvider : ISupportLoading
     /// Иконка умершего большого юнита.
     /// </summary>
     IBitmap DeathSkullBig { get; }
-
-    /// <summary>
-    /// Задний фон для подробной информации о юните (раскрытый свиток).
-    /// </summary>
-    IBitmap UnitInfoBackground { get; }
 
     /// <summary>
     /// Иконка для обозначения юнита, чей уровень выше базового на 5-9.

@@ -73,6 +73,15 @@ public class SceneInterfaceExtractor : BaseResourceExtractor
         if (begin != DIALOG_BEGIN)
             throw new ResourceException($"Некорректная строка: {begin}, ожидалось: {DIALOG_BEGIN}");
 
+        // Сцена может занимать меньше места, чем на 800*600.
+        // Координаты объектов при этом будут рассчитываться от нового границы сцены.
+        // Пересчитываем их глобальные.
+        // TODO Использовать константы из GameInfo.
+        var headerData = dialogHeader.Split(',');
+        var bounds = headerData.ParseBounds(1);
+        var offsetX = (800 - bounds.Width) / 2;
+        var offsetY = (600 - bounds.Height) / 2;
+
         var elements = new List<SceneElement>();
         while (stream.ReadLine() is { } line)
         {
@@ -91,19 +100,18 @@ public class SceneInterfaceExtractor : BaseResourceExtractor
                 continue;
 
             var elementData = line[(elementTypeName.Length + 1)..];
-            elements.Add(elementParser.Parse(elementData));
+            elements.Add(elementParser.Parse(elementData, offsetX, offsetY));
         }
 
-        var headerData = dialogHeader.Split(',');
         return new SceneInterface
         {
             Name = headerData[0],
-            Bounds = headerData.ParseBounds(1),
+            Bounds = bounds,
             BackgroundImageName = headerData[5].ParseImageName(),
             CursorImageName = headerData[6].ParseImageName(),
-            Magic = int.Parse(headerData[7]),
-            Position = headerData.ParseBounds(8),
-            Magic2 = int.Parse(headerData[12]),
+            CursorHotSpot = headerData.ParsePoint(7),
+            Position = headerData.ParseBounds(9),
+            IsSelfDrawn = headerData[13].ParseBoolean(),
             Elements = elements
         };
     }

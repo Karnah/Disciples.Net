@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Models;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Controllers.UnitActions;

@@ -22,7 +22,8 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         IBattleUnitResourceProvider battleUnitResourceProvider,
         IBattleInterfaceProvider battleInterfaceProvider,
         ITextProvider textProvider,
-        Lazy<IBattleInterfaceController> battleInterfaceController) : base(gameObjectContainer)
+        Lazy<IBattleInterfaceController> battleInterfaceController
+        ) : base(gameObjectContainer)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _battleUnitResourceProvider = battleUnitResourceProvider;
@@ -47,7 +48,7 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
     /// <inheritdoc />
     public BattleUnitInfoGameObject AddBattleUnitInfo(int x, int y, int layer)
     {
-        var battleUnitInfoObject = new BattleUnitInfoGameObject(_sceneObjectContainer, x, y, layer);
+        var battleUnitInfoObject = new BattleUnitInfoGameObject(_sceneObjectContainer, _textProvider, x, y, layer);
         return AddObject(battleUnitInfoObject);
     }
 
@@ -60,12 +61,5 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
             _battleInterfaceController.Value.UnitPortraitRightMouseButtonPressed,
             unit, rightToLeft, x, y);
         return AddObject(unitPortrait);
-    }
-
-    /// <inheritdoc />
-    public DetailUnitInfoObject ShowDetailUnitInfo(Unit unit)
-    {
-        var detailUnitInfoObject = new DetailUnitInfoObject(_sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider, _textProvider, unit);
-        return AddObject(detailUnitInfoObject);
     }
 }

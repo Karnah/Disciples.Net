@@ -28,9 +28,9 @@ public class SceneInterface
     public string? CursorImageName { get; init; }
 
     /// <summary>
-    /// Что-то магическое, много значений 0.
+    /// Активная точка курсора.
     /// </summary>
-    public int Magic { get; init; }
+    public Point CursorHotSpot { get; init; }
 
     /// <summary>
     /// Расположение элемента на экране.
@@ -38,9 +38,9 @@ public class SceneInterface
     public Bounds Position { get; init; }
 
     /// <summary>
-    /// Что-то магическое, много значений 0.
+    /// Автоматически рисовать интерфейс.
     /// </summary>
-    public int Magic2 { get; init; }
+    public bool IsSelfDrawn { get; init; }
 
     /// <summary>
     /// Элементы интерфейса.

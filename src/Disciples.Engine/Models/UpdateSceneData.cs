@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Disciples.Common.Models;
 
 namespace Disciples.Engine.Models;
 

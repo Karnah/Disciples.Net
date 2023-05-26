@@ -32,10 +32,4 @@ internal interface IBattleGameObjectContainer : IGameObjectContainer
     /// <param name="x">Положение портрета, координата X.</param>
     /// <param name="y">Положение портрета, координата Y.</param>
     UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y);
-
-    /// <summary>
-    /// Отобразить детальную информацию о юните.
-    /// </summary>
-    /// <param name="unit">Юнит, о котором необходимо вывести информацию.</param>
-    DetailUnitInfoObject ShowDetailUnitInfo(Unit unit);
 }

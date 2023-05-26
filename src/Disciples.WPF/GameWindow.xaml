@@ -8,6 +8,7 @@
         xmlns:e="clr-namespace:Disciples.Engine;assembly=Disciples.Engine"
         xmlns:c="clr-namespace:Disciples.WPF.Converters"
         xmlns:dts="clr-namespace:Disciples.WPF.DataTemplateSelectors"
+        xmlns:controls="clr-namespace:Disciples.WPF.Controls"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:GameWindowViewModel}"
         Title="WPF Disciples II" WindowStyle="None" WindowState="Maximized" Background="Black">
@@ -45,14 +46,9 @@
 
                     <dts:SceneObjectTemplateSelector.TextTemplate>
                         <DataTemplate DataType="{x:Type so:ITextSceneObject}">
-                            <TextBlock TextWrapping="Wrap"
-                                       TextAlignment="{Binding TextAlignment, Converter={c:TextAlignmentConverter}}"
-                                       FontSize="{Binding FontSize}"
-                                       FontWeight="{Binding IsBold, Converter={c:BoldFontConverter}}"
-                                       Foreground="{Binding Foreground, Converter={c:GameColorToBrushConverter}}"
-                                       Width="{Binding Width}"
-                                       Height="{Binding Height}"
-                                       Text="{Binding Text}" />
+                            <controls:SceneTextBlock Width="{Binding Width}" Height="{Binding Height}"
+                                                     TextStyle="{Binding TextStyle}"
+                                                     Text="{Binding Text}" />
                         </DataTemplate>
                     </dts:SceneObjectTemplateSelector.TextTemplate>
                 </dts:SceneObjectTemplateSelector>

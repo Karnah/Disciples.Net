@@ -13,7 +13,7 @@ internal class ButtonSceneElementParser : BaseSceneElementParser
     public override string ElementTypeName => "BUTTON";
 
     /// <inheritdoc />
-    public override SceneElement Parse(string line)
+    public override SceneElement Parse(string line, int offsetX, int offsetY)
     {
         var elements = line.Split(',');
         if (elements.Length < 11)
@@ -22,7 +22,7 @@ internal class ButtonSceneElementParser : BaseSceneElementParser
         return new ButtonSceneElement
         {
             Name = elements[0],
-            Position = elements.ParseBounds(1),
+            Position = elements.ParseBounds(1, offsetX, offsetY),
             ActiveStateImageName = elements[5].ParseImageName(),
             SelectedStateImageName = elements[6].ParseImageName(),
             PressedStateImageName = elements[7].ParseImageName(),

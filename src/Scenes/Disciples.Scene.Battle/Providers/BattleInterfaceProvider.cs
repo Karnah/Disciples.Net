@@ -45,6 +45,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// </summary>
     private void LoadBitmaps()
     {
+        UnitDetailInfoInterface = _interfaceProvider.GetSceneInterface("DLG_R_C_UNIT");
+
         Battleground = _battleResourceProvider.GetRandomBattleground();
 
         var battleIcons = _interfaceProvider.GetImageParts("DLG_BATTLE_A.PNG");
@@ -55,7 +57,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         PanelSeparator = battleIcons["DLG_BATTLE_A_SPLITLRG"];
         DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS")).Bitmap;
         DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL")).Bitmap;
-        UnitInfoBackground = _interfaceProvider.GetImage("_PG0500IX");
 
         BlueLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL1").Bitmap;
         OrangeLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL2").Bitmap;
@@ -84,6 +85,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
+    public SceneInterface UnitDetailInfoInterface { get; private set; } = null!;
+
+    /// <inheritdoc />
     public IReadOnlyList<IBitmap> Battleground { get; private set; } = null!;
 
     /// <inheritdoc />
@@ -103,9 +107,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
     /// <inheritdoc />
     public IBitmap DeathSkullBig { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IBitmap UnitInfoBackground { get; private set; } = null!;
 
     /// <inheritdoc />
     public IBitmap BlueLevelIcon { get; private set; } = null!;

@@ -11,9 +11,9 @@ public class TextBlockSceneElement : SceneElement
     public override SceneElementType Type => SceneElementType.TextBlock;
 
     /// <summary>
-    /// Информация о шрифте.
+    /// Информация о стиле отображения текста.
     /// </summary>
-    public string? Font { get; init; }
+    public string? TextStyle { get; init; }
 
     /// <summary>
     /// Идентификатор текста.
@@ -21,11 +21,7 @@ public class TextBlockSceneElement : SceneElement
     public string? TextId { get; init; }
 
     /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
+    /// Идентификатор текстовой подсказки при наведении на элемент.
     /// </summary>
-    /// <remarks>
-    /// Не уверен, что поле служит именно для этой цели.
-    /// В ресурсах игры оно нигде не задано.
-    /// </remarks>
     public string? ToolTipTextId { get; init; }
 }

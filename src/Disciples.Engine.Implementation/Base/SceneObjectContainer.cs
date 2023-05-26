@@ -2,10 +2,10 @@
 using System.Drawing;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Implementation.Base;
 
@@ -71,20 +71,15 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, bool isBold = false)
+    public ITextSceneObject AddText(TextContainer? text, double width, double height, double x, double y, int layer)
     {
-        return AddText(text, fontSize, x, y, layer, double.NaN, TextAlignment.Left, isBold);
+        return AddText(text, null, width, height, x, y, layer);
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
+    public ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, double width, double height, double x, double y, int layer)
     {
-        var textVisual = PlatformSceneObjectContainer.AddTextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor);
-        textVisual.X = x;
-        textVisual.Y = y;
-
-        return textVisual;
+        return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), width, height, x, y, layer);
     }
 
     /// <inheritdoc />

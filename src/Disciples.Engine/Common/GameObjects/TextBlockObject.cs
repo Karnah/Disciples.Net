@@ -1,6 +1,7 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.GameObjects;
 
@@ -31,7 +32,7 @@ public class TextBlockObject : GameObject
     /// <summary>
     /// Текст.
     /// </summary>
-    public string? Text
+    public TextContainer? Text
     {
         get => _textSceneObject.Text;
         set => _textSceneObject.Text = value;
@@ -42,7 +43,7 @@ public class TextBlockObject : GameObject
     {
         base.Initialize();
 
-        _textSceneObject = _sceneObjectContainer.AddText(_textBlock.Text, 12, X, Y, _layer, Width);
+        _textSceneObject = _sceneObjectContainer.AddText(_textBlock.Text, _textBlock.TextStyle, Width, Height, X, Y, _layer);
     }
 
     /// <inheritdoc />

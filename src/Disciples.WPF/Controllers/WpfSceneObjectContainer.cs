@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Linq;
 using DynamicData;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 using Disciples.WPF.SceneObjects;
 
 namespace Disciples.WPF.Controllers;
@@ -37,16 +36,9 @@ public class WpfSceneObjectContainer : IPlatformSceneObjectContainer
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string text, double fontSize, int layer, bool isBold = false)
+    public ITextSceneObject AddTextSceneObject(TextContainer? text, TextStyle textStyle, double width, double height, double x, double y, int layer)
     {
-        return AddSceneObject(new TextSceneObject(text, fontSize, layer, isBold));
-    }
-
-    /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string text, double fontSize, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null)
-    {
-        return AddSceneObject(new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor));
+        return AddSceneObject(new TextSceneObject(text, textStyle, width, height, x, y, layer));
     }
 
     /// <inheritdoc />

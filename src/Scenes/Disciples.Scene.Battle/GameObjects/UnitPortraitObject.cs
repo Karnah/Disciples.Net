@@ -9,6 +9,8 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Enums;
+using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -26,6 +28,14 @@ internal class UnitPortraitObject : GameObject
     private const int TEXT_LAYER_SHIFT = 2;
     private const int EFFECTS_LAYER_SHIFT = 3;
 
+    /// <summary>
+    /// Идентификатор в ресурсах для ХП юнита.
+    /// </summary>
+    private const string UNIT_HIT_POINTS_TEXT_ID = "X005TA0757";
+    /// <summary>
+    /// Идентификатор в ресурсах для урона и лечения.
+    /// </summary>
+    private const string DAMAGE_TEXT_ID = "X008TA0004";
     /// <summary>
     /// Идентификатор в ресурсах с текстом "Промах".
     /// </summary>
@@ -159,9 +169,17 @@ internal class UnitPortraitObject : GameObject
         _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, X, Y, BattleLayers.INTERFACE_LAYER);
         _unitPortrait.IsReflected = _rightToLeft;
 
-        _unitHitpoints = _sceneObjectContainer.AddText(string.Empty, 11, X, Y + Height + 3, BattleLayers.INTERFACE_LAYER, Width, isBold: true);
+        _unitHitpoints = _sceneObjectContainer.AddText(
+            null,
+            Width,
+            20,
+            X,
+            Y + Height,
+            BattleLayers.INTERFACE_LAYER);
+
         // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
-        if (!Unit.UnitType.IsSmall) {
+        if (!Unit.UnitType.IsSmall)
+        {
             _unitPanelSeparator = _sceneObjectContainer.AddImage(
                 _battleInterfaceProvider.PanelSeparator,
                 X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
@@ -218,27 +236,27 @@ internal class UnitPortraitObject : GameObject
         {
             case UnitActionType.Damaged:
                 _instantaneousEffectImage = AddColorImage(BattleColors.Damage);
-                _instantaneousEffectText = AddText($"-{eventData.Power!.Value}");
-                _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
+                _instantaneousEffectText = AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+                _unitHitpoints.Text = GetUnitHitPoints();
                 break;
 
             case UnitActionType.Healed:
                 _instantaneousEffectImage = AddColorImage(BattleColors.Heal);
-                _instantaneousEffectText = AddText($"+{eventData.Power!.Value}");
-                _unitHitpoints.Text = $"{Unit.HitPoints}/{Unit.MaxHitPoints}";
+                _instantaneousEffectText = AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+                _unitHitpoints.Text = GetUnitHitPoints();
                 break;
 
             case UnitActionType.Miss:
                 _instantaneousEffectImage = AddColorImage(BattleColors.Miss);
-                _instantaneousEffectText = AddText(_textProvider.GetText(MISS_TEXT_ID));
+                _instantaneousEffectText = AddText(MISS_TEXT_ID);
                 break;
 
             case UnitActionType.Defend:
-                _instantaneousEffectText = AddText(_textProvider.GetText(DEFEND_TEXT_ID));
+                _instantaneousEffectText = AddText(DEFEND_TEXT_ID);
                 break;
 
             case UnitActionType.Waiting:
-                _instantaneousEffectText = AddText(_textProvider.GetText(WAIT_TEXT_ID));
+                _instantaneousEffectText = AddText(WAIT_TEXT_ID);
                 break;
 
             case UnitActionType.Dying:
@@ -250,28 +268,26 @@ internal class UnitPortraitObject : GameObject
                 if (effectColor != null)
                     _instantaneousEffectImage = AddColorImage(effectColor.Value, false);
 
-                var underEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value, false));
-                _instantaneousEffectText = AddText(underEffectText);
+                _instantaneousEffectText = AddText(GetEffectTextId(eventData.AttackType!.Value, false));
 
                 break;
             }
 
             case UnitActionType.TriggeredEffect:
             {
-                var triggeredEffectText = _textProvider.GetText(GetEffectText(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted));
-                _instantaneousEffectText = AddText(eventData.Power == null
-                    ? triggeredEffectText
-                    : $"{triggeredEffectText} (-{eventData.Power})");
-
+                _instantaneousEffectText = AddDamageText(
+                    GetEffectTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
+                    eventData.AttackType!.Value,
+                    eventData.Power);
                 break;
             }
 
             case UnitActionType.Ward:
-                _instantaneousEffectText = AddText(_textProvider.GetText(WARD_TEXT_ID));
+                _instantaneousEffectText = AddText(WARD_TEXT_ID);
                 break;
 
             case UnitActionType.Immunity:
-                _instantaneousEffectText = AddText(_textProvider.GetText(IMMUNITY_TEXT_ID));
+                _instantaneousEffectText = AddText(IMMUNITY_TEXT_ID);
                 break;
 
             default:
@@ -319,7 +335,7 @@ internal class UnitPortraitObject : GameObject
                     ? _battleInterfaceProvider.DeathSkullSmall
                     : _battleInterfaceProvider.DeathSkullBig;
                 _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
-                _unitHitpoints.Text = $"0/{Unit.MaxHitPoints}";
+                _unitHitpoints.Text = GetUnitHitPoints();
 
                 RemoveSceneObject(ref _unitDamageForeground);
                 RemoveBattleEffectsForegrounds();
@@ -328,7 +344,7 @@ internal class UnitPortraitObject : GameObject
         else if (_lastUnitHitPoints != Unit.HitPoints)
         {
             _lastUnitHitPoints = Unit.HitPoints;
-            _unitHitpoints.Text = $"{_lastUnitHitPoints}/{Unit.MaxHitPoints}";
+            _unitHitpoints.Text = GetUnitHitPoints();
 
             RemoveSceneObject(ref _unitDamageForeground);
 
@@ -386,6 +402,7 @@ internal class UnitPortraitObject : GameObject
         }
 
         // Добавляем иконки новых эффектов.
+        // TODO Если эффектов слишком много, заполнять соседний столбец.
         foreach (var battleEffect in battleEffects)
         {
             if (!_battleEffectsIcons.ContainsKey(battleEffect.AttackType))
@@ -436,32 +453,38 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить наименования эффекта, что воздействует на юнита.
     /// </summary>
-    private static string GetEffectText(UnitAttackType attackType, bool isEffectCompleted)
+    private static string GetEffectTextId(UnitAttackType attackType, bool isEffectCompleted, int? power = null)
     {
         return attackType switch
         {
             UnitAttackType.Paralyze => isEffectCompleted
                 ? "X008TA0024"
-                : "X005TA0789",
-            UnitAttackType.Fear => "X005TA0794",
-            UnitAttackType.BoostDamage => "X005TA0795",
+                : "X008TA0008",
+            UnitAttackType.Fear => "X008TA0007",
+            UnitAttackType.BoostDamage => "X008TA0003",
             UnitAttackType.Petrify => isEffectCompleted
                 ? "X008TA0025"
                 : "X008TA0009",
-            UnitAttackType.LowerDamage => "X005TA0796",
-            UnitAttackType.LowerInitiative => "X005TA0797",
-            UnitAttackType.Poison => "X005TA0798",
-            UnitAttackType.Frostbite => "X005TA0799",
-            UnitAttackType.Revive => "X005TA0800",
-            UnitAttackType.Cure => "X005TA0793",
-            UnitAttackType.DrainLevel => "X005TA0804",
-            UnitAttackType.GiveAttack => "X005TA0805",
-            UnitAttackType.Doppelganger => "X005TA0806",
-            UnitAttackType.TransformSelf => "X005TA0807",
-            UnitAttackType.TransformOther => "X005TA0808",
-            UnitAttackType.Blister => "X160TA0012",
-            UnitAttackType.BestowWards => "X160TA0014",
-            UnitAttackType.Shatter => "X160TA0020",
+            UnitAttackType.LowerDamage => "X008TA0012",
+            UnitAttackType.LowerInitiative => "X008TA0013",
+            UnitAttackType.Poison => power == null
+                ? "X008TA0026"
+                : "X008TA0014",
+            UnitAttackType.Frostbite => power == null
+                ? "X008TA0027"
+                : "X008TA0015",
+            UnitAttackType.Revive => "X008TA0016",
+            UnitAttackType.Cure => "X008TA0017",
+            UnitAttackType.DrainLevel => "X008TA0018",
+            UnitAttackType.GiveAttack => "X008TA0019",
+            UnitAttackType.Doppelganger => "X008TA0022",
+            UnitAttackType.TransformSelf => "X008TA0022",
+            UnitAttackType.TransformOther => "X008TA0022",
+            UnitAttackType.Blister => power == null
+                ? "X160TA0011"
+                : "X160TA0022",
+            UnitAttackType.BestowWards => "X160TA0013",
+            UnitAttackType.Shatter => "X160TA0019",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
     }
@@ -484,9 +507,48 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Добавить на портрет указанный текст.
     /// </summary>
-    private ITextSceneObject AddText(string text)
+    private ITextSceneObject AddDamageText(string textId, UnitAttackType attackType, int? power)
     {
-        return _sceneObjectContainer.AddText(text, 12, X - 3, Y + Height / 2 - 6, BattleLayers.INTERFACE_LAYER + TEXT_LAYER_SHIFT, Width, isBold: true, foregroundColor: GameColors.White);
+        var text = _textProvider.GetText(textId);
+
+        switch (attackType)
+        {
+            case UnitAttackType.Damage:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.Blister:
+                text = text.ReplacePlaceholders(new []{ ("%DAMAGE%", new TextContainer($"-{power}")) });
+                break;
+
+            case UnitAttackType.Heal:
+                text = text.ReplacePlaceholders(new []{ ("%DAMAGE%", new TextContainer($"+{power}")) });
+                break;
+        }
+
+        return AddText(text);
+    }
+
+    /// <summary>
+    /// Добавить на портрет указанный текст.
+    /// </summary>
+    private ITextSceneObject AddText(string textId)
+    {
+        return AddText(_textProvider.GetText(textId));
+    }
+
+    /// <summary>
+    /// Добавить на портрет указанный текст.
+    /// </summary>
+    private ITextSceneObject AddText(TextContainer text)
+    {
+        return _sceneObjectContainer.AddText(
+            text,
+            new TextStyle { ForegroundColor = GameColors.White, FontSize = 12, FontWeight = FontWeight.Bold },
+            Width,
+            Height,
+            X,
+            Y,
+            BattleLayers.INTERFACE_LAYER + TEXT_LAYER_SHIFT);
     }
 
     /// <summary>
@@ -512,6 +574,20 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
+    /// Получить информацию о состоянии здоровья юнита.
+    /// </summary>
+    private TextContainer GetUnitHitPoints()
+    {
+        return _textProvider
+            .GetText(UNIT_HIT_POINTS_TEXT_ID)
+            .ReplacePlaceholders(new []
+            {
+                ("%HP%", new TextContainer(Unit.HitPoints.ToString()) ),
+                ("%HPMAX%", new TextContainer(Unit.MaxHitPoints.ToString()) ),
+            });
+    }
+
+    /// <summary>
     /// Очистить фоны эффектов битвы.
     /// </summary>
     private void RemoveBattleEffectsForegrounds()
@@ -530,6 +606,6 @@ internal class UnitPortraitObject : GameObject
     private void RemoveSceneObject<T>(ref T? sceneObject) where T : ISceneObject
     {
         _sceneObjectContainer.RemoveSceneObject(sceneObject);
-        sceneObject = default(T);
+        sceneObject = default;
     }
 }

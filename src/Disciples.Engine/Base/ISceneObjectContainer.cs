@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Base;
 
@@ -64,27 +64,24 @@ public interface ISceneObjectContainer
     /// Добавить текст на сцену.
     /// </summary>
     /// <param name="text">Текст.</param>
-    /// <param name="fontSize">Размер шрифта.</param>
+    /// <param name="width">Ширина текста.</param>
+    /// <param name="height">Высота текста.</param>
     /// <param name="x">Положение тексте, координата X.</param>
     /// <param name="y">Положение текста, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
-    /// <param name="isBold">Использовать жирный шрифт.</param>
-    ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, bool isBold = false);
+    ITextSceneObject AddText(TextContainer? text, double width, double height, double x, double y, int layer);
 
     /// <summary>
     /// Добавить текст на сцену.
     /// </summary>
     /// <param name="text">Текст.</param>
-    /// <param name="fontSize">Размер шрифта.</param>
+    /// <param name="textStyle">Стиль текста.</param>
+    /// <param name="width">Ширина текста.</param>
+    /// <param name="height">Высота текста.</param>
     /// <param name="x">Положение тексте, координата X.</param>
     /// <param name="y">Положение текста, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
-    /// <param name="width">Ширина текста.</param>
-    /// <param name="textAlignment">Выравнивание текста.</param>
-    /// <param name="isBold">Использовать жирный шрифт.</param>
-    /// <param name="foregroundColor">Цвет текста.</param>
-    ITextSceneObject AddText(string? text, double fontSize, double x, double y, int layer, double width,
-        TextAlignment textAlignment = TextAlignment.Center, bool isBold = false, Color? foregroundColor = null);
+    ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, double width, double height, double x, double y, int layer);
 
     /// <summary>
     /// Удалить объект со сцены.

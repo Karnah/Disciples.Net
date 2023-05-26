@@ -13,15 +13,15 @@ public class SceneObjectTemplateSelector : DataTemplateSelector
     /// <summary>
     /// Шаблон для изображения.
     /// </summary>
-    public DataTemplate ImageTemplate { get; set; }
+    public DataTemplate ImageTemplate { get; set; } = null!;
 
     /// <summary>
     /// Шаблон для текста.
     /// </summary>
-    public DataTemplate TextTemplate { get; set; }
+    public DataTemplate TextTemplate { get; set; } = null!;
 
     /// <inheritdoc />
-    public override DataTemplate SelectTemplate(object item, DependencyObject container)
+    public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
         if (item is IImageSceneObject)
             return ImageTemplate;

@@ -1,9 +1,9 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
-using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 using Disciples.Scene.LoadSaga.Models;
 
 namespace Disciples.Scene.LoadSaga.GameObjects;
@@ -57,15 +57,12 @@ internal class SagaSaveObject : GameObject
         base.Initialize();
 
         _saveText = _sceneObjectContainer.AddText(
-            Save.Name,
-            12,
+            new TextContainer(Save.Name),
+            WIDTH,
+            HEIGHT,
             X,
             Y,
-            2,
-            WIDTH,
-            TextAlignment.Left,
-            false,
-            foregroundColor: GameColors.Black);
+            2);
     }
 
     /// <inheritdoc />

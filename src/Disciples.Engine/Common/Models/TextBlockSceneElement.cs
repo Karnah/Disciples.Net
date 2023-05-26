@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -11,17 +12,17 @@ public class TextBlockSceneElement : SceneElement
     public override SceneElementType Type => SceneElementType.TextBlock;
 
     /// <summary>
-    /// Информация о шрифте.
+    ///Стиль текста.
     /// </summary>
-    public string? Font { get; init; }
+    public TextStyle? TextStyle { get; init; }
 
     /// <summary>
     /// Текст.
     /// </summary>
-    public string? Text { get; init; }
+    public TextContainer? Text { get; init; }
 
     /// <summary>
     /// Текстовая подсказка при наведении на элемент.
     /// </summary>
-    public string? ToolTip { get; init; }
+    public TextContainer? ToolTip { get; init; }
 }

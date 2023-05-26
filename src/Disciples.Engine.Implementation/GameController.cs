@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Controllers;

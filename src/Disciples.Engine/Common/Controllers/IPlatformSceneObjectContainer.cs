@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Controllers;
 
@@ -25,28 +24,19 @@ public interface IPlatformSceneObjectContainer
     /// Создать текст, который будет отображаться на сцене.
     /// </summary>
     /// <param name="text">Текст.</param>
-    /// <param name="fontSize">Размер шрифта.</param>
-    /// <param name="layer">Слой, на котором будет отображаться текст.</param>
-    /// <param name="isBold">Использовать жирный шрифт.</param>
-    ITextSceneObject AddTextSceneObject(string? text, double fontSize, int layer, bool isBold = false);
-
-    /// <summary>
-    /// Создать текст, который будет отображаться на сцене.
-    /// </summary>
-    /// <param name="text">Текст.</param>
-    /// <param name="fontSize">Размер шрифта.</param>
-    /// <param name="layer">Слой, на котором будет отображаться текст.</param>
+    /// <param name="textStyle">Стиль текста.</param>
     /// <param name="width">Ширина пространства, занимаемого текстом.</param>
-    /// <param name="textAlignment">Выравнивание текста по ширине.</param>
-    /// <param name="isBold">Использовать жирный шрифт.</param>
-    /// <param name="foregroundColor">Цвет шрифта.</param>
-    ITextSceneObject AddTextSceneObject(string? text,
-        double fontSize,
-        int layer,
+    /// <param name="height">Высота пространства, занимаемого текстом.</param>
+    /// <param name="x">X-координата текста.</param>
+    /// <param name="y">Y-координата текста.</param>
+    /// <param name="layer">Слой, на котором будет отображаться текст.</param>
+    ITextSceneObject AddTextSceneObject(TextContainer? text,
+        TextStyle textStyle,
         double width,
-        TextAlignment textAlignment = TextAlignment.Center,
-        bool isBold = false,
-        Color? foregroundColor = null);
+        double height,
+        double x,
+        double y,
+        int layer);
 
     /// <summary>
     /// Удалить объект со сцены.

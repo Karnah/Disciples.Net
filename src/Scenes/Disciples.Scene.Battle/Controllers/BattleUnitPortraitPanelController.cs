@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Base;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
@@ -7,7 +8,6 @@ using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
-using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;

@@ -1,8 +1,6 @@
-﻿using System.Drawing;
-using Disciples.Engine.Common.Constants;
-using Disciples.Engine.Common.Enums;
+﻿using ReactiveUI.Fody.Helpers;
 using Disciples.Engine.Common.SceneObjects;
-using ReactiveUI.Fody.Helpers;
+using Disciples.Engine.Models;
 
 namespace Disciples.WPF.SceneObjects;
 
@@ -12,44 +10,20 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     /// <summary>
     /// Создать объект типа <see cref="TextSceneObject" />.
     /// </summary>
-    public TextSceneObject(string text, double fontSize, int layer, bool isBold = false)
-        : this(text, fontSize, layer, double.NaN, TextAlignment.Left, isBold)
-    { }
-
-    /// <summary>
-    /// Создать объект типа <see cref="TextSceneObject" />.
-    /// </summary>
-    public TextSceneObject(string text,
-        double fontSize,
-        int layer,
-        double width,
-        TextAlignment textAlignment = TextAlignment.Center,
-        bool isBold = false,
-        Color? foregroundColor = null) : base(layer)
+    public TextSceneObject(TextContainer? text, TextStyle textStyle, double width, double height, double x, double y, int layer) : base(layer)
     {
         Text = text;
-        FontSize = fontSize;
-        IsBold = isBold;
+        TextStyle = textStyle;
         Width = width;
-        Height = double.NaN;
-        TextAlignment = textAlignment;
-        Foreground = foregroundColor ?? GameColors.Black;
+        Height = height;
+        X = x;
+        Y = y;
     }
-
 
     /// <inheritdoc />
     [Reactive]
-    public string Text { get; set; }
+    public TextContainer? Text { get; set; }
 
     /// <inheritdoc />
-    public double FontSize { get; }
-
-    /// <inheritdoc />
-    public bool IsBold { get; }
-
-    /// <inheritdoc />
-    public TextAlignment TextAlignment { get; }
-
-    /// <inheritdoc />
-    public Color Foreground { get; }
+    public TextStyle TextStyle { get; }
 }

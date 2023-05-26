@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -20,5 +21,5 @@ public class AnimationSceneElement : SceneElement
     /// <summary>
     /// Текстовая подсказка при наведении на элемент.
     /// </summary>
-    public string? ToolTip { get; init; }
+    public TextContainer? ToolTip { get; init; }
 }

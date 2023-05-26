@@ -17,9 +17,9 @@
 
     <Window.Resources>
         <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
-        <c:GameColorToBrushConverter x:Key="GameColorToBrushConverter" />
-        <c:TextAlignmentConverter x:Key="TextAlignmentConverter" />
-        <c:BoldFontConverter x:Key="BoldFontConverter" />
+        <c:TextVerticalAlignmentConverter x:Key="TextVerticalAlignmentConverter" />
+        <c:TextHorizontalAlignmentConverter x:Key="TextHorizontalAlignmentConverter" />
+        <c:TextContainerConverter x:Key="TextContainerConverter" />
     </Window.Resources>
 
     <Window.Styles>
@@ -50,14 +50,30 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vo:ITextSceneObject}">
-                    <TextBlock TextWrapping="Wrap"
-                               TextAlignment="{Binding TextAlignment, Converter={StaticResource TextAlignmentConverter}}"
-                               FontSize="{Binding FontSize}"
-                               FontWeight="{Binding IsBold, Converter={StaticResource BoldFontConverter}}"
-                               Foreground="{Binding Foreground, Converter={StaticResource GameColorToBrushConverter}}"
-                               Width="{Binding Width}"
-                               Height="{Binding Height}"
-                               Text="{Binding Text}" />
+                    <Decorator Width="{Binding Width}" Height="{Binding Height}">
+                        <TextBlock TextWrapping="Wrap">
+                            <TextBlock.VerticalAlignment>
+                                <MultiBinding Converter="{StaticResource TextVerticalAlignmentConverter}">
+                                    <Binding Path="Text" />
+                                    <Binding Path="TextStyle" />
+                                </MultiBinding>
+                            </TextBlock.VerticalAlignment>
+
+                            <TextBlock.TextAlignment>
+                                <MultiBinding Converter="{StaticResource TextHorizontalAlignmentConverter}">
+                                    <Binding Path="Text" />
+                                    <Binding Path="TextStyle" />
+                                </MultiBinding>
+                            </TextBlock.TextAlignment>
+
+                            <TextBlock.Inlines>
+                                <MultiBinding Converter="{StaticResource TextContainerConverter}">
+                                    <Binding Path="Text" />
+                                    <Binding Path="TextStyle" />
+                                </MultiBinding>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                    </Decorator>
                 </DataTemplate>
             </ItemsControl.DataTemplates>
         </ItemsControl>

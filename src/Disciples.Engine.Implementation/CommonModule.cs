@@ -37,6 +37,7 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<BattleSoundsMappingExtractor>(Reuse.Singleton);
         containerRegistrator.Register<BattleSoundsExtractor>(Reuse.Singleton);
         containerRegistrator.Register<ISoundController, BassSoundController>(Reuse.Singleton);
+        //containerRegistrator.Register<ISoundController, NullSoundController>(Reuse.Singleton);
         containerRegistrator.Register<ISoundProvider, SoundProvider>(Reuse.Singleton);
 
         containerRegistrator.Register<ITextProvider, TextProvider>(Reuse.Singleton);
@@ -50,6 +51,7 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<ISceneObjectContainer, SceneObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IGameObjectContainer, GameObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IDialogController, DialogController>(Reuse.Scoped);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(Reuse.Scoped);
 
         var mapperConfiguration = new MapperConfiguration(cnf =>
             cnf.AddMaps(typeof(IGameController).GetAssembly()));

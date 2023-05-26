@@ -1,4 +1,4 @@
-﻿namespace Disciples.Engine.Models;
+﻿namespace Disciples.Common.Models;
 
 /// <summary>
 /// Координата точки.

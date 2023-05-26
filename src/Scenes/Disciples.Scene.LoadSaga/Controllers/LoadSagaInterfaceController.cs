@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common;
+using Disciples.Engine.Common.Constants;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
@@ -9,6 +11,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.LoadSaga.GameObjects;
@@ -37,6 +40,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     private readonly SaveProvider _saveProvider;
     private readonly GameController _gameController;
     private readonly ITextProvider _textProvider;
+    private readonly ISceneInterfaceController _sceneInterfaceController;
 
     private List<SagaSaveObject> _sagaSaves = null!;
     private int? _selectedSaveIndex;
@@ -59,7 +63,8 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         LoadSagaInterfaceProvider interfaceProvider,
         SaveProvider saveProvider,
         GameController gameController,
-        ITextProvider textProvider)
+        ITextProvider textProvider,
+        ISceneInterfaceController sceneInterfaceController)
     {
         _gameObjectContainer = gameObjectContainer;
         _sceneObjectContainer = sceneObjectContainer;
@@ -67,6 +72,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         _saveProvider = saveProvider;
         _gameController = gameController;
         _textProvider = textProvider;
+        _sceneInterfaceController = sceneInterfaceController;
     }
 
     /// <summary>
@@ -104,8 +110,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     protected override void LoadInternal()
     {
         var sceneInterface = _interfaceProvider.SceneInterface;
-
-        AddInterfaceElements(sceneInterface);
+        _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
         var saves = _saveProvider.GetSaves();
         var sagaSaves = new List<SagaSaveObject>(saves.Count);
@@ -149,45 +154,6 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
-    }
-
-    /// <summary>
-    /// Добавить элементы интерфейса.
-    /// </summary>
-    private void AddInterfaceElements(SceneInterface sceneInterface)
-    {
-        if (sceneInterface.Background != null)
-            _sceneObjectContainer.AddImage(sceneInterface.Background, 0, 0, 0);
-
-        foreach (var sceneElement in sceneInterface.Elements.Values)
-        {
-            switch (sceneElement.Type)
-            {
-                case SceneElementType.Image:
-                    var image = (ImageSceneElement)sceneElement;
-                    _gameObjectContainer.AddImage(image, 1);
-                    break;
-
-                case SceneElementType.Animation:
-                    var animation = (AnimationSceneElement)sceneElement;
-                    _gameObjectContainer.AddAnimation(animation, 1);
-                    break;
-
-                case SceneElementType.TextBlock:
-                    var textBlock = (TextBlockSceneElement)sceneElement;
-                    _gameObjectContainer.AddTextBlock(textBlock, 1);
-                    break;
-
-                case SceneElementType.Button:
-                case SceneElementType.ToggleButton:
-                case SceneElementType.RadioButton:
-                case SceneElementType.ListBox:
-                case SceneElementType.EditTextBox:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
     }
 
     /// <summary>
@@ -317,43 +283,32 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// </summary>
     private void UpdateSelectedSaveDescription(Save save)
     {
-        _saveInfo.Text = ReplaceSaveInfoPlaceholders(_textProvider.GetText(SAVE_INFO), save);
-        _saveDescription.Text = ReplaceSaveDescriptionPlaceholders(_textProvider.GetText(SAVE_DESCRIPTION), save);
-    }
-
-    /// <summary>
-    /// Заменить плейсхолдеры значениями из сейва.
-    /// </summary>
-    private string ReplaceSaveInfoPlaceholders(string value, Save save)
-    {
         var gameContext = save.GameContext;
-        return value
-            .Replace("\\n", Environment.NewLine)
-            .Replace("%TYPE%", GetGameTypeText(gameContext.GameType))
-            .Replace("%TYPEDESC%", GetTypeDescription(gameContext))
-            .Replace("%TURN%", gameContext.TurnNumber.ToString())
-            .Replace("%DIFF%", GetDifficultyLevelTitle(gameContext.DifficultyLevel))
-            ;
-    }
 
-    /// <summary>
-    /// Заменить плейсхолдеры значениями из сейва.
-    /// </summary>
-    private string ReplaceSaveDescriptionPlaceholders(string value, Save save)
-    {
-        var gameContext = save.GameContext;
-        return value
-                .Replace("\\n", Environment.NewLine)
-                .Replace("%NAME%", gameContext.SagaName)
-                .Replace("%TYPE%", GetMissionTypeText(gameContext.MissionType))
-                .Replace("%DESC%", gameContext.SagaDescription)
-            ;
+        _saveInfo.Text = _textProvider
+            .GetText(SAVE_INFO)
+            .ReplacePlaceholders(new []
+            {
+                ("%TYPE%", GetGameTypeText(gameContext.GameType)),
+                ("%TYPEDESC%", GetTypeDescription(gameContext)),
+                ("%TURN%", new TextContainer(gameContext.TurnNumber.ToString())),
+                ("%DIFF%", GetDifficultyLevelTitle(gameContext.DifficultyLevel)),
+            });
+
+        _saveDescription.Text = _textProvider
+            .GetText(SAVE_DESCRIPTION)
+            .ReplacePlaceholders(new []
+            {
+                ("%NAME%", new TextContainer(gameContext.SagaName)),
+                ("%TYPE%", GetMissionTypeText(gameContext.MissionType)),
+                ("%DESC%", new TextContainer(gameContext.SagaDescription ?? string.Empty)),
+            });
     }
 
     /// <summary>
     /// Получить текст для типа игры.
     /// </summary>
-    private string GetGameTypeText(GameType type)
+    private TextContainer GetGameTypeText(GameType type)
     {
         var textId = type switch
         {
@@ -368,21 +323,21 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <summary>
     /// Получить текст для описания типа саги.
     /// </summary>
-    private string GetTypeDescription(GameContext gameContext)
+    private TextContainer GetTypeDescription(GameContext gameContext)
     {
         var race = gameContext.Players.FirstOrDefault(p => !p.IsComputer)?.Race;
         if (race == null)
-            return string.Empty;
+            return new TextContainer(string.Empty);
 
         var description = _textProvider.GetText("X005TA0719");
         return description
-            .Replace("%RACE%", GetRaceTitle(race.Value));
+            .ReplacePlaceholders(new []{ ("%RACE%", GetRaceTitle(race.Value)) });
     }
 
     /// <summary>
     /// Получить название расы.
     /// </summary>
-    private string GetRaceTitle(RaceType race)
+    private TextContainer GetRaceTitle(RaceType race)
     {
         var textId = race switch
         {
@@ -400,7 +355,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <summary>
     /// Получить наименование уровня сложности.
     /// </summary>
-    private string GetDifficultyLevelTitle(DifficultyLevel difficultyLevel)
+    private TextContainer GetDifficultyLevelTitle(DifficultyLevel difficultyLevel)
     {
         var textId = difficultyLevel switch
         {
@@ -417,7 +372,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// <summary>
     /// Получить текст для типа миссии.
     /// </summary>
-    private string GetMissionTypeText(MissionType type)
+    private TextContainer GetMissionTypeText(MissionType type)
     {
         var textId = type switch
         {

@@ -13,7 +13,7 @@ internal class ImageSceneElementParser : BaseSceneElementParser
     public override string ElementTypeName => "IMAGE";
 
     /// <inheritdoc />
-    public override SceneElement Parse(string line)
+    public override SceneElement Parse(string line, int offsetX, int offsetY)
     {
         var elements = line.Split(',');
         if (elements.Length < 7)
@@ -22,7 +22,7 @@ internal class ImageSceneElementParser : BaseSceneElementParser
         return new ImageSceneElement
         {
             Name = elements[0],
-            Position = elements.ParseBounds(1),
+            Position = elements.ParseBounds(1, offsetX, offsetY),
             ImageName = elements[5].ParseImageName(),
             ToolTipTextId = elements[6].ParseTextId(),
         };

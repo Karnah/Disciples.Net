@@ -9,6 +9,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
+using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Factories;
 using ResourceSceneElementType = Disciples.Resources.Images.Enums.SceneElementType;
 using ResourceSceneElement = Disciples.Resources.Images.Models.SceneElement;
@@ -214,7 +215,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         {
             Name = textBlock.Name,
             Position = textBlock.Position,
-            Font = textBlock.Font,
+            TextStyle = GetElementTextStyle(textBlock.TextStyle),
             Text = GetElementText(textBlock.TextId),
             ToolTip = GetElementText(textBlock.ToolTipTextId)
         };
@@ -233,10 +234,20 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <summary>
     /// Получить текст элемента.
     /// </summary>
-    private string? GetElementText(string? textId)
+    private TextContainer? GetElementText(string? textId)
     {
         return textId == null
             ? null
             : _textProvider.GetText(textId);
+    }
+
+    /// <summary>
+    /// Получить стиль текста.
+    /// </summary>
+    private static TextStyle? GetElementTextStyle(string? textStyle)
+    {
+        return textStyle == null
+            ? null
+            : new TextStyle(textStyle);
     }
 }

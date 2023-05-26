@@ -1,7 +1,9 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Scene.Battle.GameObjects;
 
@@ -11,6 +13,7 @@ namespace Disciples.Scene.Battle.GameObjects;
 internal class BattleUnitInfoGameObject : GameObject
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
+    private readonly ITextProvider _textProvider;
     private readonly int _layer;
 
     private ITextSceneObject? _unitInfoText;
@@ -18,9 +21,10 @@ internal class BattleUnitInfoGameObject : GameObject
     private int? _lastHitpoints;
 
     /// <inheritdoc />
-    public BattleUnitInfoGameObject(ISceneObjectContainer sceneObjectContainer, double x, double y, int layer) : base(x, y)
+    public BattleUnitInfoGameObject(ISceneObjectContainer sceneObjectContainer, ITextProvider textProvider, double x, double y, int layer) : base(x, y)
     {
         _sceneObjectContainer = sceneObjectContainer;
+        _textProvider = textProvider;
         _layer = layer;
 
         Width = 120;
@@ -54,10 +58,7 @@ internal class BattleUnitInfoGameObject : GameObject
         {
             _sceneObjectContainer.RemoveSceneObject(_unitInfoText);
 
-            _unitInfoText = _sceneObjectContainer.AddText(GetUnitNameAndHitPoints(Unit), 14, X, Y, _layer, true);
-            _unitInfoText.Width = Width;
-            _unitInfoText.Height = Height;
-
+            _unitInfoText = _sceneObjectContainer.AddText(GetUnitInfoText(Unit), Width, Height, X, Y, _layer);
             _lastUnit = Unit;
             _lastHitpoints = Unit.HitPoints;
         }
@@ -72,9 +73,18 @@ internal class BattleUnitInfoGameObject : GameObject
         _unitInfoText = null;
     }
 
-    private static string GetUnitNameAndHitPoints(Unit unit)
+    /// <summary>
+    /// Получить тестовое описание юнита.
+    /// </summary>
+    private TextContainer GetUnitInfoText(Unit unit)
     {
-        return $"{unit.UnitType.Name}{Environment.NewLine}" +
-               $"ОЗ : {unit.HitPoints}/{unit.MaxHitPoints}";
+        return _textProvider
+            .GetText("X100TA0608")
+            .ReplacePlaceholders(new[]
+            {
+                ("%NAME%", new TextContainer(unit.Name)),
+                ("%HP%", new TextContainer(unit.HitPoints.ToString())),
+                ("%HPMAX%", new TextContainer(unit.MaxHitPoints.ToString())),
+            });
     }
 }

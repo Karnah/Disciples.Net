@@ -10,13 +10,23 @@ internal static class ParseExtensions
     /// <summary>
     /// Распарсить границы элемента.
     /// </summary>
-    public static Bounds ParseBounds(this IReadOnlyList<string> data, int startIndex)
+    public static Bounds ParseBounds(this IReadOnlyList<string> data, int startIndex, int offsetX = 0, int offsetY = 0)
     {
         return new Bounds(
-            int.Parse(data[startIndex + 3]),
-            int.Parse(data[startIndex + 1]),
+            int.Parse(data[startIndex + 3]) + offsetY,
+            int.Parse(data[startIndex + 1]) + offsetY,
+            int.Parse(data[startIndex]) + offsetX,
+            int.Parse(data[startIndex + 2]) + offsetX);
+    }
+
+    /// <summary>
+    /// Распарсить точку.
+    /// </summary>
+    public static Point ParsePoint(this IReadOnlyList<string> data, int startIndex)
+    {
+        return new Point(
             int.Parse(data[startIndex]),
-            int.Parse(data[startIndex + 2]));
+            int.Parse(data[startIndex + 1]));
     }
 
     /// <summary>
@@ -38,6 +48,16 @@ internal static class ParseExtensions
         return string.IsNullOrEmpty(trimmed)
             ? null
             : trimmed;
+    }
+
+    /// <summary>
+    /// Получить строку стиля.
+    /// </summary>
+    public static string? ParseTextStyle(this string data)
+    {
+        return string.IsNullOrEmpty(data)
+            ? null
+            : data;
     }
 
     /// <summary>

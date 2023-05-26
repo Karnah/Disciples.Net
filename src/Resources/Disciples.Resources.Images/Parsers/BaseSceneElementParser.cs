@@ -15,5 +15,5 @@ internal abstract class BaseSceneElementParser
     /// <summary>
     /// Распарсить элемент из строки.
     /// </summary>
-    public abstract SceneElement Parse(string line);
+    public abstract SceneElement Parse(string line, int offsetX, int offsetY);
 }

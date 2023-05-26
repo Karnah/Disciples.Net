@@ -1,12 +1,10 @@
-﻿using Disciples.Engine;
-using Disciples.Engine.Base;
+﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
@@ -18,18 +16,14 @@ namespace Disciples.Scene.LoadingSave;
 /// <inheritdoc cref="ILoadingSaveScene" />
 internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
 {
-    private readonly IGameObjectContainer _gameObjectContainer;
-    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IGameController _gameController;
     private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ITextProvider _textProvider;
+    private readonly ISceneInterfaceController _sceneInterfaceController;
     private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
 
     private string _savePath = null!;
-
-    private AnimationObject _loadingAnimationObject = null!;
-    private ITextSceneObject _loadingText = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="LoadingSaveScene" />.
@@ -42,15 +36,15 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         IUnitInfoProvider unitInfoProvider,
         IInterfaceProvider interfaceProvider,
         ITextProvider textProvider,
+        ISceneInterfaceController sceneInterfaceController,
         IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
-        _gameObjectContainer = gameObjectContainer;
-        _sceneObjectContainer = sceneObjectContainer;
         _gameController = gameController;
         _unitInfoProvider = unitInfoProvider;
         _interfaceProvider = interfaceProvider;
         _textProvider = textProvider;
+        _sceneInterfaceController = sceneInterfaceController;
         _resourceExtractors = resourceExtractors;
     }
 
@@ -68,25 +62,10 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     {
         base.LoadInternal();
 
-        var loadingAnimation = _interfaceProvider.GetAnimation("DLG_WAIT_HOURGLASS");
-        var loadingAnimationWidth = loadingAnimation[0].Width;
-        var loadingAnimationHeight = loadingAnimation[0].Height;
-        _loadingAnimationObject = _gameObjectContainer.AddAnimation(
-            loadingAnimation,
-            (GameInfo.OriginalWidth - loadingAnimationWidth) / 2,
-            (GameInfo.OriginalHeight - loadingAnimationHeight) / 2,
-            1);
-
-
-        _loadingText = _sceneObjectContainer.AddText(
-            _textProvider.GetText("X003TA0004"),
-            20,
-            0,
-            450,
-            1,
-            GameInfo.OriginalWidth,
-            isBold: true,
-            foregroundColor: GameColors.White);
+        var sceneInterface = _interfaceProvider.GetSceneInterface("DLG_WAIT");
+        var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
+        var waitTextBlock = gameObjects.OfType<TextBlockObject>().First();
+        waitTextBlock.Text = _textProvider.GetText("X003TA0004");
     }
 
     /// <inheritdoc />

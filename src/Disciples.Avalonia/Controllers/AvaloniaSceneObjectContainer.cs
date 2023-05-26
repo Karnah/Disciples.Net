@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Avalonia.Collections;
 using Disciples.Avalonia.SceneObjects;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Avalonia.Controllers;
 
@@ -36,21 +35,10 @@ public class AvaloniaSceneObjectContainer : IPlatformSceneObjectContainer
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string? text, double fontSize, int layer, bool isBold = false)
+    public ITextSceneObject AddTextSceneObject(TextContainer? text, TextStyle textStyle, double width, double height,
+        double x, double y, int layer)
     {
-        return AddSceneObject(new TextSceneObject(text, fontSize, layer, isBold));
-    }
-
-    /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(string? text,
-        double fontSize,
-        int layer,
-        double width,
-        TextAlignment textAlignment = TextAlignment.Center,
-        bool isBold = false,
-        Color? foregroundColor = null)
-    {
-        return AddSceneObject(new TextSceneObject(text, fontSize, layer, width, textAlignment, isBold, foregroundColor));
+        return AddSceneObject(new TextSceneObject(text, textStyle, width, height, x, y, layer));
     }
 
     /// <inheritdoc />
