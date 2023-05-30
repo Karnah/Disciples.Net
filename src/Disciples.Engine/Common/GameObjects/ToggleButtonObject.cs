@@ -16,12 +16,12 @@ public class ToggleButtonObject : ButtonObject
     public ToggleButtonObject(
         ISceneObjectContainer sceneObjectContainer,
         IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates,
-        Action buttonPressedAction,
+        Action buttonClickedAction,
         double x,
         double y,
         int layer,
         IReadOnlyList<KeyboardButton> hotKeys)
-        : base(sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotKeys)
+        : base(sceneObjectContainer, buttonStates, buttonClickedAction, x, y, layer, hotKeys)
     {
         IsChecked = false;
     }

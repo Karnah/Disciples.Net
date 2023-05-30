@@ -2,6 +2,7 @@
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 using Action = System.Action;
 
@@ -13,10 +14,31 @@ namespace Disciples.Engine.Common.GameObjects;
 public class ButtonObject : GameObject
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
-    private readonly IReadOnlyDictionary<SceneButtonState, IBitmap> _buttonStates;
-    private readonly Action _buttonPressedAction;
+    private readonly IReadOnlyDictionary<SceneButtonState, IBitmap>? _buttonStates;
 
-    private IImageSceneObject _buttonVisualObject = null!;
+    private IImageSceneObject? _buttonVisualObject;
+
+    /// <summary>
+    /// Создать объект типа <see cref="ButtonObject" />.
+    /// </summary>
+    public ButtonObject(
+        ISceneObjectContainer sceneObjectContainer,
+        ButtonSceneElement button,
+        int layer
+    ) : base(button)
+    {
+        _sceneObjectContainer = sceneObjectContainer;
+        _buttonStates = button.ButtonStates;
+
+        ButtonState = SceneButtonState.Disabled;
+        Layer = layer;
+
+        Components = new IComponent[]
+        {
+            new SelectionComponent(this, OnSelected, OnUnselected),
+            new MouseLeftButtonClickComponent(this, button.HotKeys, OnPressed, OnClicked)
+        };
+    }
 
     /// <summary>
     /// Создать объект типа <see cref="ButtonObject" />.
@@ -24,7 +46,7 @@ public class ButtonObject : GameObject
     public ButtonObject(
         ISceneObjectContainer sceneObjectContainer,
         IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates,
-        Action buttonPressedAction,
+        Action buttonClickedAction,
         double x,
         double y,
         int layer,
@@ -33,9 +55,9 @@ public class ButtonObject : GameObject
     {
         _sceneObjectContainer = sceneObjectContainer;
         _buttonStates = buttonStates;
-        _buttonPressedAction = buttonPressedAction;
 
         ButtonState = SceneButtonState.Disabled;
+        ClickedAction = buttonClickedAction;
         Layer = layer;
 
         var bitmap = _buttonStates[ButtonState];
@@ -52,7 +74,12 @@ public class ButtonObject : GameObject
     /// <summary>
     /// Состояние кнопки.
     /// </summary>
-    public SceneButtonState ButtonState { get; protected set; }
+    public SceneButtonState ButtonState { get; private set; }
+
+    /// <summary>
+    /// Обработчик клика на кнопку.
+    /// </summary>
+    public Action? ClickedAction { get; set; }
 
     /// <summary>
     /// Слой на котором располагается кнопка.
@@ -65,7 +92,8 @@ public class ButtonObject : GameObject
     {
         base.Initialize();
 
-        _buttonVisualObject = _sceneObjectContainer.AddImage(_buttonStates[ButtonState], X, Y, Layer);
+        if (_buttonStates != null)
+            _buttonVisualObject = _sceneObjectContainer.AddImage(_buttonStates[ButtonState], X, Y, Layer);
     }
 
     /// <inheritdoc />
@@ -142,7 +170,7 @@ public class ButtonObject : GameObject
     /// </summary>
     protected virtual SceneButtonState ProcessClickInternal()
     {
-        _buttonPressedAction.Invoke();
+        ClickedAction?.Invoke();
 
         // Во время клика могли изменить состояние кнопки.
         if (ButtonState == SceneButtonState.Disabled)
@@ -173,6 +201,9 @@ public class ButtonObject : GameObject
     /// </summary>
     protected void UpdateButtonVisualObject()
     {
-        _buttonVisualObject.Bitmap = _buttonStates[ButtonState];
+        if (_buttonStates == null)
+            return;
+
+        _buttonVisualObject!.Bitmap = _buttonStates[ButtonState];
     }
 }

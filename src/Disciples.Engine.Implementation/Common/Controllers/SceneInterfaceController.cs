@@ -64,6 +64,10 @@ internal class SceneInterfaceController : ISceneInterfaceController
                     break;
 
                 case SceneElementType.Button:
+                    var button = (ButtonSceneElement)sceneElement;
+                    gameObjects.Add(_gameObjectContainer.AddButton(button, layers.InterfaceLayer));
+                    break;
+
                 case SceneElementType.ToggleButton:
                 case SceneElementType.RadioButton:
                 case SceneElementType.ListBox:

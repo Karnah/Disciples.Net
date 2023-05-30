@@ -70,9 +70,10 @@ public class GameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer)
+    public ButtonObject AddButton(ButtonSceneElement button, int layer)
     {
-        return AddButton(button.ButtonStates, buttonPressedAction, button.Position.Left, button.Position.Top, layer, button.HotKeys);
+        var buttonObject = new ButtonObject(_sceneObjectContainer, button, layer);
+        return AddObject(buttonObject);
     }
 
     /// <inheritdoc />

@@ -152,7 +152,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <summary>
     /// Получить вид кнопки для каждого состояния.
     /// </summary>
-    private IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonStates(string? activeStateImageName, string? selectedStateImageName, string? pressedStateImageName, string? disabledStateImageName)
+    private IReadOnlyDictionary<SceneButtonState, IBitmap>? GetButtonStates(string? activeStateImageName, string? selectedStateImageName, string? pressedStateImageName, string? disabledStateImageName)
     {
         // TODO Есть невидимые кнопки, которые, тем не менее, имеют горячие клавиши.
         // Подумать, как их корректнее обрабатывать.
@@ -161,7 +161,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             || string.IsNullOrEmpty(pressedStateImageName)
             || string.IsNullOrEmpty(disabledStateImageName))
         {
-            return new Dictionary<SceneButtonState, IBitmap>();
+            return null;
         }
 
         return new Dictionary<SceneButtonState, IBitmap>

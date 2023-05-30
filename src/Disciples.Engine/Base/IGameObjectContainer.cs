@@ -70,9 +70,8 @@ public interface IGameObjectContainer
     /// Добавить кнопку на сцену.
     /// </summary>
     /// <param name="button">Информация о кнопке.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer);
+    ButtonObject AddButton(ButtonSceneElement button, int layer);
 
     /// <summary>
     /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.

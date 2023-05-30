@@ -9,6 +9,8 @@ using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Providers;
 using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Extensions;
+using Disciples.Scene.Battle.Constants;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -68,19 +70,19 @@ internal class UnitDetailInfoDialog : BaseDialog
             .FirstOrDefault(go => go.SelectionComponent?.IsSelected == true);
         _gameObjects = _sceneInterfaceController.AddSceneGameObjects(_battleInterfaceProvider.UnitDetailInfoInterface, Layers.DialogLayers);
 
-        var unitPortrait = _gameObjects.OfType<ImageObject>().First(io => io.Name == "IMG_UNIT_ICON");
+        var unitPortrait = _gameObjects.Get<ImageObject>(UnitDetailInfoElementNames.PORTRAIT_IMAGE);
         unitPortrait.Bitmap = _battleUnitResourceProvider.GetUnitPortrait(_unit.UnitType);
 
-        var unitName = _gameObjects.OfType<TextBlockObject>().First(tbo => tbo.Name == "TXT_UNIT_NAME");
+        var unitName = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.NAME_TEXT_BLOCK);
         unitName.Text = new TextContainer(new []{ new TextPiece(new TextStyle { FontWeight = FontWeight.Bold }, _unit.UnitType.Name) });
 
-        var unitDescription = _gameObjects.OfType<TextBlockObject>().First(tbo => tbo.Name == "TXT_UNIT_INFO");
+        var unitDescription = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.DESCRIPTION_TEXT_BLOCK);
         unitDescription.Text = new TextContainer(_unit.UnitType.Description);
 
-        var unitStats = _gameObjects.OfType<TextBlockObject>().First(tbo => tbo.Name == "TXT_STATS");
+        var unitStats = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.STATS_TEXT_BLOCK);
         unitStats.Text = ReplacePlaceholders(_textProvider.GetText(UNIT_BASE_INFO_ID), _unit);
 
-        var unitAttack = _gameObjects.OfType<TextBlockObject>().First(tbo => tbo.Name == "TXT_ATTACK_INFO");
+        var unitAttack = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.ATTACK_INFO_TEXT_BLOCK);
         var firstPartAttack = ReplacePlaceholders(_textProvider.GetText(UNIT_ATTACK_INFO_FIRST_PART_ID), _unit);
         var secondPartAttack = ReplacePlaceholders(_textProvider.GetText(UNIT_ATTACK_INFO_SECOND_PART_ID), _unit);
         unitAttack.Text = new TextContainer(

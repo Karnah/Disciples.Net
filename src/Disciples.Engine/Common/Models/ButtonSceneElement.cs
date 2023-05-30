@@ -16,7 +16,11 @@ public class ButtonSceneElement : SceneElement
     /// <summary>
     /// Вид кнопки для каждого состояния.
     /// </summary>
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> ButtonStates { get; init; } = null!;
+    /// <remarks>
+    /// Если <see langword="null" />, значит кнопка не отображается на экране,
+    /// И нужна только для обработки горячих клавиш.
+    /// </remarks>
+    public IReadOnlyDictionary<SceneButtonState, IBitmap>? ButtonStates { get; init; }
 
     /// <summary>
     /// Текстовая подсказка при наведении на элемент.

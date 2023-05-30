@@ -70,9 +70,9 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public ButtonObject AddButton(ButtonSceneElement button, Action buttonPressedAction, int layer)
+    public ButtonObject AddButton(ButtonSceneElement button, int layer)
     {
-        return GameObjectContainer.AddButton(button, buttonPressedAction, layer);
+        return GameObjectContainer.AddButton(button, layer);
     }
 
     /// <inheritdoc />

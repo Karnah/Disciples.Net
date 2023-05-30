@@ -6,14 +6,15 @@ using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
+using Disciples.Scene.LoadSaga.Constants;
 using Disciples.Scene.LoadSaga.GameObjects;
 using Disciples.Scene.LoadSaga.Models;
 using Disciples.Scene.LoadSaga.Providers;
@@ -110,7 +111,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     protected override void LoadInternal()
     {
         var sceneInterface = _interfaceProvider.SceneInterface;
-        _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
+        var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
         var saves = _saveProvider.GetSaves();
         var sagaSaves = new List<SagaSaveObject>(saves.Count);
@@ -128,25 +129,22 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         if (_sagaSaves.Count > 0)
             _selectedSaveIndex = 0;
 
-        _goBackButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_BACK"], ExecuteBack, 1);
+        _goBackButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.BACK_BUTTON);
+        _goBackButton.ClickedAction = ExecuteBack;
         _goBackButton.SetActive();
-        _continueButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_LOAD"], ExecuteContinue, 1);
 
-        _saveUpButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_GAME_LIST_UP"], ExecuteSaveUp, 1);
-        _saveDownButton = _gameObjectContainer.AddButton((ButtonSceneElement)sceneInterface.Elements["BTN_GAME_LIST_DOWN"], ExecuteSaveDown, 1);
+        _continueButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.CONTINUE_BUTTON);
+        _continueButton.ClickedAction = ExecuteContinue;
 
-        _saveInfo = (TextBlockObject)_gameObjectContainer
-            .GameObjects
-            .First(go => go.Name == "TXT_INFO");
-        _saveDescription = (TextBlockObject)_gameObjectContainer
-            .GameObjects
-            .First(go => go.Name == "TXT_DESC");
-        _saveRaces = _gameObjectContainer
-            .GameObjects
-            .Where(go => go.Name?.StartsWith("IMG_RACE_") == true)
-            .OfType<ImageObject>()
-            .ToArray();
+        _saveUpButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.SAVE_UP_BUTTON);
+        _saveUpButton.ClickedAction = ExecuteSaveUp;
 
+        _saveDownButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.SAVE_DOWN_BUTTON);
+        _saveDownButton.ClickedAction = ExecuteSaveDown;
+
+        _saveInfo = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_INFO_TEXT_BLOCK);
+        _saveDescription = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_DESCRIPTION_TEXT_BLOCK);
+        _saveRaces = gameObjects.Get<ImageObject>(i => i.Name?.StartsWith(LoadSagaElementNames.RACES_PATTERN_IMAGE) == true);
 
         UpdateSelectedSave();
     }
