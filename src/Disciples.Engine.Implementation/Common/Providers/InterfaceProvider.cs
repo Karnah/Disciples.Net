@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;

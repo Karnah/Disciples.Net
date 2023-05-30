@@ -373,7 +373,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
             for (int row = 0; row < framePart.Height; ++row)
             {
                 var sourcePosition = ((framePart.DestY + row) * baseImage.OriginalWidth + framePart.DestX) << 2;
-                var destinationPosition = ((framePart.SourceY + row - bounds.Top) * imageWidth + framePart.SourceX - bounds.Left) << 2;
+                var destinationPosition = ((framePart.SourceY + row - bounds.Y) * imageWidth + framePart.SourceX - bounds.X) << 2;
 
                 Buffer.BlockCopy(baseImage.Data, sourcePosition, imageData, destinationPosition, partWidth);
             }

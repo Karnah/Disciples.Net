@@ -57,8 +57,8 @@ public class WpfBitmapFactory : IBitmapFactory
         var bitmapSource = BitmapSource.Create(width, height, dpi, dpi, pixelFormat, null, GetBitmapByteArray(rawBitmap, resultBounds), stride);
         bitmapSource.Freeze();
 
-        var offsetX = resultBounds.Left;
-        var offsetY = resultBounds.Top;
+        var offsetX = resultBounds.X;
+        var offsetY = resultBounds.Y;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
@@ -118,12 +118,12 @@ public class WpfBitmapFactory : IBitmapFactory
         // Сколько байт в каждой строке нужно копировать в итоговый массив.
         var copyRowLength = unionBounds.Width * 4;
 
-        for (int row = unionBounds.Top; row < unionBounds.Bottom; ++row)
+        for (int row = unionBounds.Y; row < unionBounds.Y + unionBounds.Height; ++row)
         {
-            var begin = ((row - rawBitmap.Bounds.Top) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+            var begin = ((row - rawBitmap.Bounds.Y) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
             Buffer.BlockCopy(rawBitmap.Data, begin, data,
-                (row - resultBounds.Top) * destinationRowLength, copyRowLength);
+                (row - resultBounds.Y) * destinationRowLength, copyRowLength);
         }
 
         return data;

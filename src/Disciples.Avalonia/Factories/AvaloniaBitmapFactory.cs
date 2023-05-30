@@ -65,26 +65,26 @@ public class AvaloniaBitmapFactory : IBitmapFactory
                 var destinationRowLength = width * 4;
 
                 // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
-                var sourceOffsetColumnPixels = unionBounds.Left - rawBitmap.Bounds.Left;
+                var sourceOffsetColumnPixels = unionBounds.X - rawBitmap.Bounds.X;
 
                 // Сколько в каждой строке в итоговом массиве нужно пропускать байт.
-                var targetOffsetColumnBytes = (unionBounds.Left - resultBounds.Left) * 4;
+                var targetOffsetColumnBytes = (unionBounds.X - resultBounds.X) * 4;
 
                 // Сколько байт в каждой строке нужно копировать в итоговый массив.
                 var copyRowLength = unionBounds.Width * 4;
 
-                for (int row = unionBounds.Top; row < unionBounds.Bottom; ++row)
+                for (int row = unionBounds.Y; row < unionBounds.Y + unionBounds.Height; ++row)
                 {
-                    var begin = ((row - rawBitmap.Bounds.Top) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+                    var begin = ((row - rawBitmap.Bounds.Y) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
                     Marshal.Copy(rawBitmap.Data, begin,
-                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.Top) * destinationRowLength + targetOffsetColumnBytes), copyRowLength);
+                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.Y) * destinationRowLength + targetOffsetColumnBytes), copyRowLength);
                 }
             }
         }
 
-        var offsetX = resultBounds.Left;
-        var offsetY = resultBounds.Top;
+        var offsetX = resultBounds.X;
+        var offsetY = resultBounds.Y;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
