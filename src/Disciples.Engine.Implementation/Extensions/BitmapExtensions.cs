@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using Disciples.Common.Models;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Images.Models;
@@ -16,7 +16,7 @@ public static class BitmapExtensions
     /// <summary>
     /// Конвертировать изображение из сырых данных в битмап.
     /// </summary>
-    public static IBitmap FromRawToBitmap(this IBitmapFactory bitmapFactory, RawBitmap image, Bounds? bounds = null)
+    public static IBitmap FromRawToBitmap(this IBitmapFactory bitmapFactory, RawBitmap image, Rectangle? bounds = null)
     {
         return bitmapFactory.FromRawBitmap(image, bounds).Bitmap;
     }
@@ -26,7 +26,7 @@ public static class BitmapExtensions
     /// </summary>
     public static IBitmap FromRawToOriginalBitmap(this IBitmapFactory bitmapFactory, RawBitmap image)
     {
-        var bounds = new Bounds(image.OriginalWidth, image.OriginalHeight);
+        var bounds = new Rectangle(0, 0, image.OriginalWidth, image.OriginalHeight);
         return bitmapFactory.FromRawBitmap(image, bounds).Bitmap;
     }
 

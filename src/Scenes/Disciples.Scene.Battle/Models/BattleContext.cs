@@ -30,7 +30,7 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Позиция курсора.
     /// </summary>
-    public Point MousePosition { get; private set; }
+    public PointD MousePosition { get; private set; }
 
     /// <summary>
     /// События от устройства ввода.

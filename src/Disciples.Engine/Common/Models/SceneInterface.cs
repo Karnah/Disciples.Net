@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Disciples.Common.Models;
+using System.Drawing;
 using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Engine.Common.Models;
@@ -17,7 +17,7 @@ public class SceneInterface
     /// <summary>
     /// Размеры.
     /// </summary>
-    public Bounds Bounds { get; init; }
+    public Rectangle Bounds { get; init; }
 
     /// <summary>
     /// Фон.
@@ -32,7 +32,7 @@ public class SceneInterface
     /// <summary>
     /// Расположение элемента на экране.
     /// </summary>
-    public Bounds Position { get; init; }
+    public Rectangle Position { get; init; }
 
     /// <summary>
     /// Элементы интерфейса.

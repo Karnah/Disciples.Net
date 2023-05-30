@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 using Disciples.Resources.Images.Enums;
 
 namespace Disciples.Resources.Images.Models;
@@ -21,5 +21,5 @@ public abstract class SceneElement
     /// <summary>
     /// Позиция элемента.
     /// </summary>
-    public Bounds Position { get; init; }
+    public Rectangle Position { get; init; }
 }

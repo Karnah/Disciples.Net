@@ -11,7 +11,7 @@ public class UpdateSceneData
     /// <summary>
     /// Создать объект типа <see cref="UpdateSceneData" />.
     /// </summary>
-    public UpdateSceneData(long ticksCount, Point mousePosition, IReadOnlyList<InputDeviceEvent> inputDeviceEvents)
+    public UpdateSceneData(long ticksCount, PointD mousePosition, IReadOnlyList<InputDeviceEvent> inputDeviceEvents)
     {
         TicksCount = ticksCount;
         MousePosition = mousePosition;
@@ -26,7 +26,7 @@ public class UpdateSceneData
     /// <summary>
     /// Позиция курсора.
     /// </summary>
-    public Point MousePosition { get; }
+    public PointD MousePosition { get; }
 
     /// <summary>
     /// События от устройств ввода (мыши или клавиатуры).

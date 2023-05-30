@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 
 namespace Disciples.Resources.Images.Models;
 
@@ -15,7 +15,7 @@ public class SceneInterface
     /// <summary>
     /// Размеры.
     /// </summary>
-    public Bounds Bounds { get; init; }
+    public Rectangle Bounds { get; init; }
 
     /// <summary>
     /// Название фона.
@@ -35,7 +35,7 @@ public class SceneInterface
     /// <summary>
     /// Расположение элемента на экране.
     /// </summary>
-    public Bounds Position { get; init; }
+    public Rectangle Position { get; init; }
 
     /// <summary>
     /// Автоматически рисовать интерфейс.

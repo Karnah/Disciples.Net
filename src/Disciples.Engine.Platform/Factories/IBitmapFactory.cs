@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 using Disciples.Engine.Common.Models;
 using Disciples.Resources.Images.Models;
 
@@ -26,7 +26,7 @@ public interface IBitmapFactory
     /// </summary>
     /// <param name="rawBitmap">Сырая информация об изображении.</param>
     /// <param name="bounds">Границы изображения.</param>
-    Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null);
+    Frame FromRawBitmap(RawBitmap rawBitmap, Rectangle? bounds = null);
 
 
     /// <summary>

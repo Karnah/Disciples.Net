@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
+using Disciples.Common.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Platform.Enums;
@@ -11,14 +12,13 @@ using Disciples.Engine.Platform.Events;
 
 using IInputManager = Disciples.Engine.Platform.Managers.IInputManager;
 using MouseButton = Disciples.Engine.Platform.Enums.MouseButton;
-using Point = Disciples.Engine.Platform.Models.Point;
 
 namespace Disciples.Avalonia.Managers;
 
 /// <inheritdoc />
 public class AvaloniaInputManager : IInputManager
 {
-    private Point? _screenOffset;
+    private PointD? _screenOffset;
 
     /// <summary>
     /// Создать объект типа <see cref="AvaloniaInputManager" />.
@@ -31,7 +31,7 @@ public class AvaloniaInputManager : IInputManager
 
 
     /// <inheritdoc />
-    public Point MousePosition { get; private set; }
+    public PointD MousePosition { get; private set; }
 
 
     /// <inheritdoc />
@@ -53,12 +53,12 @@ public class AvaloniaInputManager : IInputManager
                 if (_screenOffset == null)
                 {
                     var window = (Window)args.Root;
-                    _screenOffset = new Point((window.Width - GameInfo.Width) / 2, (window.Height - GameInfo.Height) / 2);
+                    _screenOffset = new PointD((window.Width - GameInfo.Width) / 2, (window.Height - GameInfo.Height) / 2);
                 }
 
-                MousePosition = new Point(
-                    (int)(args.Position.X - _screenOffset.Value.X) / GameInfo.Scale,
-                    (int)(args.Position.Y - _screenOffset.Value.Y) / GameInfo.Scale);
+                MousePosition = new PointD(
+                    (args.Position.X - _screenOffset.Value.X) / GameInfo.Scale,
+                    (args.Position.Y - _screenOffset.Value.Y) / GameInfo.Scale);
 
                 break;
 

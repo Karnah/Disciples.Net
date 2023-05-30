@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 
 namespace Disciples.Resources.Images.Extensions;
 
@@ -10,13 +10,13 @@ internal static class ParseExtensions
     /// <summary>
     /// Распарсить границы элемента.
     /// </summary>
-    public static Bounds ParseBounds(this IReadOnlyList<string> data, int startIndex, int offsetX = 0, int offsetY = 0)
+    public static Rectangle ParseBounds(this IReadOnlyList<string> data, int startIndex, int offsetX = 0, int offsetY = 0)
     {
-        return new Bounds(
-            int.Parse(data[startIndex + 3]) + offsetY,
-            int.Parse(data[startIndex + 1]) + offsetY,
+        return Rectangle.FromLTRB(
             int.Parse(data[startIndex]) + offsetX,
-            int.Parse(data[startIndex + 2]) + offsetX);
+            int.Parse(data[startIndex + 1]) + offsetY,
+            int.Parse(data[startIndex + 2]) + offsetY,
+            int.Parse(data[startIndex + 3]) + offsetX);
     }
 
     /// <summary>

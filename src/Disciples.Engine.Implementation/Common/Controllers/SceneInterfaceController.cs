@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Disciples.Common.Models;
+using System.Drawing;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
@@ -39,7 +39,7 @@ internal class SceneInterfaceController : ISceneInterfaceController
             gameObjects.Add(_gameObjectContainer.AddImage(new ImageSceneElement
             {
                 Name = "BACKGROUND",
-                Position = new Bounds((int)(offsetY + background.Height), (int)offsetY, (int)offsetX, (int)(offsetX + background.Width)),
+                Position = new Rectangle((int)offsetY, (int)offsetX, (int)(offsetX + background.Width), (int)(offsetY + background.Height)),
                 ImageBitmap = background
             }, layers.BackgroundLayer));
         }

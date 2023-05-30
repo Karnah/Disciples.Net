@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
-
+using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
@@ -11,7 +11,6 @@ using MouseButton = Disciples.Engine.Platform.Enums.MouseButton;
 using WpfMouseButton = System.Windows.Input.MouseButton;
 using MouseButtonEventArgs = Disciples.Engine.Platform.Events.MouseButtonEventArgs;
 using WpfMouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
-using Point = Disciples.Engine.Platform.Models.Point;
 
 namespace Disciples.WPF.Managers;
 
@@ -23,7 +22,7 @@ public class WpfInputManager : IInputManager
     /// </summary>
     public WpfInputManager()
     {
-        MousePosition = new Point();
+        MousePosition = new PointD();
 
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseDownEvent, new MouseButtonEventHandler(OnMouseUpDown));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpDown));
@@ -32,7 +31,7 @@ public class WpfInputManager : IInputManager
     }
 
     /// <inheritdoc />
-    public Point MousePosition { get; private set; }
+    public PointD MousePosition { get; private set; }
 
     /// <inheritdoc />
     public event EventHandler<MouseButtonEventArgs>? MouseButtonEvent;
@@ -80,7 +79,7 @@ public class WpfInputManager : IInputManager
             return;
 
         var position = args.GetPosition(gameWindow.Field);
-        MousePosition = new Point(position.X, position.Y);
+        MousePosition = new PointD(position.X, position.Y);
     }
 
     /// <summary>

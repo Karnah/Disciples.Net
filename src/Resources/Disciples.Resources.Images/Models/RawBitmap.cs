@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 
 namespace Disciples.Resources.Images.Models;
 
@@ -20,7 +20,7 @@ public class RawBitmap
     /// <summary>
     /// Границы изображения.
     /// </summary>
-    public Bounds Bounds { get; init; }
+    public Rectangle Bounds { get; init; }
 
     /// <summary>
     /// Массив байт, содержащий пиксели в BGRA.

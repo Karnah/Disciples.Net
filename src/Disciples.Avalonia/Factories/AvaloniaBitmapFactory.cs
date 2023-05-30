@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Disciples.Avalonia.Models;
-using Disciples.Common.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Images.Models;
+using Bitmap = Avalonia.Media.Imaging.Bitmap;
 using IBitmap = Disciples.Engine.IBitmap;
 
 namespace Disciples.Avalonia.Factories;
@@ -29,11 +30,9 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
-        using (var memoryStream = new MemoryStream(bitmapData))
-        {
-            var bitmap = new Bitmap(memoryStream);
-            return new AvaloniaBitmap(bitmap);
-        }
+        using var memoryStream = new MemoryStream(bitmapData);
+        var bitmap = new Bitmap(memoryStream);
+        return new AvaloniaBitmap(bitmap);
     }
 
     /// <inheritdoc />
@@ -44,7 +43,7 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public Frame FromRawBitmap(RawBitmap rawBitmap, Bounds? bounds = null)
+    public Frame FromRawBitmap(RawBitmap rawBitmap, Rectangle? bounds = null)
     {
         var resultBounds = bounds ?? rawBitmap.Bounds;
         var width = resultBounds.Width;
@@ -60,13 +59,7 @@ public class AvaloniaBitmapFactory : IBitmapFactory
             }
             else
             {
-                var unionBounds = new Bounds
-                {
-                    Bottom = Math.Max(resultBounds.Bottom, rawBitmap.Bounds.Bottom),
-                    Top = Math.Min(resultBounds.Top, rawBitmap.Bounds.Top),
-                    Left = Math.Max(resultBounds.Left, rawBitmap.Bounds.Left),
-                    Right = Math.Min(resultBounds.Right, rawBitmap.Bounds.Right)
-                };
+                var unionBounds = Rectangle.Intersect(resultBounds, rawBitmap.Bounds);
 
                 // Размер итоговой строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
                 var destinationRowLength = width * 4;
@@ -80,18 +73,18 @@ public class AvaloniaBitmapFactory : IBitmapFactory
                 // Сколько байт в каждой строке нужно копировать в итоговый массив.
                 var copyRowLength = unionBounds.Width * 4;
 
-                for (int row = unionBounds.Bottom; row < unionBounds.Top; ++row)
+                for (int row = unionBounds.Top; row < unionBounds.Bottom; ++row)
                 {
-                    var begin = ((row - rawBitmap.Bounds.Bottom) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
+                    var begin = ((row - rawBitmap.Bounds.Top) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
 
                     Marshal.Copy(rawBitmap.Data, begin,
-                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.Bottom) * destinationRowLength + targetOffsetColumnBytes), copyRowLength);
+                        new IntPtr(l.Address.ToInt64() + (row - resultBounds.Top) * destinationRowLength + targetOffsetColumnBytes), copyRowLength);
                 }
             }
         }
 
         var offsetX = resultBounds.Left;
-        var offsetY = resultBounds.Bottom;
+        var offsetY = resultBounds.Top;
 
         // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
         // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.

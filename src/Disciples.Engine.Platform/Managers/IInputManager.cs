@@ -1,7 +1,6 @@
 ﻿using System;
-
+using Disciples.Common.Models;
 using Disciples.Engine.Platform.Events;
-using Disciples.Engine.Platform.Models;
 
 namespace Disciples.Engine.Platform.Managers;
 
@@ -13,7 +12,7 @@ public interface IInputManager
     /// <summary>
     /// Положение курсора мыши.
     /// </summary>
-    Point MousePosition { get; }
+    PointD MousePosition { get; }
 
 
     /// <summary>

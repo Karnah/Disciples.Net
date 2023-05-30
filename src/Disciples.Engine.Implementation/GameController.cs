@@ -164,7 +164,7 @@ public class GameController : IGameController
             try
             {
                 var platformMousePosition = _inputManager.MousePosition;
-                var mousePosition = new Point(platformMousePosition.X, platformMousePosition.Y);
+                var mousePosition = new PointD(platformMousePosition.X, platformMousePosition.Y);
 
                 CheckInputDeviceSelection(mousePosition);
 
@@ -185,7 +185,7 @@ public class GameController : IGameController
     /// <summary>
     /// Проверить, если было изменение выделенного объекта.
     /// </summary>
-    private void CheckInputDeviceSelection(Point mousePosition)
+    private void CheckInputDeviceSelection(PointD mousePosition)
     {
         var selectedGameObject = GameObjects
             .OrderBy(go => go.Y)

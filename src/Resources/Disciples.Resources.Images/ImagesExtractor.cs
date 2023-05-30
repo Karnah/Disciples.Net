@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 using Disciples.Resources.Common;
 using Disciples.Resources.Common.Extensions;
 using Disciples.Resources.Common.Models;
@@ -65,9 +65,8 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         var baseFile = file;
         var baseImage = PrepareImage(baseFile);
         var parts = _mqImages.Select(i => i.Value).Where(i => i.FileId == baseFile.Id);
-        foreach (var part in parts) {
+        foreach (var part in parts)
             result.Add(part.Name, BuildImage(baseImage, part));
-        }
 
         return result;
     }
@@ -324,40 +323,36 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Получить общие границы для анимации.
     /// </summary>
-    private static Bounds GetAnimationBounds(IReadOnlyCollection<MqImage> images)
+    private static Rectangle GetAnimationBounds(IReadOnlyCollection<MqImage> images)
     {
-        int minRow = int.MaxValue, maxRow = int.MinValue;
-        int minColumn = int.MaxValue, maxColumn = int.MinValue;
+        if (images.Count == 0)
+            return Rectangle.Empty;
 
-        foreach (var framePart in images)
-        {
-            var frameBounds = GetImageBounds(framePart);
-            minRow = Math.Min(minRow, frameBounds.Bottom);
-            maxRow = Math.Max(maxRow, frameBounds.Top);
-            minColumn = Math.Min(minColumn, frameBounds.Left);
-            maxColumn = Math.Max(maxColumn, frameBounds.Right);
-        }
+        var bounds = GetImageBounds(images.First());
+        if (images.Count == 1)
+            return bounds;
 
-        return new Bounds(minRow, maxRow, minColumn, maxColumn);
+        return images
+            .Skip(1)
+            .Aggregate(bounds, (current, framePart) => Rectangle.Union(current, GetImageBounds(framePart)));
     }
 
     /// <summary>
     /// Получить заполненную область изображения.
     /// </summary>
-    private static Bounds GetImageBounds(MqImage mqImage)
+    private static Rectangle GetImageBounds(MqImage mqImage)
     {
-        int minRow = int.MaxValue, maxRow = int.MinValue;
-        int minColumn = int.MaxValue, maxColumn = int.MinValue;
+        var imagePieces = mqImage.ImagePieces;
+        if (imagePieces.Count == 0)
+            return Rectangle.Empty;
 
-        foreach (var framePart in mqImage.ImagePieces)
-        {
-            minRow = Math.Min(minRow, framePart.SourceY);
-            maxRow = Math.Max(maxRow, framePart.SourceY + framePart.Height);
-            minColumn = Math.Min(minColumn, framePart.SourceX);
-            maxColumn = Math.Max(maxColumn, framePart.SourceX + framePart.Width);
-        }
+        var bounds = new Rectangle(imagePieces[0].SourceX, imagePieces[0].SourceY, imagePieces[0].Width, imagePieces[0].Height);
+        if (imagePieces.Count == 1)
+            return bounds;
 
-        return new Bounds(minRow, maxRow, minColumn, maxColumn);
+        return imagePieces
+            .Skip(1)
+            .Aggregate(bounds, (current, imagePiece) => Rectangle.Union(current, new Rectangle(imagePiece.SourceX, imagePiece.SourceY, imagePiece.Width, imagePiece.Height)));
     }
 
     /// <summary>
@@ -366,7 +361,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <param name="baseImage">Базовое изображение.</param>
     /// <param name="mqImage">Информация о новом изображении.</param>
     /// <param name="bounds">Границы изображения.</param>
-    private static RawBitmap BuildImage(RawBitmap baseImage, MqImage mqImage, Bounds bounds)
+    private static RawBitmap BuildImage(RawBitmap baseImage, MqImage mqImage, Rectangle bounds)
     {
         var imageHeight = bounds.Height;
         var imageWidth = bounds.Width;
@@ -378,7 +373,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
             for (int row = 0; row < framePart.Height; ++row)
             {
                 var sourcePosition = ((framePart.DestY + row) * baseImage.OriginalWidth + framePart.DestX) << 2;
-                var destinationPosition = ((framePart.SourceY + row - bounds.Bottom) * imageWidth + framePart.SourceX - bounds.Left) << 2;
+                var destinationPosition = ((framePart.SourceY + row - bounds.Top) * imageWidth + framePart.SourceX - bounds.Left) << 2;
 
                 Buffer.BlockCopy(baseImage.Data, sourcePosition, imageData, destinationPosition, partWidth);
             }
@@ -485,7 +480,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         {
             OriginalWidth = magickImage.Width,
             OriginalHeight = magickImage.Height,
-            Bounds = new Bounds(magickImage.Width, magickImage.Height),
+            Bounds = new Rectangle(0, 0, magickImage.Width, magickImage.Height),
             Data = pixels
         };
     }

@@ -1,4 +1,5 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
@@ -78,7 +79,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Обработать положение курсора.
     /// </summary>
-    public void ProcessMousePosition(Point mousePosition)
+    public void ProcessMousePosition(PointD mousePosition)
     {
         var isMainRightPanel = _initialSquadPosition == BattleSquadPosition.Attacker;
 

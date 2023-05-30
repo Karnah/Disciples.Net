@@ -89,7 +89,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         {
             OriginalWidth = 1,
             OriginalHeight = 1,
-            Bounds = new Bounds(1, 1),
+            Bounds = new Rectangle(0, 0, 1, 1),
             Data = new[] { color.B, color.G, color.R, color.A }
         };
         return _bitmapFactory.FromRawToBitmap(rawBitmap);

@@ -10,6 +10,9 @@ namespace Disciples.WPF;
 /// </summary>
 public partial class GameWindow : Window
 {
+    /// <summary>
+    /// Создать объект типа <see cref="GameWindow" />.
+    /// </summary>
     public GameWindow(GameWindowViewModel viewModel)
     {
         this.DataContext = viewModel;

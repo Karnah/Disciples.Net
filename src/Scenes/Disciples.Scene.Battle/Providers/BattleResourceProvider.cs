@@ -1,4 +1,4 @@
-﻿using Disciples.Common.Models;
+﻿using System.Drawing;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
@@ -86,7 +86,7 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
 
         // Картинка поля боя имеет размер 950 * 600. Если игрок атакует, то первые 150 пикселей высоты пропускаются.
         // Если игрок защищается, то откидываются последние 150 пикселей. В данном случае, мы всегда берём как будто игрок атакует.
-        return battleground.Select(p => _bitmapFactory.FromRawToBitmap(p.Value, new Bounds(0, 600, 150, 950))).ToList();
+        return battleground.Select(p => _bitmapFactory.FromRawToBitmap(p.Value, new Rectangle(150, 0, 800, 600))).ToList();
     }
 
     #endregion
