@@ -17,7 +17,7 @@ public static class GameObjectExtensions
     /// <param name="gameObjects">Список всех объектов.</param>
     /// <param name="gameObjectName">Имя объекта.</param>
     /// <returns>Объект.</returns>
-    public static TGameObject Get<TGameObject>(this IReadOnlyList<GameObject> gameObjects, string gameObjectName)
+    public static TGameObject Get<TGameObject>(this IReadOnlyCollection<GameObject> gameObjects, string gameObjectName)
         where TGameObject : GameObject
     {
         return gameObjects
@@ -32,7 +32,7 @@ public static class GameObjectExtensions
     /// <param name="gameObjects">Список всех объектов.</param>
     /// <param name="filter">Условия для отбора объектов.</param>
     /// <returns>Объект.</returns>
-    public static IReadOnlyList<TGameObject> Get<TGameObject>(this IReadOnlyList<GameObject> gameObjects, Func<TGameObject, bool> filter)
+    public static IReadOnlyList<TGameObject> Get<TGameObject>(this IReadOnlyCollection<GameObject> gameObjects, Func<TGameObject, bool> filter)
         where TGameObject : GameObject
     {
         return gameObjects

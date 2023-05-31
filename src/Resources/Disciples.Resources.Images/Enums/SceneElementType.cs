@@ -36,6 +36,11 @@ public enum SceneElementType
     ListBox,
 
     /// <summary>
+    /// Список строк.
+    /// </summary>
+    TextListBox,
+
+    /// <summary>
     /// Редактируемое текстовое поле.
     /// </summary>
     EditTextBox,

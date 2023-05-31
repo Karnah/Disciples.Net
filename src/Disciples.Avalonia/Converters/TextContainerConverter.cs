@@ -98,15 +98,4 @@ public class TextContainerConverter : BaseTextConverter<InlineCollection>
             _ => throw new ArgumentOutOfRangeException(nameof(fontStyle), fontStyle, null)
         };
     }
-
-    /// <summary>
-    /// Сконвертировать цвет.
-    /// </summary>
-    private static IBrush? GetBrush(System.Drawing.Color? color)
-    {
-        if (color == null)
-            return null;
-
-        return new SolidColorBrush(new Color(color.Value.A, color.Value.R, color.Value.G, color.Value.B));
-    }
 }

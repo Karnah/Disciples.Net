@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Implementation;
+using Disciples.Engine.Models;
 using Disciples.Engine.Settings;
 using Disciples.Scene.LoadSaga.Models;
 
@@ -36,6 +37,7 @@ internal class SaveProvider
             .Where(f => !string.IsNullOrEmpty(f))
             .Select(f => new Save
             {
+                Text = new TextContainer(Path.GetFileNameWithoutExtension(f)),
                 Name = Path.GetFileNameWithoutExtension(f),
                 Path = Path.Combine(_savesPath, f),
                 GameContext = _gameController.LoadGame(Path.Combine(_savesPath, f))

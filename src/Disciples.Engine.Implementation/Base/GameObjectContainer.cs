@@ -85,6 +85,13 @@ public class GameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
+    public TextListBoxObject AddTextListBox(TextListBoxSceneElement textListBox, int layer)
+    {
+        var textListBoxObject = new TextListBoxObject(this, _sceneObjectContainer, textListBox, layer);
+        return AddObject(textListBoxObject);
+    }
+
+    /// <inheritdoc />
     public void UpdateGameObjects(long ticksCount)
     {
         for (var gameObjectNode = _gameObjects.First; gameObjectNode != null;)

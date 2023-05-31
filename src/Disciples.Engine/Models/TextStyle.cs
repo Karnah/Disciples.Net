@@ -53,6 +53,10 @@ public readonly record struct TextStyle
                     break;
 
                 case 'O':
+                    OutlineColor = ParseColor(token);
+                    break;
+
+                case 'B':
                     BackgroundColor = ParseColor(token);
                     break;
 
@@ -107,6 +111,11 @@ public readonly record struct TextStyle
     /// Цвет шрифта.
     /// </summary>
     public Color? ForegroundColor { get; init; }
+
+    /// <summary>
+    /// Цвет обводки текста.
+    /// </summary>
+    public Color? OutlineColor { get; init; }
 
     /// <summary>
     /// Цвет фона текста.
@@ -168,8 +177,8 @@ public readonly record struct TextStyle
         if (textStyleTokenType is 'N' or 'T')
             return input[offset..(offset + 2)];
 
-        // Если это цвет текста или цвет фона, то там 14 символов.
-        if (textStyleTokenType is 'C' or 'O')
+        // Если это цвет, то там 14 символов.
+        if (textStyleTokenType is 'C' or 'O' or 'B')
             return input[offset..(offset+14)];
 
         // Во всех остальных случаях будет брать до первого символа ;.

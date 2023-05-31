@@ -83,6 +83,12 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
+    public TextListBoxObject AddTextListBox(TextListBoxSceneElement textListBox, int layer)
+    {
+        return GameObjectContainer.AddTextListBox(textListBox, layer);
+    }
+
+    /// <inheritdoc />
     public TGameObject AddObject<TGameObject>(TGameObject gameObject) where TGameObject : GameObject
     {
         return GameObjectContainer.AddObject(gameObject);

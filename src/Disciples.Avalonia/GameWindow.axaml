@@ -19,6 +19,7 @@
         <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
         <c:TextVerticalAlignmentConverter x:Key="TextVerticalAlignmentConverter" />
         <c:TextHorizontalAlignmentConverter x:Key="TextHorizontalAlignmentConverter" />
+        <c:TextBackgroundConverter x:Key="TextBackgroundConverter" />
         <c:TextContainerConverter x:Key="TextContainerConverter" />
     </Window.Resources>
 
@@ -65,6 +66,13 @@
                                     <Binding Path="TextStyle" />
                                 </MultiBinding>
                             </TextBlock.TextAlignment>
+
+                            <TextBlock.Background>
+                                <MultiBinding Converter="{StaticResource TextBackgroundConverter}">
+                                    <Binding Path="Text" />
+                                    <Binding Path="TextStyle" />
+                                </MultiBinding>
+                            </TextBlock.Background>
 
                             <TextBlock.Inlines>
                                 <MultiBinding Converter="{StaticResource TextContainerConverter}">

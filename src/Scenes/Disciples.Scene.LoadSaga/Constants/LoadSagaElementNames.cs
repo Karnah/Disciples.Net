@@ -6,6 +6,11 @@
 internal class LoadSagaElementNames
 {
     /// <summary>
+    /// Список сейвов.
+    /// </summary>
+    public const string SAVES_TEXT_LIST_BOX = "TLBOX_GAME_SLOT";
+
+    /// <summary>
     /// Кнопка "Назад".
     /// </summary>
     public const string BACK_BUTTON = "BTN_BACK";
@@ -14,16 +19,6 @@ internal class LoadSagaElementNames
     /// Кнопка для загрузки выбранного сейва.
     /// </summary>
     public const string CONTINUE_BUTTON = "BTN_LOAD";
-
-    /// <summary>
-    /// Кнопка выбора сейва "Вверх".
-    /// </summary>
-    public const string SAVE_UP_BUTTON = "BTN_GAME_LIST_UP";
-
-    /// <summary>
-    /// Кнопка выбора сейва "Вниз".
-    /// </summary>
-    public const string SAVE_DOWN_BUTTON = "BTN_GAME_LIST_DOWN";
 
     /// <summary>
     /// Текст с информацией о сейве.

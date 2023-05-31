@@ -21,7 +21,8 @@ public class SceneInterfaceExtractor : BaseResourceExtractor
     {
         new ImageSceneElementParser(),
         new ButtonSceneElementParser(),
-        new TextBlockSceneElementParser()
+        new TextBlockSceneElementParser(),
+        new TextListBoxSceneElementParser()
     };
 
     /// <summary>

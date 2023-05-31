@@ -1,13 +1,11 @@
-﻿using System.Drawing;
-using Disciples.Engine.Base;
-using Disciples.Engine.Common;
+﻿using Disciples.Engine.Common;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.GameObjects;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
@@ -15,7 +13,6 @@ using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.LoadSaga.Constants;
-using Disciples.Scene.LoadSaga.GameObjects;
 using Disciples.Scene.LoadSaga.Models;
 using Disciples.Scene.LoadSaga.Providers;
 
@@ -35,40 +32,30 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     /// </summary>
     private const string SAVE_DESCRIPTION = "X005TA0664";
 
-    private readonly LoadSagaGameObjectContainer _gameObjectContainer;
-    private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly LoadSagaInterfaceProvider _interfaceProvider;
     private readonly SaveProvider _saveProvider;
     private readonly GameController _gameController;
     private readonly ITextProvider _textProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
 
-    private List<SagaSaveObject> _sagaSaves = null!;
-    private int? _selectedSaveIndex;
-    private IImageSceneObject? _saveSelection;
+    private TextListBoxObject _saveListBox = null!;
     private IReadOnlyList<ImageObject> _saveRaces = null!;
     private TextBlockObject _saveInfo = null!;
     private TextBlockObject _saveDescription = null!;
 
     private ButtonObject _goBackButton = null!;
     private ButtonObject _continueButton = null!;
-    private ButtonObject _saveUpButton = null!;
-    private ButtonObject _saveDownButton = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="LoadSagaInterfaceController" />.
     /// </summary>
     public LoadSagaInterfaceController(
-        LoadSagaGameObjectContainer gameObjectContainer,
-        ISceneObjectContainer sceneObjectContainer,
         LoadSagaInterfaceProvider interfaceProvider,
         SaveProvider saveProvider,
         GameController gameController,
         ITextProvider textProvider,
         ISceneInterfaceController sceneInterfaceController)
     {
-        _gameObjectContainer = gameObjectContainer;
-        _sceneObjectContainer = sceneObjectContainer;
         _interfaceProvider = interfaceProvider;
         _saveProvider = saveProvider;
         _gameController = gameController;
@@ -90,44 +77,11 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     {
     }
 
-    /// <summary>
-    /// Обработать нажатие на файл сейва.
-    /// </summary>
-    public void OnSaveLeftMouseButtonPressed(SagaSaveObject sagaSave)
-    {
-        _selectedSaveIndex = _sagaSaves.IndexOf(sagaSave);
-        UpdateSelectedSave();
-    }
-
-    /// <summary>
-    /// Обработать двойной клик на файле с сейвом.
-    /// </summary>
-    public void OnSaveLeftMouseButtonDoubleClicked(SagaSaveObject sagaSave)
-    {
-        LoadSave(sagaSave);
-    }
-
     /// <inheritdoc />
     protected override void LoadInternal()
     {
         var sceneInterface = _interfaceProvider.SceneInterface;
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
-
-        var saves = _saveProvider.GetSaves();
-        var sagaSaves = new List<SagaSaveObject>(saves.Count);
-        for (int saveIndex = 0; saveIndex < saves.Count; saveIndex++)
-        {
-            var saveObject = _gameObjectContainer.AddSave(
-                saves[saveIndex],
-                550,
-                22 + saveIndex * 18);
-            sagaSaves.Add(saveObject);
-        }
-
-        _sagaSaves = sagaSaves;
-
-        if (_sagaSaves.Count > 0)
-            _selectedSaveIndex = 0;
 
         _goBackButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.BACK_BUTTON);
         _goBackButton.ClickedAction = ExecuteBack;
@@ -136,17 +90,13 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         _continueButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.CONTINUE_BUTTON);
         _continueButton.ClickedAction = ExecuteContinue;
 
-        _saveUpButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.SAVE_UP_BUTTON);
-        _saveUpButton.ClickedAction = ExecuteSaveUp;
-
-        _saveDownButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.SAVE_DOWN_BUTTON);
-        _saveDownButton.ClickedAction = ExecuteSaveDown;
-
         _saveInfo = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_INFO_TEXT_BLOCK);
         _saveDescription = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_DESCRIPTION_TEXT_BLOCK);
         _saveRaces = gameObjects.Get<ImageObject>(i => i.Name?.StartsWith(LoadSagaElementNames.RACES_PATTERN_IMAGE) == true);
 
-        UpdateSelectedSave();
+        _saveListBox = gameObjects.Get<TextListBoxObject>(LoadSagaElementNames.SAVES_TEXT_LIST_BOX);
+        _saveListBox.ItemSelected = ExecuteSaveSelected;
+        _saveListBox.SetItems(_saveProvider.GetSaves());
     }
 
     /// <inheritdoc />
@@ -163,94 +113,33 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Выбрать сейв выше.
-    /// </summary>
-    private void ExecuteSaveUp()
-    {
-        --_selectedSaveIndex;
-        UpdateSelectedSave();
-    }
-
-    /// <summary>
-    /// Выбрать сейв ниже.
-    /// </summary>
-    private void ExecuteSaveDown()
-    {
-        ++_selectedSaveIndex;
-        UpdateSelectedSave();
-    }
-
-    /// <summary>
     /// Перейти на следующую страницу (загрузить сейв).
     /// </summary>
     private void ExecuteContinue()
     {
-        var sagaSave = _sagaSaves[_selectedSaveIndex!.Value];
-        LoadSave(sagaSave);
+        LoadSave((Save)_saveListBox.SelectedItem!);
     }
 
     /// <summary>
-    /// Загрузить сейв.
+    /// Обработать выбор сейва.
     /// </summary>
-    private void LoadSave(SagaSaveObject sagaSave)
+    private void ExecuteSaveSelected(TextListBoxItem? item)
     {
-        _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
-            new LoadingSaveSceneParameters(sagaSave.Save.Path));
-    }
-
-    /// <summary>
-    /// Обновить выбранный сейв-файл.
-    /// </summary>
-    private void UpdateSelectedSave()
-    {
-        if (_selectedSaveIndex == null)
+        var save = (Save?)item;
+        if (save == null)
             return;
 
-        UpdateSaveSelection();
-        UpdateButtonsState();
-
-        var save = _sagaSaves[_selectedSaveIndex!.Value].Save;
         UpdateSelectedSaveRaces(save);
         UpdateSelectedSaveDescription(save);
     }
 
     /// <summary>
-    /// Обновить выделение сейва.
+    /// Загрузить сейв.
     /// </summary>
-    private void UpdateSaveSelection()
+    private void LoadSave(Save save)
     {
-        if (_saveSelection == null)
-        {
-            _saveSelection = _sceneObjectContainer.AddColorImage(
-                Color.White,
-                215,
-                18,
-                550,
-                23 + _selectedSaveIndex!.Value * 18,
-                1);
-        }
-        else
-        {
-            _saveSelection.Y = 23 + _selectedSaveIndex!.Value * 18;
-        }
-    }
-
-    /// <summary>
-    /// Обновить состояние кнопок.
-    /// </summary>
-    private void UpdateButtonsState()
-    {
-        _continueButton.SetActive();
-
-        if (_selectedSaveIndex > 0)
-            _saveUpButton.SetActive();
-        else
-            _saveUpButton.SetDisabled();
-
-        if (_selectedSaveIndex < _sagaSaves.Count - 1)
-            _saveDownButton.SetActive();
-        else
-            _saveDownButton.SetDisabled();
+        _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
+            new LoadingSaveSceneParameters(save.Path));
     }
 
     /// <summary>

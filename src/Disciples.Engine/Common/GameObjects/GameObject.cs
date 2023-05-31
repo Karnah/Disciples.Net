@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Exceptions;
 using Disciples.Engine.Common.Models;
@@ -38,13 +39,20 @@ public abstract class GameObject
     /// <summary>
     /// Создать объект типа <see cref="GameObject" />.
     /// </summary>
-    protected GameObject(SceneElement sceneElement) : this()
+    protected GameObject(SceneElement sceneElement) : this(sceneElement.Position)
     {
         Name = sceneElement.Name;
-        X = sceneElement.Position.Left;
-        Y = sceneElement.Position.Top;
-        Width = sceneElement.Position.Width;
-        Height = sceneElement.Position.Height;
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="GameObject" />.
+    /// </summary>
+    protected GameObject(RectangleD position) : this()
+    {
+        X = position.X;
+        Y = position.Y;
+        Width = position.Width;
+        Height = position.Height;
     }
 
     /// <summary>

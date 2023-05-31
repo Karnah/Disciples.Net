@@ -88,6 +88,9 @@ public class SceneTextBlock : Decorator
                 firstPieceStyle?.VerticalAlignment ??
                 textStyle.VerticalAlignment
                 ?? TextVerticalAlignment.Top)!.Value,
+            Background = GetBrush(
+                firstPieceStyle?.BackgroundColor ??
+                textStyle.BackgroundColor),
             TextWrapping = TextWrapping.Wrap
         };
         FillInlineCollection(textBlock.Inlines, textStyle, text);

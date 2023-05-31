@@ -10,7 +10,7 @@ public interface ITextSceneObject : ISceneObject
     /// <summary>
     /// Общий стиль.
     /// </summary>
-    TextStyle TextStyle { get; }
+    TextStyle TextStyle { get; set; }
 
     /// <summary>
     /// Текст.

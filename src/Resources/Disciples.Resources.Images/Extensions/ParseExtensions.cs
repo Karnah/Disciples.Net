@@ -15,8 +15,8 @@ internal static class ParseExtensions
         return Rectangle.FromLTRB(
             int.Parse(data[startIndex]) + offsetX,
             int.Parse(data[startIndex + 1]) + offsetY,
-            int.Parse(data[startIndex + 2]) + offsetY,
-            int.Parse(data[startIndex + 3]) + offsetX);
+            int.Parse(data[startIndex + 2]) + offsetX,
+            int.Parse(data[startIndex + 3]) + offsetY);
     }
 
     /// <summary>
@@ -40,6 +40,16 @@ internal static class ParseExtensions
     }
 
     /// <summary>
+    /// Получить имя другого элемента на сцене.
+    /// </summary>
+    public static string? ParseObjectName(this string data)
+    {
+        return string.IsNullOrEmpty(data)
+            ? null
+            : data;
+    }
+
+    /// <summary>
     /// Получить идентификатор текстового ресурса.
     /// </summary>
     public static string? ParseTextId(this string data)
@@ -55,9 +65,19 @@ internal static class ParseExtensions
     /// </summary>
     public static string? ParseTextStyle(this string data)
     {
-        return string.IsNullOrEmpty(data)
+        // Некоторые строки стиля обрамлены кавычками, некоторые нет.
+        var trimmed = data.Trim('\"');
+        return string.IsNullOrEmpty(trimmed)
             ? null
-            : data;
+            : trimmed;
+    }
+
+    /// <summary>
+    /// Получить целое значение.
+    /// </summary>
+    public static int ParseInt(this string data)
+    {
+        return int.Parse(data);
     }
 
     /// <summary>

@@ -85,6 +85,13 @@ public interface IGameObjectContainer
     ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
 
     /// <summary>
+    /// Добавить список строк на сцену.
+    /// </summary>
+    /// <param name="textListBox">Информация о списке строк.</param>
+    /// <param name="layer">Слой на котором будет отображаться список.</param>
+    TextListBoxObject AddTextListBox(TextListBoxSceneElement textListBox, int layer);
+
+    /// <summary>
     /// Добавить игровой объект.
     /// </summary>
     TGameObject AddObject<TGameObject>(TGameObject gameObject)

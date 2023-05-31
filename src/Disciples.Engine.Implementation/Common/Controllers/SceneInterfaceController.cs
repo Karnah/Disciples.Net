@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
@@ -39,7 +40,7 @@ internal class SceneInterfaceController : ISceneInterfaceController
             gameObjects.Add(_gameObjectContainer.AddImage(new ImageSceneElement
             {
                 Name = "BACKGROUND",
-                Position = new Rectangle((int)offsetY, (int)offsetX, (int)(offsetX + background.Width), (int)(offsetY + background.Height)),
+                Position = new Rectangle((int)offsetX, (int)offsetY, (int)(offsetX + background.Width), (int)(offsetY + background.Height)),
                 ImageBitmap = background
             }, layers.BackgroundLayer));
         }
@@ -71,7 +72,30 @@ internal class SceneInterfaceController : ISceneInterfaceController
                 case SceneElementType.ToggleButton:
                 case SceneElementType.RadioButton:
                 case SceneElementType.ListBox:
+                case SceneElementType.TextListBox:
                 case SceneElementType.EditTextBox:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        // Эти элементы обрабатываем отдельно в конце, так как они ссылаются на другие элементы сцены.
+        var additionalElements = sceneInterface
+            .Elements
+            .Values
+            .Where(se => se.Type is SceneElementType.ListBox or SceneElementType.TextListBox);
+        foreach (var sceneElement in additionalElements)
+        {
+            switch (sceneElement.Type)
+            {
+                case SceneElementType.ListBox:
+                    break;
+
+                case SceneElementType.TextListBox:
+                    var textListBox = (TextListBoxSceneElement)sceneElement;
+                    gameObjects.Add(_gameObjectContainer.AddTextListBox(textListBox, layers.InterfaceLayer));
                     break;
 
                 default:

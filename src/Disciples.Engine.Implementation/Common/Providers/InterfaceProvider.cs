@@ -128,6 +128,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             ResourceSceneElementType.Image => GetImageSceneElement(resourceSceneElement),
             ResourceSceneElementType.Button => GetButtonSceneElement(resourceSceneElement),
             ResourceSceneElementType.TextBlock => GetTextBlockSceneElement(resourceSceneElement),
+            ResourceSceneElementType.TextListBox => GetTextListBoxSceneElement(resourceSceneElement),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -217,6 +218,36 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             TextStyle = GetElementTextStyle(textBlock.TextStyle),
             Text = GetElementText(textBlock.TextId),
             ToolTip = GetElementText(textBlock.ToolTipTextId)
+        };
+    }
+
+    /// <summary>
+    /// Получить список строк.
+    /// </summary>
+    private TextListBoxSceneElement GetTextListBoxSceneElement(ResourceSceneElement resourceSceneElement)
+    {
+        var textListBox = (Disciples.Resources.Images.Models.TextListBoxSceneElement)resourceSceneElement;
+        return new TextListBoxSceneElement
+        {
+            Name = textListBox.Name,
+            Position = textListBox.Position,
+            ColumnCount = textListBox.ColumnCount,
+            HorizontalSpacing = textListBox.HorizontalSpacing,
+            VerticalSpacing = textListBox.VerticalSpacing,
+            ScrollUpButtonName = textListBox.ScrollUpButtonName,
+            ScrollDownButtonName = textListBox.ScrollDownButtonName,
+            ScrollLeftButtonName = textListBox.ScrollLeftButtonName,
+            ScrollRightButtonName = textListBox.ScrollRightButtonName,
+            PageUpButtonName = textListBox.PageUpButtonName,
+            PageDownButtonName = textListBox.PageDownButtonName,
+            DoubleClickButtonName = textListBox.DoubleClickButtonName,
+            SelectedTextStyle = GetElementTextStyle(textListBox.SelectedTextStyle),
+            CommonTextStyle = GetElementTextStyle(textListBox.CommonTextStyle),
+            SelectionImageName = GetElementImage(textListBox.SelectionImageName),
+            UnselectedImageName = GetElementImage(textListBox.UnselectedImageName),
+            BorderSize = textListBox.BorderSize,
+            ToolTip = GetElementText(textListBox.ToolTipTextId),
+            ShouldCreateBackgroundImage = textListBox.ShouldCreateBackgroundImage,
         };
     }
 

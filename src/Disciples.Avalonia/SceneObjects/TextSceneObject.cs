@@ -25,5 +25,6 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     public TextContainer? Text { get; set; }
 
     /// <inheritdoc />
-    public TextStyle TextStyle { get; }
+    [Reactive]
+    public TextStyle TextStyle { get; set; }
 }
