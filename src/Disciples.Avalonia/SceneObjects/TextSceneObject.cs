@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.SceneObjects;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Models;
 using ReactiveUI.Fody.Helpers;
 
@@ -10,14 +11,10 @@ public class TextSceneObject : BaseSceneObject, ITextSceneObject
     /// <summary>
     /// Создать объект типа <see cref="TextSceneObject" />.
     /// </summary>
-    public TextSceneObject(TextContainer? text, TextStyle textStyle, double width, double height, double x, double y, int layer) : base(layer)
+    public TextSceneObject(TextContainer? text, TextStyle textStyle, RectangleD bounds, int layer) : base(bounds, layer)
     {
         Text = text;
         TextStyle = textStyle;
-        Width = width;
-        Height = height;
-        X = x;
-        Y = y;
     }
 
     /// <inheritdoc />

@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Disciples.Common.Models;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 using Disciples.Engine.Common.SceneObjects;
@@ -11,27 +12,15 @@ public abstract class BaseSceneObject : ReactiveObject, ISceneObject
     /// <summary>
     /// Создать объект типа <see cref="BaseSceneObject" />.
     /// </summary>
-    protected BaseSceneObject(int layer)
+    protected BaseSceneObject(RectangleD bounds, int layer)
     {
+        Bounds = bounds;
         Layer = layer;
     }
 
-
     /// <inheritdoc />
     [Reactive]
-    public double X { get; set; }
-
-    /// <inheritdoc />
-    [Reactive]
-    public double Y { get; set; }
-
-    /// <inheritdoc />
-    [Reactive]
-    public double Width { get; set; }
-
-    /// <inheritdoc />
-    [Reactive]
-    public double Height { get; set; }
+    public RectangleD Bounds { get; set; }
 
     /// <inheritdoc />
     public int Layer { get; }
@@ -39,7 +28,6 @@ public abstract class BaseSceneObject : ReactiveObject, ISceneObject
     /// <inheritdoc />
     [Reactive]
     public bool IsHidden { get; set; }
-
 
     /// <inheritdoc />
     public virtual void Destroy()

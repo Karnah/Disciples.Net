@@ -1,4 +1,5 @@
-﻿using ReactiveUI.Fody.Helpers;
+﻿using Disciples.Common.Models;
+using ReactiveUI.Fody.Helpers;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
@@ -11,9 +12,10 @@ public class ImageSceneObject : BaseSceneObject, IImageSceneObject
     /// <summary>
     /// Создать объект типа <see cref="ImageSceneObject" />.
     /// </summary>
-    public ImageSceneObject(int layer) : base(layer)
-    { }
-
+    public ImageSceneObject(IBitmap? bitmap, RectangleD bounds, int layer) : base(bounds, layer)
+    {
+        Bitmap = bitmap;
+    }
 
     /// <inheritdoc />
     [Reactive]

@@ -18,12 +18,6 @@ public interface ISceneObjectContainer
     IPlatformSceneObjectContainer PlatformSceneObjectContainer { get; }
 
     /// <summary>
-    /// Добавить пустое изображение на сцену.
-    /// </summary>
-    /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-    IImageSceneObject AddImage(int layer);
-
-    /// <summary>
     /// Добавить статичное изображение на сцену.
     /// </summary>
     /// <param name="bitmap">Изображение.</param>

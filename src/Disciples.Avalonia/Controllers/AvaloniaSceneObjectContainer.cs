@@ -2,6 +2,8 @@
 using System.Linq;
 using Avalonia.Collections;
 using Disciples.Avalonia.SceneObjects;
+using Disciples.Common.Models;
+using Disciples.Engine;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Models;
@@ -29,16 +31,15 @@ public class AvaloniaSceneObjectContainer : IPlatformSceneObjectContainer
     public IReadOnlyList<ISceneObject> SceneObjects => _visuals;
 
     /// <inheritdoc />
-    public IImageSceneObject AddImageSceneObject(int layer)
+    public IImageSceneObject AddImageSceneObject(IBitmap? bitmap, RectangleD bounds, int layer)
     {
-        return AddSceneObject(new ImageSceneObject(layer));
+        return AddSceneObject(new ImageSceneObject(bitmap, bounds, layer));
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddTextSceneObject(TextContainer? text, TextStyle textStyle, double width, double height,
-        double x, double y, int layer)
+    public ITextSceneObject AddTextSceneObject(TextContainer? text, TextStyle textStyle, RectangleD bounds, int layer)
     {
-        return AddSceneObject(new TextSceneObject(text, textStyle, width, height, x, y, layer));
+        return AddSceneObject(new TextSceneObject(text, textStyle, bounds, layer));
     }
 
     /// <inheritdoc />

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 using Disciples.Engine;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums;
 using Disciples.WPF.SceneObjects;
 
@@ -13,8 +14,6 @@ namespace Disciples.WPF.Converters;
 /// </summary>
 public class BitmapToRenderTransformConverter : BaseMultiValueConverterExtension
 {
-    private const double TOLERANCE = 0.001;
-
     /// <inheritdoc />
     public override object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
@@ -40,10 +39,10 @@ public class BitmapToRenderTransformConverter : BaseMultiValueConverterExtension
             case HorizontalAlignment.Left:
                 break;
             case HorizontalAlignment.Center:
-                offsetX += (image.Width - bitmap.OriginalSize.Width) / 2;
+                offsetX += (image.Bounds.Width - bitmap.OriginalSize.Width) / 2;
                 break;
             case HorizontalAlignment.Right:
-                offsetX += image.Width;
+                offsetX += image.Bounds.Width;
                 break;
         }
 
@@ -55,14 +54,14 @@ public class BitmapToRenderTransformConverter : BaseMultiValueConverterExtension
             case VerticalAlignment.Top:
                 break;
             case VerticalAlignment.Center:
-                offsetY += (image.Height - bitmap.OriginalSize.Height) / 2;
+                offsetY += (image.Bounds.Height - bitmap.OriginalSize.Height) / 2;
                 break;
             case VerticalAlignment.Bottom:
-                offsetY += image.Height;
+                offsetY += image.Bounds.Height;
                 break;
         }
 
-        if (Math.Abs(offsetX - 1) > TOLERANCE || Math.Abs(offsetY - 1) > TOLERANCE)
+        if (Math.Abs(offsetX - 1) > EngineConstants.DOUBLE_TOLERANCE || Math.Abs(offsetY - 1) > EngineConstants.DOUBLE_TOLERANCE)
             transforms.Add(new TranslateTransform(offsetX, offsetY));
 
         if (transforms.Count == 0)

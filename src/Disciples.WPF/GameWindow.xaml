@@ -25,8 +25,8 @@
 
             <ItemsControl.ItemContainerStyle>
                 <Style TargetType="ContentPresenter" d:DataContext="{d:DesignInstance so:ISceneObject}">
-                    <Setter Property="Canvas.Left" Value="{Binding X}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    <Setter Property="Canvas.Left" Value="{Binding Bounds.Left}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Bounds.Top}" />
                     <Setter Property="Canvas.ZIndex"  Value="{Binding Layer}" />
                     <Setter Property="Visibility"  Value="{Binding IsHidden, Converter={c:InverseBooleanToVisibilityConverter}}" />
                 </Style>
@@ -52,7 +52,7 @@
 
                     <dts:SceneObjectTemplateSelector.TextTemplate>
                         <DataTemplate DataType="{x:Type so:ITextSceneObject}">
-                            <controls:SceneTextBlock Width="{Binding Width}" Height="{Binding Height}"
+                            <controls:SceneTextBlock Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}"
                                                      TextStyle="{Binding TextStyle}"
                                                      Text="{Binding Text}" />
                         </DataTemplate>

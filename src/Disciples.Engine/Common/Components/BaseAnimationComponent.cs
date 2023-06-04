@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Disciples.Common.Models;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
@@ -158,30 +159,28 @@ public abstract class BaseAnimationComponent : BaseComponent
             return;
         }
 
+        var posX = GameObject.X + AnimationOffset.X;
+        var posY = GameObject.Y + AnimationOffset.Y;
+        var frame = frames[FrameIndex];
+
         // Добавляем изображение, если его раньше не было.
         if (animationHost == null)
-            animationHost = SceneObjectContainer.AddImage(layer ?? Layer);
-        else if (animationHost.IsHidden)
+        {
+            animationHost = SceneObjectContainer.AddImage(frame, posX, posY, layer ?? Layer);
+            return;
+        }
+
+        if (animationHost.IsHidden)
             animationHost.IsHidden = false;
 
-        // Обновляем кадр анимации.
-        var frame = frames[FrameIndex];
         animationHost.Bitmap = frame;
 
-        // Пересчитываем новую позицию изображения.
-        var posX = GameObject.X + AnimationOffset.X;
-        if (Math.Abs(animationHost.X - posX) > float.Epsilon)
-            animationHost.X = posX;
-
-        var posY = GameObject.Y + AnimationOffset.Y;
-        if (Math.Abs(animationHost.Y - posY) > float.Epsilon)
-            animationHost.Y = posY;
-
-        // Изменяем, если необходимо, размеры изображения.
-        if (Math.Abs(animationHost.Width - frame.OriginalSize.Width) > float.Epsilon)
-            animationHost.Width = frame.OriginalSize.Width;
-
-        if (Math.Abs(animationHost.Height - frame.OriginalSize.Height) > float.Epsilon)
-            animationHost.Height = frame.OriginalSize.Height;
+        if (Math.Abs(animationHost.Bounds.X - posX) > EngineConstants.DOUBLE_TOLERANCE ||
+            Math.Abs(animationHost.Bounds.Y - posY) > EngineConstants.DOUBLE_TOLERANCE ||
+            Math.Abs(animationHost.Bounds.Width - frame.OriginalSize.Width) > EngineConstants.DOUBLE_TOLERANCE ||
+            Math.Abs(animationHost.Bounds.Height - frame.OriginalSize.Height) > EngineConstants.DOUBLE_TOLERANCE)
+        {
+            animationHost.Bounds = new RectangleD(posX, posY, frame.OriginalSize.Width, frame.OriginalSize.Height);
+        }
     }
 }

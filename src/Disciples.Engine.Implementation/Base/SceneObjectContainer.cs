@@ -31,12 +31,6 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     public IPlatformSceneObjectContainer PlatformSceneObjectContainer { get; }
 
     /// <inheritdoc />
-    public IImageSceneObject AddImage(int layer)
-    {
-        return PlatformSceneObjectContainer.AddImageSceneObject(layer);
-    }
-
-    /// <inheritdoc />
     public IImageSceneObject AddImage(IBitmap bitmap, double x, double y, int layer)
     {
         if (bitmap == null)
@@ -54,14 +48,7 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     /// <inheritdoc />
     public IImageSceneObject AddImage(IBitmap? bitmap, RectangleD bounds, int layer)
     {
-        var imageVisual = PlatformSceneObjectContainer.AddImageSceneObject(layer);
-        imageVisual.X = bounds.X;
-        imageVisual.Y = bounds.Y;
-        imageVisual.Width = bounds.Width;
-        imageVisual.Height = bounds.Height;
-        imageVisual.Bitmap = bitmap;
-
-        return imageVisual;
+        return PlatformSceneObjectContainer.AddImageSceneObject(bitmap, bounds, layer);
     }
 
     /// <inheritdoc />
@@ -79,7 +66,7 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     /// <inheritdoc />
     public ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer)
     {
-        return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), bounds.Width, bounds.Height, bounds.X, bounds.Y, layer);
+        return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), bounds, layer);
     }
 
     /// <inheritdoc />

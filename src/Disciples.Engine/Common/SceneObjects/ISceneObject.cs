@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine.Common.SceneObjects;
+﻿using Disciples.Common.Models;
+
+namespace Disciples.Engine.Common.SceneObjects;
 
 /// <summary>
 /// Объект, который отрисовывается на сцене.
@@ -6,24 +8,9 @@
 public interface ISceneObject
 {
     /// <summary>
-    /// Координата X объекта (справа - налево).
+    /// Границы объекта.
     /// </summary>
-    double X { get; set; }
-
-    /// <summary>
-    /// Координата Y объекта (сверху - вниз).
-    /// </summary>
-    double Y { get; set; }
-
-    /// <summary>
-    /// Ширина объекта.
-    /// </summary>
-    double Width { get; set; }
-
-    /// <summary>
-    /// Высота объекта.
-    /// </summary>
-    double Height { get; set; }
+    RectangleD Bounds { get; set; }
 
     /// <summary>
     /// Слой на котором располагается объект на экране.

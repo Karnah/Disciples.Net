@@ -6,6 +6,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Disciples.Avalonia.SceneObjects;
 using Disciples.Engine;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums;
 
 namespace Disciples.Avalonia.Converters;
@@ -15,8 +16,6 @@ namespace Disciples.Avalonia.Converters;
 /// </summary>
 public class BitmapToRenderTransformConverter : IMultiValueConverter
 {
-    private const double TOLERANCE = 0.001;
-
     /// <inheritdoc />
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
@@ -42,10 +41,10 @@ public class BitmapToRenderTransformConverter : IMultiValueConverter
             case HorizontalAlignment.Left:
                 break;
             case HorizontalAlignment.Center:
-                offsetX += (image.Width - bitmap.OriginalSize.Width) / 2;
+                offsetX += (image.Bounds.Width - bitmap.OriginalSize.Width) / 2;
                 break;
             case HorizontalAlignment.Right:
-                offsetX += image.Width;
+                offsetX += image.Bounds.Width;
                 break;
         }
 
@@ -57,14 +56,14 @@ public class BitmapToRenderTransformConverter : IMultiValueConverter
             case VerticalAlignment.Top:
                 break;
             case VerticalAlignment.Center:
-                offsetY += (image.Height - bitmap.OriginalSize.Height) / 2;
+                offsetY += (image.Bounds.Height - bitmap.OriginalSize.Height) / 2;
                 break;
             case VerticalAlignment.Bottom:
-                offsetY += image.Height;
+                offsetY += image.Bounds.Height;
                 break;
         }
 
-        if (Math.Abs(offsetX - 1) > TOLERANCE || Math.Abs(offsetY - 1) > TOLERANCE)
+        if (Math.Abs(offsetX - 1) > EngineConstants.DOUBLE_TOLERANCE || Math.Abs(offsetY - 1) > EngineConstants.DOUBLE_TOLERANCE)
             transforms.Add(new TranslateTransform(offsetX, offsetY));
 
         if (transforms.Count == 0)

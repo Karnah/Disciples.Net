@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Models;
 
@@ -17,25 +18,21 @@ public interface IPlatformSceneObjectContainer
     /// <summary>
     /// Создать пустое изображение, которое отображается на сцене.
     /// </summary>
+    /// <param name="bitmap"></param>
+    /// <param name="bounds"></param>
     /// <param name="layer">Слой, на котором изображение будет отображаться.</param>
-    IImageSceneObject AddImageSceneObject(int layer);
+    IImageSceneObject AddImageSceneObject(IBitmap? bitmap, RectangleD bounds, int layer);
 
     /// <summary>
     /// Создать текст, который будет отображаться на сцене.
     /// </summary>
     /// <param name="text">Текст.</param>
     /// <param name="textStyle">Стиль текста.</param>
-    /// <param name="width">Ширина пространства, занимаемого текстом.</param>
-    /// <param name="height">Высота пространства, занимаемого текстом.</param>
-    /// <param name="x">X-координата текста.</param>
-    /// <param name="y">Y-координата текста.</param>
+    /// <param name="bounds"></param>
     /// <param name="layer">Слой, на котором будет отображаться текст.</param>
     ITextSceneObject AddTextSceneObject(TextContainer? text,
         TextStyle textStyle,
-        double width,
-        double height,
-        double x,
-        double y,
+        RectangleD bounds,
         int layer);
 
     /// <summary>

@@ -23,19 +23,19 @@
         <c:TextContainerConverter x:Key="TextContainerConverter" />
     </Window.Resources>
 
-    <Window.Styles>
-        <Style Selector="ItemsControl > ContentPresenter">
-            <Setter Property="Canvas.Left" Value="{Binding X}" />
-            <Setter Property="Canvas.Top" Value="{Binding Y}" />
-            <Setter Property="ZIndex" Value="{Binding Layer}" />
-            <Setter Property="IsVisible" Value="{Binding !IsHidden}" />
-        </Style>
-    </Window.Styles>
-
     <Grid Name="Field" Width="{x:Static e:GameInfo.OriginalWidth}" Height="{x:Static e:GameInfo.OriginalHeight}"
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
         <ItemsControl Items="{Binding SceneObjects}">
+            <ItemsControl.Styles>
+                <Style Selector="ItemsControl ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding Bounds.Left}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Bounds.Top}" />
+                    <Setter Property="ZIndex" Value="{Binding Layer}" />
+                    <Setter Property="IsVisible" Value="{Binding !IsHidden}" />
+                </Style>
+            </ItemsControl.Styles>
+
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Canvas />
@@ -57,7 +57,7 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vo:ITextSceneObject}">
-                    <Decorator Width="{Binding Width}" Height="{Binding Height}">
+                    <Decorator Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}">
                         <TextBlock TextWrapping="Wrap">
                             <TextBlock.VerticalAlignment>
                                 <MultiBinding Converter="{StaticResource TextVerticalAlignmentConverter}">
