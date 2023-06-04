@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -18,14 +19,17 @@ public abstract class BaseAnimationComponent : BaseComponent
     private const int FRAME_CHANGE_SPEED = 75;
 
     private long _ticksCount;
+    private bool _isEnabled;
 
     /// <inheritdoc />
-    protected BaseAnimationComponent(GameObject gameObject, ISceneObjectContainer sceneObjectContainer, int layer) :
+    protected BaseAnimationComponent(GameObject gameObject, ISceneObjectContainer sceneObjectContainer, int layer, PointD? animationOffset = null) :
         base(gameObject)
     {
         SceneObjectContainer = sceneObjectContainer;
 
         Layer = layer;
+        AnimationOffset = animationOffset ?? new PointD();
+        IsEnabled = true;
     }
 
     /// <summary>
@@ -44,6 +48,32 @@ public abstract class BaseAnimationComponent : BaseComponent
     public int Layer { get; }
 
     /// <summary>
+    /// Смещение для анимаций.
+    /// </summary>
+    protected virtual PointD AnimationOffset { get;}
+
+    /// <summary>
+    /// Признак, что анимация выполняется.
+    /// </summary>
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set
+        {
+            if (_isEnabled == value)
+                return;
+
+            _isEnabled = value;
+
+            foreach (var animationHost in GetAnimationHosts())
+            {
+                if (animationHost != null)
+                    animationHost.IsHidden = !value;
+            }
+        }
+    }
+
+    /// <summary>
     /// Контроллер сцены.
     /// </summary>
     private ISceneObjectContainer SceneObjectContainer { get; }
@@ -51,7 +81,7 @@ public abstract class BaseAnimationComponent : BaseComponent
     /// <inheritdoc />
     public override void Update(long tickCount)
     {
-        if (FramesCount == 0)
+        if (!IsEnabled || FramesCount == 0)
             return;
 
         _ticksCount += tickCount;
@@ -97,7 +127,7 @@ public abstract class BaseAnimationComponent : BaseComponent
     /// В отличие от <see cref="UpdatePosition" /> не проверяет изменение положения и размеров.
     /// Предполагается, что внутри одной анимации кадры имеют одинаковые размеры и смещение.
     /// </remarks>
-    protected void UpdateFrame(IImageSceneObject? animationHost, IReadOnlyList<Frame>? frames)
+    protected void UpdateFrame(IImageSceneObject? animationHost, AnimationFrames? frames)
     {
         if (animationHost == null)
             return;
@@ -105,7 +135,7 @@ public abstract class BaseAnimationComponent : BaseComponent
         if (frames == null || frames.Count == 0)
             return;
 
-        animationHost.Bitmap = frames[FrameIndex].Bitmap;
+        animationHost.Bitmap = frames[FrameIndex];
     }
 
     /// <summary>
@@ -117,19 +147,13 @@ public abstract class BaseAnimationComponent : BaseComponent
     /// <remarks>
     /// Необходимо использовать, когда изменилась анимация.
     /// </remarks>
-    protected void UpdatePosition(ref IImageSceneObject? animationHost, IReadOnlyList<Frame>? frames,
-        int? layer = null)
+    protected void UpdatePosition(ref IImageSceneObject? animationHost, AnimationFrames? frames, int? layer = null)
     {
         // Если фреймов нет, то удаляем анимацию со сцены.
         if (frames == null || frames.Count == 0)
         {
             if (animationHost != null)
-            {
-                // todo Здесь происходит удаление.
-                // Возможно, просто достаточно перенести в невидимую область
-                SceneObjectContainer.RemoveSceneObject(animationHost);
-                animationHost = null;
-            }
+                animationHost.IsHidden = true;
 
             return;
         }
@@ -137,25 +161,27 @@ public abstract class BaseAnimationComponent : BaseComponent
         // Добавляем изображение, если его раньше не было.
         if (animationHost == null)
             animationHost = SceneObjectContainer.AddImage(layer ?? Layer);
+        else if (animationHost.IsHidden)
+            animationHost.IsHidden = false;
 
         // Обновляем кадр анимации.
         var frame = frames[FrameIndex];
-        animationHost.Bitmap = frame.Bitmap;
+        animationHost.Bitmap = frame;
 
         // Пересчитываем новую позицию изображения.
-        var posX = GameObject.X + frame.OffsetX;
+        var posX = GameObject.X + AnimationOffset.X;
         if (Math.Abs(animationHost.X - posX) > float.Epsilon)
             animationHost.X = posX;
 
-        var posY = GameObject.Y + frame.OffsetY;
+        var posY = GameObject.Y + AnimationOffset.Y;
         if (Math.Abs(animationHost.Y - posY) > float.Epsilon)
             animationHost.Y = posY;
 
         // Изменяем, если необходимо, размеры изображения.
-        if (Math.Abs(animationHost.Width - frame.Width) > float.Epsilon)
-            animationHost.Width = frame.Width;
+        if (Math.Abs(animationHost.Width - frame.OriginalSize.Width) > float.Epsilon)
+            animationHost.Width = frame.OriginalSize.Width;
 
-        if (Math.Abs(animationHost.Height - frame.Height) > float.Epsilon)
-            animationHost.Height = frame.Height;
+        if (Math.Abs(animationHost.Height - frame.OriginalSize.Height) > float.Epsilon)
+            animationHost.Height = frame.OriginalSize.Height;
     }
 }

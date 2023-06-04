@@ -18,7 +18,7 @@ public enum SceneButtonState
     /// <summary>
     /// Курсор располагается над кнопкой.
     /// </summary>
-    Selected,
+    Hover,
 
     /// <summary>
     /// Кнопка нажата.

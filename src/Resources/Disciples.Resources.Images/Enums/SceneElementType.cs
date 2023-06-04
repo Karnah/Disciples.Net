@@ -21,7 +21,7 @@ public enum SceneElementType
     Button,
 
     /// <summary>
-    /// "Залипающая" кнопка.
+    /// Кнопка-переключатель из двух состояний.
     /// </summary>
     ToggleButton,
 

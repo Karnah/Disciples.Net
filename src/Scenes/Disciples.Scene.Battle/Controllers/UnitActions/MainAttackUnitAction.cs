@@ -1,4 +1,7 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -12,11 +15,6 @@ namespace Disciples.Scene.Battle.Controllers.UnitActions;
 /// </summary>
 internal class MainAttackUnitAction : BaseBattleUnitAction
 {
-    /// <summary>
-    /// Слой, который перекрывает всех юнитов.
-    /// </summary>
-    private const int ABOVE_ALL_UNITS_LAYER = 100 * 4;
-
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
@@ -175,20 +173,25 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         }
 
         // Если есть анимация, применяемая на площадь, то добавляем её на сцену.
-        if (currentUnitAnimation.BattleUnitAnimation.TargetAnimation?.IsSingle == false)
+        if (currentUnitAnimation.BattleUnitAnimation.TargetAnimation?.AreaFrames != null)
         {
             // Центр анимации будет приходиться на середину между первым и вторым рядом.
             var isTargetAttacker = targetBattleUnits.First().IsAttacker;
-            var (x, y) = BattleUnit.GetSceneUnitPosition(isTargetAttacker, 0.5, 1);
-
-            var targetAnimationFrames = isTargetAttacker
-                ? currentUnitAnimation.BattleUnitAnimation.TargetAnimation.AttackerDirectionFrames
-                : currentUnitAnimation.BattleUnitAnimation.TargetAnimation.DefenderDirectionFrames;
+            var squad = isTargetAttacker
+                ? _context.AttackingBattleSquad
+                : _context.DefendingBattleSquad;
+            var backPosition = squad.GetUnitPosition(UnitSquadLinePosition.Back, UnitSquadFlankPosition.Center);
+            var frontPosition = squad.GetUnitPosition(UnitSquadLinePosition.Front, UnitSquadFlankPosition.Center);
+            var point = new PointD(
+                            (backPosition.X + frontPosition.X) / 2 + BattleUnit.SmallBattleUnitAnimationOffset.X,
+                            (backPosition.Y + frontPosition.Y) / 2 + BattleUnit.SmallBattleUnitAnimationOffset.Y);
             var areaAnimation = _battleGameObjectContainer.AddAnimation(
-                targetAnimationFrames,
-                x,
-                y,
-                ABOVE_ALL_UNITS_LAYER,
+                currentUnitAnimation.BattleUnitAnimation.TargetAnimation.AreaFrames,
+                point.X,
+                point.Y,
+                isTargetAttacker
+                    ? BattleLayers.ABOVE_ALL_ATTACKER_UNITS_LAYER
+                    : BattleLayers.ABOVE_ALL_DEFENDER_UNITS_LAYER,
                 false);
             AddAction(new AnimationBattleAction(areaAnimation.AnimationComponent));
         }

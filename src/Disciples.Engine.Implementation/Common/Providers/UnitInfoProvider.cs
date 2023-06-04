@@ -84,7 +84,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         if (!_unitPortraits.TryGetValue(unitTypeId, out var unitPortrait))
         {
-            unitPortrait = _bitmapFactory.FromRawToOriginalBitmap(_unitPortraitExtractor.GetImage(unitTypeId.ToUpper()));
+            unitPortrait = _bitmapFactory.FromRawToBitmap(_unitPortraitExtractor.GetImage(unitTypeId));
             _unitPortraits.Add(unitTypeId, unitPortrait);
         }
 

@@ -8,7 +8,7 @@ public enum InputDeviceActionType
     /// <summary>
     /// Выделение.
     /// </summary>
-    Selection,
+    Hover,
 
     /// <summary>
     /// Левая кнопка мыши.

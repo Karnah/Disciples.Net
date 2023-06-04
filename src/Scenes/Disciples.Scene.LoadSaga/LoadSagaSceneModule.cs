@@ -1,4 +1,6 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.LoadSaga.Controllers;
 using Disciples.Scene.LoadSaga.Providers;
@@ -17,6 +19,7 @@ public class LoadSagaSceneModule : IGameModule
         var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadSagaScene));
         containerRegistrator.Register<ILoadSagaScene, LoadSagaScene>(loadingScopeReuse);
         containerRegistrator.Register<LoadSagaInterfaceProvider>(loadingScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(loadingScopeReuse);
         containerRegistrator.Register<LoadSagaInterfaceController>(loadingScopeReuse);
         containerRegistrator.Register<LoadSagaSoundController>(loadingScopeReuse);
         containerRegistrator.Register<SaveProvider>(loadingScopeReuse);

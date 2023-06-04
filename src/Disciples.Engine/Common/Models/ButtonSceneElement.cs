@@ -20,7 +20,7 @@ public class ButtonSceneElement : SceneElement
     /// Если <see langword="null" />, значит кнопка не отображается на экране,
     /// И нужна только для обработки горячих клавиш.
     /// </remarks>
-    public IReadOnlyDictionary<SceneButtonState, IBitmap>? ButtonStates { get; init; }
+    public ButtonStates? ButtonStates { get; init; }
 
     /// <summary>
     /// Текстовая подсказка при наведении на элемент.

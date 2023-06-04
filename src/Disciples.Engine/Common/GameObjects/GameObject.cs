@@ -12,6 +12,8 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </summary>
 public abstract class GameObject
 {
+    private bool _isHidden;
+
     /// <summary>
     /// Создать объект типа <see cref="GameObject" />.
     /// </summary>
@@ -83,6 +85,11 @@ public abstract class GameObject
     public double Height { get; protected set; }
 
     /// <summary>
+    /// Границы элемента.
+    /// </summary>
+    public RectangleD Bounds => new(X, Y, Width, Height);
+
+    /// <summary>
     /// Компоненты из которых состоит объект.
     /// </summary>
     public IReadOnlyCollection<IComponent> Components { get; protected set; }
@@ -91,6 +98,19 @@ public abstract class GameObject
     /// Был ли объект инициализирован.
     /// </summary>
     public bool IsInitialized { get; private set; }
+
+    /// <summary>
+    /// Признак, что объект скрыт.
+    /// </summary>
+    public bool IsHidden
+    {
+        get => _isHidden;
+        set
+        {
+            _isHidden = value;
+            OnHiddenChanged(value);
+        }
+    }
 
     /// <summary>
     /// Был ли объект удалён со сцены.
@@ -209,5 +229,13 @@ public abstract class GameObject
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Обработать изменение параметра <see cref="IsHidden" />.
+    /// </summary>
+    protected virtual void OnHiddenChanged(bool isHidden)
+    {
+
     }
 }

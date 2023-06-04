@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine;
+﻿using Disciples.Common.Models;
+
+namespace Disciples.Engine;
 
 /// <summary>
 /// Изображение.
@@ -6,14 +8,19 @@
 public interface IBitmap
 {
     /// <summary>
-    /// Ширина изображения.
+    /// Размеры изображения в ресурсах.
     /// </summary>
-    double Width { get; }
+    SizeD OriginalSize { get; }
 
     /// <summary>
-    /// Высота изображения.
+    /// Реальный размер изображения <see cref="BitmapData" />.
     /// </summary>
-    double Height { get; }
+    SizeD ActualSize { get; }
+
+    /// <summary>
+    /// Смещение <see cref="BitmapData" /> относительно размеров <see cref="OriginalSize" />.
+    /// </summary>
+    PointD Offset { get; }
 
     /// <summary>
     /// Внутренний объект, содержащий информацию об изображении.

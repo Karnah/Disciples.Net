@@ -65,8 +65,8 @@ internal class BattleScene : BaseScene, IBattleScene
     /// <inheritdoc />
     public void InitializeParameters(BattleSceneParameters parameters)
     {
-        _battleContext.AttackingSquad = parameters.AttackingSquad;
-        _battleContext.DefendingSquad = parameters.DefendingSquad;
+        _battleContext.AttackingBattleSquad.Squad = parameters.AttackingSquad;
+        _battleContext.DefendingBattleSquad.Squad = parameters.DefendingSquad;
     }
 
     /// <inheritdoc />
@@ -82,6 +82,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleInterfaceProvider.Load();
         _battleUnitResourceProvider.Load();
 
+        _battleInterfaceController.PreLoad();
         _battleController.Load();
         _battleInterfaceController.Load();
         _battleSoundController.Load();

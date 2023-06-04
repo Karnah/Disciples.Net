@@ -7,6 +7,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.Resources.Common.Exceptions;
 using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -26,7 +27,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
     private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
-    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), IReadOnlyList<Frame>> _effectsAnimation = new();
+    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), AnimationFrames> _effectsAnimation = new();
     private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
@@ -47,27 +48,39 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
+    public AnimationFrames SmallUnitTurnAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public AnimationFrames BigUnitTurnAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public AnimationFrames SmallUnitTargetAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public AnimationFrames BigUnitTargetAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
     public IBitmap GetUnitFace(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitFace(unitType.Id);
+        return _unitInfoProvider.GetUnitFace(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public IBitmap GetUnitBattleFace(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitBattleFace(unitType.Id);
+        return _unitInfoProvider.GetUnitBattleFace(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public IBitmap GetUnitPortrait(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitPortrait(unitType.Id);
+        return _unitInfoProvider.GetUnitPortrait(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction)
     {
-        var unitTypeId = unitType.Id;
+        var unitTypeId = unitType.LeaderBaseUnit?.Id ?? unitType.Id;
         var animationKey = (unitTypeId, direction);
         if (!_unitsAnimations.ContainsKey(animationKey))
             _unitsAnimations[animationKey] = ExtractUnitAnimation(unitTypeId, direction);
@@ -76,7 +89,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall)
+    public AnimationFrames GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall)
     {
         var animationKey = (effectAttackType, isSmall);
         if (!_effectsAnimation.ContainsKey(animationKey))
@@ -88,10 +101,11 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     public BattleUnitSounds GetBattleUnitSounds(UnitType unitType)
     {
-        if (!_unitSounds.TryGetValue(unitType.Id, out var battleUnitSounds))
+        var unitTypeId = unitType.LeaderBaseUnit?.Id ?? unitType.Id;
+        if (!_unitSounds.TryGetValue(unitTypeId, out var battleUnitSounds))
         {
-            battleUnitSounds = ExtractUnitSounds(unitType.Id);
-            _unitSounds[unitType.Id] = battleUnitSounds;
+            battleUnitSounds = ExtractUnitSounds(unitTypeId);
+            _unitSounds[unitTypeId] = battleUnitSounds;
         }
 
         return battleUnitSounds;
@@ -100,6 +114,10 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     protected override void LoadInternal()
     {
+        SmallUnitTurnAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKCURSMALLA");
+        BigUnitTurnAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKCURLARGEA");
+        SmallUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKSMALLA");
+        BigUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKLARGEA");
     }
 
     /// <inheritdoc />
@@ -140,15 +158,13 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private BattleUnitFrames GetUnitFrames(string unitTypeId, BattleDirection direction, BattleUnitState unitState)
     {
         var shadowKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Shadow);
-        var shadowFrames = GetAnimationFrames(shadowKey);
+        var shadowFrames = TryGetAnimationFrames(shadowKey);
 
         var bodyKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Body);
         var unitFrames = GetAnimationFrames(bodyKey);
-        if (unitFrames == null)
-            throw new ArgumentException($"Отсутствует анимация для юнита: {bodyKey.Key}");
 
         var auraKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Aura);
-        var auraFrames = GetAnimationFrames(auraKey);
+        var auraFrames = TryGetAnimationFrames(auraKey);
 
         return new BattleUnitFrames(shadowFrames, unitFrames, auraFrames);
     }
@@ -156,39 +172,25 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <summary>
     /// Получить анимацию, которая применяется к атакуемым юнитам.
     /// </summary>
+    /// <remarks>
+    /// TODO Может быть больше одной анимации. Порядковый индекс - последние две цифры в ключе.
+    /// </remarks>
     private BattleUnitTargetAnimation? GetUnitTargetAnimation(string unitTypeId)
     {
-        // В начале пытаемся достать анимацию для одного юнита.
-        // Если её нет, то для площади.
-        // Если и для площади нет, то просто вернётся null.
-        return GetUnitTargetAnimation(unitTypeId, UnitTargetAnimationType.Single)
-               ?? GetUnitTargetAnimation(unitTypeId, UnitTargetAnimationType.Area);
-    }
+        var targetSymmetricAnimationFrames = TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, null));
+        var targetAttackingFrames = targetSymmetricAnimationFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, BattleSquadPosition.Attacker));
+        var targetDefenderFrames = targetSymmetricAnimationFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, BattleSquadPosition.Defender));
+        var areaDirectionFrames = TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Area, null));
+        if (areaDirectionFrames == null && targetAttackingFrames == null && targetDefenderFrames == null)
+            return null;
 
-    /// <summary>
-    /// Получить анимацию, которая применяется к атакуемым юнитам.
-    /// </summary>
-    private BattleUnitTargetAnimation? GetUnitTargetAnimation(string unitTypeId, UnitTargetAnimationType animationType)
-    {
-        var isSingle = animationType == UnitTargetAnimationType.Single;
-
-        // Проверяем анимацию на одну цель, которая не зависит от направления.
-        var targetWithoutDirectionFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, null));
-        if (targetWithoutDirectionFrames != null)
-            return new BattleUnitTargetAnimation(isSingle, targetWithoutDirectionFrames, targetWithoutDirectionFrames);
-
-        var targetAttackingFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleSquadPosition.Attacker));
-        var targetDefenderFrames = GetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, animationType, BattleSquadPosition.Defender));
-        if (targetAttackingFrames != null && targetDefenderFrames != null)
-            return new BattleUnitTargetAnimation(isSingle, targetAttackingFrames, targetDefenderFrames);
-
-        return null;
+        return new BattleUnitTargetAnimation(targetAttackingFrames, targetDefenderFrames, areaDirectionFrames);
     }
 
     /// <summary>
     /// Получить кадры анимации.
     /// </summary>
-    private IReadOnlyList<Frame>? GetAnimationFrames(BaseResourceKey key)
+    private AnimationFrames? TryGetAnimationFrames(BaseResourceKey key)
     {
         var images = _imagesExtractor.GetAnimationFrames(key.Key);
         if (images == null)
@@ -198,32 +200,31 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <summary>
+    /// Получить кадры анимации.
+    /// </summary>
+    private AnimationFrames GetAnimationFrames(BaseResourceKey key)
+    {
+        return TryGetAnimationFrames(key) ?? throw new ResourceNotFoundException(key.Key);
+    }
+
+    /// <summary>
     /// Получить анимацию мёртвого юнита.
     /// </summary>
     /// <remarks>
     /// На самом деле это единичная картинка с костями.
     /// </remarks>
-    private IReadOnlyList<Frame> GetDeadFrames(bool isSmall)
+    private AnimationFrames GetDeadFrames(bool isSmall)
     {
         var imageIndex = RandomGenerator.Get(2);
         var resourceKey = new UnitDeadBodyResourceKey(isSmall, imageIndex);
-        var deadFrame = _battleResourceProvider.GetBattleFrame(resourceKey.Key);
-
-        // Необходимо задать дополнительно смещение, чтобы кости оказались в нужном месте.
-        var frame = new Frame(
-            deadFrame.Width,
-            deadFrame.Height,
-            deadFrame.OffsetX - 30,
-            deadFrame.OffsetY - 10,
-            deadFrame.Bitmap);
-
-        return new []{ frame };
+        var deadFrame = _battleResourceProvider.GetBattleBitmap(resourceKey.Key);
+        return new AnimationFrames(new[] { deadFrame });
     }
 
     /// <summary>
     /// Получить анимацию смерти юнита.
     /// </summary>
-    private IReadOnlyList<Frame> GetDeathAnimation(UnitDeathAnimationType animationType)
+    private AnimationFrames GetDeathAnimation(UnitDeathAnimationType animationType)
     {
         return _battleResourceProvider.GetBattleAnimation(new UnitDeathAnimationResourceKey(animationType).Key);
     }

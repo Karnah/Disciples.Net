@@ -1,35 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using Disciples.Engine.Base;
+﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.GameObjects;
 
 /// <summary>
-/// Класс для "залипающей кнопки". То есть кнопка остаётся нажатой до тех пор, пока на неё не кликнут еще раз.
+/// Кнопка-переключатель из двух состояний.
 /// </summary>
-public class ToggleButtonObject : ButtonObject
+public class ToggleButtonObject : BaseButtonObject
 {
+    private readonly ToggleButtonSceneElement _toggleButton;
+
     /// <summary>
     /// Создать объект типа <see cref="ToggleButtonObject" />.
     /// </summary>
     public ToggleButtonObject(
         ISceneObjectContainer sceneObjectContainer,
-        IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates,
-        Action buttonClickedAction,
-        double x,
-        double y,
-        int layer,
-        IReadOnlyList<KeyboardButton> hotKeys)
-        : base(sceneObjectContainer, buttonStates, buttonClickedAction, x, y, layer, hotKeys)
+        ToggleButtonSceneElement toggleButton,
+        int layer)
+        : base(sceneObjectContainer, toggleButton, toggleButton.HotKeys, layer)
     {
-        IsChecked = false;
+        _toggleButton = toggleButton;
     }
 
     /// <summary>
     /// Признак, что кнопка находится во включенном состоянии.
     /// </summary>
     public bool IsChecked { get; private set; }
+
+    /// <inheritdoc />
+    protected override ButtonStates? ButtonStates => IsChecked
+        ? _toggleButton.CheckedButtonStates
+        : _toggleButton.ButtonStates;
 
     /// <inheritdoc />
     public override void SetDisabled()
@@ -40,36 +42,11 @@ public class ToggleButtonObject : ButtonObject
     }
 
     /// <inheritdoc />
-    protected override void OnSelected()
-    {
-        // Если IsChecked=true, то кнопка находится в состоянии Pressed.
-        // В этом статусе выделение не применяется.
-        if (IsChecked)
-            return;
-
-        base.OnSelected();
-    }
-
-    /// <inheritdoc />
-    protected override void OnUnselected()
-    {
-        // Если IsChecked=true, то кнопка находится в состоянии Pressed.
-        // В этом статусе выделение не применяется.
-        if (IsChecked)
-            return;
-
-        base.OnUnselected();
-    }
-
-    /// <inheritdoc />
     protected override SceneButtonState ProcessClickInternal()
     {
         IsChecked = !IsChecked;
 
-        var buttonState = base.ProcessClickInternal();
-        return IsChecked
-            ? SceneButtonState.Pressed
-            : buttonState;
+        return base.ProcessClickInternal();
     }
 
     /// <summary>
@@ -81,8 +58,6 @@ public class ToggleButtonObject : ButtonObject
             return;
 
         IsChecked = isChecked;
-        SetState(IsChecked
-            ? SceneButtonState.Pressed
-            : SceneButtonState.Active);
+        UpdateButtonVisualObject();
     }
 }

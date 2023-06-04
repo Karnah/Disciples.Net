@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -16,6 +17,7 @@ public class Unit
     public Unit(string id, UnitType unitType, Player player, UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition)
     {
         Id = id;
+        IsLeader = unitType.UnitCategory is UnitCategory.Leader or UnitCategory.LeaderThief;
         UnitType = unitType;
         Player = player;
 
@@ -35,6 +37,11 @@ public class Unit
     /// Уникальный идентификатор юнита.
     /// </summary>
     public string Id { get; }
+
+    /// <summary>
+    /// Является ли юнит лидером.
+    /// </summary>
+    public bool IsLeader { get; }
 
     /// <summary>
     /// Тип юнита.

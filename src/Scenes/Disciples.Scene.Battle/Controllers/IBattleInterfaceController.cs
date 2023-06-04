@@ -1,4 +1,7 @@
-﻿using Disciples.Engine.Base;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Base;
+using Disciples.Engine.Common.Models;
+using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
 namespace Disciples.Scene.Battle.Controllers;
@@ -9,6 +12,11 @@ namespace Disciples.Scene.Battle.Controllers;
 internal interface IBattleInterfaceController : ISupportLoading
 {
     /// <summary>
+    /// Инициализировать начальное состояние.
+    /// </summary>
+    void PreLoad();
+
+    /// <summary>
     /// Обработать события перед обновлением сцены.
     /// </summary>
     void BeforeSceneUpdate();
@@ -17,6 +25,11 @@ internal interface IBattleInterfaceController : ISupportLoading
     /// Обработать завершение обновлении сцены.
     /// </summary>
     void AfterSceneUpdate();
+
+    /// <summary>
+    /// Получить позицию юнита на поле боя.
+    /// </summary>
+    RectangleD GetBattleUnitPosition(Unit unit, BattleSquadPosition unitSquadPosition);
 
     #region События пользовательского ввода
 

@@ -13,6 +13,26 @@ namespace Disciples.Scene.Battle.Providers;
 internal interface IBattleUnitResourceProvider : ISupportLoading
 {
     /// <summary>
+    /// Анимация для выделения маленького юнита при его ходе.
+    /// </summary>
+    AnimationFrames SmallUnitTurnAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация для выделения большое юнита при его ходе.
+    /// </summary>
+    AnimationFrames BigUnitTurnAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация для выделения маленького юнита, когда его выбрали в качестве цели.
+    /// </summary>
+    AnimationFrames SmallUnitTargetAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация для выделения большое юнита, когда его выбрали в качестве цели.
+    /// </summary>
+    AnimationFrames BigUnitTargetAnimationFrames { get; }
+
+    /// <summary>
     /// Получить изображение юнита.
     /// </summary>
     /// <param name="unitType">Тип юнита.</param>
@@ -40,7 +60,8 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// <summary>
     /// Получить анимацию эффекта, применяемую к юниту.
     /// </summary>
-    IReadOnlyList<Frame> GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall);
+    AnimationFrames GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall);
+
 
     /// <summary>
     /// Получить звуки юнита в битве.

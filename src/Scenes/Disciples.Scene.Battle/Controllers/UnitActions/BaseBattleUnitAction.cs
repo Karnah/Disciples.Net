@@ -317,19 +317,22 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
         // Если у атакующего есть анимация, применяемая к юниту, то добавляем её на сцену.
         // Это требуется только для основной атаки.
-        var targetUnitAnimation = attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
-        if (isMainAttack && targetUnitAnimation?.IsSingle == true)
+        if (isMainAttack)
         {
             var targetAnimationFrames = targetUnit.IsAttacker
-                ? targetUnitAnimation.AttackerDirectionFrames
-                : targetUnitAnimation.DefenderDirectionFrames;
-            var targetAnimation = _battleGameObjectContainer.AddAnimation(
-                targetAnimationFrames,
-                targetUnit.X,
-                targetUnit.Y,
-                targetUnit.AnimationComponent.Layer + 2,
-                false);
-            AddAction(new AnimationBattleAction(targetAnimation.AnimationComponent));
+                ? attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.AttackerDirectionFrames
+                : attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.DefenderDirectionFrames;
+            if (targetAnimationFrames != null)
+            {
+                var animationPoint = targetUnit.AnimationComponent.AnimationPoint;
+                var targetAnimation = _battleGameObjectContainer.AddAnimation(
+                    targetAnimationFrames,
+                    animationPoint.X,
+                    animationPoint.Y,
+                    targetUnit.AnimationComponent.Layer + 2,
+                    false);
+                AddAction(new AnimationBattleAction(targetAnimation.AnimationComponent));
+            }
         }
     }
 
@@ -341,10 +344,11 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         battleUnit.Unit.IsDead = true;
         battleUnit.Unit.Effects.Clear();
 
+        var animationPoint = battleUnit.AnimationComponent.AnimationPoint;
         var deathAnimation = _battleGameObjectContainer.AddAnimation(
             battleUnit.AnimationComponent.BattleUnitAnimation.DeathFrames,
-            battleUnit.X,
-            battleUnit.Y,
+            animationPoint.X,
+            animationPoint.Y,
             battleUnit.AnimationComponent.Layer + 2,
             false);
         AddAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
@@ -365,10 +369,11 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     {
         // TODO Анимации может не быть. Например, для паралича.
         var animationFrames = _unitResourceProvider.GetEffectAnimation(effectAttackType, battleUnit.Unit.UnitType.IsSmall);
+        var animationPoint = battleUnit.AnimationComponent.AnimationPoint;
         var animation = _battleGameObjectContainer.AddAnimation(
             animationFrames,
-            battleUnit.X,
-            battleUnit.Y,
+            animationPoint.X,
+            animationPoint.Y,
             battleUnit.AnimationComponent.Layer + 2,
             false);
         return new AnimationBattleAction(animation.AnimationComponent);

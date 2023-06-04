@@ -80,7 +80,7 @@ internal class TextListBoxItemObject : GameObject
     {
         base.Initialize();
 
-        _textSceneObject = _sceneObjectContainer.AddText(Item.Text, _commonTextStyle, Width, Height, X, Y, _layer);
+        _textSceneObject = _sceneObjectContainer.AddText(Item.Text, _commonTextStyle, Bounds, _layer);
     }
 
     /// <inheritdoc />

@@ -110,11 +110,11 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
             switch (inputDeviceEvent.ActionType)
             {
-                case InputDeviceActionType.Selection when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.SelectionComponent?.Selected();
+                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
+                    inputDeviceGameObject?.SelectionComponent?.Hovered();
                     continue;
-                case InputDeviceActionType.Selection when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.SelectionComponent?.Unselected();
+                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
+                    inputDeviceGameObject?.SelectionComponent?.Unhovered();
                     continue;
 
                 case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:

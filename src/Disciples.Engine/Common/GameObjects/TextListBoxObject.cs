@@ -146,9 +146,7 @@ public class TextListBoxObject : GameObject
         if (buttonName == null)
             return null;
 
-        var button = _gameObjectContainer.GameObjects.Get<ButtonObject>(buttonName);
-        button.ClickedAction = clickedAction;
-        return button;
+        return _gameObjectContainer.GameObjects.GetButton(buttonName, clickedAction);
     }
 
     /// <summary>

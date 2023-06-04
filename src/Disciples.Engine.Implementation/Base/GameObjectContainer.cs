@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 
@@ -43,7 +41,7 @@ public class GameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true)
+    public AnimationObject AddAnimation(AnimationFrames frames, double x, double y, int layer, bool repeat = true)
     {
         var animation = new AnimationObject(_sceneObjectContainer, frames, x, y, layer, repeat);
         return AddObject(animation);
@@ -57,19 +55,6 @@ public class GameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
-    {
-        return AddButton(buttonStates, buttonPressedAction, x, y, layer, hotkey == null ? Array.Empty<KeyboardButton>() : new []{ hotkey.Value });
-    }
-
-    /// <inheritdoc />
-    public ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, IReadOnlyList<KeyboardButton> hotKeys)
-    {
-        var button = new ButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer, hotKeys);
-        return AddObject(button);
-    }
-
-    /// <inheritdoc />
     public ButtonObject AddButton(ButtonSceneElement button, int layer)
     {
         var buttonObject = new ButtonObject(_sceneObjectContainer, button, layer);
@@ -77,11 +62,10 @@ public class GameObjectContainer : IGameObjectContainer
     }
 
     /// <inheritdoc />
-    public ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null)
+    public ToggleButtonObject AddToggleButton(ToggleButtonSceneElement toggleButton, int layer)
     {
-        var toggleButton = new ToggleButtonObject(_sceneObjectContainer, buttonStates, buttonPressedAction, x, y, layer,
-            hotkey == null ? Array.Empty<KeyboardButton>() : new []{ hotkey.Value });
-        return AddObject(toggleButton);
+        var toggleButtonObject = new ToggleButtonObject(_sceneObjectContainer, toggleButton, layer);
+        return AddObject(toggleButtonObject);
     }
 
     /// <inheritdoc />

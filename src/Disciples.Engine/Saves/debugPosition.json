@@ -1,0 +1,153 @@
+{
+  "SagaName": "Common battle",
+  "SagaDescription": null,
+  "GameType": 0,
+  "MissionType": 0,
+  "TurnNumber": 1,
+  "DifficultyLevel": 2,
+  "Players": [
+    {
+      "Id": 1,
+      "IsComputer": false,
+      "Race": 0,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 1,
+              "Name": null,
+              "UnitTypeId": "G000UU8023", // warden.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 2,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 120,
+              "IsDead": false
+            },
+            {
+              "Id": 2,
+              "Name": null,
+              "UnitTypeId": "G000UU8035", // sylph.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 4,
+              "Experience": 0,
+              "HitPoints": 95,
+              "IsDead": false
+            },
+            {
+              "Id": 3,
+              "Name": null,
+              "UnitTypeId": "G000UU8023", // warden.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 0,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 120,
+              "IsDead": false
+            },
+            {
+              "Id": 4,
+              "Name": null,
+              "UnitTypeId": "G000UU8015", // centaur charger.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 2,
+              "Experience": 0,
+              "HitPoints": 175,
+              "IsDead": false
+            },
+            {
+              "Id": 5,
+              "Name": null,
+              "UnitTypeId": "G000UU8010", // dryad.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 18,
+              "Experience": 0,
+              "HitPoints": 185,
+              "IsDead": false
+            },
+            {
+              "Id": 6,
+              "Name": null,
+              "UnitTypeId": "G000UU8015", // centaur charger.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 0,
+              "Level": 2,
+              "Experience": 0,
+              "HitPoints": 175,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "IsComputer": true,
+      "Race": 3,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 7,
+              "Name": null,
+              "UnitTypeId": "G000UU0151", // prophetess.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 4,
+              "Experience": 0,
+              "HitPoints": 125,
+              "IsDead": false
+            },
+            {
+              "Id": 8,
+              "Name": null,
+              "UnitTypeId": "G000UU0154", // imperial assassin.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 0,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 135,
+              "IsDead": false
+            },
+            {
+              "Id": 9,
+              "Name": null,
+              "UnitTypeId": "G000UU8049", // gumtic bledwater.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 1100,
+              "IsDead": false
+            },
+            {
+              "Id": 10,
+              "Name": null,
+              "UnitTypeId": "G000UU0156", // defender of faith.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 5,
+              "Experience": 0,
+              "HitPoints": 225,
+              "IsDead": false
+            },
+            {
+              "Id": 11,
+              "Name": null,
+              "UnitTypeId": "G000UU8150", // sir allemon.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 0,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 800,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

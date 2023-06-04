@@ -51,7 +51,6 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<ISceneObjectContainer, SceneObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IGameObjectContainer, GameObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IDialogController, DialogController>(Reuse.Scoped);
-        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(Reuse.Scoped);
 
         var mapperConfiguration = new MapperConfiguration(cnf =>
             cnf.AddMaps(typeof(IGameController).GetAssembly()));

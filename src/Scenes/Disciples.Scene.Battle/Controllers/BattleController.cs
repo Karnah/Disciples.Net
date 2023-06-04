@@ -112,10 +112,10 @@ internal class BattleController : BaseSupportLoading, IBattleController
         var units = new List<BattleUnit>();
 
         foreach (var attackSquadUnit in _context.AttackingSquad.Units)
-            units.Add(_battleGameObjectContainer.AddBattleUnit(attackSquadUnit, true));
+            units.Add(_battleGameObjectContainer.AddBattleUnit(attackSquadUnit, BattleSquadPosition.Attacker));
 
         foreach (var defendSquadUnit in _context.DefendingSquad.Units)
-            units.Add(_battleGameObjectContainer.AddBattleUnit(defendSquadUnit, false));
+            units.Add(_battleGameObjectContainer.AddBattleUnit(defendSquadUnit, BattleSquadPosition.Defender));
 
         _context.BattleUnits = units;
     }
@@ -123,7 +123,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     // Начать новый раунд.
     private void StartNewRound()
     {
-        ++_context.Round;
+        ++_context.RoundNumber;
         var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad);
         var nextUnit = _context.UnitTurnQueue.NextRound(turnOrder);
         BeginUnitTurn(nextUnit);

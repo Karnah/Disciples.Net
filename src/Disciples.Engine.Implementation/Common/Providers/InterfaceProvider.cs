@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
@@ -69,7 +70,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetAnimation(string animationName)
+    public AnimationFrames GetAnimation(string animationName)
     {
         var frames = _interfaceImagesExtractor.GetAnimationFrames(animationName);
         if (frames == null)
@@ -81,15 +82,26 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     /// <remarks>
     /// Для цветов используется схема BGRA.
+    /// TODO Завести новый объект сцены, чтобы не выделять дополнительную память и не округлять?
     /// </remarks>
-    public IBitmap GetColorBitmap(Color color)
+    public IBitmap GetColorBitmap(Color color, SizeD size)
     {
+        var width = (int)Math.Round(size.Width);
+        var height = (int)Math.Round(size.Height);
+        var data = new byte[width * height * 4];
+        var colorData = new[] { color.B, color.G, color.R, color.A };
+
+        for (int i = 0; i < width * height; i++)
+        {
+            colorData.CopyTo(data, i * 4);
+        }
+
         var rawBitmap = new RawBitmap
         {
-            OriginalWidth = 1,
-            OriginalHeight = 1,
-            Bounds = new Rectangle(0, 0, 1, 1),
-            Data = new[] { color.B, color.G, color.R, color.A }
+            OriginalWidth = width,
+            OriginalHeight = height,
+            Bounds = new Rectangle(0, 0, width, height),
+            Data = data
         };
         return _bitmapFactory.FromRawToBitmap(rawBitmap);
     }
@@ -128,6 +140,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             ResourceSceneElementType.Image => GetImageSceneElement(resourceSceneElement),
             ResourceSceneElementType.Button => GetButtonSceneElement(resourceSceneElement),
             ResourceSceneElementType.TextBlock => GetTextBlockSceneElement(resourceSceneElement),
+            ResourceSceneElementType.ToggleButton => GetToggleButtonSceneElement(resourceSceneElement),
             ResourceSceneElementType.TextListBox => GetTextListBoxSceneElement(resourceSceneElement),
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -143,7 +156,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         {
             Name = button.Name,
             Position = button.Position,
-            ButtonStates = GetButtonStates(button.ActiveStateImageName, button.SelectedStateImageName, button.PressedStateImageName, button.DisabledStateImageName),
+            ButtonStates = GetButtonStates(button.ActiveStateImageName, button.HoverStateImageName, button.PressedStateImageName, button.DisabledStateImageName),
             ToolTip = GetElementText(button.ToolTipTextId),
             IsRepeat = button.IsRepeat,
             HotKeys = button.HotKeys.Select(k => (KeyboardButton)k).ToArray(),
@@ -151,27 +164,42 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     }
 
     /// <summary>
+    /// Получить Кнопка-переключатель из двух состояний.
+    /// </summary>
+    private ToggleButtonSceneElement GetToggleButtonSceneElement(ResourceSceneElement resourceSceneElement)
+    {
+        var toggleButton = (Disciples.Resources.Images.Models.ToggleButtonSceneElement)resourceSceneElement;
+        return new ToggleButtonSceneElement
+        {
+            Name = toggleButton.Name,
+            Position = toggleButton.Position,
+            ButtonStates = GetButtonStates(toggleButton.ActiveStateImageName, toggleButton.HoverStateImageName, toggleButton.PressedStateImageName, toggleButton.DisabledStateImageName),
+            CheckedButtonStates = GetButtonStates(toggleButton.CheckedActiveStateImageName, toggleButton.CheckedHoverStateImageName, toggleButton.CheckedPressedStateImageName, toggleButton.DisabledStateImageName),
+            ToolTip = GetElementText(toggleButton.ToolTipTextId),
+            HotKeys = toggleButton.HotKeys.Select(k => (KeyboardButton)k).ToArray(),
+        };
+    }
+
+    /// <summary>
     /// Получить вид кнопки для каждого состояния.
     /// </summary>
-    private IReadOnlyDictionary<SceneButtonState, IBitmap>? GetButtonStates(string? activeStateImageName, string? selectedStateImageName, string? pressedStateImageName, string? disabledStateImageName)
+    private ButtonStates? GetButtonStates(string? activeStateImageName, string? hoverStateImageName, string? pressedStateImageName, string? disabledStateImageName)
     {
-        // TODO Есть невидимые кнопки, которые, тем не менее, имеют горячие клавиши.
-        // Подумать, как их корректнее обрабатывать.
-        if (string.IsNullOrEmpty(activeStateImageName)
-            || string.IsNullOrEmpty(selectedStateImageName)
-            || string.IsNullOrEmpty(pressedStateImageName)
-            || string.IsNullOrEmpty(disabledStateImageName))
+        if (activeStateImageName == null ||
+            hoverStateImageName == null ||
+            pressedStateImageName == null ||
+            disabledStateImageName == null)
         {
             return null;
         }
 
-        return new Dictionary<SceneButtonState, IBitmap>
+        return new ButtonStates(new Dictionary<SceneButtonState, IBitmap>
         {
             { SceneButtonState.Active, GetImage(activeStateImageName) },
             { SceneButtonState.Disabled, GetImage(disabledStateImageName) },
-            { SceneButtonState.Selected, GetImage(selectedStateImageName) },
+            { SceneButtonState.Hover, GetImage(hoverStateImageName) },
             { SceneButtonState.Pressed, GetImage(pressedStateImageName) }
-        };
+        });
     }
 
     /// <summary>
@@ -201,7 +229,12 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             Name = image.Name,
             Position = image.Position,
             ImageBitmap = GetElementImage(image.ImageName),
-            ToolTip = GetElementText(image.ToolTipTextId),
+            // TODO Какая-то магия. Иногда для изображений вместо tooltip выводить просто имя изображения.
+            // Например IMG_BIGFACESBG из DLG_BATTLE_A.
+            // Возможно, одно и тоже имя может быть частью некоторых файлов, поэтому идёт уточнение.
+            ToolTip = image.ToolTipTextId?.StartsWith("X") == true
+                ? GetElementText(image.ToolTipTextId)
+                : null,
         };
     }
 

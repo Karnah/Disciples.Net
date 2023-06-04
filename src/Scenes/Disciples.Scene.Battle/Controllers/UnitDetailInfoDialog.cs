@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
@@ -67,11 +68,13 @@ internal class UnitDetailInfoDialog : BaseDialog
     {
         _beforeOpenSelectedGameObject = _gameObjectContainer
             .GameObjects
-            .FirstOrDefault(go => go.SelectionComponent?.IsSelected == true);
+            .FirstOrDefault(go => go.SelectionComponent?.IsHover == true);
         _gameObjects = _sceneInterfaceController.AddSceneGameObjects(_battleInterfaceProvider.UnitDetailInfoInterface, Layers.DialogLayers);
 
         var unitPortrait = _gameObjects.Get<ImageObject>(UnitDetailInfoElementNames.PORTRAIT_IMAGE);
         unitPortrait.Bitmap = _battleUnitResourceProvider.GetUnitPortrait(_unit.UnitType);
+        unitPortrait.HorizontalAlignment = HorizontalAlignment.Center;
+        unitPortrait.VerticalAlignment = VerticalAlignment.Center;
 
         var unitName = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.NAME_TEXT_BLOCK);
         unitName.Text = new TextContainer(new []{ new TextPiece(new TextStyle { FontWeight = FontWeight.Bold }, _unit.UnitType.Name) });
@@ -97,7 +100,7 @@ internal class UnitDetailInfoDialog : BaseDialog
     {
         // Запоминаем последний выбранный объект.
         var selectionEvent = inputDeviceEvents
-            .LastOrDefault(e => e.ActionType == InputDeviceActionType.Selection);
+            .LastOrDefault(e => e.ActionType == InputDeviceActionType.Hover);
         if (selectionEvent != null)
         {
             _lastSelectedGameObject = selectionEvent.ActionState == InputDeviceActionState.Activated
@@ -121,8 +124,8 @@ internal class UnitDetailInfoDialog : BaseDialog
         // Обрабатываем событие изменения выбранного объекта.
         if (_beforeOpenSelectedGameObject != _lastSelectedGameObject)
         {
-            _beforeOpenSelectedGameObject?.SelectionComponent!.Unselected();
-            _lastSelectedGameObject?.SelectionComponent!.Selected();
+            _beforeOpenSelectedGameObject?.SelectionComponent!.Unhovered();
+            _lastSelectedGameObject?.SelectionComponent!.Hovered();
         }
 
         // Прокидываем событие отжатой кнопки до объекта, на котором она была нажата.

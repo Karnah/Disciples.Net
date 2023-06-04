@@ -1,14 +1,16 @@
-﻿using Disciples.Engine;
-using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
+﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
+using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
+using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -18,38 +20,49 @@ namespace Disciples.Scene.Battle.Controllers;
 internal class BattleBottomPanelController : BaseSupportLoading
 {
     private readonly IBattleGameObjectContainer _gameObjectContainer;
-    private readonly ISceneObjectContainer _sceneObjectContainer;
-    private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly BattleUnitActionController _unitActionController;
     private readonly BattleContext _context;
     private readonly IGameController _gameController;
+    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
+    private readonly ITextProvider _textProvider;
 
-    private ButtonObject? _defendButton;
-    private ButtonObject? _retreatButton;
-    private ButtonObject? _waitButton;
-    private ButtonObject? _instantResolveButton;
-    private ToggleButtonObject? _autoBattleButton;
+    private ButtonObject _defendButton = null!;
+    private ButtonObject _retreatButton = null!;
+    private ButtonObject _waitButton = null!;
+    private ButtonObject _instantResolveButton = null!;
+    private ToggleButtonObject _autoBattleButton = null!;
 
-    private ButtonObject? _openSquadInventoryButton;
-    private ButtonObject? _exitButton;
+    private ButtonObject _openSquadInventoryButton = null!;
+    private ButtonObject _exitButton = null!;
+
+    private BattleUnitBottomPanelData _rightUnitPanel = null!;
+    private BattleUnitBottomPanelData _leftUnitPanel = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleBottomPanelController" />.
     /// </summary>
     public BattleBottomPanelController(
         IBattleGameObjectContainer gameObjectContainer,
-        ISceneObjectContainer sceneObjectContainer,
-        IBattleInterfaceProvider interfaceProvider,
         BattleUnitActionController unitActionController,
         BattleContext context,
-        IGameController gameController)
+        IGameController gameController,
+        IBattleUnitResourceProvider battleUnitResourceProvider,
+        ITextProvider textProvider)
     {
         _gameObjectContainer = gameObjectContainer;
-        _sceneObjectContainer = sceneObjectContainer;
-        _interfaceProvider = interfaceProvider;
         _unitActionController = unitActionController;
         _context = context;
         _gameController = gameController;
+        _battleUnitResourceProvider = battleUnitResourceProvider;
+        _textProvider = textProvider;
+    }
+
+    /// <summary>
+    /// Обработать событие изменения юнита-цели.
+    /// </summary>
+    public void ProcessTargetUnitChanged(BattleUnit? targetBattleUnit)
+    {
+        UpdateBattleUnitPanel(targetBattleUnit, _rightUnitPanel);
     }
 
     /// <summary>
@@ -74,6 +87,8 @@ internal class BattleBottomPanelController : BaseSupportLoading
             if (!_context.IsWaitingUnitTurn)
                 ActivateButtons(_waitButton);
         }
+
+        UpdateBattleUnitPanel(_context.CurrentBattleUnit, _leftUnitPanel);
     }
 
     /// <summary>
@@ -81,33 +96,34 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     public void ProcessBattleCompleted()
     {
-        RemoveButton(ref _defendButton);
-        RemoveButton(ref _retreatButton);
-        RemoveButton(ref _waitButton);
-        RemoveButton(ref _instantResolveButton);
-        RemoveButton(ref _autoBattleButton);
+        _defendButton.IsHidden = true;
+        _retreatButton.IsHidden = true;
+        _waitButton.IsHidden = true;
+        _instantResolveButton.IsHidden = true;
+        _autoBattleButton.IsHidden = true;
 
         // Возможность открыть инвентарь будет только, если победил игрок при атаке.
         if (_context.BattleWinnerSquad == BattleSquadPosition.Attacker && !_context.AttackingSquad.Player.IsComputer)
         {
-            _openSquadInventoryButton = _gameObjectContainer.AddButton(_interfaceProvider.OpenSquadInventoryButton, ExecuteOpenSquadInventory, 343, 524, BattleLayers.INTERFACE_LAYER, KeyboardButton.P);
-            _openSquadInventoryButton.SetActive();
+            _openSquadInventoryButton.IsHidden = false;
         }
 
-        _exitButton = _gameObjectContainer.AddButton(_interfaceProvider.ExitButton, ExecuteExit, 419, 524, BattleLayers.INTERFACE_LAYER, KeyboardButton.Escape);
-        _exitButton.SetActive();
+        _exitButton.IsHidden = false;
     }
 
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        _sceneObjectContainer.AddImage(_interfaceProvider.BottomPanel, 0, GameInfo.OriginalHeight - _interfaceProvider.BottomPanel.Height, BattleLayers.PANEL_LAYER);
+        var gameObjects = _gameObjectContainer.GameObjects;
 
-        _defendButton = _gameObjectContainer.AddButton(_interfaceProvider.DefendButton, ExecuteDefend, 380, 504, BattleLayers.INTERFACE_LAYER, KeyboardButton.D);
-        _retreatButton = _gameObjectContainer.AddButton(_interfaceProvider.RetreatButton, ExecuteRetreat, 343, 524, BattleLayers.INTERFACE_LAYER, KeyboardButton.R);
-        _waitButton = _gameObjectContainer.AddButton(_interfaceProvider.WaitButton, ExecuteWait, 419, 524, BattleLayers.INTERFACE_LAYER, KeyboardButton.W);
-        _instantResolveButton = _gameObjectContainer.AddButton(_interfaceProvider.InstantResolveButton, ExecuteInstantBattle, 359, 563, BattleLayers.INTERFACE_LAYER, new [] { KeyboardButton.I, KeyboardButton.Escape });
-        _autoBattleButton = _gameObjectContainer.AddToggleButton(_interfaceProvider.AutoBattleButton, ExecuteAutoBattle, 403, 563, BattleLayers.INTERFACE_LAYER, KeyboardButton.A);
+        _defendButton = gameObjects.GetButton(BattleBottomPanelElementNames.DEFEND_BUTTON, ExecuteDefend);
+        _retreatButton = gameObjects.GetButton(BattleBottomPanelElementNames.RETREAT_BUTTON, ExecuteRetreat);
+        _waitButton = gameObjects.GetButton(BattleBottomPanelElementNames.WAIT_BUTTON, ExecuteWait);
+        _instantResolveButton = gameObjects.GetButton(BattleBottomPanelElementNames.INSTANT_RESOLVE_BUTTON, ExecuteInstantBattle);
+        _autoBattleButton = gameObjects.GetToggleButton(BattleBottomPanelElementNames.AUTO_BATTLE_TOGGLE_BUTTON, ExecuteAutoBattle);
+
+        _exitButton = gameObjects.GetButton(BattleBottomPanelElementNames.EXIT_BUTTON, ExecuteExit, true);
+        _openSquadInventoryButton = gameObjects.GetButton(BattleBottomPanelElementNames.SQUAD_INVENTORY_BUTTON, ExecuteOpenSquadInventory, true);
 
         // Эти кнопки доступны всегда.
         ActivateButtons(_instantResolveButton, _autoBattleButton);
@@ -115,6 +131,23 @@ internal class BattleBottomPanelController : BaseSupportLoading
         // Эти кнопки могут быть недоступны, если первый ход - компьютера.
         if (_context.BattleState == BattleState.WaitPlayerTurn)
             ActivateButtons(_defendButton, _retreatButton, _waitButton);
+
+        _leftUnitPanel = new BattleUnitBottomPanelData
+        {
+            Portrait = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.LEFT_UNIT_PORTRAIT_IMAGE),
+            Info = gameObjects.Get<TextBlockObject>(BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK),
+            LeaderItemsPanel = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.LEFT_LEADER_ITEMS_IMAGE, true)
+        };
+        UpdateBattleUnitPanel(_context.CurrentBattleUnit, _leftUnitPanel);
+
+        _rightUnitPanel = new BattleUnitBottomPanelData
+        {
+            Portrait = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.RIGHT_UNIT_PORTRAIT_IMAGE),
+            Info = gameObjects.Get<TextBlockObject>(BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK),
+            LeaderItemsPanel = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.RIGHT_LEADER_ITEMS_IMAGE, true)
+        };
+        // На правой панели используется развёрнутое изображение.
+        _rightUnitPanel.Portrait.IsReflected = true;
     }
 
     /// <inheritdoc />
@@ -183,9 +216,38 @@ internal class BattleBottomPanelController : BaseSupportLoading
     }
 
     /// <summary>
+    /// Получить тестовое описание юнита.
+    /// </summary>
+    private TextContainer GetUnitInfoText(Unit unit)
+    {
+        return _textProvider
+            .GetText("X100TA0608")
+            .ReplacePlaceholders(new[]
+            {
+                ("%NAME%", new TextContainer(unit.Name)),
+                ("%HP%", new TextContainer(unit.HitPoints.ToString())),
+                ("%HPMAX%", new TextContainer(unit.MaxHitPoints.ToString())),
+            });
+    }
+
+    /// <summary>
+    /// Обновить данные юнита на выбранной панели.
+    /// </summary>
+    private void UpdateBattleUnitPanel(BattleUnit? battleUnit, BattleUnitBottomPanelData panelData)
+    {
+        if (battleUnit == null || panelData.BattleUnit == battleUnit)
+            return;
+
+        panelData.BattleUnit = battleUnit;
+        panelData.Portrait.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(battleUnit.Unit.UnitType);
+        panelData.Info.Text = GetUnitInfoText(battleUnit.Unit);
+        panelData.LeaderItemsPanel.IsHidden = !battleUnit.Unit.IsLeader;
+    }
+
+    /// <summary>
     /// Активировать указанные кнопки.
     /// </summary>
-    private static void ActivateButtons(params ButtonObject?[] buttons)
+    private static void ActivateButtons(params BaseButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {
@@ -196,29 +258,11 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// <summary>
     /// Деактивировать указанные кнопки.
     /// </summary>
-    private static void DisableButtons(params ButtonObject?[] buttons)
+    private static void DisableButtons(params BaseButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {
             button?.SetDisabled();
         }
-    }
-
-    /// <summary>
-    /// Убрать кнопку со сцены.
-    /// </summary>
-    private static void RemoveButton(ref ButtonObject? button)
-    {
-        button?.Destroy();
-        button = null;
-    }
-
-    /// <summary>
-    /// Убрать кнопку со сцены.
-    /// </summary>
-    private static void RemoveButton(ref ToggleButtonObject? button)
-    {
-        button?.Destroy();
-        button = null;
     }
 }

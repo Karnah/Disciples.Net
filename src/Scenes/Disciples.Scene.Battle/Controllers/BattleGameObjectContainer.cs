@@ -1,7 +1,9 @@
-﻿using Disciples.Engine.Base;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Common.Controllers;
+using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Providers;
 
@@ -33,7 +35,7 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
     }
 
     /// <inheritdoc />
-    public BattleUnit AddBattleUnit(Unit unit, bool isAttacker)
+    public BattleUnit AddBattleUnit(Unit unit, BattleSquadPosition unitSquadPosition)
     {
         var battleUnit = new BattleUnit(_sceneObjectContainer, _battleUnitResourceProvider, 
             _battleInterfaceController.Value.BattleUnitSelected,
@@ -41,25 +43,19 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
             _battleInterfaceController.Value.BattleUnitLeftMouseButtonClicked,
             _battleInterfaceController.Value.BattleUnitRightMouseButtonPressed,
             unit,
-            isAttacker);
+            unitSquadPosition,
+            _battleInterfaceController.Value.GetBattleUnitPosition(unit, unitSquadPosition));
         return AddObject(battleUnit);
     }
 
     /// <inheritdoc />
-    public BattleUnitInfoGameObject AddBattleUnitInfo(int x, int y, int layer)
-    {
-        var battleUnitInfoObject = new BattleUnitInfoGameObject(_sceneObjectContainer, _textProvider, x, y, layer);
-        return AddObject(battleUnitInfoObject);
-    }
-
-    /// <inheritdoc />
-    public UnitPortraitObject AddUnitPortrait(Unit unit, bool rightToLeft, double x, double y)
+    public UnitPortraitObject AddUnitPortrait(Unit unit, BattleSquadPosition unitSquadPosition, RectangleD portraitBounds, RectangleD hitPointsBounds)
     {
         var unitPortrait = new UnitPortraitObject(_textProvider, _sceneObjectContainer, _battleInterfaceProvider, _battleUnitResourceProvider,
             _battleInterfaceController.Value.UnitPortraitSelected,
             _battleInterfaceController.Value.UnitPortraitLeftMouseButtonClicked,
             _battleInterfaceController.Value.UnitPortraitRightMouseButtonPressed,
-            unit, rightToLeft, x, y);
+            unit, unitSquadPosition, portraitBounds, hitPointsBounds);
         return AddObject(unitPortrait);
     }
 }

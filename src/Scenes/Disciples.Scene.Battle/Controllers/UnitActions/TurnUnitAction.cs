@@ -127,7 +127,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
                 return false;
 
             var unitEffect = _unitEffects[_currentUnitEffectIndex.Value];
-            var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect, _battleContext.Round);
+            var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect, _battleContext.RoundNumber);
             if (attackResult == null)
                 continue;
 

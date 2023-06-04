@@ -16,13 +16,16 @@ public static class GameObjectExtensions
     /// <typeparam name="TGameObject">Тип объекта.</typeparam>
     /// <param name="gameObjects">Список всех объектов.</param>
     /// <param name="gameObjectName">Имя объекта.</param>
+    /// <param name="isHidden">Признак, что необходимо сразу спрятать объект.</param>
     /// <returns>Объект.</returns>
-    public static TGameObject Get<TGameObject>(this IReadOnlyCollection<GameObject> gameObjects, string gameObjectName)
+    public static TGameObject Get<TGameObject>(this IReadOnlyCollection<GameObject> gameObjects, string gameObjectName, bool isHidden = false)
         where TGameObject : GameObject
     {
-        return gameObjects
+        var gameObject = gameObjects
             .OfType<TGameObject>()
             .First(go => go.Name == gameObjectName);
+        gameObject.IsHidden = isHidden;
+        return gameObject;
     }
 
     /// <summary>
@@ -39,5 +42,35 @@ public static class GameObjectExtensions
             .OfType<TGameObject>()
             .Where(filter)
             .ToArray();
+    }
+
+    /// <summary>
+    /// Получить кнопку по имени и инициализировать метод для клика по ней.
+    /// </summary>
+    /// <param name="gameObjects">Список всех объектов.</param>
+    /// <param name="buttonObjectName">Имя объекта.</param>
+    /// <param name="clickedAction">Действие при клике.</param>
+    /// <param name="isHidden">Признак, что необходимо сразу спрятать кнопку.</param>
+    /// <returns>Кнопка.</returns>
+    public static ButtonObject GetButton(this IReadOnlyCollection<GameObject> gameObjects, string buttonObjectName, Action? clickedAction = null, bool isHidden = false)
+    {
+        var button = gameObjects.Get<ButtonObject>(buttonObjectName, isHidden);
+        button.ClickedAction = clickedAction;
+        return button;
+    }
+
+    /// <summary>
+    /// Получить кнопку по имени и инициализировать метод для клика по ней.
+    /// </summary>
+    /// <param name="gameObjects">Список всех объектов.</param>
+    /// <param name="buttonObjectName">Имя объекта.</param>
+    /// <param name="clickedAction">Действие при клике.</param>
+    /// <param name="isHidden">Признак, что необходимо сразу спрятать кнопку.</param>
+    /// <returns>Кнопка.</returns>
+    public static ToggleButtonObject GetToggleButton(this IReadOnlyCollection<GameObject> gameObjects, string buttonObjectName, Action? clickedAction = null, bool isHidden = false)
+    {
+        var button = gameObjects.Get<ToggleButtonObject>(buttonObjectName, isHidden);
+        button.ClickedAction = clickedAction;
+        return button;
     }
 }

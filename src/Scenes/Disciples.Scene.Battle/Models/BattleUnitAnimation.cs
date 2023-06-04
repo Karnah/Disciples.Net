@@ -14,7 +14,7 @@ internal class BattleUnitAnimation
     public BattleUnitAnimation(
         Dictionary<BattleUnitState, BattleUnitFrames> battleUnitFrames,
         BattleUnitTargetAnimation? targetAnimation,
-        IReadOnlyList<Frame> deathFrames)
+        AnimationFrames deathFrames)
     {
         BattleUnitFrames = battleUnitFrames;
         TargetAnimation = targetAnimation;
@@ -35,5 +35,5 @@ internal class BattleUnitAnimation
     /// <summary>
     /// Анимация смерти юнита.
     /// </summary>
-    public IReadOnlyList<Frame> DeathFrames { get; }
+    public AnimationFrames DeathFrames { get; }
 }

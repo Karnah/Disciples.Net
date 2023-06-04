@@ -28,6 +28,7 @@
                     <Setter Property="Canvas.Left" Value="{Binding X}" />
                     <Setter Property="Canvas.Top" Value="{Binding Y}" />
                     <Setter Property="Canvas.ZIndex"  Value="{Binding Layer}" />
+                    <Setter Property="Visibility"  Value="{Binding IsHidden, Converter={c:InverseBooleanToVisibilityConverter}}" />
                 </Style>
             </ItemsControl.ItemContainerStyle>
 
@@ -35,12 +36,17 @@
                 <dts:SceneObjectTemplateSelector>
                     <dts:SceneObjectTemplateSelector.ImageTemplate>
                         <DataTemplate DataType="{x:Type so:IImageSceneObject}">
-                            <Image Stretch="Fill"
-                                   Width="{Binding Width}"
-                                   Height="{Binding Height}"
-                                   Source="{Binding Bitmap.BitmapData}"
+                            <Image Stretch="None"
                                    RenderTransformOrigin="0.5,0.5"
-                                   RenderTransform="{Binding IsReflected, Converter={c:ReflectedToRenderTransformConverter}}" />
+                                   Source="{Binding Bitmap.BitmapData}">
+                                <Image.RenderTransform>
+                                    <MultiBinding Converter="{c:BitmapToRenderTransformConverter}">
+                                        <Binding />
+                                        <Binding Path="IsReflected" />
+                                        <Binding Path="Bitmap" />
+                                    </MultiBinding>
+                                </Image.RenderTransform>
+                            </Image>
                         </DataTemplate>
                     </dts:SceneObjectTemplateSelector.ImageTemplate>
 

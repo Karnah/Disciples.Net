@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.SceneObjects;
 using ReactiveUI.Fody.Helpers;
 
@@ -21,4 +22,10 @@ public class ImageSceneObject : BaseSceneObject, IImageSceneObject
     /// <inheritdoc />
     [Reactive]
     public bool IsReflected { get; set; }
+
+    /// <inheritdoc />
+    public HorizontalAlignment HorizontalAlignment { get; set; }
+
+    /// <inheritdoc />
+    public VerticalAlignment VerticalAlignment { get; set; }
 }

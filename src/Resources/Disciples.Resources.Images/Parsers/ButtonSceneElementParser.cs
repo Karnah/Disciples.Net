@@ -24,7 +24,7 @@ internal class ButtonSceneElementParser : BaseSceneElementParser
             Name = elements[0],
             Position = elements.ParseBounds(1, offsetX, offsetY),
             ActiveStateImageName = elements[5].ParseImageName(),
-            SelectedStateImageName = elements[6].ParseImageName(),
+            HoverStateImageName = elements[6].ParseImageName(),
             PressedStateImageName = elements[7].ParseImageName(),
             DisabledStateImageName = elements[8].ParseImageName(),
             ToolTipTextId = elements[9].ParseTextId(),

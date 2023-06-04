@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using Disciples.Common.Models;
-using Disciples.Engine.Base;
+﻿using Disciples.Common.Models;
 using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
@@ -21,18 +19,15 @@ namespace Disciples.Scene.Battle.Controllers;
 /// </summary>
 internal class BattleUnitPortraitPanelController : BaseSupportLoading
 {
+    /// <summary>
+    /// Сдвиг для анимаций панели, чтобы она ложилась поверх портретов.
+    /// </summary>
+    private const int PANEL_ANIMATION_OFFSET = -2;
+
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
-    private readonly ISceneObjectContainer _sceneObjectContainer;
-
-    // TODO Такая обработка должна быть во многих местах кода. Вынести её в одно место.
-    /// <summary>
-    /// Если начальная позиция <see cref="BattleSquadPosition.Attacker" />, значит место на панели справа.
-    /// Иначе панель будет располагаться слева.
-    /// </summary>
-    private readonly BattleSquadPosition _initialSquadPosition = BattleSquadPosition.Attacker;
 
     private readonly BattleUnitPortraitPanelData _leftPanel = new();
     private readonly BattleUnitPortraitPanelData _rightPanel = new();
@@ -51,14 +46,12 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider interfaceProvider,
         BattleContext context,
-        BattleProcessor battleProcessor,
-        ISceneObjectContainer sceneObjectContainer)
+        BattleProcessor battleProcessor)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = interfaceProvider;
         _context = context;
         _battleProcessor = battleProcessor;
-        _sceneObjectContainer = sceneObjectContainer;
     }
 
     /// <summary>
@@ -81,8 +74,9 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     public void ProcessMousePosition(PointD mousePosition)
     {
-        var isMainRightPanel = _initialSquadPosition == BattleSquadPosition.Attacker;
+        var isMainRightPanel = _context.PlayerSquadPosition == BattleSquadPosition.Attacker;
 
+        // TODO Область для отображении второй панели определяется в LEFT_PANEL_DISPLAY_PLACEHOLDER.
         if (IsDisplayingBothPanels)
         {
             var isNeedHideOppositePanel = isMainRightPanel
@@ -139,7 +133,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             SetDisplayingSquad(displayingSquad);
 
         DisableButtons(_reflectPanelButton);
-        // TODO. Если юнит защищается, то рамка-анимация остаётся на нём. Возможно, что целителем такая же тема.
+        // TODO. Рамка-анимация текущего юнита всегда должна присутствовать.
         CleanAnimationsOnUnitsPanel(_rightPanel);
         CleanAnimationsOnUnitsPanel(_leftPanel);
     }
@@ -169,11 +163,17 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        var buttonPosition = _initialSquadPosition == BattleSquadPosition.Attacker
-            ? new Point(633, 402)
-            : new Point(142, 402);
-        _reflectPanelButton = _battleGameObjectContainer.AddToggleButton(_interfaceProvider.ToggleRightButton,
-            ReflectUnitsPanel, buttonPosition.X, buttonPosition.Y, BattleLayers.INTERFACE_LAYER, KeyboardButton.Tab);
+        var gameObjects = _battleGameObjectContainer.GameObjects;
+
+        _reflectPanelButton = gameObjects.GetToggleButton(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_REFLECT_TOGGLE_BUTTON, ExecuteReflectUnitsPanel);
+
+        _leftPanel.PanelImage = gameObjects.Get<ImageObject>(BattleUnitPanelElementNames.LEFT_UNIT_PANEL_IMAGE, true);
+        _leftPanel.PortraitPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.LEFT_UNIT_PANEL_PORTRAIT_PATTERN_PLACEHOLDER);
+        _leftPanel.HitPointsPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.LEFT_UNIT_PANEL_HP_PATTERN_PLACEHOLDER);
+
+        _rightPanel.PanelImage = gameObjects.Get<ImageObject>(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_IMAGE, true);
+        _rightPanel.PortraitPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_PORTRAIT_PATTERN_PLACEHOLDER);
+        _rightPanel.HitPointsPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_HP_PATTERN_PLACEHOLDER);
     }
 
     /// <inheritdoc />
@@ -193,7 +193,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         if (IsDisplayingBothPanels)
             return;
 
-        var isRightMainPanel = _initialSquadPosition == BattleSquadPosition.Attacker;
+        var isRightMainPanel = _context.PlayerSquadPosition == BattleSquadPosition.Attacker;
         ArrangePortraits(displayingSquad, isRightMainPanel);
         ArrangeBorders(isRightMainPanel);
 
@@ -204,7 +204,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Поменять отряд, который отображается на основной панели с юнитам.
     /// </summary>
-    private void ReflectUnitsPanel()
+    private void ExecuteReflectUnitsPanel()
     {
         // Смена отряда не работает, если отображаются обе панели.
         if (IsDisplayingBothPanels)
@@ -233,8 +233,6 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             ? _rightPanel
             : _leftPanel;
 
-        _sceneObjectContainer.RemoveSceneObject(panel.PanelImage);
-
         foreach (var unitPortrait in panel.UnitPortraits)
         {
             unitPortrait.Destroy();
@@ -245,7 +243,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             borderAnimation.Destroy();
         }
 
-        panel.PanelImage = null;
+        panel.PanelImage.IsHidden = true;
         panel.PanelSquadDirection = null;
         panel.BattleUnits = Array.Empty<BattleUnit>();
         panel.UnitPortraits = Array.Empty<UnitPortraitObject>();
@@ -271,20 +269,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         if (panel.PanelSquadDirection == squadPosition)
             return;
 
-        // Добавляем изображение панели, если её еще нет.
-        if (panel.PanelImage == null)
-        {
-            var bitmap = isRightPanel
-                ? _interfaceProvider.RightPanel
-                : _interfaceProvider.LeftPanel;
-            var xPosition = isRightPanel
-                ? GameInfo.OriginalWidth - bitmap.Width
-                : 0;
-            var panelImage = _sceneObjectContainer.AddImage(bitmap, xPosition, 30, BattleLayers.PANEL_LAYER);
-
-            panel.PanelImage = panelImage;
-        }
-
+        panel.PanelImage.IsHidden = false;
         panel.PanelSquadDirection = squadPosition;
 
         // Удаляем старые портреты.
@@ -295,15 +280,12 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             .Where(u => u.SquadPosition == squadPosition)
             .ToList();
 
-        var isAttackingSquad = squadPosition == BattleSquadPosition.Attacker;
         var portraits = new List<UnitPortraitObject>();
         foreach (var battleUnit in battleUnits)
         {
-            var position = GetUnitPortraitPanelPosition(isRightPanel, battleUnit.Unit, squadPosition);
-            var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit,
-                !isAttackingSquad,
-                position.X,
-                position.Y);
+            var portraitBounds = GetBounds(battleUnit.Unit, squadPosition, panel.PortraitPlaceholders);
+            var hitPointsBounds = GetBounds(battleUnit.Unit, squadPosition, panel.HitPointsPlaceholders);
+            var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit, squadPosition, portraitBounds, hitPointsBounds);
             portraits.Add(portrait);
         }
 
@@ -314,34 +296,29 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Получить координаты на сцене для рамки портрета юнита.
     /// </summary>
-    private static Point GetUnitPortraitPanelPosition(bool isRightPanel, Unit unit, BattleSquadPosition unitSquadPosition)
+    private static RectangleD GetBounds(Unit unit, BattleSquadPosition squadPosition, IReadOnlyDictionary<int, SceneElement> placeholders)
     {
-        var unitLineOffset = GetUnitLineOffset(unitSquadPosition, unit.SquadLinePosition);
-        return isRightPanel
-            ? GetRightUnitPortraitPanelPosition(unitLineOffset, unit)
-            : GetLeftUnitPortraitPanelPosition(unitLineOffset, unit);
+        var placeholderId = GetPlaceholderId(unit.SquadLinePosition, unit.SquadFlankPosition, squadPosition);
+        var placeholderPosition = placeholders[placeholderId].Position;
+        if (unit.UnitType.IsSmall)
+            return placeholderPosition;
+
+        var secondPlaceHolderId = GetPlaceholderId(UnitSquadLinePosition.Back, unit.SquadFlankPosition, squadPosition);
+        var secondPlaceHolderPosition = placeholders[secondPlaceHolderId].Position;
+        return RectangleD.Union(placeholderPosition, secondPlaceHolderPosition);
     }
 
     /// <summary>
-    /// Получить координаты на сцене для рамки портрета юнита на правой панели.
+    /// Получить идентификатор плейсхолдера.
     /// </summary>
-    private static Point GetRightUnitPortraitPanelPosition(int unitLineOffset, Unit unit)
+    private static int GetPlaceholderId(UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition, BattleSquadPosition squadPosition)
     {
-        return new Point(unit.UnitType.IsSmall
-                ? 644 + 79 * unitLineOffset
-                : 644,
-            85 + 106 * (2 - (int)unit.SquadFlankPosition));
-    }
+        var lineOffset = (int)squadLinePosition;
+        var flankOffset = (int)squadFlankPosition;
 
-    /// <summary>
-    /// Получить координаты на сцене для портрета юнита на левой панели.
-    /// </summary>
-    private static Point GetLeftUnitPortraitPanelPosition(int unitLineOffset, Unit unit)
-    {
-        return new Point(unit.UnitType.IsSmall
-                ? 8 + 79 * unitLineOffset
-                : 8,
-            85 + 106 * (2 - (int)unit.SquadFlankPosition));
+        return squadPosition == BattleSquadPosition.Defender
+            ? 6 - lineOffset - flankOffset * 2
+            : 5 + lineOffset - flankOffset * 2;
     }
 
     /// <summary>
@@ -373,13 +350,12 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         // Если отображается отряд текущего юнита, то нужно его выделить на панели.
         if (CurrentBattleUnit.SquadPosition == panel.PanelSquadDirection)
         {
-            var position = GetUnitBorderPanelPosition(isRightPanel, currentUnit, CurrentBattleUnit.SquadPosition);
-
+            var currentUnitPortrait = GetUnitPortrait(panel, CurrentBattleUnit);
             unitPanelAnimations.Add(
                 _battleGameObjectContainer.AddAnimation(
                     _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.IsSmall),
-                    position.X,
-                    position.Y,
+                    currentUnitPortrait.X + PANEL_ANIMATION_OFFSET,
+                    currentUnitPortrait.Y + PANEL_ANIMATION_OFFSET,
                     BattleLayers.INTERFACE_ANIMATION_LAYER));
         }
 
@@ -387,15 +363,15 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         if (currentUnit.UnitType.MainAttack.Reach == UnitAttackReach.All &&
             panel.BattleUnits.Any(CanAttack))
         {
-            var position = GetBigBorderPanelPosition(isRightPanel);
-
+            // Плейсхолдер 1 - это всегда левый верхний портрет.
+            var topLeftElement = panel.PortraitPlaceholders[1];
             unitPanelAnimations.Add(
                 _battleGameObjectContainer.AddAnimation(
                     currentUnit.HasAllyAbility()
                         ? _interfaceProvider.GetFieldHealBorder()
                         : _interfaceProvider.GetFieldAttackBorder(),
-                    position.X,
-                    position.Y,
+                    topLeftElement.Position.X + PANEL_ANIMATION_OFFSET,
+                    topLeftElement.Position.Y + PANEL_ANIMATION_OFFSET,
                     BattleLayers.INTERFACE_ANIMATION_LAYER));
         }
         // Иначе добавляем рамку только тем юнитам, которых можно атаковать.
@@ -406,15 +382,14 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                 if (!CanAttack(targetBattleUnit))
                     continue;
 
-                var position = GetUnitBorderPanelPosition(isRightPanel, targetBattleUnit.Unit, targetBattleUnit.SquadPosition);
-
+                var unitPortrait = GetUnitPortrait(panel, targetBattleUnit);
                 unitPanelAnimations.Add(
                     _battleGameObjectContainer.AddAnimation(
                         currentUnit.HasAllyAbility()
                             ? _interfaceProvider.GetUnitHealBorder(targetBattleUnit.Unit.UnitType.IsSmall)
                             : _interfaceProvider.GetUnitAttackBorder(targetBattleUnit.Unit.UnitType.IsSmall),
-                        position.X,
-                        position.Y,
+                        unitPortrait.X + PANEL_ANIMATION_OFFSET,
+                        unitPortrait.Y + PANEL_ANIMATION_OFFSET,
                         BattleLayers.INTERFACE_ANIMATION_LAYER));
             }
         }
@@ -451,70 +426,17 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Получить координаты на сцене для рамки портрета юнита.
+    /// Получить портрет юнита.
     /// </summary>
-    private static Point GetUnitBorderPanelPosition(bool isRightPanel, Unit unit, BattleSquadPosition unitSquadPosition)
+    private static UnitPortraitObject GetUnitPortrait(BattleUnitPortraitPanelData panelData, BattleUnit battleUnit)
     {
-        var unitLineOffset = GetUnitLineOffset(unitSquadPosition, unit.SquadLinePosition);
-        return isRightPanel
-            ? GetRightUnitBorderPanelPosition(unitLineOffset, unit)
-            : GetLeftUnitBorderPanelPosition(unitLineOffset, unit);
-    }
-
-    /// <summary>
-    /// Получить координаты для большой рамки (для юнитов, которые атакуют по области).
-    /// </summary>
-    private static Point GetBigBorderPanelPosition(bool isRightPanel)
-    {
-        return isRightPanel
-            ? new Point(642, 83)
-            : new Point(6, 83);
-    }
-
-    /// <summary>
-    /// Получить координаты на сцене для рамки портрета юнита на правой панели.
-    /// </summary>
-    private static Point GetRightUnitBorderPanelPosition(int unitLineOffset, Unit unit)
-    {
-        return new Point(
-            unit.UnitType.IsSmall
-                ? 642 + unitLineOffset * 79
-                : 642,
-            83 + (2 - (int)unit.SquadFlankPosition) * 106
-        );
-    }
-
-    /// <summary>
-    /// Получить координаты на сцене для портрета юнита на левой панели.
-    /// </summary>
-    private static Point GetLeftUnitBorderPanelPosition(int unitLineOffset, Unit unit)
-    {
-        return new Point(
-            unit.UnitType.IsSmall
-                ? 6 + unitLineOffset * 79
-                : 6,
-            83 + (2 - (int)unit.SquadFlankPosition) * 106
-        );
-    }
-
-    /// <summary>
-    /// Получить линию, на которой располагается юнит.
-    /// </summary>
-    /// <remarks>
-    /// Для защищающегося отряда: слева первая линия, справа вторая.
-    /// Для атакующего отряда: слева вторая линия, справа первая.
-    /// </remarks>
-    private static int GetUnitLineOffset(BattleSquadPosition unitSquadPosition, UnitSquadLinePosition linePosition)
-    {
-        return unitSquadPosition == BattleSquadPosition.Attacker
-            ? (int)linePosition
-            : ((int)linePosition + 1) % 2;
+        return panelData.UnitPortraits.First(up => up.Unit == battleUnit.Unit);
     }
 
     /// <summary>
     /// Активировать указанные кнопки.
     /// </summary>
-    private static void ActivateButtons(params ButtonObject?[] buttons)
+    private static void ActivateButtons(params BaseButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {
@@ -525,7 +447,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Деактивировать указанные кнопки.
     /// </summary>
-    private static void DisableButtons(params ButtonObject?[] buttons)
+    private static void DisableButtons(params BaseButtonObject?[] buttons)
     {
         foreach (var button in buttons)
         {

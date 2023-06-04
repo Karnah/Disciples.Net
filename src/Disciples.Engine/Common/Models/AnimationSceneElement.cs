@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Disciples.Engine.Common.Enums;
+﻿using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
@@ -16,7 +14,7 @@ public class AnimationSceneElement : SceneElement
     /// <summary>
     /// Кадры анимации.
     /// </summary>
-    public IReadOnlyList<Frame> Frames { get; init; } = Array.Empty<Frame>();
+    public AnimationFrames Frames { get; init; } = null!;
 
     /// <summary>
     /// Текстовая подсказка при наведении на элемент.

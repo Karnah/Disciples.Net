@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
@@ -12,7 +12,7 @@ using Disciples.Engine.Common.Models;
 namespace Disciples.Engine.Implementation.Common.Controllers;
 
 /// <inheritdoc />
-internal class SceneInterfaceController : ISceneInterfaceController
+public class SceneInterfaceController : ISceneInterfaceController
 {
     private readonly IGameObjectContainer _gameObjectContainer;
 
@@ -31,78 +31,89 @@ internal class SceneInterfaceController : ISceneInterfaceController
     {
         var gameObjects = new List<GameObject>();
 
-        var background = sceneInterface.Background;
-        if (background != null)
-        {
-            var offsetX = (GameInfo.OriginalWidth - background.Width) / 2;
-            var offsetY = (GameInfo.OriginalHeight - background.Height) / 2;
+        gameObjects.AddRange(GetBackground(sceneInterface, layers));
 
-            gameObjects.Add(_gameObjectContainer.AddImage(new ImageSceneElement
-            {
-                Name = "BACKGROUND",
-                Position = new Rectangle((int)offsetX, (int)offsetY, (int)(offsetX + background.Width), (int)(offsetY + background.Height)),
-                ImageBitmap = background
-            }, layers.BackgroundLayer));
-        }
-
-        foreach (var sceneElement in sceneInterface.Elements.Values)
-        {
-            switch (sceneElement.Type)
-            {
-                case SceneElementType.Image:
-                    var image = (ImageSceneElement)sceneElement;
-                    gameObjects.Add(_gameObjectContainer.AddImage(image, layers.InterfaceLayer));
-                    break;
-
-                case SceneElementType.Animation:
-                    var animation = (AnimationSceneElement)sceneElement;
-                    gameObjects.Add(_gameObjectContainer.AddAnimation(animation, layers.InterfaceLayer));
-                    break;
-
-                case SceneElementType.TextBlock:
-                    var textBlock = (TextBlockSceneElement)sceneElement;
-                    gameObjects.Add(_gameObjectContainer.AddTextBlock(textBlock, layers.InterfaceLayer));
-                    break;
-
-                case SceneElementType.Button:
-                    var button = (ButtonSceneElement)sceneElement;
-                    gameObjects.Add(_gameObjectContainer.AddButton(button, layers.InterfaceLayer));
-                    break;
-
-                case SceneElementType.ToggleButton:
-                case SceneElementType.RadioButton:
-                case SceneElementType.ListBox:
-                case SceneElementType.TextListBox:
-                case SceneElementType.EditTextBox:
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        // Эти элементы обрабатываем отдельно в конце, так как они ссылаются на другие элементы сцены.
-        var additionalElements = sceneInterface
+        var commonObjects = sceneInterface
             .Elements
             .Values
-            .Where(se => se.Type is SceneElementType.ListBox or SceneElementType.TextListBox);
-        foreach (var sceneElement in additionalElements)
-        {
-            switch (sceneElement.Type)
-            {
-                case SceneElementType.ListBox:
-                    break;
+            .Where(e => e.Type is not SceneElementType.ListBox and not SceneElementType.TextListBox)
+            .Select(e => GetElement(e, layers))
+            .Where(go => go != null);
+        gameObjects.AddRange(commonObjects!);
 
-                case SceneElementType.TextListBox:
-                    var textListBox = (TextListBoxSceneElement)sceneElement;
-                    gameObjects.Add(_gameObjectContainer.AddTextListBox(textListBox, layers.InterfaceLayer));
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        // Эти элементы обрабатываем отдельно в конце, так как они ссылаются на другие элементы сцены.
+        var additionalObjects = sceneInterface
+            .Elements
+            .Values
+            .Where(e => e.Type is SceneElementType.ListBox or SceneElementType.TextListBox)
+            .Select(e => GetElement(e, layers))
+            .Where(go => go != null);
+        gameObjects.AddRange(additionalObjects!);
 
         return gameObjects;
+    }
+
+    /// <summary>
+    /// Получить фон сцены.
+    /// </summary>
+    protected virtual IReadOnlyList<GameObject> GetBackground(SceneInterface sceneInterface, Layers layers)
+    {
+        var background = sceneInterface.Background;
+        if (background == null)
+            return Array.Empty<GameObject>();
+
+        var backgroundObject = _gameObjectContainer.AddImage(new ImageSceneElement
+        {
+            Name = "BACKGROUND",
+            Position = new RectangleD(0, 0, background.OriginalSize.Width, background.OriginalSize.Height),
+            ImageBitmap = background
+        }, layers.BackgroundLayer);
+
+        return new[] { backgroundObject };
+    }
+
+    /// <summary>
+    /// Получить объект сцены.
+    /// </summary>
+    protected virtual GameObject? GetElement(SceneElement sceneElement, Layers layers)
+    {
+        switch (sceneElement.Type)
+        {
+            case SceneElementType.Image:
+                var image = (ImageSceneElement)sceneElement;
+                return _gameObjectContainer.AddImage(image, layers.InterfaceLayer);
+
+            case SceneElementType.Animation:
+                var animation = (AnimationSceneElement)sceneElement;
+                return _gameObjectContainer.AddAnimation(animation, layers.InterfaceLayer);
+
+            case SceneElementType.TextBlock:
+                var textBlock = (TextBlockSceneElement)sceneElement;
+                return _gameObjectContainer.AddTextBlock(textBlock, layers.InterfaceLayer);
+
+            case SceneElementType.Button:
+                var button = (ButtonSceneElement)sceneElement;
+                return  _gameObjectContainer.AddButton(button, layers.InterfaceLayer + 1);
+
+            case SceneElementType.ToggleButton:
+                var toggleButton = (ToggleButtonSceneElement)sceneElement;
+                return  _gameObjectContainer.AddToggleButton(toggleButton, layers.InterfaceLayer + 1);
+
+            case SceneElementType.RadioButton:
+            case SceneElementType.ListBox:
+                break;
+
+            case SceneElementType.TextListBox:
+                var textListBox = (TextListBoxSceneElement)sceneElement;
+                return _gameObjectContainer.AddTextListBox(textListBox, layers.InterfaceLayer);
+
+            case SceneElementType.EditTextBox:
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return null;
     }
 }

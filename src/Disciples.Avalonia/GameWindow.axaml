@@ -16,7 +16,7 @@
     </Design.DataContext>
 
     <Window.Resources>
-        <c:ReflectedToRenderTransformConverter x:Key="ReflectedToRenderTransformConverter" />
+        <c:BitmapToRenderTransformConverter x:Key="BitmapToRenderTransformConverter" />
         <c:TextVerticalAlignmentConverter x:Key="TextVerticalAlignmentConverter" />
         <c:TextHorizontalAlignmentConverter x:Key="TextHorizontalAlignmentConverter" />
         <c:TextBackgroundConverter x:Key="TextBackgroundConverter" />
@@ -28,6 +28,7 @@
             <Setter Property="Canvas.Left" Value="{Binding X}" />
             <Setter Property="Canvas.Top" Value="{Binding Y}" />
             <Setter Property="ZIndex" Value="{Binding Layer}" />
+            <Setter Property="IsVisible" Value="{Binding !IsHidden}" />
         </Style>
     </Window.Styles>
 
@@ -43,11 +44,16 @@
 
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="{x:Type vo:IImageSceneObject}">
-                    <Image Stretch="Fill" RenderOptions.BitmapInterpolationMode="HighQuality"
-                           Source="{Binding Bitmap.BitmapData}"
-                           Width="{Binding Width}"
-                           Height="{Binding Height}"
-                           RenderTransform="{Binding IsReflected, Converter={StaticResource ReflectedToRenderTransformConverter}}" />
+                    <Image Stretch="None" RenderOptions.BitmapInterpolationMode="HighQuality"
+                           Source="{Binding Bitmap.BitmapData}">
+                        <Image.RenderTransform>
+                            <MultiBinding Converter="{StaticResource BitmapToRenderTransformConverter}">
+                                <Binding />
+                                <Binding Path="IsReflected" />
+                                <Binding Path="Bitmap" />
+                            </MultiBinding>
+                        </Image.RenderTransform>
+                    </Image>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vo:ITextSceneObject}">

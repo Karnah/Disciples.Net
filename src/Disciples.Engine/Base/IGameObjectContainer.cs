@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Disciples.Engine.Common.Enums;
+﻿using System.Collections.Generic;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 
@@ -34,7 +32,7 @@ public interface IGameObjectContainer
     /// <param name="y">Положение анимации, координата Y.</param>
     /// <param name="layer">Слой на котором будет отображаться анимация.</param>
     /// <param name="repeat"><value>false</value>, если необходимо уничтожить объект после того, как анимация будет завершена.</param>
-    AnimationObject AddAnimation(IReadOnlyList<Frame> frames, double x, double y, int layer, bool repeat = true);
+    AnimationObject AddAnimation(AnimationFrames frames, double x, double y, int layer, bool repeat = true);
 
     /// <summary>
     /// Добавить анимацию на сцену.
@@ -47,42 +45,16 @@ public interface IGameObjectContainer
     /// <summary>
     /// Добавить кнопку на сцену.
     /// </summary>
-    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
-    /// <param name="x">Положение кнопки, координата X.</param>
-    /// <param name="y">Положение кнопки, координата Y.</param>
-    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
-
-    /// <summary>
-    /// Добавить кнопку на сцену.
-    /// </summary>
-    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
-    /// <param name="x">Положение кнопки, координата X.</param>
-    /// <param name="y">Положение кнопки, координата Y.</param>
-    /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    /// <param name="hotKeys">Горячие клавиши для кнопки.</param>
-    ButtonObject AddButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, IReadOnlyList<KeyboardButton> hotKeys);
-
-    /// <summary>
-    /// Добавить кнопку на сцену.
-    /// </summary>
     /// <param name="button">Информация о кнопке.</param>
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
     ButtonObject AddButton(ButtonSceneElement button, int layer);
 
     /// <summary>
-    /// Добавить кнопку на сцену, которая будет нажата до тех пор, пока на неё не нажмут еще раз.
+    /// Добавить кнопку-переключатель из двух состояний на сцену.
     /// </summary>
-    /// <param name="buttonStates">Изображения кнопки в зависимости от её состояния.</param>
-    /// <param name="buttonPressedAction">Действие, которое будет выполняться на кнопке после нажатия.</param>
-    /// <param name="x">Положение кнопки, координата X.</param>
-    /// <param name="y">Положение кнопки, координата Y.</param>
+    /// <param name="toggleButton">Информация о кнопке.</param>
     /// <param name="layer">Слой на котором будет отображаться кнопка.</param>
-    /// <param name="hotkey">Горячая клавиша для кнопки.</param>
-    ToggleButtonObject AddToggleButton(IReadOnlyDictionary<SceneButtonState, IBitmap> buttonStates, Action buttonPressedAction, double x, double y, int layer, KeyboardButton? hotkey = null);
+    ToggleButtonObject AddToggleButton(ToggleButtonSceneElement toggleButton, int layer);
 
     /// <summary>
     /// Добавить список строк на сцену.

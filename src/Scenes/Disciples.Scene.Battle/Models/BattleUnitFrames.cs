@@ -10,10 +10,9 @@ internal class BattleUnitFrames
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitFrames" />.
     /// </summary>
-    public BattleUnitFrames(
-        IReadOnlyList<Frame>? shadowFrames,
-        IReadOnlyList<Frame> unitFrames,
-        IReadOnlyList<Frame>? auraFrames)
+    public BattleUnitFrames(AnimationFrames? shadowFrames,
+        AnimationFrames unitFrames,
+        AnimationFrames? auraFrames)
     {
         ShadowFrames = shadowFrames;
         UnitFrames = unitFrames;
@@ -24,15 +23,15 @@ internal class BattleUnitFrames
     /// <summary>
     /// Кадры для анимации тени.
     /// </summary>
-    public IReadOnlyList<Frame>? ShadowFrames { get; }
+    public AnimationFrames? ShadowFrames { get; }
 
     /// <summary>
     /// Кадры для анимации самого юнита.
     /// </summary>
-    public IReadOnlyList<Frame> UnitFrames { get; }
+    public AnimationFrames UnitFrames { get; }
 
     /// <summary>
     /// Кадры для анимации ауры юнита.
     /// </summary>
-    public IReadOnlyList<Frame>? AuraFrames { get; }
+    public AnimationFrames? AuraFrames { get; }
 }

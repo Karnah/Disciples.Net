@@ -1,9 +1,11 @@
-﻿using Disciples.Engine.Base;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Components;
+using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Providers;
 
@@ -15,45 +17,85 @@ namespace Disciples.Scene.Battle.GameObjects;
 internal class BattleUnit : GameObject
 {
     /// <summary>
-    /// Ширина юнита на сцене.
+    /// Высота маленького юнита на сцене.
     /// </summary>
-    private const int BATTLE_UNIT_WIDTH = 75;
+    private const int SMALL_BATTLE_UNIT_HEIGHT = 105;
     /// <summary>
-    /// Высота юнита на сцене.
+    /// Высота большого юнита на сцене.
     /// </summary>
-    private const int BATTLE_UNIT_HEIGHT = 100;
+    /// <remarks>
+    /// TODO У разных юнитов разная высота. Встречал 150, 120 и 130.
+    /// </remarks>
+    private const int BIG_BATTLE_UNIT_HEIGHT = 150;
+    /// <summary>
+    /// Сдвиг по координате Y для больших юнитов.
+    /// </summary>
+    private const int BIG_BATTLE_UNIT_Y_OFFSET = 45;
+
+    /// <summary>
+    /// Сдвиг анимаций маленького юнита.
+    /// </summary>
+    public static readonly PointD SmallBattleUnitAnimationOffset = new(-365, -410);
+    /// <summary>
+    /// Сдвиг анимаций большого юнита.
+    /// </summary>
+    private static readonly PointD BigBattleUnitAnimationOffset = new(SmallBattleUnitAnimationOffset.X, SmallBattleUnitAnimationOffset.Y + BIG_BATTLE_UNIT_Y_OFFSET);
+    /// <summary>
+    /// Сдвиг анимаций выделения маленького юнита.
+    /// </summary>
+    private static readonly PointD SmallBattleUnitSelectionAnimationOffset = new(-365, -220);
+    /// <summary>
+    /// Сдвиг анимаций выделения большого юнита.
+    /// </summary>
+    private static readonly PointD BigBattleUnitSelectionAnimationOffset = new(SmallBattleUnitSelectionAnimationOffset.X, SmallBattleUnitSelectionAnimationOffset.Y + BIG_BATTLE_UNIT_Y_OFFSET);
 
     private BattleUnitState _unitState;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleUnit" />.
     /// </summary>
-    public BattleUnit(
-        ISceneObjectContainer sceneObjectContainer,
+    public BattleUnit(ISceneObjectContainer sceneObjectContainer,
         IBattleUnitResourceProvider battleUnitResourceProvider,
         Action<BattleUnit> onUnitSelected,
         Action<BattleUnit> onUnitUnselected,
         Action<BattleUnit> onUnitMouseRightButtonClicked,
         Action<BattleUnit> onUnitMouseLeftButtonPressed,
         Unit unit,
-        bool isAttacker
-    ) : base(GetSceneUnitPosition(isAttacker, (int)unit.SquadLinePosition, (int)unit.SquadFlankPosition))
+        BattleSquadPosition unitSquadPosition,
+        RectangleD bounds
+        ) : base(bounds)
     {
         Unit = unit;
-        IsAttacker = isAttacker;
-        SquadPosition = isAttacker
-            ? BattleSquadPosition.Attacker
-            : BattleSquadPosition.Defender;
-        Direction = isAttacker
+        IsAttacker = unitSquadPosition == BattleSquadPosition.Attacker;
+        SquadPosition = unitSquadPosition;
+        Direction = unitSquadPosition == BattleSquadPosition.Attacker
             ? BattleDirection.Face
             : BattleDirection.Back;
         UnitState = BattleUnitState.Waiting;
 
-        AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider);
+        var unitAnimationOffset = Unit.UnitType.IsSmall
+            ? SmallBattleUnitAnimationOffset
+            : BigBattleUnitAnimationOffset;
+        AnimationComponent = new BattleUnitAnimationComponent(this, sceneObjectContainer, battleUnitResourceProvider, unitAnimationOffset);
+        var unitSelectionAnimationOffset = Unit.UnitType.IsSmall
+            ? SmallBattleUnitSelectionAnimationOffset
+            : BigBattleUnitSelectionAnimationOffset;
+        var unitTurnAnimationFrames = Unit.UnitType.IsSmall
+            ? battleUnitResourceProvider.SmallUnitTurnAnimationFrames
+            : battleUnitResourceProvider.BigUnitTurnAnimationFrames;
+        UnitTurnAnimationComponent = new AnimationComponent(this, sceneObjectContainer, unitTurnAnimationFrames,
+            BattleLayers.UNIT_SELECTION_ANIMATION_LAYER, unitSelectionAnimationOffset);
+        var targetAnimationFrames = Unit.UnitType.IsSmall
+            ? battleUnitResourceProvider.SmallUnitTargetAnimationFrames
+            : battleUnitResourceProvider.BigUnitTargetAnimationFrames;
+        TargetAnimationComponent = new AnimationComponent(this, sceneObjectContainer, targetAnimationFrames,
+            BattleLayers.UNIT_SELECTION_ANIMATION_LAYER, unitSelectionAnimationOffset);
         SoundComponent = new BattleUnitSoundComponent(this, battleUnitResourceProvider);
-        this.Components = new IComponent[]
+        Components = new IComponent[]
         {
             AnimationComponent,
+            UnitTurnAnimationComponent,
+            TargetAnimationComponent,
             SoundComponent,
             new SelectionComponent(this,
                 () => onUnitSelected.Invoke(this),
@@ -62,15 +104,25 @@ internal class BattleUnit : GameObject
             new MouseRightButtonClickComponent(this, () => onUnitMouseLeftButtonPressed.Invoke(this))
         };
 
-        Width = BATTLE_UNIT_WIDTH;
-        Height = BATTLE_UNIT_HEIGHT;
+        Height = Unit.UnitType.IsSmall
+            ? SMALL_BATTLE_UNIT_HEIGHT
+            : BIG_BATTLE_UNIT_HEIGHT;
     }
-
 
     /// <summary>
     /// Компонент анимации юнита.
     /// </summary>
     public BattleUnitAnimationComponent AnimationComponent { get; }
+
+    /// <summary>
+    /// Компонент анимации выделения текущего юнита.
+    /// </summary>
+    public AnimationComponent UnitTurnAnimationComponent { get; }
+
+    /// <summary>
+    /// Компонент анимации выделении юнита-цели.
+    /// </summary>
+    public AnimationComponent TargetAnimationComponent { get; }
 
     /// <summary>
     /// Компонент звуков юнита.
@@ -88,7 +140,7 @@ internal class BattleUnit : GameObject
     public bool IsAttacker { get; }
 
     /// <summary>
-    /// Направление, куда смотрит юнит.
+    /// Позиция отряда юнита.
     /// </summary>
     public BattleSquadPosition SquadPosition { get; set; }
 
@@ -96,6 +148,24 @@ internal class BattleUnit : GameObject
     /// Направление, куда смотрит юнит.
     /// </summary>
     public BattleDirection Direction { get; set; }
+
+    /// <summary>
+    /// Признак, что сейчас ход этого юнита.
+    /// </summary>
+    public bool IsUnitTurn
+    {
+        get => UnitTurnAnimationComponent.IsEnabled;
+        set => UnitTurnAnimationComponent.IsEnabled = value;
+    }
+
+    /// <summary>
+    /// Признак, что юнит выбран в качестве цели.
+    /// </summary>
+    public bool IsTarget
+    {
+        get => TargetAnimationComponent.IsEnabled;
+        set => TargetAnimationComponent.IsEnabled = value;
+    }
 
     /// <summary>
     /// Действие, которое выполняет юнит в данный момент.
@@ -115,28 +185,12 @@ internal class BattleUnit : GameObject
         }
     }
 
-
-    /// <summary>
-    /// Рассчитать позицию юнита на сцене.
-    /// </summary>
-    /// <param name="isAttacker">Находится ли юнит в атакующем отряде.</param>
-    /// <param name="linePosition">Линия, на которой располагается юнит.</param>
-    /// <param name="flankPosition">Позиция на которой находится юнит (центр, правый и левый фланги).</param>
-    /// <remarks>
-    /// Этот метод используется в том числе для расчета позиций анимаций, которые располагаются между юнитами.
-    /// Поэтому используем double для позиций.
-    /// </remarks>
-    public static (double X, double Y) GetSceneUnitPosition(bool isAttacker, double linePosition, double flankPosition)
+    /// <inheritdoc />
+    public override void Initialize()
     {
-        // Если смотреть на поле, то фронт защищающегося отряда (линия 0) - это 2 линия
-        // Тыл же (линия 1) будет на 3 линии. Поэтому пересчитываем положение
-        var gameLine = isAttacker
-            ? linePosition
-            : 3 - linePosition;
+        base.Initialize();
 
-        var x = 60 + 95 * gameLine + 123 * flankPosition;
-        var y = 200 + 60 * gameLine - 43 * flankPosition;
-
-        return (x, y);
+        IsUnitTurn = false;
+        IsTarget = false;
     }
 }

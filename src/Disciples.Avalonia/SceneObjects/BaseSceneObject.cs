@@ -35,6 +35,10 @@ public abstract class BaseSceneObject : ReactiveObject, ISceneObject
     /// <inheritdoc />
     public int Layer { get; }
 
+    /// <inheritdoc />
+    [Reactive]
+    public bool IsHidden { get; set; }
+
 
     /// <inheritdoc />
     public virtual void Destroy()

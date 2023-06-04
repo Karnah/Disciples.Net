@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
@@ -41,45 +42,44 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
         if (bitmap == null)
             throw new ArgumentNullException(nameof(bitmap));
 
-        return AddImage(bitmap, bitmap.Width, bitmap.Height, x, y, layer);
+        return AddImage(bitmap, new RectangleD(x, y, bitmap.OriginalSize.Width, bitmap.OriginalSize.Height), layer);
     }
 
     /// <inheritdoc />
     public IImageSceneObject AddImage(ImageSceneElement imageSceneElement, int layer)
     {
-        var bounds = imageSceneElement.Position;
-        return AddImage(imageSceneElement.ImageBitmap, bounds.Width, bounds.Height, bounds.Left, bounds.Top, layer);
+        return AddImage(imageSceneElement.ImageBitmap, imageSceneElement.Position, layer);
     }
 
     /// <inheritdoc />
-    public IImageSceneObject AddImage(IBitmap? bitmap, double width, double height, double x, double y, int layer)
+    public IImageSceneObject AddImage(IBitmap? bitmap, RectangleD bounds, int layer)
     {
         var imageVisual = PlatformSceneObjectContainer.AddImageSceneObject(layer);
-        imageVisual.X = x;
-        imageVisual.Y = y;
-        imageVisual.Width = width;
-        imageVisual.Height = height;
+        imageVisual.X = bounds.X;
+        imageVisual.Y = bounds.Y;
+        imageVisual.Width = bounds.Width;
+        imageVisual.Height = bounds.Height;
         imageVisual.Bitmap = bitmap;
 
         return imageVisual;
     }
 
     /// <inheritdoc />
-    public IImageSceneObject AddColorImage(Color color, double width, double height, double x, double y, int layer)
+    public IImageSceneObject AddColorImage(Color color, RectangleD bounds, int layer)
     {
-        return AddImage(_interfaceProvider.GetColorBitmap(color), width, height, x, y, layer);
+        return AddImage(_interfaceProvider.GetColorBitmap(color, new SizeD(bounds.Width, bounds.Height)), bounds, layer);
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(TextContainer? text, double width, double height, double x, double y, int layer)
+    public ITextSceneObject AddText(TextContainer? text, RectangleD bounds, int layer)
     {
-        return AddText(text, null, width, height, x, y, layer);
+        return AddText(text, null, bounds, layer);
     }
 
     /// <inheritdoc />
-    public ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, double width, double height, double x, double y, int layer)
+    public ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer)
     {
-        return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), width, height, x, y, layer);
+        return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), bounds.Width, bounds.Height, bounds.X, bounds.Y, layer);
     }
 
     /// <inheritdoc />

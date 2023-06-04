@@ -7,6 +7,8 @@ using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Sounds.Models;
+using Disciples.Scene.Battle.Enums;
+using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Resources.SoundKeys;
 using Disciples.Scene.Battle.Resources.SoundKeys.Extensions;
 
@@ -18,27 +20,29 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     private readonly BattleImagesExtractor _imagesExtractor;
     private readonly IBitmapFactory _bitmapFactory;
     private readonly BattleSoundsExtractor _soundsExtractor;
+    private readonly BattleContext _context;
 
-    private readonly Dictionary<string, IReadOnlyList<Frame>> _animations;
-    private readonly Dictionary<string, Frame> _images;
+    private readonly Dictionary<string, AnimationFrames> _animations;
+    private readonly Dictionary<string, IBitmap> _images;
     private readonly Dictionary<string, RawSound?> _rawSounds;
 
     /// <inheritdoc />
-    public BattleResourceProvider(BattleImagesExtractor imagesExtractor, IBitmapFactory bitmapFactory, BattleSoundsExtractor soundsExtractor)
+    public BattleResourceProvider(BattleImagesExtractor imagesExtractor, IBitmapFactory bitmapFactory, BattleSoundsExtractor soundsExtractor, BattleContext context)
     {
         _imagesExtractor = imagesExtractor;
         _bitmapFactory = bitmapFactory;
         _soundsExtractor = soundsExtractor;
+        _context = context;
 
-        _animations = new Dictionary<string, IReadOnlyList<Frame>>();
-        _images = new Dictionary<string, Frame>();
+        _animations = new Dictionary<string, AnimationFrames>();
+        _images = new Dictionary<string, IBitmap>();
         _rawSounds = new Dictionary<string, RawSound?>();
     }
 
     #region Анимации
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetBattleAnimation(string animationName)
+    public AnimationFrames GetBattleAnimation(string animationName)
     {
         if (!_animations.ContainsKey(animationName))
             _animations[animationName] = ExtractAnimationFrames(animationName);
@@ -47,7 +51,7 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     }
 
     /// <inheritdoc />
-    public Frame GetBattleFrame(string frameName)
+    public IBitmap GetBattleBitmap(string frameName)
     {
         if (!_images.ContainsKey(frameName))
         {
@@ -62,7 +66,7 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     /// Извлечь кадры анимации из ресурсов.
     /// </summary>
     /// <param name="animationName">Имя анимации в ресурсах игры.</param>
-    private IReadOnlyList<Frame> ExtractAnimationFrames(string animationName)
+    private AnimationFrames ExtractAnimationFrames(string animationName)
     {
         var images = _imagesExtractor.GetAnimationFrames(animationName);
         if (images == null)
@@ -84,9 +88,12 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
         var index = RandomGenerator.Get(battlegrounds.Count);
         var battleground = _imagesExtractor.GetImageParts(battlegrounds[index]);
 
-        // Картинка поля боя имеет размер 950 * 600. Если игрок атакует, то первые 150 пикселей высоты пропускаются.
-        // Если игрок защищается, то откидываются последние 150 пикселей. В данном случае, мы всегда берём как будто игрок атакует.
-        return battleground.Select(p => _bitmapFactory.FromRawToBitmap(p.Value, new Rectangle(150, 0, 800, 600))).ToList();
+        // Картинка поля боя имеет размер 950 * 600. Если игрок атакует, то первые 150 пикселей ширины пропускаются.
+        // Если игрок защищается, то откидываются последние 150 пикселей.
+        var bounds = _context.PlayerSquadPosition == BattleSquadPosition.Attacker
+            ? new Rectangle(150, 0, 800, 600)
+            : new Rectangle(0, 0, 800, 600);
+        return battleground.Select(p => _bitmapFactory.FromRawToBitmap(p.Value, bounds)).ToList();
     }
 
     #endregion

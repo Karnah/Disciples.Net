@@ -1,4 +1,5 @@
-﻿using Disciples.Engine;
+﻿using Disciples.Common.Models;
+using Disciples.Engine;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Models;
@@ -18,6 +19,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
 {
     private readonly BattleUnit _battleUnit;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
+    private readonly PointD _animationOffset;
 
     /// <summary>
     /// Анимация какого действия отображается в данный момент.
@@ -27,15 +29,15 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// <summary>
     /// Кадры анимации тени юнита.
     /// </summary>
-    private IReadOnlyList<Frame>? _shadowFrames;
+    private AnimationFrames? _shadowFrames;
     /// <summary>
     /// Кадры анимации юнита.
     /// </summary>
-    private IReadOnlyList<Frame> _unitFrames = Array.Empty<Frame>();
+    private AnimationFrames _unitFrames = null!;
     /// <summary>
     /// Кадры анимации ауры юнита.
     /// </summary>
-    private IReadOnlyList<Frame>? _auraFrames;
+    private AnimationFrames? _auraFrames;
 
     /// <summary>
     /// Изображение, которые отрисовывает кадры анимации тени юнита.
@@ -56,17 +58,29 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     public BattleUnitAnimationComponent(
         BattleUnit battleUnit,
         ISceneObjectContainer sceneObjectContainer,
-        IBattleUnitResourceProvider battleUnitResourceProvider
-    ) : base(battleUnit, sceneObjectContainer, GetLayer(battleUnit))
+        IBattleUnitResourceProvider battleUnitResourceProvider,
+        PointD animationOffset
+    ) : base(battleUnit, sceneObjectContainer, GetLayer(battleUnit), animationOffset)
     {
         _battleUnit = battleUnit;
         _battleUnitResourceProvider = battleUnitResourceProvider;
+        _animationOffset = animationOffset;
     }
 
     /// <summary>
     /// Вся информация об анимации юнита.
     /// </summary>
     public BattleUnitAnimation BattleUnitAnimation { get; private set; } = null!;
+
+    /// <inheritdoc />
+    protected override PointD AnimationOffset => _battleUnit.UnitState == BattleUnitState.Dead
+        ? new PointD(-10, 0)
+        : base.AnimationOffset;
+
+    /// <summary>
+    /// Позиция вывода анимации.
+    /// </summary>
+    public PointD AnimationPoint => new(GameObject.X + _animationOffset.X, GameObject.Y + _animationOffset.Y);
 
     /// <inheritdoc />
     public override void Initialize()
@@ -103,7 +117,8 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// <inheritdoc />
     protected override IReadOnlyList<IImageSceneObject?> GetAnimationHosts()
     {
-        return new[] {
+        return new[]
+        {
             _shadowAnimationHost,
             _unitAnimationHost,
             _auraAnimationHost
@@ -115,12 +130,15 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     /// </summary>
     private static int GetLayer(BattleUnit battleUnit)
     {
+        var unitBaseLayer = battleUnit.IsAttacker
+            ? BattleLayers.ATTACKER_UNIT_BASE_LAYER
+            : BattleLayers.DEFENDER_UNIT_BASE_LAYER;
         var battleLine = battleUnit.IsAttacker
             ? (int)battleUnit.Unit.SquadLinePosition
             : 3 - (int)battleUnit.Unit.SquadLinePosition;
         var flankPosition = 2 - (int)battleUnit.Unit.SquadFlankPosition;
 
-        return BattleLayers.UNIT_BASE_LAYER + battleLine * 100 + flankPosition * 10;
+        return unitBaseLayer + battleLine * 100 + flankPosition * 10;
     }
 
     /// <summary>

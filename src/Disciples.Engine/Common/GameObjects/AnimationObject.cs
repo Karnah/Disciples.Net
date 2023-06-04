@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Disciples.Engine.Base;
+﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Models;
 
@@ -33,14 +32,13 @@ public class AnimationObject : GameObject
     /// <summary>
     /// Создать объект типа <see cref="AnimationObject" />.
     /// </summary>
-    public AnimationObject(
-        ISceneObjectContainer sceneObjectContainer,
-        IReadOnlyList<Frame> frames,
+    public AnimationObject(ISceneObjectContainer sceneObjectContainer,
+        AnimationFrames frames,
         double x,
         double y,
         int layer,
         bool repeat = true
-    ) : base(x, y)
+        ) : base(x, y)
     {
         AnimationComponent = new AnimationComponent(this, sceneObjectContainer, frames, layer);
 

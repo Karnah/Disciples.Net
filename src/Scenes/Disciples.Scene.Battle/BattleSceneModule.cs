@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Controllers;
@@ -26,6 +27,7 @@ public class BattleSceneModule : IGameModule
         containerRegistrator.Register<BattleSoundController>(battleScopeReuse);
         containerRegistrator.Register<BattleDialogController>(battleScopeReuse);
         containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(battleScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, BattleSceneInterfaceController>(battleScopeReuse);
         containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(battleScopeReuse);
         containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(battleScopeReuse);
         containerRegistrator.Register<IBattleController, BattleController>(battleScopeReuse);

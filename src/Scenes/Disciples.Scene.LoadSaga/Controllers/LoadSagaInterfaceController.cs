@@ -83,12 +83,10 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
         var sceneInterface = _interfaceProvider.SceneInterface;
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
-        _goBackButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.BACK_BUTTON);
-        _goBackButton.ClickedAction = ExecuteBack;
+        _goBackButton = gameObjects.GetButton(LoadSagaElementNames.BACK_BUTTON, ExecuteBack);
         _goBackButton.SetActive();
 
-        _continueButton = gameObjects.Get<ButtonObject>(LoadSagaElementNames.CONTINUE_BUTTON);
-        _continueButton.ClickedAction = ExecuteContinue;
+        _continueButton = gameObjects.GetButton(LoadSagaElementNames.CONTINUE_BUTTON, ExecuteContinue);
 
         _saveInfo = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_INFO_TEXT_BLOCK);
         _saveDescription = gameObjects.Get<TextBlockObject>(LoadSagaElementNames.SAVE_DESCRIPTION_TEXT_BLOCK);

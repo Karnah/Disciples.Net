@@ -30,6 +30,11 @@ public interface ISceneObject
     /// </summary>
     int Layer { get; }
 
+    /// <summary>
+    /// Признак, что объект скрыт со сцены.
+    /// </summary>
+    public bool IsHidden { get; set; }
+
 
     /// <summary>
     /// Очистить занимаемые объектом ресурсы.

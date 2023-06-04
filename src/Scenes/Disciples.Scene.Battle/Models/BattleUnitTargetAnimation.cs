@@ -11,25 +11,25 @@ internal class BattleUnitTargetAnimation
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitTargetAnimation" />.
     /// </summary>
-    public BattleUnitTargetAnimation(bool isSingle, IReadOnlyList<Frame> attackerDirectionFrames, IReadOnlyList<Frame> defenderDirectionFrames)
+    public BattleUnitTargetAnimation(AnimationFrames? attackerDirectionFrames, AnimationFrames? defenderDirectionFrames, AnimationFrames? areaFrames)
     {
-        IsSingle = isSingle;
         AttackerDirectionFrames = attackerDirectionFrames;
         DefenderDirectionFrames = defenderDirectionFrames;
+        AreaFrames = areaFrames;
     }
-
-    /// <summary>
-    /// Анимация применяется к одному юниту, а не к площади.
-    /// </summary>
-    public bool IsSingle { get; }
 
     /// <summary>
     /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Attacker" />.
     /// </summary>
-    public IReadOnlyList<Frame> AttackerDirectionFrames { get; }
+    public AnimationFrames? AttackerDirectionFrames { get; }
 
     /// <summary>
     /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Defender" />.
     /// </summary>
-    public IReadOnlyList<Frame> DefenderDirectionFrames { get; }
+    public AnimationFrames? DefenderDirectionFrames { get; }
+
+    /// <summary>
+    /// Кадры анимации, применяемые к области.
+    /// </summary>
+    public AnimationFrames? AreaFrames { get; }
 }

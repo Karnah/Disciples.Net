@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 
@@ -29,10 +30,10 @@ public interface IInterfaceProvider : ISupportLoading
     /// Получить анимацию.
     /// </summary>
     /// <param name="animationName">Имя анимации.</param>
-    IReadOnlyList<Frame> GetAnimation(string animationName);
+    AnimationFrames GetAnimation(string animationName);
 
     /// <summary>
     /// Получить изображение указанного цвета.
     /// </summary>
-    IBitmap GetColorBitmap(Color color);
+    IBitmap GetColorBitmap(Color color, SizeD size);
 }

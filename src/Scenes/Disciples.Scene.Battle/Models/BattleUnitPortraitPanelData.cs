@@ -1,5 +1,5 @@
 ﻿using Disciples.Engine.Common.GameObjects;
-using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -13,7 +13,17 @@ internal class BattleUnitPortraitPanelData
     /// <summary>
     /// Изображение панели.
     /// </summary>
-    public IImageSceneObject? PanelImage { get; set; }
+    public ImageObject PanelImage { get; set; } = null!;
+
+    /// <summary>
+    /// Плейсхолдеры для портрета юнита.
+    /// </summary>
+    public IReadOnlyDictionary<int, SceneElement> PortraitPlaceholders { get; set; } = null!;
+
+    /// <summary>
+    /// Плейсхолдеры для ХП юнита.
+    /// </summary>
+    public IReadOnlyDictionary<int, SceneElement> HitPointsPlaceholders { get; set; } = null!;
 
     /// <summary>
     /// Отряд, который в данный момент отображается на правой панели.

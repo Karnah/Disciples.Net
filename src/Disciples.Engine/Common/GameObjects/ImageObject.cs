@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 
@@ -38,6 +39,33 @@ public class ImageObject : GameObject
         set => _imageSceneObject.Bitmap = value;
     }
 
+    /// <summary>
+    /// Необходимо ли развернуть изображение.
+    /// </summary>
+    public bool IsReflected
+    {
+        get => _imageSceneObject.IsReflected;
+        set => _imageSceneObject.IsReflected = value;
+    }
+
+    /// <summary>
+    /// Выравнивание по ширине.
+    /// </summary>
+    public HorizontalAlignment HorizontalAlignment
+    {
+        get => _imageSceneObject.HorizontalAlignment;
+        set => _imageSceneObject.HorizontalAlignment = value;
+    }
+
+    /// <summary>
+    /// Выравнивание по высоте.
+    /// </summary>
+    public VerticalAlignment VerticalAlignment
+    {
+        get => _imageSceneObject.VerticalAlignment;
+        set => _imageSceneObject.VerticalAlignment = value;
+    }
+
     /// <inheritdoc />
     public override void Initialize()
     {
@@ -52,5 +80,13 @@ public class ImageObject : GameObject
         base.Destroy();
 
         _sceneObjectContainer.RemoveSceneObject(_imageSceneObject);
+    }
+
+    /// <inheritdoc />
+    protected override void OnHiddenChanged(bool isHidden)
+    {
+        base.OnHiddenChanged(isHidden);
+
+        _imageSceneObject.IsHidden = isHidden;
     }
 }

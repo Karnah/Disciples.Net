@@ -446,7 +446,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 
                 // Проверяем прозрачную область.
                 // Вторая проверка нужна потому, что по какой-то причине есть еще несколько дополнительных прозрачных цветов.
-                if (color == mainTransparentColor || (pixels[i] > 251 && pixels[i + 1] < 4 && pixels[i + 2] > 251))
+                if (color == mainTransparentColor || (pixels[i] > 248 && pixels[i + 1] < 4 && pixels[i + 2] > 251))
                 {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;

@@ -1,10 +1,10 @@
-﻿using Disciples.Engine;
+﻿using Disciples.Common.Models;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Constants;
+using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Constants;
@@ -13,17 +13,13 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
 /// <inheritdoc cref="IBattleInterfaceController" />
 internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceController
 {
-    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
-    private readonly IBattleResourceProvider _battleResourceProvider;
-    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -31,26 +27,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly BattleUnitActionController _unitActionController;
     private readonly BattleDialogController _dialogController;
     private readonly BattleBottomPanelController _bottomPanelController;
-
-    private IImageSceneObject _currentUnitFace = null!;
-    private BattleUnitInfoGameObject _currentUnitTextInfoObject = null!;
-    private IImageSceneObject? _targetUnitFace;
-    private BattleUnitInfoGameObject? _targetUnitTextInfoObject;
-    private BattleUnit? _targetUnitObject;
+    private readonly ISceneInterfaceController _sceneInterfaceController;
 
     /// <summary>
     /// Позволяет заблокировать действия пользователя на время анимации.
     /// </summary>
     private bool _isAnimating;
 
-    /// <summary>
-    /// Игровой объект, отрисовывающий на текущем юните анимацию выделения.
-    /// </summary>
-    private AnimationObject? _currentUnitSelectionAnimation;
-    /// <summary>
-    /// Игровые объекты, которые отрисовывают анимации цели на юнитах-целях.
-    /// </summary>
-    private IList<AnimationObject>? _targetUnitsAnimations;
     /// <summary>
     /// Необходимо ли отрисовывать анимации цели на юнитах.
     /// </summary>
@@ -60,22 +43,17 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// Создать объект типа <see cref="BattleInterfaceController" />.
     /// </summary>
     public BattleInterfaceController(
-        IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
-        IBattleResourceProvider battleResourceProvider,
-        IBattleUnitResourceProvider battleUnitResourceProvider,
         BattleContext context,
         BattleProcessor battleProcessor,
         ISceneObjectContainer sceneObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleUnitActionController unitActionController,
         BattleDialogController dialogController,
-        BattleBottomPanelController bottomPanelController)
+        BattleBottomPanelController bottomPanelController,
+        ISceneInterfaceController sceneInterfaceController)
     {
-        _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = battleInterfaceProvider;
-        _battleResourceProvider = battleResourceProvider;
-        _battleUnitResourceProvider = battleUnitResourceProvider;
         _context = context;
         _battleProcessor = battleProcessor;
         _sceneObjectContainer = sceneObjectContainer;
@@ -83,6 +61,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _unitActionController = unitActionController;
         _dialogController = dialogController;
         _bottomPanelController = bottomPanelController;
+        _sceneInterfaceController = sceneInterfaceController;
     }
 
     /// <summary>
@@ -94,6 +73,13 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// Список юнитов.
     /// </summary>
     private IReadOnlyList<BattleUnit> BattleUnits => _context.BattleUnits;
+
+    /// <inheritdoc />
+    public void PreLoad()
+    {
+        _context.AttackingBattleSquad.UnitPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattlegroundElementNames.ATTACK_UNIT_PATTERN_PLACEHOLDER);
+        _context.DefendingBattleSquad.UnitPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattlegroundElementNames.DEFEND_UNIT_PATTERN_PLACEHOLDER);
+    }
 
     /// <inheritdoc />
     public void BeforeSceneUpdate()
@@ -121,6 +107,30 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 ProcessBattleCompleted();
                 break;
         }
+    }
+
+    /// <inheritdoc />
+    public RectangleD GetBattleUnitPosition(Unit unit, BattleSquadPosition unitSquadPosition)
+    {
+        var squad = unitSquadPosition == BattleSquadPosition.Attacker
+            ? _context.AttackingBattleSquad
+            : _context.DefendingBattleSquad;
+        var unitPosition = squad.GetUnitPosition(unit.SquadLinePosition, unit.SquadFlankPosition);
+        if (unit.UnitType.IsSmall)
+            return unitPosition;
+
+        // Для больших юнитов необходимо пересчитать позицию.
+        return unitSquadPosition == BattleSquadPosition.Attacker
+            ? new RectangleD(
+                unitPosition.X - 30,
+                unitPosition.Y - 60,
+                unitPosition.Width,
+                unitPosition.Height)
+            : new RectangleD(
+                unitPosition.X + 35,
+                unitPosition.Y - 20,
+                unitPosition.Width,
+                unitPosition.Height);
     }
 
     /// <inheritdoc />
@@ -177,7 +187,10 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        InitializeMainInterface();
+        _sceneInterfaceController.AddSceneGameObjects(_interfaceProvider.BattleInterface, Layers.SceneLayers);
+
+        foreach (var battleground in _interfaceProvider.Battleground)
+            _sceneObjectContainer.AddImage(battleground, 0, 0, BattleLayers.BACKGROUND_LAYER);
 
         _unitPortraitPanelController.Load();
         _bottomPanelController.Load();
@@ -202,56 +215,21 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     /// <summary>
-    /// Разместить на сцене изображение поля боя и панелей, текст на панелях.
-    /// </summary>
-    private void InitializeMainInterface()
-    {
-        foreach (var battleground in _interfaceProvider.Battleground)
-            _sceneObjectContainer.AddImage(battleground, 0, 0, BattleLayers.BACKGROUND_LAYER);
-
-        var currentUnitBattleFace = _battleUnitResourceProvider.GetUnitBattleFace(CurrentBattleUnit.Unit.UnitType);
-        _currentUnitFace = _sceneObjectContainer.AddImage(
-            currentUnitBattleFace,
-            0,
-            GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
-            BattleLayers.INTERFACE_LAYER);
-
-        _currentUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(190, 520, BattleLayers.INTERFACE_LAYER);
-        _currentUnitTextInfoObject.Unit = CurrentBattleUnit.Unit;
-
-
-        // Используем размеры лица текущего юнита, так как юнит-цель не инициализируются в начале боя.
-        _targetUnitFace = _sceneObjectContainer.AddImage(
-            null,
-            currentUnitBattleFace.Width,
-            currentUnitBattleFace.Height,
-            GameInfo.OriginalWidth - currentUnitBattleFace.Width,
-            GameInfo.OriginalHeight - currentUnitBattleFace.Height - 5,
-            BattleLayers.INTERFACE_LAYER);
-        // todo Добавить перегрузку в метод?
-        _targetUnitFace.IsReflected = true;
-
-        _targetUnitTextInfoObject = _battleGameObjectContainer.AddBattleUnitInfo(510, 520, BattleLayers.INTERFACE_LAYER);
-    }
-
-    /// <summary>
     /// Обновить цель.
     /// </summary>
     /// <param name="targetUnitObject">Юнит, на которого навели курсором.</param>
     /// <param name="shouldAnimateTarget">Необходимо ли выделить юнита с помощью анимации (красный крутящийся круг).</param>
     private void UpdateTargetUnit(BattleUnit? targetUnitObject, bool shouldAnimateTarget = true)
     {
+        _context.TargetBattleUnit = targetUnitObject;
+        _bottomPanelController.ProcessTargetUnitChanged(targetUnitObject);
+
         if (targetUnitObject == null)
         {
             DetachTargetAnimations();
-            _targetUnitObject = null;
-
             return;
         }
 
-        _targetUnitObject = targetUnitObject;
-        _targetUnitFace!.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(targetUnitObject.Unit.UnitType);
-        _targetUnitTextInfoObject!.Unit = targetUnitObject.Unit;
         _shouldAnimateTargets = shouldAnimateTarget;
 
         if (shouldAnimateTarget && !_isAnimating)
@@ -311,7 +289,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         AttachSelectedAnimation(CurrentBattleUnit);
 
-        if (_targetUnitObject != null && _shouldAnimateTargets)
+        if (_context.TargetBattleUnit != null && _shouldAnimateTargets)
             SelectTargetUnits();
     }
 
@@ -331,7 +309,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         DetachSelectedAnimation();
 
-        if (_targetUnitObject != null)
+        if (_context.TargetBattleUnit != null)
             SelectTargetUnits();
     }
 
@@ -341,20 +319,12 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void AttachSelectedAnimation(BattleUnit battleUnit)
     {
-        _currentUnitFace.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(battleUnit.Unit.UnitType);
-        _currentUnitTextInfoObject.Unit = battleUnit.Unit;
-
         DetachSelectedAnimation();
 
         if (_isAnimating)
             return;
 
-        var frames = _battleResourceProvider.GetBattleAnimation(
-            battleUnit.Unit.UnitType.IsSmall
-                ? "MRKCURSMALLA"
-                : "MRKCURLARGEA");
-        // Задаём смещение 190. Возможно, стоит вычислять высоту юнита или что-то в этом роде.
-        _currentUnitSelectionAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, BattleLayers.UNIT_SELECTION_ANIMATION_LAYER);
+        battleUnit.IsUnitTurn = true;
     }
 
     /// <summary>
@@ -362,11 +332,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void DetachSelectedAnimation()
     {
-        if (_currentUnitSelectionAnimation == null)
-            return;
-
-        _currentUnitSelectionAnimation?.Destroy();
-        _currentUnitSelectionAnimation = null;
+        var selectedBattleUnit = BattleUnits.FirstOrDefault(bu => bu.IsUnitTurn);
+        if (selectedBattleUnit != null)
+            selectedBattleUnit.IsUnitTurn = false;
     }
 
     /// <summary>
@@ -374,11 +342,11 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void SelectTargetUnits()
     {
-        if (_targetUnitObject == null)
+        if (_context.TargetBattleUnit == null)
             return;
 
         var currentUnit = CurrentBattleUnit.Unit;
-        var targetUnit = _targetUnitObject.Unit;
+        var targetUnit = _context.TargetBattleUnit.Unit;
 
         if (targetUnit.IsDead)
             return;
@@ -387,10 +355,9 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         // то всегда будет выделена только одна цель
         if (currentUnit.UnitType.MainAttack.Reach != UnitAttackReach.All)
         {
-            AttachTargetAnimations(_targetUnitObject);
+            AttachTargetAnimations(_context.TargetBattleUnit);
             return;
         }
-
 
         BattleUnit[] targetUnits;
 
@@ -406,7 +373,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         }
         else
         {
-            targetUnits = new[] { _targetUnitObject };
+            targetUnits = new[] { _context.TargetBattleUnit };
         }
 
         AttachTargetAnimations(targetUnits);
@@ -417,20 +384,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void AttachTargetAnimations(params BattleUnit[] battleUnits)
     {
-        if (_targetUnitsAnimations != null)
-            DetachTargetAnimations();
-
-        _targetUnitsAnimations = new List<AnimationObject>(battleUnits.Length);
-        foreach (var battleUnit in battleUnits)
-        {
-            var frames = _battleResourceProvider.GetBattleAnimation(
-                battleUnit.Unit.UnitType.IsSmall
-                    ? "MRKSMALLA"
-                    : "MRKLARGEA");
-
-            var targetAnimation = _battleGameObjectContainer.AddAnimation(frames, battleUnit.X, battleUnit.Y + 190, BattleLayers.UNIT_SELECTION_ANIMATION_LAYER);
-            _targetUnitsAnimations.Add(targetAnimation);
-        }
+        foreach (var battleUnit in BattleUnits)
+            battleUnit.IsTarget = battleUnits.Contains(battleUnit);
     }
 
     /// <summary>
@@ -438,13 +393,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void DetachTargetAnimations()
     {
-        if (_targetUnitsAnimations == null)
-            return;
-
-        foreach (var targetAnimation in _targetUnitsAnimations)
-            targetAnimation.Destroy();
-
-        _targetUnitsAnimations = null;
+        foreach (var battleUnit in BattleUnits)
+            battleUnit.IsTarget = false;
     }
 
     /// <summary>

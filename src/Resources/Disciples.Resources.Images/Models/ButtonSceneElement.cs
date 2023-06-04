@@ -18,7 +18,7 @@ public class ButtonSceneElement : SceneElement
     /// <summary>
     /// Название изображения с состоянием кнопки, когда навели курсором.
     /// </summary>
-    public string? SelectedStateImageName { get; init; }
+    public string? HoverStateImageName { get; init; }
 
     /// <summary>
     /// Название изображения с состоянием кнопки, когда она нажата.

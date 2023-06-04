@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
@@ -42,46 +43,34 @@ public interface ISceneObjectContainer
     /// Добавить статичное изображение указанных размеров на сцену.
     /// </summary>
     /// <param name="bitmap">Изображение.</param>
-    /// <param name="width">Ширина изображения.</param>
-    /// <param name="height">Высота изображения.</param>
-    /// <param name="x">Положение изображения, координата X.</param>
-    /// <param name="y">Положение изображения, координата Y.</param>
+    /// <param name="bounds">Границы изображения.</param>
     /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-    IImageSceneObject AddImage(IBitmap? bitmap, double width, double height, double x, double y, int layer);
+    IImageSceneObject AddImage(IBitmap? bitmap, RectangleD bounds, int layer);
 
     /// <summary>
     /// Добавить прямоугольник указанного цвета и размеров на сцену.
     /// </summary>
     /// <param name="color">Цвет изображения.</param>
-    /// <param name="width">Ширина изображения.</param>
-    /// <param name="height">Высота изображения.</param>
-    /// <param name="x">Положение изображения, координата X.</param>
-    /// <param name="y">Положение изображения, координата Y.</param>
+    /// <param name="bounds">Границы изображения.</param>
     /// <param name="layer">Слой на котором будет отображаться изображение.</param>
-    IImageSceneObject AddColorImage(Color color, double width, double height, double x, double y, int layer);
+    IImageSceneObject AddColorImage(Color color, RectangleD bounds, int layer);
 
     /// <summary>
     /// Добавить текст на сцену.
     /// </summary>
     /// <param name="text">Текст.</param>
-    /// <param name="width">Ширина текста.</param>
-    /// <param name="height">Высота текста.</param>
-    /// <param name="x">Положение тексте, координата X.</param>
-    /// <param name="y">Положение текста, координата Y.</param>
+    /// <param name="bounds">Границы текста.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
-    ITextSceneObject AddText(TextContainer? text, double width, double height, double x, double y, int layer);
+    ITextSceneObject AddText(TextContainer? text, RectangleD bounds, int layer);
 
     /// <summary>
     /// Добавить текст на сцену.
     /// </summary>
     /// <param name="text">Текст.</param>
     /// <param name="textStyle">Стиль текста.</param>
-    /// <param name="width">Ширина текста.</param>
-    /// <param name="height">Высота текста.</param>
-    /// <param name="x">Положение тексте, координата X.</param>
-    /// <param name="y">Положение текста, координата Y.</param>
+    /// <param name="bounds">Границы текста.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
-    ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, double width, double height, double x, double y, int layer);
+    ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer);
 
     /// <summary>
     /// Удалить объект со сцены.

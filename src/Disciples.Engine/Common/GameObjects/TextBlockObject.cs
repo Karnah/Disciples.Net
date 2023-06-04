@@ -43,7 +43,7 @@ public class TextBlockObject : GameObject
     {
         base.Initialize();
 
-        _textSceneObject = _sceneObjectContainer.AddText(_textBlock.Text, _textBlock.TextStyle, Width, Height, X, Y, _layer);
+        _textSceneObject = _sceneObjectContainer.AddText(_textBlock.Text, _textBlock.TextStyle, _textBlock.Position, _layer);
     }
 
     /// <inheritdoc />
@@ -52,5 +52,13 @@ public class TextBlockObject : GameObject
         base.Destroy();
 
         _sceneObjectContainer.RemoveSceneObject(_textSceneObject);
+    }
+
+    /// <inheritdoc />
+    protected override void OnHiddenChanged(bool isHidden)
+    {
+        base.OnHiddenChanged(isHidden);
+
+        _textSceneObject.IsHidden = isHidden;
     }
 }

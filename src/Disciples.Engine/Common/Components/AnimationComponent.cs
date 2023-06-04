@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -11,17 +12,17 @@ namespace Disciples.Engine.Common.Components;
 /// </summary>
 public class AnimationComponent : BaseAnimationComponent
 {
-    private readonly IReadOnlyList<Frame> _frames;
+    private readonly AnimationFrames _frames;
 
     private IImageSceneObject? _animationFrame;
 
     /// <inheritdoc />
-    public AnimationComponent(
-        GameObject gameObject,
+    public AnimationComponent(GameObject gameObject,
         ISceneObjectContainer sceneObjectContainer,
-        IReadOnlyList<Frame> frames,
-        int layer
-    ) : base(gameObject, sceneObjectContainer, layer)
+        AnimationFrames frames,
+        int layer,
+        PointD? animationOffset = null
+        ) : base(gameObject, sceneObjectContainer, layer, animationOffset)
     {
         _frames = frames;
 

@@ -8,39 +8,39 @@ namespace Disciples.Engine.Common.Components;
 /// </summary>
 public class SelectionComponent : BaseComponent
 {
-    private readonly Action? _onSelectedAction;
-    private readonly Action? _onUnselectedAction;
+    private readonly Action? _onHoveredAction;
+    private readonly Action? _onUnhoveredAction;
 
     /// <summary>
     /// Создать объект типа <see cref="SelectionComponent" />.
     /// </summary>
-    public SelectionComponent(GameObject gameObject, Action? onSelectedAction = null, Action? onUnselectedAction = null) : base(gameObject)
+    public SelectionComponent(GameObject gameObject, Action? onHoveredAction = null, Action? onUnhoveredAction = null) : base(gameObject)
     {
-        _onSelectedAction = onSelectedAction;
-        _onUnselectedAction = onUnselectedAction;
+        _onHoveredAction = onHoveredAction;
+        _onUnhoveredAction = onUnhoveredAction;
     }
 
     /// <summary>
     /// Признак, что указатель находится над объектом.
     /// </summary>
-    public bool IsSelected { get; private set; }
+    public bool IsHover { get; private set; }
 
     /// <summary>
     /// Обработать наведение указателя на объект.
     /// </summary>
-    public void Selected()
+    public void Hovered()
     {
-        IsSelected = true;
-        _onSelectedAction?.Invoke();
+        IsHover = true;
+        _onHoveredAction?.Invoke();
     }
 
     /// <summary>
     /// Обработать снятие указателя с объекта.
     /// </summary>
-    public void Unselected()
+    public void Unhovered()
     {
-        IsSelected = false;
-        _onUnselectedAction?.Invoke();
+        IsHover = false;
+        _onUnhoveredAction?.Invoke();
 
         // Если убрали выделение с объекта, сбрасываем нажатие.
         var clickComponent = GameObject.TryGetComponent<MouseLeftButtonClickComponent>();

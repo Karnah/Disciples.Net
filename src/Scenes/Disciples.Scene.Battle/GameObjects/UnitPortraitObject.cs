@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Disciples.Common.Models;
 using Disciples.Engine;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Components;
@@ -23,10 +24,11 @@ namespace Disciples.Scene.Battle.GameObjects;
 /// </summary>
 internal class UnitPortraitObject : GameObject
 {
-    private const int PANEL_SEPARATOR_LAYER_SHIFT = 1;
-    private const int FOREGROUND_LAYER_SHIFT = 1;
-    private const int TEXT_LAYER_SHIFT = 2;
-    private const int EFFECTS_LAYER_SHIFT = 3;
+    private const int PANEL_SEPARATOR_LAYER_SHIFT = 11;
+    private const int PORTRAIT_AND_HP_LAYER_SHIFT = 12;
+    private const int FOREGROUND_LAYER_SHIFT = 13;
+    private const int TEXT_LAYER_SHIFT = 13;
+    private const int EFFECTS_LAYER_SHIFT = 14;
 
     /// <summary>
     /// Идентификатор в ресурсах для ХП юнита.
@@ -60,7 +62,7 @@ internal class UnitPortraitObject : GameObject
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
-    private readonly bool _rightToLeft;
+    private readonly BattleSquadPosition _unitSquadPosition;
 
     private readonly IBitmap _unitFaceBitmap;
 
@@ -120,8 +122,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Создать объект класса <see cref="UnitPortraitObject" />.
     /// </summary>
-    public UnitPortraitObject(
-        ITextProvider textProvider,
+    public UnitPortraitObject(ITextProvider textProvider,
         ISceneObjectContainer sceneObjectContainer,
         IBattleInterfaceProvider battleInterfaceProvider,
         IBattleUnitResourceProvider battleUnitResourceProvider,
@@ -129,21 +130,19 @@ internal class UnitPortraitObject : GameObject
         Action<UnitPortraitObject> onUnitPortraitRightMouseButtonClicked,
         Action<UnitPortraitObject> onUnitPortraitMouseLeftButtonPressed,
         Unit unit,
-        bool rightToLeft,
-        double x,
-        double y) : base(x, y)
+        BattleSquadPosition unitSquadPosition,
+        RectangleD portraitBounds,
+        RectangleD hitPointsBounds) : base(RectangleD.Union(portraitBounds, hitPointsBounds))
     {
         _textProvider = textProvider;
         _sceneObjectContainer = sceneObjectContainer;
         _battleInterfaceProvider = battleInterfaceProvider;
-        _rightToLeft = rightToLeft;
-
+        _unitSquadPosition = unitSquadPosition;
         _unitFaceBitmap = battleUnitResourceProvider.GetUnitFace(unit.UnitType);
 
         Unit = unit;
-
-        Width = _unitFaceBitmap.Width;
-        Height = _unitFaceBitmap.Height;
+        PortraitBounds = portraitBounds;
+        HitPointsBounds = hitPointsBounds;
 
         _battleEffectsIcons = new Dictionary<UnitAttackType, IImageSceneObject>();
         _battleEffectsForegrounds = new Dictionary<UnitAttackType, IImageSceneObject>();
@@ -161,29 +160,33 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     public Unit Unit { get; }
 
+    /// <summary>
+    /// Расположение портрета.
+    /// </summary>
+    public RectangleD PortraitBounds { get; }
+
+    /// <summary>
+    /// Расположение информации о здоровье.
+    /// </summary>
+    public RectangleD HitPointsBounds { get; }
+
     /// <inheritdoc />
     public override void Initialize()
     {
         base.Initialize();
 
-        _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, X, Y, BattleLayers.INTERFACE_LAYER);
-        _unitPortrait.IsReflected = _rightToLeft;
+        _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, PortraitBounds, BattleLayers.INTERFACE_LAYER + PORTRAIT_AND_HP_LAYER_SHIFT);
+        _unitPortrait.IsReflected = _unitSquadPosition == BattleSquadPosition.Defender;
 
-        _unitHitpoints = _sceneObjectContainer.AddText(
-            null,
-            Width,
-            20,
-            X,
-            Y + Height,
-            BattleLayers.INTERFACE_LAYER);
+        _unitHitpoints = _sceneObjectContainer.AddText(null, HitPointsBounds, BattleLayers.INTERFACE_LAYER + PORTRAIT_AND_HP_LAYER_SHIFT);
 
         // Если юнит большой, то необходимо "закрасить" область между двумя клетками на панели.
         if (!Unit.UnitType.IsSmall)
         {
             _unitPanelSeparator = _sceneObjectContainer.AddImage(
                 _battleInterfaceProvider.PanelSeparator,
-                X + (Width - _battleInterfaceProvider.PanelSeparator.Width) / 2 - 1,
-                Y + Height - 1,
+                HitPointsBounds.X + (HitPointsBounds.Width - _battleInterfaceProvider.PanelSeparator.ActualSize.Width) / 2,
+                HitPointsBounds.Y + (HitPointsBounds.Height - _battleInterfaceProvider.PanelSeparator.ActualSize.Height) / 2 + 1,
                 BattleLayers.PANEL_LAYER + PANEL_SEPARATOR_LAYER_SHIFT);
         }
 
@@ -348,14 +351,15 @@ internal class UnitPortraitObject : GameObject
 
             RemoveSceneObject(ref _unitDamageForeground);
 
-            var height = (1 - ((double)_lastUnitHitPoints / Unit.MaxHitPoints)) * Height;
+            var height = (1 - ((double)_lastUnitHitPoints / Unit.MaxHitPoints)) * PortraitBounds.Height;
             if (height > 0)
             {
-                var width = Width;
-                var x = _unitPortrait.X;
-                var y = _unitPortrait.Y + (Height - height);
+                var width = PortraitBounds.Width;
+                var x = PortraitBounds.X;
+                var y = PortraitBounds.Y + (PortraitBounds.Height - height);
+                var bounds = new RectangleD(x, y, width, height);
 
-                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, width, height, x, y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
+                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, bounds, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
             }
         }
     }
@@ -371,8 +375,8 @@ internal class UnitPortraitObject : GameObject
             var icon = _battleInterfaceProvider.UnitPortraitDefendIcon;
             _defendIcon = _sceneObjectContainer.AddImage(
                 icon,
-                X + (Width - icon.Width) / 2,
-                Y + Height - icon.Height,
+                PortraitBounds.X + (PortraitBounds.Width - icon.OriginalSize.Width) / 2,
+                PortraitBounds.Y + PortraitBounds.Height - icon.OriginalSize.Height,
                 BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
         }
         else if (!Unit.Effects.IsDefended && _defendIcon != null)
@@ -415,8 +419,8 @@ internal class UnitPortraitObject : GameObject
                         .Count();
                     _battleEffectsIcons.Add(battleEffect.AttackType, _sceneObjectContainer.AddImage(
                         icon,
-                        X + Width - icon.Width,
-                        Y + Height - icon.Height * (iconsCount + 1),
+                        PortraitBounds.X + PortraitBounds.Width - icon.OriginalSize.Width,
+                        PortraitBounds.Y + PortraitBounds.Height - icon.OriginalSize.Height * (iconsCount + 1),
                         BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT));
                 }
             }
@@ -501,7 +505,7 @@ internal class UnitPortraitObject : GameObject
             RemoveBattleEffectsForegrounds();
         }
 
-        return _sceneObjectContainer.AddColorImage(color, Width, Height, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
+        return _sceneObjectContainer.AddColorImage(color, PortraitBounds, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
     }
 
     /// <summary>
@@ -544,10 +548,7 @@ internal class UnitPortraitObject : GameObject
         return _sceneObjectContainer.AddText(
             text,
             new TextStyle { ForegroundColor = GameColors.White, FontSize = 12, FontWeight = FontWeight.Bold },
-            Width,
-            Height,
-            X,
-            Y,
+            PortraitBounds,
             BattleLayers.INTERFACE_LAYER + TEXT_LAYER_SHIFT);
     }
 
@@ -568,8 +569,8 @@ internal class UnitPortraitObject : GameObject
 
         return _sceneObjectContainer.AddImage(
             icon,
-            X + (Width - icon.Width) / 2,
-            Y + icon.Height / 2,
+            PortraitBounds.X + (PortraitBounds.Width - icon.OriginalSize.Width) / 2,
+            PortraitBounds.Y,
             BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
     }
 

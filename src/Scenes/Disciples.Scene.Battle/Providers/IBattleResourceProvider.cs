@@ -17,13 +17,13 @@ internal interface IBattleResourceProvider : ISupportLoading
     /// Получить анимацию для сцены битвы.
     /// </summary>
     /// <param name="animationName">Имя анимации.</param>
-    IReadOnlyList<Frame> GetBattleAnimation(string animationName);
+    AnimationFrames GetBattleAnimation(string animationName);
 
     /// <summary>
     /// Получить изображение для сцены битвы.
     /// </summary>
     /// <param name="frameName">Имя изображения.</param>
-    Frame GetBattleFrame(string frameName);
+    IBitmap GetBattleBitmap(string frameName);
 
     #endregion
 

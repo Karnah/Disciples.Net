@@ -1,5 +1,5 @@
 ﻿using Disciples.Engine;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
@@ -45,59 +45,41 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// </summary>
     private void LoadBitmaps()
     {
+        BattleInterface = _interfaceProvider.GetSceneInterface("DLG_BATTLE_A");
         UnitDetailInfoInterface = _interfaceProvider.GetSceneInterface("DLG_R_C_UNIT");
 
         Battleground = _battleResourceProvider.GetRandomBattleground();
 
         var battleIcons = _interfaceProvider.GetImageParts("DLG_BATTLE_A.PNG");
 
-        LeftPanel = battleIcons["DLG_BATTLE_A_LUNITGROUP"];
-        RightPanel = battleIcons["DLG_BATTLE_A_RUNITGROUP"];
-        BottomPanel = battleIcons["DLG_BATTLE_A_MAINCOMBATBG"];
         PanelSeparator = battleIcons["DLG_BATTLE_A_SPLITLRG"];
-        DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS")).Bitmap;
-        DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL")).Bitmap;
+        DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS"));
+        DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL"));
 
-        BlueLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL1").Bitmap;
-        OrangeLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL2").Bitmap;
-        RedLevelIcon = _battleResourceProvider.GetBattleFrame("FIHIGHLEVEL3").Bitmap;
+        BlueLevelIcon = _battleResourceProvider.GetBattleBitmap("FIHIGHLEVEL1");
+        OrangeLevelIcon = _battleResourceProvider.GetBattleBitmap("FIHIGHLEVEL2");
+        RedLevelIcon = _battleResourceProvider.GetBattleBitmap("FIHIGHLEVEL3");
 
-        UnitPortraitDefendIcon = _battleResourceProvider.GetBattleFrame("FIDEFENDING").Bitmap;
+        UnitPortraitDefendIcon = _battleResourceProvider.GetBattleBitmap("FIDEFENDING");
         UnitBattleEffectsIcon = new Dictionary<UnitAttackType, IBitmap>
         {
-            { UnitAttackType.Paralyze, _battleResourceProvider.GetBattleFrame("FIPARALYZE").Bitmap },
-            { UnitAttackType.Petrify, _battleResourceProvider.GetBattleFrame("FIPETRIFY").Bitmap },
-            { UnitAttackType.Poison, _battleResourceProvider.GetBattleFrame("FIPOISON").Bitmap },
-            { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleFrame("F1FROSTBITE").Bitmap },
-            { UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleFrame("F1DRAINLEVEL").Bitmap },
-            { UnitAttackType.TransformOther, _battleResourceProvider.GetBattleFrame("FITRANSFORM").Bitmap },
+            { UnitAttackType.Paralyze, _battleResourceProvider.GetBattleBitmap("FIPARALYZE") },
+            { UnitAttackType.Petrify, _battleResourceProvider.GetBattleBitmap("FIPETRIFY") },
+            { UnitAttackType.Poison, _battleResourceProvider.GetBattleBitmap("FIPOISON") },
+            { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleBitmap("F1FROSTBITE") },
+            { UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleBitmap("F1DRAINLEVEL") },
+            { UnitAttackType.TransformOther, _battleResourceProvider.GetBattleBitmap("FITRANSFORM") },
         };
-
-        ToggleRightButton = GetButtonBitmaps(battleIcons, "TOGGLERIGHT");
-        DefendButton = GetButtonBitmaps(battleIcons, "DEFEND");
-        RetreatButton = GetButtonBitmaps(battleIcons, "RETREAT");
-        WaitButton = GetButtonBitmaps(battleIcons, "WAIT");
-        InstantResolveButton = GetButtonBitmaps(battleIcons, "INSTANTRESOLVE");
-        AutoBattleButton = GetButtonBitmaps(battleIcons, "AUTOB");
-        OpenSquadInventoryButton = GetButtonBitmaps(battleIcons, "MANAGESTACK");
-        ExitButton = GetButtonBitmaps(battleIcons, "RETURN");
     }
 
+    /// <inheritdoc />
+    public SceneInterface BattleInterface { get; private set; } = null!;
 
     /// <inheritdoc />
     public SceneInterface UnitDetailInfoInterface { get; private set; } = null!;
 
     /// <inheritdoc />
     public IReadOnlyList<IBitmap> Battleground { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IBitmap LeftPanel { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IBitmap RightPanel { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IBitmap BottomPanel { get; private set; } = null!;
 
     /// <inheritdoc />
     public IBitmap PanelSeparator { get; private set; } = null!;
@@ -125,66 +107,16 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     public IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;
 
 
-    #region Buttons
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> ToggleRightButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> DefendButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> RetreatButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> WaitButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> InstantResolveButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> AutoBattleButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> OpenSquadInventoryButton { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<SceneButtonState, IBitmap> ExitButton { get; private set; } = null!;
-
-    /// <summary>
-    /// Получить словарь с изображениями кнопки для каждого её состояния.
-    /// </summary>
-    /// <param name="battleIcons">Иконки битвы.</param>
-    /// <param name="buttonName">Имя кнопки.</param>
-    private static IReadOnlyDictionary<SceneButtonState, IBitmap> GetButtonBitmaps(IReadOnlyDictionary<string, IBitmap> battleIcons, string buttonName)
-    {
-        // Для некоторых иконок не предусмотрен заблокированный вариант, поэтому используем TryGetValue.
-        battleIcons.TryGetValue($"DLG_BATTLE_A_{buttonName}_D", out var disabledState);
-        var activeState = battleIcons[$"DLG_BATTLE_A_{buttonName}_N"];
-        var selectedState = battleIcons[$"DLG_BATTLE_A_{buttonName}_H"];
-        var pressedState = battleIcons[$"DLG_BATTLE_A_{buttonName}_C"];
-
-        return new Dictionary<SceneButtonState, IBitmap>
-        {
-            { SceneButtonState.Disabled, disabledState ?? activeState },
-            { SceneButtonState.Active, activeState },
-            { SceneButtonState.Selected, selectedState },
-            { SceneButtonState.Pressed, pressedState }
-        };
-    }
-
-    #endregion
-
     #region UnitPanelBorders
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetUnitAttackBorder(bool sizeSmall)
+    public AnimationFrames GetUnitAttackBorder(bool sizeSmall)
     {
         return GetAttackBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetFieldAttackBorder()
+    public AnimationFrames GetFieldAttackBorder()
     {
         return GetAttackBorder(BattleBorderSize.Field);
     }
@@ -193,7 +125,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// Извлечь из ресурсов рамку атаки.
     /// </summary>
     /// <param name="battleBorderSize">Размер рамки.</param>
-    private IReadOnlyList<Frame> GetAttackBorder(BattleBorderSize battleBorderSize)
+    private AnimationFrames GetAttackBorder(BattleBorderSize battleBorderSize)
     {
         var suffix = GetBattleBorderTypeSuffix(battleBorderSize);
 
@@ -203,7 +135,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetUnitSelectionBorder(bool sizeSmall)
+    public AnimationFrames GetUnitSelectionBorder(bool sizeSmall)
     {
         return GetSelectionBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
@@ -212,7 +144,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     /// Извлечь из ресурсов рамку выделения текущего юнита.
     /// </summary>
     /// <param name="battleBorderSize">Размер рамки.</param>
-    private IReadOnlyList<Frame> GetSelectionBorder(BattleBorderSize battleBorderSize)
+    private AnimationFrames GetSelectionBorder(BattleBorderSize battleBorderSize)
     {
         if (battleBorderSize == BattleBorderSize.Field)
             throw new ArgumentException("Selection border can not use for field", nameof(battleBorderSize));
@@ -223,22 +155,34 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetUnitHealBorder(bool sizeSmall)
+    public AnimationFrames GetUnitHealBorder(bool sizeSmall)
     {
         return GetHealBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
 
     /// <inheritdoc />
-    public IReadOnlyList<Frame> GetFieldHealBorder()
+    public AnimationFrames GetFieldHealBorder()
     {
         return GetHealBorder(BattleBorderSize.Field);
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<int, SceneElement> GetUnitPlaceholders(string pattern)
+    {
+        var placeholders = new Dictionary<int, SceneElement>();
+        for (int i = 1; i <= GameConstants.MAX_UNITS_IN_SQUAD; i++)
+        {
+            placeholders.Add(i, BattleInterface.Elements[$"{pattern}{i}"]);
+        }
+
+        return placeholders;
     }
 
     /// <summary>
     /// Извлечь из ресурсов рамку исцеления.
     /// </summary>
     /// <param name="battleBorderSize">Размер рамки.</param>
-    private IReadOnlyList<Frame> GetHealBorder(BattleBorderSize battleBorderSize)
+    private AnimationFrames GetHealBorder(BattleBorderSize battleBorderSize)
     {
         var suffix = GetBattleBorderTypeSuffix(battleBorderSize);
         return _battleResourceProvider.GetBattleAnimation($"HEA{suffix}A");

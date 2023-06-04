@@ -187,21 +187,31 @@ public class GameController : IGameController
     /// </summary>
     private void CheckInputDeviceSelection(PointD mousePosition)
     {
+        // Объект выделения не менялся.
+        if (_selectedGameObject != null &&
+            _selectedGameObject.X <= mousePosition.X && mousePosition.X < (_selectedGameObject.X + _selectedGameObject.Width) &&
+            _selectedGameObject.Y <= mousePosition.Y && mousePosition.Y < (_selectedGameObject.Y + _selectedGameObject.Height) &&
+            !_selectedGameObject.IsHidden)
+        {
+            return;
+        }
+
+        // TODO Можно каждый раз не проходиться по всем элементам, а создать отдельную коллекцию.
         var selectedGameObject = GameObjects
-            .OrderBy(go => go.Y)
             .FirstOrDefault(go => go.SelectionComponent != null &&
                                   go.X <= mousePosition.X && mousePosition.X < (go.X + go.Width) &&
-                                  go.Y <= mousePosition.Y && mousePosition.Y < (go.Y + go.Height));
+                                  go.Y <= mousePosition.Y && mousePosition.Y < (go.Y + go.Height) &&
+                                  !go.IsHidden);
 
-        // Если объект не менялся, то ничего делать не нужно.
+        // Здесь будет обработана ситуация, когда объекта выделения не было и не появилось.
         if (selectedGameObject == _selectedGameObject)
             return;
 
         if (_selectedGameObject != null)
-            _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Selection, InputDeviceActionState.Deactivated, _selectedGameObject));
+            _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Hover, InputDeviceActionState.Deactivated, _selectedGameObject));
 
         if (selectedGameObject != null)
-            _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Selection, InputDeviceActionState.Activated, selectedGameObject));
+            _inputDeviceEvents.Add(new InputDeviceEvent(InputDeviceActionType.Hover, InputDeviceActionState.Activated, selectedGameObject));
 
         _selectedGameObject = selectedGameObject;
     }

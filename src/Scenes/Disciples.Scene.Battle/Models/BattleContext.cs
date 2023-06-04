@@ -40,22 +40,46 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Номер раунда битвы.
     /// </summary>
-    public int Round { get; set; }
+    public int RoundNumber { get; set; }
+
+    /// <summary>
+    /// Позиция отряда игрока.
+    /// </summary>
+    /// <remarks>
+    /// Если атаковал игрок, то <see cref="BattleSquadPosition.Attacker" />.
+    /// Если ИИ атаковал игрока, то <see cref="BattleSquadPosition.Defender" />.
+    /// </remarks>
+    public BattleSquadPosition PlayerSquadPosition => BattleSquadPosition.Attacker;
 
     /// <summary>
     /// Атакующий отряд
     /// </summary>
-    public Squad AttackingSquad { get; set; } = null!;
+    public BattleSquadData AttackingBattleSquad { get; } = new();
 
     /// <summary>
     /// Отряд, который защищается.
     /// </summary>
-    public Squad DefendingSquad { get; set; } = null!;
+    public BattleSquadData DefendingBattleSquad { get; } = new();
+
+    /// <summary>
+    /// Атакующий отряд
+    /// </summary>
+    public Squad AttackingSquad => AttackingBattleSquad.Squad;
+
+    /// <summary>
+    /// Отряд, который защищается.
+    /// </summary>
+    public Squad DefendingSquad => DefendingBattleSquad.Squad;
 
     /// <summary>
     /// Юнит, который выполняет свой ход.
     /// </summary>
     public BattleUnit CurrentBattleUnit { get; set; } = null!;
+
+    /// <summary>
+    /// Юнит, который выбран в качестве цели.
+    /// </summary>
+    public BattleUnit? TargetBattleUnit { get; set; }
 
     /// <summary>
     /// Состояние битвы.

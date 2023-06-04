@@ -3,8 +3,8 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Disciples.Common.Models;
 using Disciples.Engine;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Images.Models;
 using Disciples.WPF.Models;
@@ -14,24 +14,12 @@ namespace Disciples.WPF.Factories;
 /// <inheritdoc />
 public class WpfBitmapFactory : IBitmapFactory
 {
-    /// <summary>
-    /// Уменьшение смещение для больших изображений по оси X.
-    /// </summary>
-    private const int BIG_FRAME_OFFSET_X = 380;
-    /// <summary>
-    /// Уменьшение смещение для больших изображений по оси Y.
-    /// </summary>
-    private const int BIG_FRAME_OFFSET_Y = 410;
-
-
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
-        using (var memoryStream = new MemoryStream(bitmapData))
-        {
-            var bitmap = BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
-            return new WpfBitmap(bitmap);
-        }
+        using var memoryStream = new MemoryStream(bitmapData);
+        var bitmap = BitmapFrame.Create(memoryStream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+        return new WpfBitmap(bitmap);
     }
 
     /// <inheritdoc />
@@ -43,9 +31,11 @@ public class WpfBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public Frame FromRawBitmap(RawBitmap rawBitmap, Rectangle? bounds = null)
+    public IBitmap FromRawBitmap(RawBitmap rawBitmap, Rectangle? bounds = null)
     {
-        var resultBounds = bounds ?? rawBitmap.Bounds;
+        var resultBounds = bounds == null
+            ? rawBitmap.Bounds
+            : Rectangle.Intersect(bounds.Value, rawBitmap.Bounds);
         var width = resultBounds.Width;
         var height = resultBounds.Height;
         var pixelFormat = PixelFormats.Bgra32;
@@ -57,20 +47,9 @@ public class WpfBitmapFactory : IBitmapFactory
         var bitmapSource = BitmapSource.Create(width, height, dpi, dpi, pixelFormat, null, GetBitmapByteArray(rawBitmap, resultBounds), stride);
         bitmapSource.Freeze();
 
-        var offsetX = resultBounds.X;
-        var offsetY = resultBounds.Y;
-
-        // Если изображение занимает весь экран, то это, вероятно, анимации юнитов.
-        // Чтобы юниты отображались на своих местах, координаты конечного изображения приходится смещать далеко в минус.
-        // Чтобы иметь нормальные координаты, здесь производим перерасчёт.
-        if (Math.Abs(rawBitmap.OriginalWidth - GameInfo.OriginalWidth) < float.Epsilon
-            && Math.Abs(rawBitmap.OriginalHeight - GameInfo.OriginalHeight) < float.Epsilon)
-        {
-            offsetX -= BIG_FRAME_OFFSET_X;
-            offsetY -= BIG_FRAME_OFFSET_Y;
-        }
-
-        return new Frame(width, height, offsetX, offsetY, new WpfBitmap(bitmapSource));
+        var originalSize = new SizeD(bounds?.Width ?? rawBitmap.OriginalWidth, bounds?.Height ?? rawBitmap.OriginalHeight);
+        var offset = new PointD(Math.Max(0, rawBitmap.Bounds.X - (bounds?.X ?? 0)), Math.Max(0, rawBitmap.Bounds.Y - (bounds?.Y ?? 0)));
+        return new WpfBitmap(bitmapSource, originalSize, offset);
     }
 
     /// <inheritdoc />
@@ -107,23 +86,18 @@ public class WpfBitmapFactory : IBitmapFactory
         var stride = width << 2;
 
         var data = new byte[stride * height];
-        var unionBounds = Rectangle.Intersect(resultBounds, rawBitmap.Bounds);
 
-        // Размер итоговой строки = ширина изображения * 4 (количество байт, которым кодируется один пиксель).
-        var destinationRowLength = width * 4;
+        // Каждый пиксель кодируется 4 байтами.
+        var sourceRowLength = rawBitmap.Bounds.Width * 4;
+        var sourceOffsetColumnPixels = (resultBounds.X - rawBitmap.Bounds.X) * 4;
+        var sourcePosition = resultBounds.Y * sourceRowLength + sourceOffsetColumnPixels;
 
-        // Сколько в каждой строке в исходном массиве нужно пропускать пикселей.
-        var sourceOffsetColumnPixels = unionBounds.Left - rawBitmap.Bounds.Left;
+        var targetRowLength = width * 4;
 
-        // Сколько байт в каждой строке нужно копировать в итоговый массив.
-        var copyRowLength = unionBounds.Width * 4;
-
-        for (int row = unionBounds.Y; row < unionBounds.Y + unionBounds.Height; ++row)
+        for (int row = 0; row < height; ++row, sourcePosition += sourceRowLength)
         {
-            var begin = ((row - rawBitmap.Bounds.Y) * rawBitmap.Bounds.Width + sourceOffsetColumnPixels) * 4;
-
-            Buffer.BlockCopy(rawBitmap.Data, begin, data,
-                (row - resultBounds.Y) * destinationRowLength, copyRowLength);
+            Buffer.BlockCopy(rawBitmap.Data, sourcePosition,
+                data, row * targetRowLength, targetRowLength);
         }
 
         return data;
