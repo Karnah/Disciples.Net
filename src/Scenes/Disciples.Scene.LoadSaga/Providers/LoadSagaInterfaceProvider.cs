@@ -35,15 +35,13 @@ internal class LoadSagaInterfaceProvider : BaseSupportLoading
     protected override void LoadInternal()
     {
         SceneInterface = _interfaceProvider.GetSceneInterface("DLG_LOAD");
-
-        var races = _interfaceProvider.GetImageParts("GODFACES.PNG");
         Races = new Dictionary<RaceType, IBitmap>
         {
-            { RaceType.Human, races["GODHU"] },
-            { RaceType.Undead, races["GODUN"] },
-            { RaceType.Heretic, races["GODHE"] },
-            { RaceType.Dwarf, races["GODDW"] },
-            { RaceType.Elf, races["GODEL"] },
+            { RaceType.Human, _interfaceProvider.GetImage("GODHU") },
+            { RaceType.Undead, _interfaceProvider.GetImage("GODUN") },
+            { RaceType.Heretic, _interfaceProvider.GetImage("GODHE") },
+            { RaceType.Dwarf, _interfaceProvider.GetImage("GODDW") },
+            { RaceType.Elf, _interfaceProvider.GetImage("GODEL") },
         };
     }
 

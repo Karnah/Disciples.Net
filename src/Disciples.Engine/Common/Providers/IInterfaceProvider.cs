@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
@@ -20,17 +19,6 @@ public interface IInterfaceProvider : ISupportLoading
     /// Получить изображение по имени.
     /// </summary>
     IBitmap GetImage(string imageName);
-
-    /// <summary>
-    /// Получить части из которых состоит изображение.
-    /// </summary>
-    IReadOnlyDictionary<string, IBitmap> GetImageParts(string imageName);
-
-    /// <summary>
-    /// Получить анимацию.
-    /// </summary>
-    /// <param name="animationName">Имя анимации.</param>
-    AnimationFrames GetAnimation(string animationName);
 
     /// <summary>
     /// Получить изображение указанного цвета.

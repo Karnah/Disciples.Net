@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using Disciples.Resources.Common;
+using Disciples.Resources.Common.Exceptions;
 using Disciples.Resources.Common.Extensions;
 using Disciples.Resources.Common.Models;
 using Disciples.Resources.Images.Enums;
@@ -20,6 +21,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 {
     private IReadOnlyDictionary<string, MqImage>? _mqImages;
     private IReadOnlyDictionary<string, MqAnimation>? _mqAnimations;
+    private IReadOnlyDictionary<int, IReadOnlyList<MqImage>>? _baseMqImages;
 
     /// <summary>
     /// Создать объект типа <see cref="ImagesExtractor" />.
@@ -47,6 +49,17 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     }
 
     /// <summary>
+    /// Признак, что изображение является частью базового.
+    /// </summary>
+    public string? GetBaseImageName(string name)
+    {
+        if (_mqImages?.TryGetValue(name, out var image) == true)
+            return GetFile(image.FileId).Name;
+
+        return null;
+    }
+
+    /// <summary>
     /// Получить все изображения, которые создаются из указанного базового.
     /// </summary>
     /// <param name="name">Имя базового изображения.</param>
@@ -59,16 +72,18 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     {
         var file = TryGetFile(name);
         if (file == null)
-            return null;
+            throw new ResourceNotFoundException($"Не найдено изображение с именем {name}");
 
-        var result = new Dictionary<string, RawBitmap>();
-        var baseFile = file;
-        var baseImage = PrepareImage(baseFile);
-        var parts = _mqImages.Select(i => i.Value).Where(i => i.FileId == baseFile.Id);
-        foreach (var part in parts)
-            result.Add(part.Name, BuildImage(baseImage, part));
+        if (_baseMqImages == null)
+            throw new ResourceException("Ресурс не поддерживает части изображений");
 
-        return result;
+        if (!_baseMqImages.TryGetValue(file.Id, out var images))
+            throw new ResourceException($"Изображение {name} не состоит из частей");
+
+        var baseImage = PrepareImage(file);
+        return images.ToDictionary(
+            image => image.Name,
+            image => BuildImage(baseImage, image));
     }
 
     /// <summary>
@@ -148,6 +163,10 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         _mqImages = mqImages
             .Where(mi => mi.Value.IsAnimationFrame == false)
             .ToDictionary(mi => mi.Key, mi => mi.Value.MqImage);
+        _baseMqImages = _mqImages
+            .Values
+            .GroupBy(i => i.FileId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<MqImage>)g.ToArray());
     }
 
     /// <summary>

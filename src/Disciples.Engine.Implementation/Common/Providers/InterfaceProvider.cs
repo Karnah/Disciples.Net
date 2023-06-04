@@ -25,6 +25,8 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     private readonly SceneInterfaceExtractor _sceneInterfaceExtractor;
     private readonly ITextProvider _textProvider;
 
+    private readonly Dictionary<string, IBitmap> _bitmapCache = new();
+
     /// <inheritdoc />
     public InterfaceProvider(
         InterfaceImagesExtractor interfaceImagesExtractor,
@@ -56,27 +58,10 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     public IBitmap GetImage(string imageName)
     {
-        return _bitmapFactory.FromRawToBitmap(_interfaceImagesExtractor.GetImage(imageName));
-    }
+        if (_bitmapCache.TryGetValue(imageName, out var bitmap))
+            return bitmap;
 
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, IBitmap> GetImageParts(string imageName)
-    {
-        var imageParts = _interfaceImagesExtractor.GetImageParts(imageName);
-
-        return imageParts
-            .Select(ip => new KeyValuePair<string, IBitmap>(ip.Key, _bitmapFactory.FromRawToBitmap(ip.Value)))
-            .ToDictionary(ip => ip.Key, ip => ip.Value);
-    }
-
-    /// <inheritdoc />
-    public AnimationFrames GetAnimation(string animationName)
-    {
-        var frames = _interfaceImagesExtractor.GetAnimationFrames(animationName);
-        if (frames == null)
-            throw new ArgumentException($"Не найдена анимация {animationName}", nameof(animationName));
-
-        return _bitmapFactory.ConvertToFrames(frames);
+        return ExtractAndCacheImage(imageName);
     }
 
     /// <inheritdoc />
@@ -117,6 +102,29 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     /// <inheritdoc />
     protected override void UnloadInternal()
     {
+    }
+
+    /// <summary>
+    /// Извлечь изображение из ресурсов и сохранить его в кэш.
+    /// </summary>
+    private IBitmap ExtractAndCacheImage(string imageName)
+    {
+        // Если искомое изображение является частью базового, то достаем все изображения от этого базового.
+        var baseImageName = _interfaceImagesExtractor.GetBaseImageName(imageName);
+        if (baseImageName != null)
+        {
+            var imageParts = _interfaceImagesExtractor.GetImageParts(baseImageName);
+            foreach (var (imagePartName, image) in imageParts)
+            {
+                _bitmapCache.Add(imagePartName, _bitmapFactory.FromRawToBitmap(image));
+            }
+
+            return _bitmapCache[imageName];
+        }
+
+        var bitmap = _bitmapFactory.FromRawBitmap(_interfaceImagesExtractor.GetImage(imageName));
+        _bitmapCache.Add(imageName, bitmap);
+        return bitmap;
     }
 
     /// <summary>

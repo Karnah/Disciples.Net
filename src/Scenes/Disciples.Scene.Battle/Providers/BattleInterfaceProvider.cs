@@ -50,9 +50,7 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
         Battleground = _battleResourceProvider.GetRandomBattleground();
 
-        var battleIcons = _interfaceProvider.GetImageParts("DLG_BATTLE_A.PNG");
-
-        PanelSeparator = battleIcons["DLG_BATTLE_A_SPLITLRG"];
+        PanelSeparator = _interfaceProvider.GetImage("DLG_BATTLE_A_SPLITLRG");
         DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS"));
         DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL"));
 

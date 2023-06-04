@@ -1,7 +1,13 @@
 ﻿namespace Disciples.Resources.Images.Models;
 
+/// <summary>
+/// Класс для описания изображений, которые являются частью другого базового.
+/// </summary>
 internal class MqImage
 {
+    /// <summary>
+    /// Создать объект типа <see cref="MqImage" />.
+    /// </summary>
     public MqImage(string name, int fileId, int width, int height, IReadOnlyList<MqImagePiece> imagePieces)
     {
         Name = name;
@@ -11,29 +17,28 @@ internal class MqImage
         ImagePieces = imagePieces;
     }
 
-
     /// <summary>
-    /// Название изображения
+    /// Название изображения.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// Идентификатор файла, который содержит базовое изображение
+    /// Идентификатор файла, который содержит базовое изображение.
     /// </summary>
     public int FileId { get; }
 
     /// <summary>
-    /// Ширина изображения
+    /// Ширина изображения.
     /// </summary>
     public int Width { get; }
 
     /// <summary>
-    /// Высота изображения
+    /// Высота изображения.
     /// </summary>
     public int Height { get; }
 
     /// <summary>
-    /// Информация о частях, которая позволит собрать изображение из базового
+    /// Информация о частях, которая позволит собрать изображение из базового.
     /// </summary>
     public IReadOnlyList<MqImagePiece> ImagePieces { get; }
 }

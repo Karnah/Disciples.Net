@@ -1,7 +1,4 @@
-﻿using Disciples.Resources.Common.Exceptions;
-using Disciples.Resources.Common.Extensions;
-
-namespace Disciples.Resources.Common;
+﻿namespace Disciples.Resources.Common;
 
 /// <summary>
 /// Базовый класс для извлечения ресурсов, которые запакованы в MQDB.
