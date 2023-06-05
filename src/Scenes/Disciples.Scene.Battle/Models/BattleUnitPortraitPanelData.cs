@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.GameObjects;
+﻿using Disciples.Common.Models;
+using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -24,6 +25,11 @@ internal class BattleUnitPortraitPanelData
     /// Плейсхолдеры для ХП юнита.
     /// </summary>
     public IReadOnlyDictionary<int, SceneElement> HitPointsPlaceholders { get; set; } = null!;
+
+    /// <summary>
+    /// Границы области, когда нужно выводить эту панель как дополнительную (вторую).
+    /// </summary>
+    public RectangleD DisplayPanelBounds { get; set; }
 
     /// <summary>
     /// Отряд, который в данный момент отображается на правой панели.

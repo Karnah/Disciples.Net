@@ -70,7 +70,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     public void Initialize()
     {
         var targetSquadPosition = GetTargetSquadPosition();
-        _unitPortraitPanelController.DisablePanelSwitch(targetSquadPosition);
+        _unitPortraitPanelController.ProcessActionsBegin(targetSquadPosition);
 
         InitializeInternal();
 

@@ -8,9 +8,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Constants;
-using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.Enums;
-using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 
@@ -198,12 +196,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         // Проверяем, если первый ход ИИ.
         _isAnimating = _context.BattleState != BattleState.WaitPlayerTurn;
 
-        var displayingSquad = GetPanelDisplayingSquad();
-        if (_isAnimating)
-            _unitPortraitPanelController.DisablePanelSwitch(displayingSquad);
-        else
-            _unitPortraitPanelController.EnablePanelSwitch(displayingSquad);
-
         AttachSelectedAnimation(CurrentBattleUnit);
     }
 
@@ -264,13 +256,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         _isAnimating = true;
 
-        var displayingSquad = _context.UnitAction is MainAttackUnitAction attackAction
-            // Показываем отряд атакуемого юнита.
-            ? attackAction.TargetBattleUnit.SquadPosition
-            // Иначе это защита/ожидания и другое действие. Показываем отряд текущего юнита.
-            : CurrentBattleUnit.SquadPosition;
-        _unitPortraitPanelController.DisablePanelSwitch(displayingSquad);
-
+        // _unitPortraitPanelController вызывается непосредственно из action.
         _bottomPanelController.ProcessActionsBegin();
 
         DetachSelectedAnimation();
@@ -284,7 +270,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         _isAnimating = false;
 
-        _unitPortraitPanelController.EnablePanelSwitch(GetPanelDisplayingSquad());
+        _unitPortraitPanelController.ProcessActionsCompleted();
         _bottomPanelController.ProcessActionsCompleted();
 
         AttachSelectedAnimation(CurrentBattleUnit);
@@ -304,7 +290,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _isAnimating = false;
 
         // Отображаем отряд победителя.
-        _unitPortraitPanelController.CompleteBattle();
+        _unitPortraitPanelController.ProcessBattleCompleted();
         _bottomPanelController.ProcessBattleCompleted();
 
         DetachSelectedAnimation();
@@ -395,19 +381,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         foreach (var battleUnit in BattleUnits)
             battleUnit.IsTarget = false;
-    }
-
-    /// <summary>
-    /// Получить тип отряд, который должен отображаться на панели.
-    /// </summary>
-    private BattleSquadPosition GetPanelDisplayingSquad()
-    {
-        var currentUnit = CurrentBattleUnit.Unit;
-        var showEnemies = currentUnit.HasEnemyAbility();
-
-        return showEnemies
-            ? CurrentBattleUnit.SquadPosition.GetOpposite()
-            : CurrentBattleUnit.SquadPosition;
     }
 
     /// <summary>
