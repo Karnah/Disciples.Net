@@ -32,9 +32,9 @@ public interface IBitmapFactory
     /// Сохранить изображение в файл на диске.
     /// </summary>
     /// <param name="bitmap">Изображение, которое необходимо сохранить.</param>
-    /// <param name="filePath">Путь до файла.</param>
+    /// <param name="fileName">Имя файла.</param>
     /// <remarks>
     /// Используется только для тестов и подготовки данных.
     /// </remarks>
-    void SaveToFile(IBitmap bitmap, string filePath);
+    void SaveToFile(IBitmap bitmap, string fileName);
 }

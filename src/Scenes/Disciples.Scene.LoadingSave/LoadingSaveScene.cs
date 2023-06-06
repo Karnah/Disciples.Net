@@ -6,6 +6,7 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
@@ -21,6 +22,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ITextProvider _textProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
+    private readonly MenuSoundController _menuSoundController;
     private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
 
     private string _savePath = null!;
@@ -37,6 +39,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         IInterfaceProvider interfaceProvider,
         ITextProvider textProvider,
         ISceneInterfaceController sceneInterfaceController,
+        MenuSoundController menuSoundController,
         IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
@@ -45,6 +48,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         _interfaceProvider = interfaceProvider;
         _textProvider = textProvider;
         _sceneInterfaceController = sceneInterfaceController;
+        _menuSoundController = menuSoundController;
         _resourceExtractors = resourceExtractors;
     }
 
@@ -61,6 +65,9 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     protected override void LoadInternal()
     {
         base.LoadInternal();
+
+        // Музыка из меню больше не нужна, останавливаем её.
+        _menuSoundController.Stop();
 
         var sceneInterface = _interfaceProvider.GetSceneInterface("DLG_WAIT");
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);

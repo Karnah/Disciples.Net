@@ -4,31 +4,27 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
-using Disciples.Scene.LoadSaga.Controllers;
-using Disciples.Scene.LoadSaga.Providers;
+using Disciples.Scene.SinglePlayerGameMenu.Controllers;
 
-namespace Disciples.Scene.LoadSaga;
+namespace Disciples.Scene.SinglePlayerGameMenu;
 
-/// <inheritdoc cref="ILoadSagaScene" />
-internal class LoadSagaScene : BaseScene, ILoadSagaScene
+/// <inheritdoc cref="ISinglePlayerGameMenuScene" />
+internal class SinglePlayerGameMenuScene : BaseScene, ISinglePlayerGameMenuScene
 {
-    private readonly LoadSagaInterfaceProvider _interfaceProvider;
-    private readonly LoadSagaInterfaceController _interfaceController;
+    private readonly SinglePlayerGameMenuInterfaceController _interfaceController;
     private readonly MenuSoundController _soundController;
 
     /// <summary>
-    /// Создать объект типа <see cref="LoadSagaScene" />.
+    /// Создать объект типа <see cref="SinglePlayerGameMenuScene" />.
     /// </summary>
-    public LoadSagaScene(
+    public SinglePlayerGameMenuScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IDialogController dialogController,
-        LoadSagaInterfaceProvider interfaceProvider,
-        LoadSagaInterfaceController interfaceController,
+        SinglePlayerGameMenuInterfaceController interfaceController,
         MenuSoundController soundController
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
-        _interfaceProvider = interfaceProvider;
         _interfaceController = interfaceController;
         _soundController = soundController;
     }
@@ -44,28 +40,27 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
         base.LoadInternal();
 
         _soundController.Load();
-        _interfaceProvider.Load();
         _interfaceController.Load();
     }
 
+    /// <inheritdoc />
     protected override void UnloadInternal()
     {
         base.UnloadInternal();
 
         _soundController.Unload();
+        _interfaceController.Unload();
     }
 
     /// <inheritdoc />
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
         _soundController.BeforeSceneUpdate();
-        _interfaceController.BeforeSceneUpdate();
     }
 
     /// <inheritdoc />
     protected override void AfterSceneUpdate()
     {
         _soundController.AfterSceneUpdate();
-        _interfaceController.AfterSceneUpdate();
     }
 }

@@ -14,6 +14,8 @@ namespace Disciples.WPF.Factories;
 /// <inheritdoc />
 public class WpfBitmapFactory : IBitmapFactory
 {
+    private const string IMAGES_DIRECTORY = "TempImages";
+
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
@@ -36,8 +38,8 @@ public class WpfBitmapFactory : IBitmapFactory
         var resultBounds = bounds == null
             ? rawBitmap.Bounds
             : Rectangle.Intersect(bounds.Value, rawBitmap.Bounds);
-        var width = resultBounds.Width;
-        var height = resultBounds.Height;
+        var width = Math.Max(resultBounds.Width, 1);
+        var height = Math.Max(resultBounds.Height, 1);
         var pixelFormat = PixelFormats.Bgra32;
         var dpi = 96;
 
@@ -53,8 +55,11 @@ public class WpfBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public void SaveToFile(IBitmap bitmap, string filePath)
+    public void SaveToFile(IBitmap bitmap, string fileName)
     {
+        if (!Directory.Exists(IMAGES_DIRECTORY))
+            Directory.CreateDirectory(IMAGES_DIRECTORY);
+
         var bitmapFrame = bitmap.BitmapData as BitmapFrame;
         if (bitmapFrame == null)
         {
@@ -65,7 +70,7 @@ public class WpfBitmapFactory : IBitmapFactory
             bitmapFrame = BitmapFrame.Create(bitmapSource);
         }
 
-        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        using (var fileStream = new FileStream(Path.Combine(IMAGES_DIRECTORY, fileName), FileMode.Create))
         {
             BitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(bitmapFrame);
@@ -78,6 +83,10 @@ public class WpfBitmapFactory : IBitmapFactory
     /// </summary>
     private static byte[] GetBitmapByteArray(RawBitmap rawBitmap, Rectangle resultBounds)
     {
+        // Возвращаем один пустой пиксель.
+        if (resultBounds == Rectangle.Empty)
+            return new byte[4];
+
         if (rawBitmap.Bounds == resultBounds)
             return rawBitmap.Data;
 

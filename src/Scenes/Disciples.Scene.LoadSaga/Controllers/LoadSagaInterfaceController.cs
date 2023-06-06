@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common;
+﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
@@ -7,7 +8,6 @@ using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
-using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
@@ -34,7 +34,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
 
     private readonly LoadSagaInterfaceProvider _interfaceProvider;
     private readonly SaveProvider _saveProvider;
-    private readonly GameController _gameController;
+    private readonly IGameController _gameController;
     private readonly ITextProvider _textProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
 
@@ -52,7 +52,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     public LoadSagaInterfaceController(
         LoadSagaInterfaceProvider interfaceProvider,
         SaveProvider saveProvider,
-        GameController gameController,
+        IGameController gameController,
         ITextProvider textProvider,
         ISceneInterfaceController sceneInterfaceController)
     {
@@ -103,11 +103,11 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Вернуться на предыдущую страницу (закрыть приложение).
+    /// Вернуться на страницу одиночной игры.
     /// </summary>
     private void ExecuteBack()
     {
-        _gameController.Exit();
+        _gameController.ChangeScene<ISinglePlayerGameMenuScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>

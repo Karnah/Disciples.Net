@@ -17,6 +17,8 @@ namespace Disciples.Avalonia.Factories;
 /// <inheritdoc />
 public class AvaloniaBitmapFactory : IBitmapFactory
 {
+    private const string IMAGES_DIRECTORY = "TempImages";
+
     /// <inheritdoc />
     public IBitmap FromByteArray(byte[] bitmapData)
     {
@@ -38,14 +40,19 @@ public class AvaloniaBitmapFactory : IBitmapFactory
         var resultBounds = bounds == null
             ? rawBitmap.Bounds
             : Rectangle.Intersect(bounds.Value, rawBitmap.Bounds);
-        var width = resultBounds.Width;
-        var height = resultBounds.Height;
+        var width = Math.Max(resultBounds.Width, 1);
+        var height = Math.Max(resultBounds.Height, 1);
         var dpi = new Vector(96, 96);
 
         var bitmap = new WriteableBitmap(new PixelSize(width, height), dpi, PixelFormat.Bgra8888, AlphaFormat.Unpremul);
         using (var l = bitmap.Lock())
         {
-            if (resultBounds == rawBitmap.Bounds)
+            if (resultBounds == Rectangle.Empty)
+            {
+                // Если изображение пустое, то никак заполнять внутренний массив не нужно.
+                // При этом сам WriteableBitmap будет иметь размеры 1*1.
+            }
+            else if (resultBounds == rawBitmap.Bounds)
             {
                 Marshal.Copy(rawBitmap.Data, 0, new IntPtr(l.Address.ToInt64()), rawBitmap.Data.Length);
             }
@@ -72,9 +79,12 @@ public class AvaloniaBitmapFactory : IBitmapFactory
     }
 
     /// <inheritdoc />
-    public void SaveToFile(IBitmap bitmap, string filePath)
+    public void SaveToFile(IBitmap bitmap, string fileName)
     {
+        if (!Directory.Exists(IMAGES_DIRECTORY))
+            Directory.CreateDirectory(IMAGES_DIRECTORY);
+
         var avaloniaBitmapData = bitmap.BitmapData as Bitmap;
-        avaloniaBitmapData?.Save(filePath);
+        avaloniaBitmapData?.Save(Path.Combine(IMAGES_DIRECTORY, fileName));
     }
 }

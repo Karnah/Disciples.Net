@@ -39,6 +39,7 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<ISoundController, BassSoundController>(Reuse.Singleton);
         //containerRegistrator.Register<ISoundController, NullSoundController>(Reuse.Singleton);
         containerRegistrator.Register<ISoundProvider, SoundProvider>(Reuse.Singleton);
+        containerRegistrator.Register<MenuSoundController>(Reuse.Singleton);
 
         containerRegistrator.Register<ITextProvider, TextProvider>(Reuse.Singleton);
         containerRegistrator.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);

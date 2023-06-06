@@ -39,7 +39,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Common"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.LoadingSave", "src\Scenes\Disciples.Scene.LoadingSave\Disciples.Scene.LoadingSave.csproj", "{A6A867FE-3827-4F7D-BCB6-D0B29459C8AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Scene.LoadSaga", "src\Scenes\Disciples.Scene.LoadSaga\Disciples.Scene.LoadSaga.csproj", "{5973C421-2649-4BA7-B85D-B639351F2DD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.LoadSaga", "src\Scenes\Disciples.Scene.LoadSaga\Disciples.Scene.LoadSaga.csproj", "{5973C421-2649-4BA7-B85D-B639351F2DD5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Scene.MainMenu", "src\Scenes\Disciples.Scene.MainMenu\Disciples.Scene.MainMenu.csproj", "{55991733-4817-484C-B109-E76B665100D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Scene.SinglePlayerGameMenu", "src\Scenes\Disciples.Scene.SinglePlayerGameMenu\Disciples.Scene.SinglePlayerGameMenu.csproj", "{F1814564-B7B0-4480-993C-698C364EBC04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,6 +119,14 @@ Global
 		{5973C421-2649-4BA7-B85D-B639351F2DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5973C421-2649-4BA7-B85D-B639351F2DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5973C421-2649-4BA7-B85D-B639351F2DD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55991733-4817-484C-B109-E76B665100D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55991733-4817-484C-B109-E76B665100D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55991733-4817-484C-B109-E76B665100D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55991733-4817-484C-B109-E76B665100D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1814564-B7B0-4480-993C-698C364EBC04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1814564-B7B0-4480-993C-698C364EBC04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1814564-B7B0-4480-993C-698C364EBC04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1814564-B7B0-4480-993C-698C364EBC04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +142,8 @@ Global
 		{E6BF39E8-2957-4547-9F80-50A6AB6CFCE2} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 		{A6A867FE-3827-4F7D-BCB6-D0B29459C8AF} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{5973C421-2649-4BA7-B85D-B639351F2DD5} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
+		{55991733-4817-484C-B109-E76B665100D0} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
+		{F1814564-B7B0-4480-993C-698C364EBC04} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E186CCB-6441-4721-BA47-1C0F06A46447}

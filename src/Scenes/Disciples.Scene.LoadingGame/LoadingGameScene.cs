@@ -98,7 +98,7 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     {
         LoadResources();
 
-        _gameController.ChangeScene<ILoadSagaScene, SceneParameters>(SceneParameters.Empty);
+        _gameController.ChangeScene<IMainMenuScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>

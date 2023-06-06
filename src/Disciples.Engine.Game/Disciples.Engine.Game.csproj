@@ -17,6 +17,8 @@
     <ProjectReference Include="..\Scenes\Disciples.Scene.LoadingGame\Disciples.Scene.LoadingGame.csproj" />
     <ProjectReference Include="..\Scenes\Disciples.Scene.LoadingSave\Disciples.Scene.LoadingSave.csproj" />
     <ProjectReference Include="..\Scenes\Disciples.Scene.LoadSaga\Disciples.Scene.LoadSaga.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.MainMenu\Disciples.Scene.MainMenu.csproj" />
+    <ProjectReference Include="..\Scenes\Disciples.Scene.SinglePlayerGameMenu\Disciples.Scene.SinglePlayerGameMenu.csproj" />
   </ItemGroup>
 
 </Project>

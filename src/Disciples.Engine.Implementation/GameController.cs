@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Disciples.Common.Models;
 using Disciples.Engine.Base;
@@ -71,6 +72,11 @@ public class GameController : IGameController
     public event EventHandler? SceneChanged;
 
     /// <summary>
+    /// Версия игры.
+    /// </summary>
+    public string? Version { get; } = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+
+    /// <summary>
     /// Запустить внутренний таймер, который обновляет объекты на сцене.
     /// </summary>
     public void Start()
@@ -100,7 +106,7 @@ public class GameController : IGameController
     /// <summary>
     /// Выйти из игры.
     /// </summary>
-    public void Exit()
+    public void Quit()
     {
         Stop();
         Environment.Exit(0);
@@ -141,6 +147,7 @@ public class GameController : IGameController
 
         _cursorController.SetCursorState(scene.DefaultCursorType);
         _currentScene = scene;
+        _selectedGameObject = null;
 
         // TODO Вынести в сцену.
         CurrentSceneContainer!.UpdateContainer();
