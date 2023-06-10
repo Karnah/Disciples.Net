@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Input.Raw;
+using Avalonia.Interactivity;
 using Disciples.Common.Models;
-using Disciples.Engine;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
@@ -18,15 +15,15 @@ namespace Disciples.Avalonia.Managers;
 /// <inheritdoc />
 public class AvaloniaInputManager : IInputManager
 {
-    private PointD? _screenOffset;
-
     /// <summary>
     /// Создать объект типа <see cref="AvaloniaInputManager" />.
     /// </summary>
     public AvaloniaInputManager()
     {
-        Application.Current!.InputManager!.PostProcess.OfType<RawPointerEventArgs>().Subscribe(OnMouseStateChanged);
-        Application.Current.InputManager.PostProcess.OfType<RawKeyEventArgs>().Subscribe(OnKeyStateChanged);
+        InputElement.PointerPressedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
+        InputElement.PointerReleasedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
+        InputElement.PointerMovedEvent.AddClassHandler(typeof(Window), OnMouseMove);
+        InputElement.KeyUpEvent.AddClassHandler(typeof(Window), OnKeyDown);
     }
 
 
@@ -41,63 +38,69 @@ public class AvaloniaInputManager : IInputManager
     public event EventHandler<KeyButtonEventArgs>? KeyButtonEvent;
 
     /// <summary>
-    /// Обработать событие от курсора.
+    /// Обработать событие нажатия на кнопку мыши.
     /// </summary>
-    private void OnMouseStateChanged(RawPointerEventArgs args)
+    private void OnMouseUpDown(object? sender, RoutedEventArgs args)
     {
-        switch (args.Type)
+        var gameWindow = sender as GameWindow;
+        if (gameWindow == null)
+            return;
+
+        var pointerEventArgs = args as PointerEventArgs;
+        if (pointerEventArgs == null)
+            return;
+
+        var pointerUpdateKind = pointerEventArgs.GetCurrentPoint(null).Properties.PointerUpdateKind;
+        switch (pointerUpdateKind)
         {
-            case RawPointerEventType.Move:
-                // Один раз рассчитываем смещение игрового поля относительно левого края экрана.
-                // Предполагаем, что поле выровнено по центру экрана.
-                if (_screenOffset == null)
-                {
-                    var window = (Window)args.Root;
-                    _screenOffset = new PointD((window.Width - GameInfo.Width) / 2, (window.Height - GameInfo.Height) / 2);
-                }
-
-                MousePosition = new PointD(
-                    (args.Position.X - _screenOffset.Value.X) / GameInfo.Scale,
-                    (args.Position.Y - _screenOffset.Value.Y) / GameInfo.Scale);
-
-                break;
-
-            case RawPointerEventType.LeftButtonDown:
+            case PointerUpdateKind.LeftButtonPressed:
                 MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left, ButtonState.Pressed));
                 break;
-
-            case RawPointerEventType.LeftButtonUp:
-                MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left, ButtonState.Released));
-                break;
-
-            case RawPointerEventType.RightButtonDown:
+            case PointerUpdateKind.RightButtonPressed:
                 MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Right, ButtonState.Pressed));
                 break;
-
-            case RawPointerEventType.RightButtonUp:
+            case PointerUpdateKind.LeftButtonReleased:
+                MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Left, ButtonState.Released));
+                break;
+            case PointerUpdateKind.RightButtonReleased:
                 MouseButtonEvent?.Invoke(this, new MouseButtonEventArgs(MouseButton.Right, ButtonState.Released));
                 break;
         }
     }
 
     /// <summary>
-    /// Обработать событие от клавиатуры.
+    /// Обработать событие изменения положения мыши.
     /// </summary>
-    private void OnKeyStateChanged(RawKeyEventArgs args)
+    private void OnMouseMove(object? sender, RoutedEventArgs args)
     {
-        // Если были какие-то модификаторы, то игнорируем.
-        if (args.Modifiers != RawInputModifiers.None)
+        var gameWindow = sender as GameWindow;
+        if (gameWindow == null)
             return;
 
-        var keyboardButton = ToKeyboardButton(args.Key);
+        var pointerEventArgs = args as PointerEventArgs;
+        if (pointerEventArgs == null)
+            return;
+
+        var position = pointerEventArgs.GetPosition(gameWindow.GameField);
+        MousePosition = new PointD(position.X, position.Y);
+    }
+
+    /// <summary>
+    /// Обработать событие нажатия на клавишу клавиатуры.
+    /// </summary>
+    private void OnKeyDown(object? sender, RoutedEventArgs args)
+    {
+        var keyEventArgs = (KeyEventArgs)args;
+
+        // Если были какие-то модификаторы, то игнорируем.
+        if (keyEventArgs.KeyModifiers != KeyModifiers.None)
+            return;
+
+        var keyboardButton = ToKeyboardButton(keyEventArgs.Key);
         if (keyboardButton == null)
             return;
 
-        KeyButtonEvent?.Invoke(this, new KeyButtonEventArgs(
-            keyboardButton.Value,
-            args.Type == RawKeyEventType.KeyDown
-                ? ButtonState.Pressed
-                : ButtonState.Released));
+        KeyButtonEvent?.Invoke(this, new KeyButtonEventArgs(keyboardButton.Value, ButtonState.Pressed));
     }
 
     /// <summary>

@@ -11,7 +11,7 @@ using Disciples.Engine;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Common.Controllers;
 using IBitmap = Disciples.Engine.IBitmap;
-using IAvaloniaBitmap = Avalonia.Media.Imaging.IBitmap;
+using IAvaloniaBitmap = Avalonia.Media.Imaging.Bitmap;
 
 namespace Disciples.Avalonia.Managers;
 

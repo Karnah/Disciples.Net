@@ -8,8 +8,14 @@ using DryIoc;
 
 namespace Disciples.Avalonia;
 
+/// <summary>
+/// Главное окно игры.
+/// </summary>
 public partial class GameWindow : Window
 {
+    /// <summary>
+    /// Создать объект типа <see cref="GameWindow" />.
+    /// </summary>
     public GameWindow()
     {
         DataContext = ((App)Application.Current!).Container.Resolve<GameWindowViewModel>();
@@ -24,22 +30,26 @@ public partial class GameWindow : Window
     }
 
     /// <summary>
+    /// Объект игрового поля.
+    /// </summary>
+    public Grid GameField { get; private set; } = null!;
+
+    /// <summary>
     /// Обработать событие отображения окна.
     /// </summary>
     private void OnActivated(object? sender, EventArgs e)
     {
-        var screen = this.Screens.ScreenFromVisual(this);
+        var screen = Screens.ScreenFromVisual(this);
 
         // Если окно открыть и тут же закрыть, screen будет null.
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (screen == null)
             return;
 
         // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
         var scale = Math.Min(screen.WorkingArea.Width / GameInfo.OriginalWidth, screen.WorkingArea.Height / GameInfo.OriginalHeight);
 
-        var field = this.Find<Grid>("Field");
-        field.RenderTransform = new ScaleTransform(scale, scale);
+        GameField = this.Find<Grid>("Field")!;
+        GameField.RenderTransform = new ScaleTransform(scale, scale);
 
         GameInfo.Width = scale * GameInfo.OriginalWidth;
         GameInfo.Height = scale * GameInfo.OriginalHeight;
