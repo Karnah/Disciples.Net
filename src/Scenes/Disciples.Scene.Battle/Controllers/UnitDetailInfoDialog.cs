@@ -69,6 +69,7 @@ internal class UnitDetailInfoDialog : BaseDialog
         _beforeOpenSelectedGameObject = _gameObjectContainer
             .GameObjects
             .FirstOrDefault(go => go.SelectionComponent?.IsHover == true);
+        _lastSelectedGameObject = _beforeOpenSelectedGameObject;
         _gameObjects = _sceneInterfaceController.AddSceneGameObjects(_battleInterfaceProvider.UnitDetailInfoInterface, Layers.DialogLayers);
 
         var unitPortrait = _gameObjects.Get<ImageObject>(UnitDetailInfoElementNames.PORTRAIT_IMAGE);

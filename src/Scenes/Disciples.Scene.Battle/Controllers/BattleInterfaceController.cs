@@ -335,7 +335,10 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         var targetUnit = _context.TargetBattleUnit.Unit;
 
         if (targetUnit.IsDead)
+        {
+            _context.TargetBattleUnit.IsTarget = false;
             return;
+        }
 
         // Если текущий юнит может атаковать только одну цель,
         // то всегда будет выделена только одна цель

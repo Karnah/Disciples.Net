@@ -41,7 +41,7 @@ public struct RectangleD : IEquatable<RectangleD>
     /// Initializes a new instance of the <see cref='RectangleD'/> class with the specified location
     /// and size.
     /// </summary>
-    public RectangleD(PointF location, SizeF size)
+    public RectangleD(PointD location, SizeD size)
     {
         x = location.X;
         y = location.Y;

@@ -17,6 +17,9 @@ namespace Disciples.Scene.Battle.Components;
 /// </summary>
 internal class BattleUnitAnimationComponent : BaseAnimationComponent
 {
+    private static readonly PointD SmallUnitDeadOffset = new(-10, -10);
+    private static readonly PointD BigUnitDeadOffset = new(-10, 30);
+
     private readonly BattleUnit _battleUnit;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly PointD _animationOffset;
@@ -74,7 +77,9 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
 
     /// <inheritdoc />
     protected override PointD AnimationOffset => _battleUnit.UnitState == BattleUnitState.Dead
-        ? new PointD(-10, 0)
+        ? _battleUnit.Unit.UnitType.IsSmall
+            ? SmallUnitDeadOffset
+            : BigUnitDeadOffset
         : base.AnimationOffset;
 
     /// <summary>
