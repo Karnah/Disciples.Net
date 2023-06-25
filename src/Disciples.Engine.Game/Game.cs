@@ -1,14 +1,17 @@
 ﻿using DryIoc;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.Battle;
 using Disciples.Scene.LoadingGame;
 using Disciples.Scene.LoadingSave;
 using Disciples.Scene.LoadSaga;
 using Disciples.Scene.MainMenu;
 using Disciples.Scene.SinglePlayerGameMenu;
+using Disciples.Scene.Video;
 
 namespace Disciples.Engine.Game;
 
@@ -45,7 +48,11 @@ public class Game
     {
         _gameController = Container.Resolve<GameController>();
         _gameController.Start();
-        _gameController.ChangeScene<ILoadingGameScene, SceneParameters>(SceneParameters.Empty);
+        _gameController.ChangeScene<IVideoScene, VideoSceneParameters>(new VideoSceneParameters
+        {
+            VideoPaths = Container.Resolve<IVideoProvider>().IntroVideoPaths,
+            OnCompleted = gc => gc.ChangeScene<ILoadingGameScene, SceneParameters>(SceneParameters.Empty)
+        });
     }
 
     /// <summary>
@@ -65,6 +72,7 @@ public class Game
         var modules = new[]
         {
             new CommonModule(),
+            new VideoSceneModule(),
             new LoadingGameSceneModule(),
             new MainMenuSceneModule(),
             new SinglePlayerGameMenuSceneModule(),

@@ -30,5 +30,6 @@ public abstract class BaseSceneObject : ReactiveObject, ISceneObject
 
     /// <inheritdoc />
     public virtual void Destroy()
-    { }
+    {
+    }
 }

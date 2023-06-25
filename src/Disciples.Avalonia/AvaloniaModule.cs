@@ -1,6 +1,7 @@
 ﻿using Disciples.Avalonia.Controllers;
 using Disciples.Avalonia.Factories;
 using Disciples.Avalonia.Managers;
+using Disciples.Avalonia.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Platform.Factories;
@@ -17,6 +18,9 @@ public class AvaloniaModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
+        // Информация об игре.
+        containerRegistrator.Register<AvaloniaGameInfo>(Reuse.Singleton);
+
         // Регистрируем устройства ввода.
         containerRegistrator.Register<IInputManager, AvaloniaInputManager>(Reuse.Singleton);
         containerRegistrator.Register<ICursorController, AvaloniaCursorController>(Reuse.Singleton);

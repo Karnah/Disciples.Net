@@ -3,6 +3,7 @@ using System.Linq;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Models;
 using Disciples.Engine.Enums;
 
@@ -33,6 +34,11 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
     /// <inheritdoc />
     public virtual CursorType DefaultCursorType => CursorType.Default;
+
+    /// <summary>
+    /// Объект, который будет использован для обработки событий ввода, если сейчас не выбран другой объект.
+    /// </summary>
+    protected virtual GameObject? DefaultInputGameObject => null;
 
     /// <summary>
     /// Признак, что базовый класс должен сам обрабатывать события ввода пользователя.
@@ -106,7 +112,7 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
         foreach (var inputDeviceEvent in inputDeviceEvents)
         {
-            var inputDeviceGameObject = inputDeviceEvent.GameObject;
+            var inputDeviceGameObject = inputDeviceEvent.GameObject ?? DefaultInputGameObject;
 
             switch (inputDeviceEvent.ActionType)
             {

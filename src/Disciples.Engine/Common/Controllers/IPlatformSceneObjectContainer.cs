@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Disciples.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Models;
@@ -34,6 +35,14 @@ public interface IPlatformSceneObjectContainer
         TextStyle textStyle,
         RectangleD bounds,
         int layer);
+
+    /// <summary>
+    /// Добавить видео из файла на сцену.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="bounds">Границы.</param>
+    /// <param name="layer">Слой.</param>
+    IVideoSceneObject AddVideoSceneObject(Stream stream, RectangleD bounds, int layer);
 
     /// <summary>
     /// Удалить объект со сцены.

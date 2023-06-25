@@ -16,11 +16,11 @@ public class LoadSagaSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadSagaScene));
-        containerRegistrator.Register<ILoadSagaScene, LoadSagaScene>(loadingScopeReuse);
-        containerRegistrator.Register<LoadSagaInterfaceProvider>(loadingScopeReuse);
-        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(loadingScopeReuse);
-        containerRegistrator.Register<LoadSagaInterfaceController>(loadingScopeReuse);
-        containerRegistrator.Register<SaveProvider>(loadingScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(ILoadSagaScene));
+        containerRegistrator.Register<ILoadSagaScene, LoadSagaScene>(sceneScopeReuse);
+        containerRegistrator.Register<LoadSagaInterfaceProvider>(sceneScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<LoadSagaInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<SaveProvider>(sceneScopeReuse);
     }
 }

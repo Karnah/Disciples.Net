@@ -6,6 +6,8 @@
         xmlns:e="clr-namespace:Disciples.Engine;assembly=Disciples.Engine"
         xmlns:vo="clr-namespace:Disciples.Engine.Common.SceneObjects;assembly=Disciples.Engine"
         xmlns:local="clr-namespace:Disciples.Avalonia"
+        xmlns:controls="clr-namespace:Disciples.Avalonia.Controls"
+        xmlns:so="clr-namespace:Disciples.Avalonia.SceneObjects"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Disciples.Avalonia.GameWindow"
         WindowState="Maximized" Background="Black" SystemDecorations="None" CanResize="False"
@@ -87,6 +89,14 @@
                                 </MultiBinding>
                             </TextBlock.Inlines>
                         </TextBlock>
+                    </Decorator>
+                </DataTemplate>
+
+                <DataTemplate DataType="{x:Type so:VideoSceneObject}">
+                    <Decorator Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}">
+                        <controls:AutoPlayVideoView HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                    VideoSceneObject="{Binding }"
+                                                    MediaPlayer="{Binding MediaPlayer}" />
                     </Decorator>
                 </DataTemplate>
             </ItemsControl.DataTemplates>

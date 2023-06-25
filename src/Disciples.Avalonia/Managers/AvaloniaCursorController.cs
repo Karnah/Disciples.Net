@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -18,15 +17,17 @@ namespace Disciples.Avalonia.Managers;
 /// <inheritdoc />
 internal class AvaloniaCursorController : BaseCursorController
 {
+    private readonly AvaloniaGameInfo _gameInfo;
+
     private Cursor? _defaultCursor;
     private Cursor? _noneCursor;
 
     /// <summary>
     /// Создать объект типа <see cref="AvaloniaCursorController" />.
     /// </summary>
-    /// <param name="interfaceProvider"></param>
-    public AvaloniaCursorController(IInterfaceProvider interfaceProvider) : base(interfaceProvider)
+    public AvaloniaCursorController(IInterfaceProvider interfaceProvider, AvaloniaGameInfo gameInfo) : base(interfaceProvider)
     {
+        _gameInfo = gameInfo;
     }
 
     /// <inheritdoc />
@@ -83,12 +84,11 @@ internal class AvaloniaCursorController : BaseCursorController
     /// <summary>
     /// Выполнить асинхронное действие с окном в главном потоке.
     /// </summary>
-    private static async Task ExecuteMainThreadAsync(Action<Window> action)
+    private async Task ExecuteMainThreadAsync(Action<Window> action)
     {
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            var window = ((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
-            action(window);
+            action(_gameInfo.OverlapWindow);
         });
     }
 }

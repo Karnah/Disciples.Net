@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Disciples.Avalonia.Models;
 using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Platform.Enums;
@@ -15,21 +16,23 @@ namespace Disciples.Avalonia.Managers;
 /// <inheritdoc />
 public class AvaloniaInputManager : IInputManager
 {
+    private readonly AvaloniaGameInfo _gameInfo;
+
     /// <summary>
     /// Создать объект типа <see cref="AvaloniaInputManager" />.
     /// </summary>
-    public AvaloniaInputManager()
+    public AvaloniaInputManager(AvaloniaGameInfo gameInfo)
     {
+        _gameInfo = gameInfo;
+
         InputElement.PointerPressedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
         InputElement.PointerReleasedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
         InputElement.PointerMovedEvent.AddClassHandler(typeof(Window), OnMouseMove);
         InputElement.KeyUpEvent.AddClassHandler(typeof(Window), OnKeyDown);
     }
 
-
     /// <inheritdoc />
     public PointD MousePosition { get; private set; }
-
 
     /// <inheritdoc />
     public event EventHandler<MouseButtonEventArgs>? MouseButtonEvent;
@@ -42,10 +45,6 @@ public class AvaloniaInputManager : IInputManager
     /// </summary>
     private void OnMouseUpDown(object? sender, RoutedEventArgs args)
     {
-        var gameWindow = sender as GameWindow;
-        if (gameWindow == null)
-            return;
-
         var pointerEventArgs = args as PointerEventArgs;
         if (pointerEventArgs == null)
             return;
@@ -73,15 +72,11 @@ public class AvaloniaInputManager : IInputManager
     /// </summary>
     private void OnMouseMove(object? sender, RoutedEventArgs args)
     {
-        var gameWindow = sender as GameWindow;
-        if (gameWindow == null)
-            return;
-
         var pointerEventArgs = args as PointerEventArgs;
         if (pointerEventArgs == null)
             return;
 
-        var position = pointerEventArgs.GetPosition(gameWindow.GameField);
+        var position = pointerEventArgs.GetPosition(null) * _gameInfo.FieldTransform;
         MousePosition = new PointD(position.X, position.Y);
     }
 

@@ -16,9 +16,9 @@ public class LoadingSaveSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadingSaveScene));
-        containerRegistrator.Register<ILoadingSaveScene, LoadingSaveScene>(loadingScopeReuse);
-        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(loadingScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(ILoadingSaveScene));
+        containerRegistrator.Register<ILoadingSaveScene, LoadingSaveScene>(sceneScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(sceneScopeReuse);
         containerRegistrator.RegisterDelegate<IReadOnlyList<BaseMqdbResourceExtractor>>(context => new BaseMqdbResourceExtractor[]
         {
             context.Resolve<BattleImagesExtractor>(),
@@ -27,6 +27,6 @@ public class LoadingSaveSceneModule : IGameModule
             context.Resolve<BattleUnitImagesExtractor>(),
             context.Resolve<UnitFaceImagesExtractor>(),
             context.Resolve<UnitPortraitImagesExtractor>(),
-        }, loadingScopeReuse);
+        }, sceneScopeReuse);
     }
 }

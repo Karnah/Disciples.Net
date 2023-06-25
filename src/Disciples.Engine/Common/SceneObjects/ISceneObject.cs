@@ -22,7 +22,6 @@ public interface ISceneObject
     /// </summary>
     public bool IsHidden { get; set; }
 
-
     /// <summary>
     /// Очистить занимаемые объектом ресурсы.
     /// </summary>

@@ -198,7 +198,8 @@ public class GameController : IGameController
         if (_selectedGameObject != null &&
             _selectedGameObject.X <= mousePosition.X && mousePosition.X < (_selectedGameObject.X + _selectedGameObject.Width) &&
             _selectedGameObject.Y <= mousePosition.Y && mousePosition.Y < (_selectedGameObject.Y + _selectedGameObject.Height) &&
-            !_selectedGameObject.IsHidden)
+            !_selectedGameObject.IsHidden &&
+            !_selectedGameObject.IsDestroyed)
         {
             return;
         }

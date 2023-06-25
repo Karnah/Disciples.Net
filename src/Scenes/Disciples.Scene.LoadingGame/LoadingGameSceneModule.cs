@@ -12,7 +12,7 @@ public class LoadingGameSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var loadingScopeReuse = new CurrentScopeReuse(nameof(ILoadingGameScene));
-        containerRegistrator.Register<ILoadingGameScene, LoadingGameScene>(loadingScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(ILoadingGameScene));
+        containerRegistrator.Register<ILoadingGameScene, LoadingGameScene>(sceneScopeReuse);
     }
 }

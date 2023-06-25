@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Disciples.Avalonia.Models;
 using Disciples.Engine;
 using DryIoc;
 
@@ -13,12 +14,19 @@ namespace Disciples.Avalonia;
 /// </summary>
 public partial class GameWindow : Window
 {
+    private readonly AvaloniaGameInfo _gameInfo;
+
+    private bool _isClosing;
+
     /// <summary>
     /// Создать объект типа <see cref="GameWindow" />.
     /// </summary>
     public GameWindow()
     {
-        DataContext = ((App)Application.Current!).Container.Resolve<GameWindowViewModel>();
+        var container = ((App)Application.Current!).Container;
+        _gameInfo = container.Resolve<AvaloniaGameInfo>();
+
+        DataContext = container.Resolve<GameWindowViewModel>();
 
         Activated += OnActivated;
 
@@ -28,11 +36,6 @@ public partial class GameWindow : Window
         this.AttachDevTools();
 #endif
     }
-
-    /// <summary>
-    /// Объект игрового поля.
-    /// </summary>
-    public Grid GameField { get; private set; } = null!;
 
     /// <summary>
     /// Обработать событие отображения окна.
@@ -48,11 +51,30 @@ public partial class GameWindow : Window
         // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
         var scale = Math.Min(screen.WorkingArea.Width / GameInfo.OriginalWidth, screen.WorkingArea.Height / GameInfo.OriginalHeight);
 
-        GameField = this.Find<Grid>("Field")!;
-        GameField.RenderTransform = new ScaleTransform(scale, scale);
+        var gameField = this.Find<Grid>("Field")!;
+        gameField.RenderTransform = new ScaleTransform(scale, scale);
+        _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
 
         GameInfo.Width = scale * GameInfo.OriginalWidth;
         GameInfo.Height = scale * GameInfo.OriginalHeight;
         GameInfo.Scale = scale;
+
+        // Инициализируем в первый раз.
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (_gameInfo.OverlapWindow == null)
+        {
+            var overlapWindow = new OverlapWindow();
+            overlapWindow.Closed += (_, _) =>
+            {
+                if (_isClosing)
+                    return;
+
+                _isClosing = true;
+                Close();
+            };
+            overlapWindow.Show(this);
+
+            _gameInfo.OverlapWindow = overlapWindow;
+        }
     }
 }

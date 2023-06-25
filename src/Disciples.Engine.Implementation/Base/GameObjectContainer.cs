@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -73,6 +75,13 @@ public class GameObjectContainer : IGameObjectContainer
     {
         var textListBoxObject = new TextListBoxObject(this, _sceneObjectContainer, textListBox, layer);
         return AddObject(textListBoxObject);
+    }
+
+    /// <inheritdoc />
+    public VideoGameObject AddVideo(Stream videoStream, RectangleD bounds, int layer, bool canSkip = true)
+    {
+        var videoObject = new VideoGameObject(_sceneObjectContainer, videoStream, bounds, layer, canSkip);
+        return AddObject(videoObject);
     }
 
     /// <inheritdoc />

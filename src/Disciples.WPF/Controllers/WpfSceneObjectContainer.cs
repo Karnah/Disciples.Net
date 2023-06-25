@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using Disciples.Common.Models;
 using Disciples.Engine;
@@ -41,6 +42,12 @@ public class WpfSceneObjectContainer : IPlatformSceneObjectContainer
     public ITextSceneObject AddTextSceneObject(TextContainer? text, TextStyle textStyle, RectangleD bounds, int layer)
     {
         return AddSceneObject(new TextSceneObject(text, textStyle, bounds, layer));
+    }
+
+    /// <inheritdoc />
+    public IVideoSceneObject AddVideoSceneObject(Stream stream, RectangleD bounds, int layer)
+    {
+        return AddSceneObject(new VideoSceneObject(stream, bounds, layer));
     }
 
     /// <inheritdoc />

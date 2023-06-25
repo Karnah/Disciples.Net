@@ -20,6 +20,11 @@ public class SceneObjectTemplateSelector : DataTemplateSelector
     /// </summary>
     public DataTemplate TextTemplate { get; set; } = null!;
 
+    /// <summary>
+    /// Шаблон для видео.
+    /// </summary>
+    public DataTemplate VideoTemplate { get; set; } = null!;
+
     /// <inheritdoc />
     public override DataTemplate? SelectTemplate(object item, DependencyObject container)
     {
@@ -28,6 +33,9 @@ public class SceneObjectTemplateSelector : DataTemplateSelector
 
         if (item is ITextSceneObject)
             return TextTemplate;
+
+        if (item is IVideoSceneObject)
+            return VideoTemplate;
 
         return base.SelectTemplate(item, container);
     }

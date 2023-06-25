@@ -9,6 +9,7 @@
         xmlns:c="clr-namespace:Disciples.WPF.Converters"
         xmlns:dts="clr-namespace:Disciples.WPF.DataTemplateSelectors"
         xmlns:controls="clr-namespace:Disciples.WPF.Controls"
+        xmlns:sceneObjects="clr-namespace:Disciples.WPF.SceneObjects"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:GameWindowViewModel}"
         Title="WPF Disciples II" WindowStyle="None" WindowState="Maximized" Background="Black">
@@ -57,6 +58,16 @@
                                                      Text="{Binding Text}" />
                         </DataTemplate>
                     </dts:SceneObjectTemplateSelector.TextTemplate>
+
+                    <dts:SceneObjectTemplateSelector.VideoTemplate>
+                        <DataTemplate DataType="{x:Type sceneObjects:VideoSceneObject}">
+                            <Decorator Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}">
+                                <controls:AutoPlayVideoView HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                            VideoSceneObject="{Binding }"
+                                                            MediaPlayer="{Binding MediaPlayer}" />
+                            </Decorator>
+                        </DataTemplate>
+                    </dts:SceneObjectTemplateSelector.VideoTemplate>
                 </dts:SceneObjectTemplateSelector>
             </ItemsControl.ItemTemplateSelector>
         </ItemsControl>

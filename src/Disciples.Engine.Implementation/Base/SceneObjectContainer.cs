@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
@@ -67,6 +68,12 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     public ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer)
     {
         return PlatformSceneObjectContainer.AddTextSceneObject(text, textStyle ?? new TextStyle(), bounds, layer);
+    }
+
+    /// <inheritdoc />
+    public IVideoSceneObject AddVideo(Stream videoStream, RectangleD bounds, int layer)
+    {
+        return PlatformSceneObjectContainer.AddVideoSceneObject(videoStream, bounds, layer);
     }
 
     /// <inheritdoc />

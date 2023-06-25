@@ -17,8 +17,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DryIoc.dll" Version="5.4.0" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.7.0" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.2.1" />
     <PackageReference Include="ReactiveUI.WPF" Version="19.2.1" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />

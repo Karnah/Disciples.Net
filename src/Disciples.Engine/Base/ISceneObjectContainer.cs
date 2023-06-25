@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.IO;
 using Disciples.Common.Models;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Models;
@@ -65,6 +66,14 @@ public interface ISceneObjectContainer
     /// <param name="bounds">Границы текста.</param>
     /// <param name="layer">Слой на котором будет отображаться текст.</param>
     ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer);
+
+    /// <summary>
+    /// Добавить видео из файла на сцену.
+    /// </summary>
+    /// <param name="videoStream">Видеопоток.</param>
+    /// <param name="bounds">Границы.</param>
+    /// <param name="layer">Слой.</param>
+    IVideoSceneObject AddVideo(Stream videoStream, RectangleD bounds, int layer);
 
     /// <summary>
     /// Удалить объект со сцены.

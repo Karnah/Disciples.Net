@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
@@ -69,6 +71,12 @@ public abstract class BaseSceneGameObjectContainer : IGameObjectContainer
     public TextListBoxObject AddTextListBox(TextListBoxSceneElement textListBox, int layer)
     {
         return GameObjectContainer.AddTextListBox(textListBox, layer);
+    }
+
+    /// <inheritdoc />
+    public VideoGameObject AddVideo(Stream videoStream, RectangleD bounds, int layer, bool canSkip = true)
+    {
+        return GameObjectContainer.AddVideo(videoStream, bounds, layer, canSkip);
     }
 
     /// <inheritdoc />

@@ -9,6 +9,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <None Remove=".gitignore" />
@@ -30,8 +31,13 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview5" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview5" />
     <PackageReference Include="DryIoc.dll" Version="5.4.0" />
+    <PackageReference Include="LibVLCSharp" Version="3.7.0" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.2.1" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Condition="$([MSBuild]::IsOsPlatform('Windows'))" Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
+    <PackageReference Condition="$([MSBuild]::IsOsPlatform('OSX'))" Include="VideoLAN.LibVLC.Mac" Version="3.1.3.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />
@@ -43,5 +49,8 @@
     <Compile Update="GameWindow.axaml.cs">
       <DependentUpon>GameWindow.axaml</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Remove="OverlapWindow.axaml" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@ using Disciples.Engine.Platform.Managers;
 using Disciples.WPF.Controllers;
 using Disciples.WPF.Factories;
 using Disciples.WPF.Managers;
+using Disciples.WPF.Models;
 using DryIoc;
 
 namespace Disciples.WPF;
@@ -17,6 +18,9 @@ public class WpfModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
+        // Информация об игре.
+        containerRegistrator.Register<WpfGameInfo>(Reuse.Singleton);
+
         // Регистрируем устройства ввода.
         containerRegistrator.Register<IInputManager, WpfInputManager>(Reuse.Singleton);
         containerRegistrator.Register<ICursorController, WpfCursorController>(Reuse.Singleton);

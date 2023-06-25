@@ -11,7 +11,7 @@ namespace Disciples.Avalonia;
 /// </summary>
 public partial class App : Application
 {
-    private Game? _game;
+    private Game _game = null!;
 
     /// <summary>
     /// IoC контейнер.
@@ -30,11 +30,10 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var gameWindow = new GameWindow();
-        gameWindow.Closing += (sender, eventArgs) => { _game!.Stop(); };
+        gameWindow.Loaded += (sender, args) => { _game.Start(); };
+        gameWindow.Closing += (sender, eventArgs) => { _game.Stop(); };
 
         ((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!).MainWindow = gameWindow;
         base.OnFrameworkInitializationCompleted();
-
-        _game!.Start();
     }
 }

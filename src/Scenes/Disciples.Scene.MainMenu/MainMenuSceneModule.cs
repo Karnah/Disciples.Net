@@ -15,9 +15,9 @@ public class MainMenuSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var loadingScopeReuse = new CurrentScopeReuse(nameof(IMainMenuScene));
-        containerRegistrator.Register<IMainMenuScene, MainMenuScene>(loadingScopeReuse);
-        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(loadingScopeReuse);
-        containerRegistrator.Register<MainMenuInterfaceController>(loadingScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(IMainMenuScene));
+        containerRegistrator.Register<IMainMenuScene, MainMenuScene>(sceneScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<MainMenuInterfaceController>(sceneScopeReuse);
     }
 }

@@ -17,22 +17,22 @@ public class BattleSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var battleScopeReuse = new CurrentScopeReuse(nameof(IBattleScene));
-        containerRegistrator.Register<BattleContext>(battleScopeReuse);
-        containerRegistrator.Register<BattleProcessor>(battleScopeReuse);
-        containerRegistrator.Register<BattleAiProcessor>(battleScopeReuse);
-        containerRegistrator.Register<BattleUnitPortraitPanelController>(battleScopeReuse);
-        containerRegistrator.Register<BattleBottomPanelController>(battleScopeReuse);
-        containerRegistrator.Register<BattleUnitActionController>(battleScopeReuse);
-        containerRegistrator.Register<BattleSoundController>(battleScopeReuse);
-        containerRegistrator.Register<BattleDialogController>(battleScopeReuse);
-        containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(battleScopeReuse);
-        containerRegistrator.Register<ISceneInterfaceController, BattleSceneInterfaceController>(battleScopeReuse);
-        containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(battleScopeReuse);
-        containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(battleScopeReuse);
-        containerRegistrator.Register<IBattleController, BattleController>(battleScopeReuse);
-        containerRegistrator.Register<IBattleInterfaceController, BattleInterfaceController>(battleScopeReuse);
-        containerRegistrator.Register<IBattleGameObjectContainer, BattleGameObjectContainer>(battleScopeReuse);
-        containerRegistrator.Register<IBattleScene, BattleScene>(battleScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(IBattleScene));
+        containerRegistrator.Register<BattleContext>(sceneScopeReuse);
+        containerRegistrator.Register<BattleProcessor>(sceneScopeReuse);
+        containerRegistrator.Register<BattleAiProcessor>(sceneScopeReuse);
+        containerRegistrator.Register<BattleUnitPortraitPanelController>(sceneScopeReuse);
+        containerRegistrator.Register<BattleBottomPanelController>(sceneScopeReuse);
+        containerRegistrator.Register<BattleUnitActionController>(sceneScopeReuse);
+        containerRegistrator.Register<BattleSoundController>(sceneScopeReuse);
+        containerRegistrator.Register<BattleDialogController>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(sceneScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, BattleSceneInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleInterfaceProvider, BattleInterfaceProvider>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleUnitResourceProvider, BattleUnitResourceProvider>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleController, BattleController>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleInterfaceController, BattleInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleGameObjectContainer, BattleGameObjectContainer>(sceneScopeReuse);
+        containerRegistrator.Register<IBattleScene, BattleScene>(sceneScopeReuse);
     }
 }

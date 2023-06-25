@@ -15,9 +15,9 @@ public class SinglePlayerGameMenuSceneModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        var loadingScopeReuse = new CurrentScopeReuse(nameof(ISinglePlayerGameMenuScene));
-        containerRegistrator.Register<ISinglePlayerGameMenuScene, SinglePlayerGameMenuScene>(loadingScopeReuse);
-        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(loadingScopeReuse);
-        containerRegistrator.Register<SinglePlayerGameMenuInterfaceController>(loadingScopeReuse);
+        var sceneScopeReuse = new CurrentScopeReuse(nameof(ISinglePlayerGameMenuScene));
+        containerRegistrator.Register<ISinglePlayerGameMenuScene, SinglePlayerGameMenuScene>(sceneScopeReuse);
+        containerRegistrator.Register<ISceneInterfaceController, SceneInterfaceController>(sceneScopeReuse);
+        containerRegistrator.Register<SinglePlayerGameMenuInterfaceController>(sceneScopeReuse);
     }
 }

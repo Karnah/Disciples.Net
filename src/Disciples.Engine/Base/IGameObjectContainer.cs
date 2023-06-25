@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Disciples.Common.Models;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 
@@ -62,6 +64,15 @@ public interface IGameObjectContainer
     /// <param name="textListBox">Информация о списке строк.</param>
     /// <param name="layer">Слой на котором будет отображаться список.</param>
     TextListBoxObject AddTextListBox(TextListBoxSceneElement textListBox, int layer);
+
+    /// <summary>
+    /// Добавить видео на сцену.
+    /// </summary>
+    /// <param name="videoStream">Видеопоток.</param>
+    /// <param name="bounds">Границы.</param>
+    /// <param name="layer">Слой.</param>
+    /// <param name="canSkip">Можно ли пропустить видеоролик.</param>
+    VideoGameObject AddVideo(Stream videoStream, RectangleD bounds, int layer, bool canSkip = true);
 
     /// <summary>
     /// Добавить игровой объект.
