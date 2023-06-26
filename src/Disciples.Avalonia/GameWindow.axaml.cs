@@ -37,6 +37,17 @@ public partial class GameWindow : Window
 #endif
     }
 
+    /// <inheritdoc />
+    protected override void OnLoaded()
+    {
+        base.OnLoaded();
+
+        // FieldTransform задаём именно в OnLoaded, в OnActivated будут некорректные координаты.
+        // Но OnActivated срабатывает раньше.
+        var gameField = this.Find<Grid>("Field")!;
+        _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
+    }
+
     /// <summary>
     /// Обработать событие отображения окна.
     /// </summary>
@@ -53,7 +64,6 @@ public partial class GameWindow : Window
 
         var gameField = this.Find<Grid>("Field")!;
         gameField.RenderTransform = new ScaleTransform(scale, scale);
-        _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
 
         GameInfo.Width = scale * GameInfo.OriginalWidth;
         GameInfo.Height = scale * GameInfo.OriginalHeight;
