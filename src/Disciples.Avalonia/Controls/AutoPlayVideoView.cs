@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Data;
-using Avalonia.Platform;
+using Avalonia.Interactivity;
 using Disciples.Avalonia.SceneObjects;
 
 namespace Disciples.Avalonia.Controls;
@@ -40,16 +40,9 @@ public class AutoPlayVideoView : VideoView
     }
 
     /// <inheritdoc />
-    protected override void OnLoaded()
+    protected override void OnLoaded(RoutedEventArgs e)
     {
-        base.OnLoaded();
+        base.OnLoaded(e);
         VideoSceneObject?.Play();
-    }
-
-    /// <inheritdoc />
-    protected override void DestroyNativeControlCore(IPlatformHandle control)
-    {
-        base.DestroyNativeControlCore(control);
-        VideoSceneObject?.Stop();
     }
 }

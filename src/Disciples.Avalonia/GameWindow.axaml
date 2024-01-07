@@ -28,7 +28,7 @@
     <Grid Name="Field" Width="{x:Static e:GameInfo.OriginalWidth}" Height="{x:Static e:GameInfo.OriginalHeight}"
           HorizontalAlignment="Center" VerticalAlignment="Center">
 
-        <ItemsControl Items="{Binding SceneObjects}">
+        <ItemsControl ItemsSource="{Binding SceneObjects}">
             <ItemsControl.Styles>
                 <Style Selector="ItemsControl ContentPresenter">
                     <Setter Property="Canvas.Left" Value="{Binding Bounds.Left}" />

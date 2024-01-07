@@ -39,11 +39,11 @@ public class VideoSceneObject : BaseSceneObject, IVideoSceneObject
         MediaPlayer.Play(_media);
     }
 
-    /// <summary>
-    /// Остановить проигрывание видеоролика.
-    /// </summary>
-    public void Stop()
+    /// <inheritdoc />
+    public override void Destroy()
     {
+        base.Destroy();
+
         MediaPlayer.Stop();
         MediaPlayer.Dispose();
     }

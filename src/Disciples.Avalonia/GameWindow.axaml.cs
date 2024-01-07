@@ -1,7 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Disciples.Avalonia.Models;
 using Disciples.Engine;
@@ -30,7 +30,7 @@ public partial class GameWindow : Window
 
         Activated += OnActivated;
 
-        AvaloniaXamlLoader.Load(this);
+        InitializeComponent();
 
 #if DEBUG
         this.AttachDevTools();
@@ -38,9 +38,9 @@ public partial class GameWindow : Window
     }
 
     /// <inheritdoc />
-    protected override void OnLoaded()
+    protected override void OnLoaded(RoutedEventArgs e)
     {
-        base.OnLoaded();
+        base.OnLoaded(e);
 
         // FieldTransform задаём именно в OnLoaded, в OnActivated будут некорректные координаты.
         // Но OnActivated срабатывает раньше.
