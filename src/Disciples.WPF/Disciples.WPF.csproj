@@ -23,9 +23,9 @@
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />
-    <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
-    <ProjectReference Include="..\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
-    <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
+    <ProjectReference Include="..\Engine\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />
+    <ProjectReference Include="..\Engine\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
+    <ProjectReference Include="..\Engine\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
+    <ProjectReference Include="..\Engine\Disciples.Engine\Disciples.Engine.csproj" />
   </ItemGroup>
 </Project>

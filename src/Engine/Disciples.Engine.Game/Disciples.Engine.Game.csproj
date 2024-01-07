@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DryIoc.dll" Version="5.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
+    <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.LoadingGame\Disciples.Scene.LoadingGame.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.LoadingSave\Disciples.Scene.LoadingSave.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.LoadSaga\Disciples.Scene.LoadSaga.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.MainMenu\Disciples.Scene.MainMenu.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.SinglePlayerGameMenu\Disciples.Scene.SinglePlayerGameMenu.csproj" />
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.Video\Disciples.Scene.Video.csproj" />
+  </ItemGroup>
+
+</Project>

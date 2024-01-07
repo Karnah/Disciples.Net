@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine", "src\Disciples.Engine\Disciples.Engine.csproj", "{776E40D0-F4E1-4CE0-A408-6DD48B456805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine", "src\Engine\Disciples.Engine\Disciples.Engine.csproj", "{776E40D0-F4E1-4CE0-A408-6DD48B456805}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Implementation", "src\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Implementation", "src\Engine\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj", "{B68DA9D6-3E28-4234-ADB8-48029EC729C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Common", "src\Disciples.Common\Disciples.Common.csproj", "{672F5E77-50F0-49BD-8A6A-D93B5C59A660}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Common", "src\Common\Disciples.Common\Disciples.Common.csproj", "{672F5E77-50F0-49BD-8A6A-D93B5C59A660}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Platform", "src\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj", "{B140D92D-D12B-4524-A330-EC46A7784E59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Platform", "src\Engine\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj", "{B140D92D-D12B-4524-A330-EC46A7784E59}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.WPF", "src\Disciples.WPF\Disciples.WPF.csproj", "{65A059DB-14F0-443D-9537-AE80B527213A}"
 EndProject
@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Images"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Sounds", "src\Resources\Disciples.Resources.Sounds\Disciples.Resources.Sounds.csproj", "{E5453CD9-6587-484D-97E2-AE75206771F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Game", "src\Disciples.Engine.Game\Disciples.Engine.Game.csproj", "{9728EECF-382F-46E7-A509-2FAF0B50DDFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Engine.Game", "src\Engine\Disciples.Engine.Game\Disciples.Engine.Game.csproj", "{9728EECF-382F-46E7-A509-2FAF0B50DDFA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Resources.Common", "src\Resources\Disciples.Resources.Common\Disciples.Resources.Common.csproj", "{E6BF39E8-2957-4547-9F80-50A6AB6CFCE2}"
 EndProject
@@ -45,7 +45,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.MainMenu", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.SinglePlayerGameMenu", "src\Scenes\Disciples.Scene.SinglePlayerGameMenu\Disciples.Scene.SinglePlayerGameMenu.csproj", "{F1814564-B7B0-4480-993C-698C364EBC04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Scene.Video", "src\Scenes\Disciples.Scene.Video\Disciples.Scene.Video.csproj", "{78BD330B-ACED-438C-AB89-77FDF7F72742}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Disciples.Scene.Video", "src\Scenes\Disciples.Scene.Video\Disciples.Scene.Video.csproj", "{78BD330B-ACED-438C-AB89-77FDF7F72742}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{3C06893E-1D55-47E8-AF9D-2A98739A1258}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{E73388CF-4FAF-40E7-BDA1-6747DA979AE7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +142,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{776E40D0-F4E1-4CE0-A408-6DD48B456805} = {E73388CF-4FAF-40E7-BDA1-6747DA979AE7}
+		{B68DA9D6-3E28-4234-ADB8-48029EC729C2} = {E73388CF-4FAF-40E7-BDA1-6747DA979AE7}
+		{672F5E77-50F0-49BD-8A6A-D93B5C59A660} = {3C06893E-1D55-47E8-AF9D-2A98739A1258}
+		{B140D92D-D12B-4524-A330-EC46A7784E59} = {E73388CF-4FAF-40E7-BDA1-6747DA979AE7}
 		{D764FD71-7E95-49A4-BB3E-728E07CD88E1} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{B37ABF40-108C-40C8-BAA0-43DEADE8E39A} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{CD2CAEDC-10B2-4988-BF07-6DB29B726BC8} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
@@ -145,6 +153,7 @@ Global
 		{7478B22C-CB31-4093-AB9C-8E1C4E8DD968} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 		{C3F9BDC6-6C7D-4000-A3BD-B7F5C7015BEB} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 		{E5453CD9-6587-484D-97E2-AE75206771F8} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
+		{9728EECF-382F-46E7-A509-2FAF0B50DDFA} = {E73388CF-4FAF-40E7-BDA1-6747DA979AE7}
 		{E6BF39E8-2957-4547-9F80-50A6AB6CFCE2} = {62DD857E-7DB8-47FF-AFAC-88F89AB3FF2D}
 		{A6A867FE-3827-4F7D-BCB6-D0B29459C8AF} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{5973C421-2649-4BA7-B85D-B639351F2DD5} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
