@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
@@ -16,11 +16,11 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DryIoc.dll" Version="5.4.0" />
-    <PackageReference Include="LibVLCSharp.WPF" Version="3.7.0" />
-    <PackageReference Include="ReactiveUI.Fody" Version="19.2.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="19.2.1" />
-    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.18" />
+    <PackageReference Include="DryIoc.dll" Version="5.4.3" />
+    <PackageReference Include="LibVLCSharp.WPF" Version="3.8.2" />
+    <PackageReference Include="ReactiveUI.Fody" Version="19.5.39" />
+    <PackageReference Include="ReactiveUI.WPF" Version="19.5.39" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.20" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Disciples.Engine.Game\Disciples.Engine.Game.csproj" />
