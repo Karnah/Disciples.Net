@@ -44,7 +44,8 @@ internal class BattleScene : BaseScene, IBattleScene
         IBattleController battleController,
         IBattleInterfaceController battleInterfaceController,
         BattleContext battleContext,
-        BattleSoundController battleSoundController
+        BattleSoundController battleSoundController,
+        BattleSceneParameters parameters
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _textProvider = textProvider;
@@ -57,17 +58,13 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleInterfaceController = battleInterfaceController;
         _battleContext = battleContext;
         _battleSoundController = battleSoundController;
+
+        _battleContext.AttackingBattleSquad.Squad = parameters.AttackingSquad;
+        _battleContext.DefendingBattleSquad.Squad = parameters.DefendingSquad;
     }
 
     /// <inheritdoc />
     protected override bool IsProcessInputDeviceEvents => false;
-
-    /// <inheritdoc />
-    public void InitializeParameters(BattleSceneParameters parameters)
-    {
-        _battleContext.AttackingBattleSquad.Squad = parameters.AttackingSquad;
-        _battleContext.DefendingBattleSquad.Squad = parameters.DefendingSquad;
-    }
 
     /// <inheritdoc />
     protected override void LoadInternal()
@@ -100,6 +97,8 @@ internal class BattleScene : BaseScene, IBattleScene
     /// <inheritdoc />
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
+        base.BeforeSceneUpdate(data);
+
         _battleContext.BeforeSceneUpdate(data);
 
         ProcessInputDeviceEvents(data.InputDeviceEvents);
@@ -112,6 +111,8 @@ internal class BattleScene : BaseScene, IBattleScene
     /// <inheritdoc />
     protected override void AfterSceneUpdate()
     {
+        base.AfterSceneUpdate();
+
         _battleContext.AfterSceneUpdate();
         _battleController.AfterSceneUpdate();
         _battleInterfaceController.AfterSceneUpdate();

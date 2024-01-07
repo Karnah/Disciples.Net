@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
@@ -10,9 +11,9 @@ using Disciples.Scene.LoadSaga.Providers;
 namespace Disciples.Scene.LoadSaga;
 
 /// <inheritdoc cref="ILoadSagaScene" />
-internal class LoadSagaScene : BaseScene, ILoadSagaScene
+internal class LoadSagaScene : BaseMenuScene, ILoadSagaScene
 {
-    private readonly LoadSagaInterfaceProvider _interfaceProvider;
+    private readonly LoadSagaInterfaceProvider _loadSagaInterfaceProvider;
     private readonly LoadSagaInterfaceController _interfaceController;
     private readonly MenuSoundController _soundController;
 
@@ -23,20 +24,19 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IDialogController dialogController,
-        LoadSagaInterfaceProvider interfaceProvider,
+        IInterfaceProvider interfaceProvider,
+        LoadSagaInterfaceProvider loadSagaInterfaceProvider,
         LoadSagaInterfaceController interfaceController,
         MenuSoundController soundController
-        ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
+        ) : base(gameObjectContainer, sceneObjectContainer, dialogController, interfaceProvider)
     {
-        _interfaceProvider = interfaceProvider;
+        _loadSagaInterfaceProvider = loadSagaInterfaceProvider;
         _interfaceController = interfaceController;
         _soundController = soundController;
     }
 
     /// <inheritdoc />
-    public void InitializeParameters(SceneParameters parameters)
-    {
-    }
+    protected override string TransitionAnimationName => "TRANS_SINGLE2NEW";
 
     /// <inheritdoc />
     protected override void LoadInternal()
@@ -44,7 +44,7 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
         base.LoadInternal();
 
         _soundController.Load();
-        _interfaceProvider.Load();
+        _loadSagaInterfaceProvider.Load();
         _interfaceController.Load();
     }
 
@@ -58,6 +58,8 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
     /// <inheritdoc />
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
+        base.BeforeSceneUpdate(data);
+
         _soundController.BeforeSceneUpdate();
         _interfaceController.BeforeSceneUpdate();
     }
@@ -65,6 +67,8 @@ internal class LoadSagaScene : BaseScene, ILoadSagaScene
     /// <inheritdoc />
     protected override void AfterSceneUpdate()
     {
+        base.AfterSceneUpdate();
+
         _soundController.AfterSceneUpdate();
         _interfaceController.AfterSceneUpdate();
     }

@@ -47,11 +47,6 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     public override CursorType DefaultCursorType => CursorType.None;
 
     /// <inheritdoc />
-    public void InitializeParameters(SceneParameters parameters)
-    {
-    }
-
-    /// <inheritdoc />
     protected override void LoadInternal()
     {
         base.LoadInternal();
@@ -79,16 +74,6 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
 
         _loadingSceneObject?.Destroy();
         _loadingSceneObject = null;
-    }
-
-    /// <inheritdoc />
-    protected override void BeforeSceneUpdate(UpdateSceneData data)
-    {
-    }
-
-    /// <inheritdoc />
-    protected override void AfterSceneUpdate()
-    {
     }
 
     /// <summary>

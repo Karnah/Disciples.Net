@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена главного меню.
 /// </summary>
-public interface IMainMenuScene : IScene, ISupportLoadingWithParameters<SceneParameters>
+public interface IMainMenuScene : IScene<SceneParameters>
 {
 }

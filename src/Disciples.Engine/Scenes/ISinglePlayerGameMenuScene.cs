@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Меню однопользовательской игры.
 /// </summary>
-public interface ISinglePlayerGameMenuScene : IScene, ISupportLoadingWithParameters<SceneParameters>
+public interface ISinglePlayerGameMenuScene : IScene<SceneParameters>
 {
 }

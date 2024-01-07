@@ -36,6 +36,7 @@ public class GameController : IGameController
 
     private long _ticks;
     private IScene? _currentScene;
+    private string _currentSceneName = string.Empty;
 
     /// <summary>
     /// Объект, который в данный момент выделен курсором.
@@ -129,24 +130,28 @@ public class GameController : IGameController
     }
 
     /// <inheritdoc />
-    public async void ChangeScene<TScene, TData>(TData data)
-        where TScene : IScene, ISupportLoadingWithParameters<TData>
-        where TData : SceneParameters
+    public async void ChangeScene<TScene, TSceneParameters>(TSceneParameters sceneParameters)
+        where TScene : IScene<TSceneParameters>
+        where TSceneParameters : SceneParameters
     {
         // Старая сцена должна прекращать обработку всех событий на время загрузки новой.
         _currentScene?.Unload();
-
         _sceneResolverContext?.Dispose();
-        _sceneResolverContext = _container.OpenScope(typeof(TScene).Name);
 
-        var scene = _sceneResolverContext.Resolve<TScene>();
+        var sceneName = typeof(TScene).Name;
+        _sceneResolverContext = _container.OpenScope(sceneName);
 
-        scene.InitializeParameters(data);
+        var scene = _sceneResolverContext.Resolve<TScene>(new object[]
+        {
+            sceneParameters,
+            new SceneChangeContext { PreviousSceneName = _currentSceneName }
+        });
 
         await Task.Run(scene.Load);
 
         _cursorController.SetCursorState(scene.DefaultCursorType);
         _currentScene = scene;
+        _currentSceneName = sceneName;
         _selectedGameObject = null;
 
         // TODO Вынести в сцену.

@@ -36,9 +36,10 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     public virtual CursorType DefaultCursorType => CursorType.Default;
 
     /// <summary>
-    /// Объект, который будет использован для обработки событий ввода, если сейчас не выбран другой объект.
+    /// Объект, который будет использован для обработки всех событий ввода.
+    /// <see langwrod="null" />, если нужно обрабатывать все объекты сцены.
     /// </summary>
-    protected virtual GameObject? DefaultInputGameObject => null;
+    protected virtual GameObject? MainInputGameObject => null;
 
     /// <summary>
     /// Признак, что базовый класс должен сам обрабатывать события ввода пользователя.
@@ -91,12 +92,18 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     /// <summary>
     /// Выполнить действия до обновления игровых объектов.
     /// </summary>
-    protected abstract void BeforeSceneUpdate(UpdateSceneData data);
+    protected virtual void BeforeSceneUpdate(UpdateSceneData data)
+    {
+
+    }
 
     /// <summary>
-    /// Выполнить действия после игровых объектов.
+    /// Выполнить действия после обновления игровых объектов.
     /// </summary>
-    protected abstract void AfterSceneUpdate();
+    protected virtual void AfterSceneUpdate()
+    {
+
+    }
 
     /// <summary>
     /// Обработать события ввода пользователя.
@@ -112,7 +119,7 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
         foreach (var inputDeviceEvent in inputDeviceEvents)
         {
-            var inputDeviceGameObject = inputDeviceEvent.GameObject ?? DefaultInputGameObject;
+            var inputDeviceGameObject = MainInputGameObject ?? inputDeviceEvent.GameObject;
 
             switch (inputDeviceEvent.ActionType)
             {
@@ -138,11 +145,19 @@ public abstract class BaseScene : BaseSupportLoading, IScene
                     continue;
 
                 case InputDeviceActionType.KeyboardButton when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    // TODO Оптимизация.
-                    foreach (var gameObject in GameObjectContainer.GameObjects.ToArray())
+                    if (MainInputGameObject != null)
                     {
-                        gameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
+                        MainInputGameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
                     }
+                    else
+                    {
+                        // TODO Оптимизация.
+                        foreach (var gameObject in GameObjectContainer.GameObjects.ToArray())
+                        {
+                            gameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
+                        }
+                    }
+
                     break;
             }
         }

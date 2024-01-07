@@ -24,20 +24,24 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     private readonly IBitmapFactory _bitmapFactory;
     private readonly SceneInterfaceExtractor _sceneInterfaceExtractor;
     private readonly ITextProvider _textProvider;
+    private readonly MenuAnimationExtractor _menuAnimationExtractor;
 
     private readonly Dictionary<string, IBitmap> _bitmapCache = new();
+    private readonly Dictionary<string, SceneTransitionAnimation> _sceneAnimationCache = new();
 
     /// <inheritdoc />
     public InterfaceProvider(
         InterfaceImagesExtractor interfaceImagesExtractor,
         IBitmapFactory bitmapFactory,
         SceneInterfaceExtractor sceneInterfaceExtractor,
-        ITextProvider textProvider)
+        ITextProvider textProvider,
+        MenuAnimationExtractor menuAnimationExtractor)
     {
         _interfaceImagesExtractor = interfaceImagesExtractor;
         _bitmapFactory = bitmapFactory;
         _sceneInterfaceExtractor = sceneInterfaceExtractor;
         _textProvider = textProvider;
+        _menuAnimationExtractor = menuAnimationExtractor;
     }
 
     /// <inheritdoc />
@@ -92,11 +96,25 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     }
 
     /// <inheritdoc />
+    public SceneTransitionAnimation GetSceneTransitionAnimation(string animationName)
+    {
+        if (!_sceneAnimationCache.TryGetValue(animationName, out var animation))
+        {
+            var data = _menuAnimationExtractor.GetFileContent($"{animationName}.BIK");
+            animation = new SceneTransitionAnimation(data);
+            _sceneAnimationCache.Add(animationName, animation);
+        }
+
+        return animation;
+    }
+
+    /// <inheritdoc />
     protected override void LoadInternal()
     {
         _interfaceImagesExtractor.Load();
         _sceneInterfaceExtractor.Load();
         _textProvider.Load();
+        _menuAnimationExtractor.Load();
     }
 
     /// <inheritdoc />

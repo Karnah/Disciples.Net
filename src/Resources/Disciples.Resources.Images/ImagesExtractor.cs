@@ -113,7 +113,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// </summary>
     public byte[] GetFileContent(string name)
     {
-        return GetFileContent(GetFile($"{name.ToUpper()}.PNG"));
+        return GetFileContent(GetFile(name.ToUpperInvariant()));
     }
 
     /// <summary>

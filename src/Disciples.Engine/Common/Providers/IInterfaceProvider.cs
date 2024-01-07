@@ -24,4 +24,9 @@ public interface IInterfaceProvider : ISupportLoading
     /// Получить изображение указанного цвета.
     /// </summary>
     IBitmap GetColorBitmap(Color color, SizeD size);
+
+    /// <summary>
+    /// Получить анимацию для перехода между сценами.
+    /// </summary>
+    SceneTransitionAnimation GetSceneTransitionAnimation(string animationName);
 }

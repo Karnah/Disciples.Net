@@ -33,3 +33,14 @@ public interface IScene : ISupportLoading
     /// </summary>
     void UpdateScene(UpdateSceneData data);
 }
+
+/// <summary>
+/// Объект сцены с её параметрами.
+/// </summary>
+/// <typeparam name="TSceneParameters">Тип параметров сцены.</typeparam>
+// Используется для передачи параметров в конструктор.
+// ReSharper disable once UnusedTypeParameter
+public interface IScene<TSceneParameters> : IScene
+    where TSceneParameters : SceneParameters
+{
+}

@@ -103,11 +103,11 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Вернуться на страницу одиночной игры.
+    /// Вернуться на страницу главного меню.
     /// </summary>
     private void ExecuteBack()
     {
-        _gameController.ChangeScene<ISinglePlayerGameMenuScene, SceneParameters>(SceneParameters.Empty);
+        _gameController.ChangeScene<IMainMenuScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>

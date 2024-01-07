@@ -12,7 +12,8 @@ public class Layers
     {
         BackgroundLayer = 0,
         InterfacePanelLayer = 1000,
-        InterfaceLayer = 1010
+        InterfaceLayer = 1010,
+        AboveAllLayer = 1999
     };
 
     /// <summary>
@@ -22,7 +23,8 @@ public class Layers
     {
         BackgroundLayer = 2000,
         InterfacePanelLayer = 2010,
-        InterfaceLayer = 2020
+        InterfaceLayer = 2020,
+        AboveAllLayer = 2999
     };
 
     /// <summary>
@@ -39,4 +41,9 @@ public class Layers
     /// Слой для расположения интерфейса (кнопки, текст, картинки и так далее).
     /// </summary>
     public int InterfaceLayer { get; init; }
+
+    /// <summary>
+    /// Слой, который перекрывает все элементы.
+    /// </summary>
+    public int AboveAllLayer { get; init; }
 }

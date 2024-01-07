@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine;
+﻿using Disciples.Common.Models;
+
+namespace Disciples.Engine;
 
 /// <summary>
 /// Информация об игре.
@@ -14,6 +16,11 @@ public static class GameInfo
     /// Оригинальная высота экрана.
     /// </summary>
     public const double OriginalHeight = 600;
+
+    /// <summary>
+    /// Границы сцены.
+    /// </summary>
+    public static readonly RectangleD SceneBounds = new RectangleD(0, 0, OriginalWidth, OriginalHeight);
 
 
     /// <summary>

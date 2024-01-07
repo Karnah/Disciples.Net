@@ -30,8 +30,8 @@ public interface IGameController
     /// </summary>
     /// <typeparam name="TScene">Тип новой сцены.</typeparam>
     /// <typeparam name="TSceneParameters">Тип параметров инициализации новой сцены.</typeparam>
-    /// <param name="data">Данные для инициализации новой сцены.</param>
-    void ChangeScene<TScene, TSceneParameters>(TSceneParameters data)
-        where TScene : IScene, ISupportLoadingWithParameters<TSceneParameters>
+    /// <param name="sceneParameters">Данные для инициализации новой сцены.</param>
+    void ChangeScene<TScene, TSceneParameters>(TSceneParameters sceneParameters)
+        where TScene : IScene<TSceneParameters>
         where TSceneParameters : SceneParameters;
 }

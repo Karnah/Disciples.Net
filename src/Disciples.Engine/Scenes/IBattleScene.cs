@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена битвы двух отрядов.
 /// </summary>
-public interface IBattleScene : IScene, ISupportLoadingWithParameters<BattleSceneParameters>
+public interface IBattleScene : IScene<BattleSceneParameters>
 {
 }

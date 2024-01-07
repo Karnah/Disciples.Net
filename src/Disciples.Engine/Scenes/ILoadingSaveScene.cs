@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена загрузки сейва.
 /// </summary>
-public interface ILoadingSaveScene : IScene, ISupportLoadingWithParameters<LoadingSaveSceneParameters>
+public interface ILoadingSaveScene : IScene<LoadingSaveSceneParameters>
 {
 }

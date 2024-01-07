@@ -1,5 +1,4 @@
-﻿using Disciples.Common.Models;
-using Disciples.Engine;
+﻿using Disciples.Engine;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
@@ -17,9 +16,10 @@ internal class VideoScene : BaseScene, IVideoScene
 {
     private readonly IGameController _gameController;
 
-    private IReadOnlyList<string> _videoPaths = null!;
+    private readonly IReadOnlyList<string> _videoPaths;
+    private readonly Action<IGameController> _onCompleted;
+
     private int? _videoIndex;
-    private Action<IGameController> _onCompleted = null!;
     private VideoGameObject _videoObject = null!;
 
     /// <summary>
@@ -29,10 +29,14 @@ internal class VideoScene : BaseScene, IVideoScene
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IDialogController dialogController,
-        IGameController gameController
+        IGameController gameController,
+        VideoSceneParameters parameters
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _gameController = gameController;
+
+        _videoPaths = parameters.VideoPaths;
+        _onCompleted = parameters.OnCompleted;
     }
 
     /// <inheritdoc />
@@ -42,14 +46,7 @@ internal class VideoScene : BaseScene, IVideoScene
     /// <remarks>
     /// При нажатии даже за пределами экрана, нужно обрабатывать событие на видеоролике.
     /// </remarks>
-    protected override GameObject DefaultInputGameObject => _videoObject;
-
-    /// <inheritdoc />
-    public void InitializeParameters(VideoSceneParameters parameters)
-    {
-        _videoPaths = parameters.VideoPaths;
-        _onCompleted = parameters.OnCompleted;
-    }
+    protected override GameObject MainInputGameObject => _videoObject;
 
     /// <inheritdoc />
     protected override void LoadInternal()
@@ -62,13 +59,10 @@ internal class VideoScene : BaseScene, IVideoScene
     /// <inheritdoc />
     protected override void BeforeSceneUpdate(UpdateSceneData data)
     {
+        base.BeforeSceneUpdate(data);
+
         if (IsLoaded && _videoObject.IsCompleted)
             ShowNextVideo();
-    }
-
-    /// <inheritdoc />
-    protected override void AfterSceneUpdate()
-    {
     }
 
     /// <summary>
@@ -97,7 +91,7 @@ internal class VideoScene : BaseScene, IVideoScene
         var fileStream = File.OpenRead(nextVideoPath);
         _videoObject = GameObjectContainer.AddVideo(
             fileStream,
-            new RectangleD(0, 0, GameInfo.OriginalWidth, GameInfo.OriginalHeight),
+            GameInfo.SceneBounds,
             Layers.SceneLayers.BackgroundLayer);
     }
 }

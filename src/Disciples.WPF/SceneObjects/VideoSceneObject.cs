@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Disciples.Common.Models;
+using Disciples.Engine;
 using Disciples.Engine.Common.SceneObjects;
 using LibVLCSharp.Shared;
 
@@ -8,7 +9,7 @@ namespace Disciples.WPF.SceneObjects;
 /// <inheritdoc cref="IVideoSceneObject" />
 public class VideoSceneObject : BaseSceneObject, IVideoSceneObject
 {
-    private readonly LibVLC _libVlc;
+    private static readonly LibVLC LibVlc = new(false);
     private readonly Media _media;
 
     /// <summary>
@@ -16,10 +17,9 @@ public class VideoSceneObject : BaseSceneObject, IVideoSceneObject
     /// </summary>
     public VideoSceneObject(Stream stream, RectangleD bounds, int layer) : base(bounds, layer)
     {
-        _libVlc = new LibVLC(true);
-        _media = new Media(_libVlc, new StreamMediaInput(stream));
+        _media = new Media(LibVlc, new StreamMediaInput(stream));
 
-        MediaPlayer = new MediaPlayer(_libVlc);
+        MediaPlayer = new MediaPlayer(LibVlc);
     }
 
     /// <summary>
@@ -45,6 +45,5 @@ public class VideoSceneObject : BaseSceneObject, IVideoSceneObject
     {
         MediaPlayer.Stop();
         MediaPlayer.Dispose();
-        _libVlc.Dispose();
     }
 }

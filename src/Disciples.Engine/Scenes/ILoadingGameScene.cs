@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена загрузки игры.
 /// </summary>
-public interface ILoadingGameScene : IScene, ISupportLoadingWithParameters<SceneParameters>
+public interface ILoadingGameScene : IScene<SceneParameters>
 {
 }

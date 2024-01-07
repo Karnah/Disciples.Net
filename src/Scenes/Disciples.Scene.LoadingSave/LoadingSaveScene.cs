@@ -25,7 +25,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly MenuSoundController _menuSoundController;
     private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
 
-    private string _savePath = null!;
+    private readonly string _savePath;
 
     /// <summary>
     /// Создать объект типа <see cref="LoadingSaveScene" />.
@@ -40,7 +40,8 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         ITextProvider textProvider,
         ISceneInterfaceController sceneInterfaceController,
         MenuSoundController menuSoundController,
-        IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors
+        IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors,
+        LoadingSaveSceneParameters parameters
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _gameController = gameController;
@@ -50,16 +51,11 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         _sceneInterfaceController = sceneInterfaceController;
         _menuSoundController = menuSoundController;
         _resourceExtractors = resourceExtractors;
+        _savePath = parameters.SavePath;
     }
 
     /// <inheritdoc />
     public override CursorType DefaultCursorType => CursorType.None;
-
-    /// <inheritdoc />
-    public void InitializeParameters(LoadingSaveSceneParameters parameters)
-    {
-        _savePath = parameters.SavePath;
-    }
 
     /// <inheritdoc />
     protected override void LoadInternal()

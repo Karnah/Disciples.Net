@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена выбора сейва из саги.
 /// </summary>
-public interface ILoadSagaScene : IScene, ISupportLoadingWithParameters<SceneParameters>
+public interface ILoadSagaScene : IScene<SceneParameters>
 {
 }

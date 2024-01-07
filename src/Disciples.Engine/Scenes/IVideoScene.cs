@@ -6,6 +6,6 @@ namespace Disciples.Engine.Scenes;
 /// <summary>
 /// Сцена для отображения видео.
 /// </summary>
-public interface IVideoScene : IScene, ISupportLoadingWithParameters<VideoSceneParameters>
+public interface IVideoScene : IScene<VideoSceneParameters>
 {
 }
