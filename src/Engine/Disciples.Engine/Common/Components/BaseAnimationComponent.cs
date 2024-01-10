@@ -136,7 +136,9 @@ public abstract class BaseAnimationComponent : BaseComponent
         if (frames == null || frames.Count == 0)
             return;
 
-        animationHost.Bitmap = frames[FrameIndex];
+        // Если одна анимация состоит из нескольких частей (например, анимацию юнита состоит из анимации тела юнита, его тени и ауры),
+        // То чаще всего они имеют одинаковое количество фреймов. Но иногда анимация ауры состоит из меньшего количества фреймов, поэтому берём остаток от деления.
+        animationHost.Bitmap = frames[FrameIndex % frames.Count];
     }
 
     /// <summary>
@@ -161,7 +163,7 @@ public abstract class BaseAnimationComponent : BaseComponent
 
         var posX = GameObject.X + AnimationOffset.X;
         var posY = GameObject.Y + AnimationOffset.Y;
-        var frame = frames[FrameIndex];
+        var frame = frames[FrameIndex % frames.Count];
 
         // Добавляем изображение, если его раньше не было.
         if (animationHost == null)

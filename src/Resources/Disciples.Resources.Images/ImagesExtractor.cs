@@ -19,6 +19,11 @@ namespace Disciples.Resources.Images;
 /// </remarks>
 public class ImagesExtractor : BaseMqdbResourceExtractor
 {
+    /// <summary>
+    /// Анимации имеют данный идентификатор фрейма.
+    /// </summary>
+    private const int ANIMATION_MQ_INDEX_ID = -1;
+
     private IReadOnlyDictionary<string, MqImage>? _mqImages;
     private IReadOnlyDictionary<string, MqAnimation>? _mqAnimations;
     private IReadOnlyDictionary<int, IReadOnlyList<MqImage>>? _baseMqImages;
@@ -37,9 +42,6 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Получить кадры анимации по её имени.
     /// </summary>
-    // bug Невозможно получить информацию о некоторых файлах. В основном, связанных с эльфами.
-    // Например, G000UU8029HHITA1A00.
-    // Ссылки на PNG нет, но в .ff файле какая-то информация есть.
     public IReadOnlyCollection<RawBitmap>? GetAnimationFrames(string name)
     {
         if (_mqAnimations?.ContainsKey(name) != true)
@@ -159,7 +161,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         if (mqImages == null)
             return;
 
-        _mqAnimations = LoadMqAnimations(stream, mqImages);
+        _mqAnimations = LoadMqAnimations(stream, mqIndexes, mqImages);
         _mqImages = mqImages
             .Where(mi => mi.Value.IsAnimationFrame == false)
             .ToDictionary(mi => mi.Key, mi => mi.Value.MqImage);
@@ -200,7 +202,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Загрузить изображения. Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую.
     /// </summary>
-    private IDictionary<string, MqImage>? LoadMqImages(Stream stream, IDictionary<string, MqIndex> mqIndices)
+    private IDictionary<string, MqImage>? LoadMqImages(Stream stream, IDictionary<string, MqIndex> mqIndexes)
     {
         var imagesFile = TryGetFile("-IMAGES.OPT");
         if (imagesFile == null)
@@ -236,7 +238,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
                     pieces.Add(piece);
                 }
 
-                var fileId = mqIndices[frameName].Id;
+                var fileId = mqIndexes[frameName].Id;
                 var mqImage = new MqImage(frameName, fileId, width, height, pieces);
                 // todo Возможно дублирование. WTF?
                 mqImages.TryAdd(mqImage.Name, mqImage);
@@ -249,7 +251,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Загрузить анимации. Анимации хранят информацию о изображениях из которых состоят.
     /// </summary>
-    private IReadOnlyDictionary<string, MqAnimation>? LoadMqAnimations(Stream stream, IDictionary<string, MqImageInfo> mqImages)
+    private IReadOnlyDictionary<string, MqAnimation>? LoadMqAnimations(Stream stream, IDictionary<string, MqIndex> mqIndexes, IDictionary<string, MqImageInfo> mqImages)
     {
         var animsFile = TryGetFile("-ANIMS.OPT");
         if (animsFile == null)
@@ -277,19 +279,19 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
             ++animNumber;
         }
 
+        // Анимации идут в одинаковом порядке в -INDEX.OPT и -ANIMS.OPT,
+        // Поэтому имена извлекаем таким образом.
+        var animationNames = mqIndexes
+            .Values
+            .Where(ind => ind.Id == ANIMATION_MQ_INDEX_ID)
+            .Select(ind => ind.Name)
+            .ToArray();
         var mqAnimations = new Dictionary<string, MqAnimation>();
-        foreach (var animationInfo in animationsInfo)
+        foreach (var (animationIndex, frames) in animationsInfo)
         {
-            foreach (var mqAnimationFrame in animationInfo.Frames)
-            {
-                var safeFileName = Path.GetFileNameWithoutExtension(GetFile(mqAnimationFrame.FileId).Name);
-                var mqAnimation = new MqAnimation(animationInfo.AnimationIndex, safeFileName, animationInfo.Frames);
-
-                // Имя анимации - это имя базового изображения для первого фрейма.
-                // Фреймы могут иметь разные базовые изображения, но пока это работает.
-                mqAnimations.TryAdd(safeFileName, mqAnimation);
-                break;
-            }
+            var animationName = animationNames[animationIndex];
+            var mqAnimation = new MqAnimation(animationIndex, animationName, frames);
+            mqAnimations.Add(animationName, mqAnimation);
         }
 
         return mqAnimations;
@@ -388,8 +390,16 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 
         foreach (var framePart in mqImage.ImagePieces)
         {
-            var partWidth = framePart.Width << 2;
-            for (int row = 0; row < framePart.Height; ++row)
+            // Баг ресурсов Disciples.
+            // В некоторых случаях фрейм может иметь размеры больше, чем его базовое изображение (пример, G000UU0049HMOVA1A00).
+            if (baseImage.OriginalWidth < framePart.DestX)
+                continue;
+
+            var frameWidth = Math.Min(framePart.Width, Math.Max(baseImage.OriginalWidth - framePart.DestX, 0));
+            var frameHeight = Math.Min(framePart.Height, Math.Max(baseImage.OriginalHeight - framePart.DestY, 0));
+
+            var partWidth = frameWidth << 2;
+            for (int row = 0; row < frameHeight; ++row)
             {
                 var sourcePosition = ((framePart.DestY + row) * baseImage.OriginalWidth + framePart.DestX) << 2;
                 var destinationPosition = ((framePart.SourceY + row - bounds.Y) * imageWidth + framePart.SourceX - bounds.X) << 2;

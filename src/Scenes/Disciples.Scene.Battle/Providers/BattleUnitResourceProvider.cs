@@ -157,11 +157,24 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </summary>
     private BattleUnitFrames GetUnitFrames(string unitTypeId, BattleDirection direction, BattleUnitState unitState)
     {
+        var bodyKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Body);
+        var unitFrames = TryGetAnimationFrames(bodyKey);
+
+        // Баг ресурсов Disciples.
+        // Для некоторых юнитов (например, умертвие) не задана анимация тела получения урона.
+        // В этом случае игра использует анимацию ожидания.
+        if (unitFrames == null)
+        {
+            if (unitState == BattleUnitState.Waiting)
+                throw new ResourceNotFoundException(bodyKey.Key);
+
+            unitState = BattleUnitState.Waiting;
+            bodyKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Body);
+            unitFrames = GetAnimationFrames(bodyKey);
+        }
+
         var shadowKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Shadow);
         var shadowFrames = TryGetAnimationFrames(shadowKey);
-
-        var bodyKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Body);
-        var unitFrames = GetAnimationFrames(bodyKey);
 
         var auraKey = new UnitAnimationResourceKey(unitTypeId, unitState, direction, UnitAnimationType.Aura);
         var auraFrames = TryGetAnimationFrames(auraKey);

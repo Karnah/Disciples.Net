@@ -10,17 +10,17 @@ internal class MqAnimation
     }
 
     /// <summary>
-    /// Идентификатор анимации
+    /// Идентификатор анимации.
     /// </summary>
     public int Index { get; }
 
     /// <summary>
-    /// Название анимации
+    /// Название анимации.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// Фреймы из которых состоит анимация
+    /// Фреймы из которых состоит анимация.
     /// </summary>
     public IReadOnlyCollection<MqImage> Frames { get; }
 }

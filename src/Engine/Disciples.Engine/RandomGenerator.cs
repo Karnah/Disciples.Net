@@ -18,7 +18,7 @@ public static class RandomGenerator
     }
 
     /// <summary>
-    /// Получить случайное число от 0 до <paramref name="max" />.
+    /// Получить случайное число от 0 до <paramref name="max" /> (не включительно).
     /// </summary>
     public static int Get(int max)
     {
@@ -26,7 +26,7 @@ public static class RandomGenerator
     }
 
     /// <summary>
-    /// Получить случайное число от <paramref name="min" /> до <paramref name="max" />.
+    /// Получить случайное число от <paramref name="min" /> до <paramref name="max" /> (не включительно).
     /// </summary>
     public static int Get(int min, int max)
     {

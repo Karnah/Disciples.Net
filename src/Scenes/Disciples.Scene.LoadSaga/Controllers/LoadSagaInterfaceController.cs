@@ -137,7 +137,7 @@ internal class LoadSagaInterfaceController : BaseSupportLoading
     private void LoadSave(Save save)
     {
         _gameController.ChangeScene<ILoadingSaveScene, LoadingSaveSceneParameters>(
-            new LoadingSaveSceneParameters(save.Path));
+            new LoadingSaveSceneParameters(save.GameContext));
     }
 
     /// <summary>

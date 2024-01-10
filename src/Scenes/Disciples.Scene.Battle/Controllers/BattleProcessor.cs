@@ -288,6 +288,7 @@ internal class BattleProcessor
             case UnitAttackType.BoostDamage:
             case UnitAttackType.LowerDamage:
             case UnitAttackType.LowerInitiative:
+                break;
 
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:

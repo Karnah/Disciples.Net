@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
@@ -25,7 +26,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly MenuSoundController _menuSoundController;
     private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
 
-    private readonly string _savePath;
+    private readonly GameContext _save;
 
     /// <summary>
     /// Создать объект типа <see cref="LoadingSaveScene" />.
@@ -51,7 +52,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         _sceneInterfaceController = sceneInterfaceController;
         _menuSoundController = menuSoundController;
         _resourceExtractors = resourceExtractors;
-        _savePath = parameters.SavePath;
+        _save = parameters.Save;
     }
 
     /// <inheritdoc />
@@ -96,12 +97,10 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     {
         LoadResources();
 
-        var gameContext = _gameController.LoadGame(_savePath);
-
         // Следующая сцена будет сцена битвы.
         _gameController.ChangeScene<IBattleScene, BattleSceneParameters>(new BattleSceneParameters(
-            CreateSquad(gameContext.Players[0], gameContext.Players[0].Squads[0]),
-            CreateSquad(gameContext.Players[1], gameContext.Players[1].Squads[0])));
+            CreateSquad(_save.Players[0], _save.Players[0].Squads[0]),
+            CreateSquad(_save.Players[1], _save.Players[1].Squads[0])));
     }
 
     /// <summary>

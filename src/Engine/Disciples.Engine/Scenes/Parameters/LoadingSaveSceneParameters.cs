@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Models;
+﻿using Disciples.Engine.Common;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Scenes.Parameters;
 
@@ -10,13 +11,13 @@ public class LoadingSaveSceneParameters : SceneParameters
     /// <summary>
     /// Создать объект типа <see cref="LoadingSaveSceneParameters" />.
     /// </summary>
-    public LoadingSaveSceneParameters(string savePath)
+    public LoadingSaveSceneParameters(GameContext save)
     {
-        SavePath = savePath;
+        Save = save;
     }
 
     /// <summary>
-    /// Путь до сейва.
+    /// Данные сейва.
     /// </summary>
-    public string SavePath { get; }
+    public GameContext Save { get; }
 }
