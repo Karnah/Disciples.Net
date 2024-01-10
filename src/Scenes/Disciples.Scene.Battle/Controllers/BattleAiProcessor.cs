@@ -88,7 +88,7 @@ internal class BattleAiProcessor
         {
             var target = attackingSquad
                 .Units
-                .Where(u => u.HitPoints < u.MaxHitPoints)
+                .Where(u => u.HitPoints < u.MaxHitPoints && !u.IsDead)
                 .MinBy(u => u.HitPoints);
             if (target != null)
                 return new BattleAiCommand { CommandType = BattleCommandType.Attack, Target = target };
@@ -110,14 +110,26 @@ internal class BattleAiProcessor
             defendingSquad
                 .Units
                 .Where(u => _battleProcessor.CanAttack(attackingUnit, attackingSquad, u, defendingSquad))
+                .Select(u => new
+                {
+                    TargetUnit = u,
+                    _battleProcessor.ProcessMainAttack(attackingUnit, u)?.AttackResult
+                } )
+                .Where(r => r.AttackResult is not null and not AttackResult.Immunity)
                 .ToList();
 
         if (availableForAttackUnits.Count == 0)
             return new BattleAiCommand { CommandType = BattleCommandType.Defend };
 
         var target = availableForAttackUnits
-            .OrderBy(a => a.HitPoints)
-            .First();
+            // Если у юнита есть защита от атаки, то снижаем ему приоритет.
+            .OrderBy(unit => unit.AttackResult == AttackResult.Ward
+                ? 1
+                : 0)
+            // TODO Для юнитов с окаменением/параличом логичнее атаковать самых сильных юнитов.
+            .ThenBy(a => a.TargetUnit.HitPoints)
+            .First()
+            .TargetUnit;
         return new BattleAiCommand
         {
             CommandType = BattleCommandType.Attack,
