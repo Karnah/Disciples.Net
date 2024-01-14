@@ -28,5 +28,10 @@ internal enum BattleUnitState
     /// <summary>
     /// Юнит убит.
     /// </summary>
-    Dead
+    Dead,
+
+    /// <summary>
+    /// Юнит сбежал.
+    /// </summary>
+    Retreated
 }

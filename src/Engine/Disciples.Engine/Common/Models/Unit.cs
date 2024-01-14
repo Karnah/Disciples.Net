@@ -177,9 +177,19 @@ public class Unit
     public int Initiative => BaseInitiative + InitiativeModifier;
 
     /// <summary>
+    /// Признак, что юнита не нужно учитывать на поле боя.
+    /// </summary>
+    public bool IsDeadOrRetreated => IsDead || IsRetreated;
+
+    /// <summary>
     /// Мёртв ли юнит.
     /// </summary>
     public bool IsDead { get; set; }
+
+    /// <summary>
+    /// Юнит сбежал.
+    /// </summary>
+    public bool IsRetreated { get; set; }
 
     /// <summary>
     /// Эффекты, воздействующие на юнита.

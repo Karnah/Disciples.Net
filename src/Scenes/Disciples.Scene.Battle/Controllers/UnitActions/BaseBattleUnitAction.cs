@@ -186,6 +186,12 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (unitAction.ActionType == UnitActionType.Dying)
         {
             unitAction.TargetUnit.UnitState = BattleUnitState.Dead;
+
+            // Если юнит отступал, то возвращаем его положение на место,
+            // Чтобы корректно отображались кости.
+            unitAction.TargetUnit.Direction = unitAction.TargetUnit.IsAttacker
+                ? BattleDirection.Face
+                : BattleDirection.Back;
         }
 
         // На юнита наложен эффект.

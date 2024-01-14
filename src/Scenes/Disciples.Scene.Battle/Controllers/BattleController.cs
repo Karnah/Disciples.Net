@@ -177,6 +177,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
                 break;
 
             case BattleCommandType.Retreat:
+                _unitActionController.Retreat();
                 break;
 
             default:

@@ -133,15 +133,18 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private BattleUnitAnimation ExtractUnitAnimation(string unitTypeId, BattleDirection direction)
     {
         var unitType = _unitInfoProvider.GetUnitType(unitTypeId);
-        // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
         var unitFrames = new Dictionary<BattleUnitState, BattleUnitFrames>
         {
-            { BattleUnitState.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.IsSmall), null) }
+            // Анимация после смерти - это просто кости. Они одинаковы для всех юнитов, поэтому извлекаем отдельно.
+            { BattleUnitState.Dead, new BattleUnitFrames(null, GetDeadFrames(unitType.IsSmall), null) },
+
+            // Если юнит сбежал, то там пустое место.
+            { BattleUnitState.Retreated, new BattleUnitFrames(null, new AnimationFrames(), null )}
         };
 
         foreach (BattleUnitState action in Enum.GetValues(typeof(BattleUnitState)))
         {
-            if (action == BattleUnitState.Dead)
+            if (unitFrames.ContainsKey(action))
                 continue;
 
             unitFrames.Add(action, GetUnitFrames(unitTypeId, direction, action));

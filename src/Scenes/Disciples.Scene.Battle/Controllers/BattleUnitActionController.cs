@@ -101,6 +101,20 @@ internal class BattleUnitActionController
     }
 
     /// <summary>
+    /// Убежать с поля боя.
+    /// </summary>
+    public void Retreat()
+    {
+        var retreat = new RetreatUnitAction(
+            _battleContext,
+            _battleGameObjectContainer,
+            _unitPortraitPanelController,
+            _unitResourceProvider,
+            _soundController);
+        _battleContext.AddUnitAction(retreat);
+    }
+
+    /// <summary>
     /// Обработать начало ход юнита.
     /// </summary>
     public void UnitTurn()

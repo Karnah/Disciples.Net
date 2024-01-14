@@ -25,12 +25,17 @@ public class UnitEffects
     /// <summary>
     /// Есть ли на юните эффекты, которые наложены во время битвы.
     /// </summary>
-    public bool HasBattleEffects => IsDefended || _battleEffects.Count > 0;
+    public bool HasBattleEffects => IsDefended || IsRetreating || _battleEffects.Count > 0;
 
     /// <summary>
     /// Признак, что юнит защитился.
     /// </summary>
     public bool IsDefended { get; set; }
+
+    /// <summary>
+    /// Признак, что юнит собирается сбежать.
+    /// </summary>
+    public bool IsRetreating { get; set; }
 
     /// <summary>
     /// Признак, что юнит парализован и не может выполнить ход.
@@ -76,6 +81,7 @@ public class UnitEffects
     public void Clear()
     {
         IsDefended = false;
+        IsRetreating = false;
         _battleEffects.Clear();
     }
 }

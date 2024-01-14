@@ -135,7 +135,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     public void BattleUnitSelected(BattleUnit battleUnit)
     {
         // Если выбрали кости юнита, то не нужно менять портрет.
-        if (battleUnit.Unit.IsDead)
+        if (battleUnit.Unit.IsDeadOrRetreated)
             return;
 
         UpdateTargetUnit(battleUnit);
@@ -156,6 +156,10 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <inheritdoc />
     public void BattleUnitRightMouseButtonPressed(BattleUnit battleUnit)
     {
+        // Если юнит сбежал, то информацию по нему будет показана только по портрету.
+        if (battleUnit.Unit.IsRetreated)
+            return;
+
         ShowDetailUnitInfo(battleUnit.Unit);
     }
 
@@ -334,7 +338,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         var currentUnit = CurrentBattleUnit.Unit;
         var targetUnit = _context.TargetBattleUnit.Unit;
 
-        if (targetUnit.IsDead)
+        if (targetUnit.IsDeadOrRetreated)
         {
             _context.TargetBattleUnit.IsTarget = false;
             return;
@@ -357,7 +361,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility())
         {
             targetUnits = BattleUnits
-                .Where(u => u.Unit.Player == targetUnit.Player && u.Unit.IsDead == false)
+                .Where(u => u.Unit.Player == targetUnit.Player && u.Unit.IsDeadOrRetreated == false)
                 .ToArray();
         }
         else

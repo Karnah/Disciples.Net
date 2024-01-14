@@ -66,6 +66,11 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     public bool IsDisplayingBothPanels { get; private set; }
 
     /// <summary>
+    /// Отряд, который отображается на панели.
+    /// </summary>
+    public BattleSquadPosition DisplayingSquad => _displayingSquad!.Value;
+
+    /// <summary>
     ///  Юнит, который выполняет свой ход.
     /// </summary>
     private BattleUnit CurrentBattleUnit => _context.CurrentBattleUnit;

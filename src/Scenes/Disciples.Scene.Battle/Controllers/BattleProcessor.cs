@@ -35,7 +35,7 @@ internal class BattleProcessor
         return new Queue<Unit>(
             attackingSquad.Units
                 .Concat(defendingSquad.Units)
-                .Where(u => !u.IsDead)
+                .Where(u => !u.IsDeadOrRetreated)
                 .OrderByDescending(u => u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE)));
     }
 
@@ -52,7 +52,7 @@ internal class BattleProcessor
     /// <param name="targetSquad">Отряд цели.</param>
     public bool CanAttack(Unit attackingUnit, Squad attackingSquad, Unit targetUnit, Squad targetSquad)
     {
-        if (attackingUnit.IsDead)
+        if (attackingUnit.IsRetreated)
             return false;
 
         // Лекарь не может атаковать врага, а воин не может атаковать союзника.
@@ -108,7 +108,7 @@ internal class BattleProcessor
     /// </summary>
     private static bool IsFrontLineEmpty(Squad squad)
     {
-        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsDead);
+        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsDeadOrRetreated);
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ internal class BattleProcessor
     {
         return squad.Units.Any(u => u.SquadLinePosition == linePosition &&
                                     u.SquadFlankPosition == flankPosition &&
-                                    u.IsDead == false) == false;
+                                    u.IsDeadOrRetreated == false) == false;
     }
 
     #endregion
@@ -201,6 +201,9 @@ internal class BattleProcessor
     /// <param name="accuracy">Точность атаки.</param>
     private static BattleProcessorAttackResult? ProcessAttack(Unit targetUnit, UnitAttack attack, int? power, int accuracy)
     {
+        if (targetUnit.IsRetreated)
+            return null;
+
         // Единственная атаки, которая действует на мёртвых юнитов - воскрешение и призыв.
         if (targetUnit.IsDead
             && attack.AttackType is not UnitAttackType.Revive or UnitAttackType.Summon)
@@ -385,10 +388,10 @@ internal class BattleProcessor
     /// <param name="defendingSquad">Защищающийся отряд.</param>
     public Squad? GetBattleWinnerSquad(Squad attackingSquad, Squad defendingSquad)
     {
-        if (attackingSquad.Units.All(u => u.IsDead))
+        if (attackingSquad.Units.All(u => u.IsDeadOrRetreated))
             return defendingSquad;
 
-        if (defendingSquad.Units.All(u => u.IsDead))
+        if (defendingSquad.Units.All(u => u.IsDeadOrRetreated))
             return attackingSquad;
 
         return null;

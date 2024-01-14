@@ -103,6 +103,10 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private IImageSceneObject? _defendIcon;
     /// <summary>
+    /// Иконка, если юнит сбежал.
+    /// </summary>
+    private IImageSceneObject? _retreatedIcon;
+    /// <summary>
     /// Иконки эффектов, которые воздействуют на юнита.
     /// </summary>
     private readonly Dictionary<UnitAttackType, IImageSceneObject> _battleEffectsIcons;
@@ -176,7 +180,6 @@ internal class UnitPortraitObject : GameObject
         base.Initialize();
 
         _unitPortrait = _sceneObjectContainer.AddImage(_unitFaceBitmap, PortraitBounds, BattleLayers.INTERFACE_LAYER + PORTRAIT_AND_HP_LAYER_SHIFT);
-        _unitPortrait.IsReflected = _unitSquadPosition == BattleSquadPosition.Defender;
 
         _unitHitpoints = _sceneObjectContainer.AddText(null, HitPointsBounds, BattleLayers.INTERFACE_LAYER + PORTRAIT_AND_HP_LAYER_SHIFT);
 
@@ -213,6 +216,7 @@ internal class UnitPortraitObject : GameObject
         RemoveSceneObject(ref _unitPanelSeparator);
         RemoveSceneObject(ref _highLevelUnitIcon);
         RemoveSceneObject(ref _defendIcon);
+        RemoveSceneObject(ref _retreatedIcon);
 
         foreach (var battleEffectsIcon in _battleEffectsIcons)
             _sceneObjectContainer.RemoveSceneObject(battleEffectsIcon.Value);
@@ -256,6 +260,9 @@ internal class UnitPortraitObject : GameObject
 
             case UnitActionType.Defend:
                 _instantaneousEffectText = AddText(DEFEND_TEXT_ID);
+                break;
+
+            case UnitActionType.Retreating:
                 break;
 
             case UnitActionType.Waiting:
@@ -324,6 +331,10 @@ internal class UnitPortraitObject : GameObject
             _lastLevelDiff = levelDiff;
         }
 
+        _unitPortrait.IsReflected = Unit.IsRetreated || Unit.Effects.IsRetreating
+            ? _unitSquadPosition == BattleSquadPosition.Attacker
+            : _unitSquadPosition != BattleSquadPosition.Attacker;
+
         // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
         if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
             return;
@@ -384,12 +395,23 @@ internal class UnitPortraitObject : GameObject
             RemoveSceneObject(ref _defendIcon);
         }
 
+        // Иконка сбежавшего юнита отображается снизу слева.
+        // После того, как юнит сбежал - все эффекты с него удаляются, поэтому не будет пересечений с _battleEffectsIcons.
+        if (Unit.IsRetreated && _retreatedIcon == null)
+        {
+            var icon = _battleInterfaceProvider.UnitPortraitRetreatedIcon;
+            _retreatedIcon = _sceneObjectContainer.AddImage(
+                icon,
+                PortraitBounds.X + PortraitBounds.Width - icon.OriginalSize.Width,
+                PortraitBounds.Y + PortraitBounds.Height - icon.OriginalSize.Height,
+                BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
+        }
+
         var battleEffects = Unit.Effects.GetBattleEffects();
 
         // Удаляем иконки тех эффектов, действие которых закончилось.
         var expiredEffects = _battleEffectsIcons
-            .Where(bei => battleEffects.All(be => be.AttackType != bei.Key))
-            .ToList();
+            .Where(bei => battleEffects.All(be => be.AttackType != bei.Key));
         foreach (var expiredEffect in expiredEffects)
         {
             if (_battleEffectsIcons.TryGetValue(expiredEffect.Key, out var effectIcon))

@@ -45,7 +45,7 @@ internal class UnitTurnQueue
         // Очередь из основных ходов юнитов.
         do
         {
-            if (_turnOrder.TryDequeue(out var nextUnit) && !nextUnit.IsDead)
+            if (_turnOrder.TryDequeue(out var nextUnit) && !nextUnit.IsDeadOrRetreated)
                 return nextUnit;
         } while (_turnOrder.Count > 0);
 
@@ -57,7 +57,7 @@ internal class UnitTurnQueue
 
             do
             {
-                if (_waitingTurnOrder.TryPop(out var nextUnit) && !nextUnit.IsDead)
+                if (_waitingTurnOrder.TryPop(out var nextUnit) && !nextUnit.IsDeadOrRetreated)
                     return nextUnit;
             } while (_waitingTurnOrder.Count > 0);
         }

@@ -21,7 +21,7 @@ internal class UnitBattleAction : ComplexBattleAction
         int? power = null,
         AnimationBattleAction? animationBattleAction = null,
         UnitAttackSource? attackSource = null
-        ) : base(GetBattleActions(animationBattleAction))
+        ) : base(GetBattleActions(actionType, animationBattleAction))
     {
         TargetUnit = targetUnit;
         ActionType = actionType;
@@ -66,14 +66,18 @@ internal class UnitBattleAction : ComplexBattleAction
     /// <summary>
     /// Получить все действия.
     /// </summary>
-    private static IReadOnlyList<IBattleAction> GetBattleActions(AnimationBattleAction? animationBattleAction)
+    private static IReadOnlyList<IBattleAction> GetBattleActions(UnitActionType unitActionType, AnimationBattleAction? animationBattleAction)
     {
+        var touchUnitActionDuration = unitActionType == UnitActionType.Retreating
+            ? 1
+            : TOUCH_UNIT_ACTION_DURATION;
+
         if (animationBattleAction == null)
-            return new[] { new DelayBattleAction(TOUCH_UNIT_ACTION_DURATION) };
+            return new[] { new DelayBattleAction(touchUnitActionDuration) };
 
         return new IBattleAction[]
         {
-            new DelayBattleAction(TOUCH_UNIT_ACTION_DURATION),
+            new DelayBattleAction(touchUnitActionDuration),
             animationBattleAction
         };
     }

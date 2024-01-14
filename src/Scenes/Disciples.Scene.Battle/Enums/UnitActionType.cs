@@ -31,6 +31,11 @@ internal enum UnitActionType
     Waiting,
 
     /// <summary>
+    /// Юнит готовится к побегу.
+    /// </summary>
+    Retreating,
+
+    /// <summary>
     /// Юнит умирает.
     /// </summary>
     Dying,

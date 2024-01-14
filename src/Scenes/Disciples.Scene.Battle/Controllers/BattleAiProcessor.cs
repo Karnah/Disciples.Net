@@ -49,15 +49,15 @@ internal class BattleAiProcessor
     /// <returns>Победивший отряд в битве.</returns>
     public Squad ProcessInstantBattle(Squad attackingSquad, Squad defendingSquad)
     {
-        if (attackingSquad.Units.All(u => u.IsDead))
+        if (attackingSquad.Units.All(u => u.IsDeadOrRetreated))
             return defendingSquad;
 
-        if (defendingSquad.Units.All(u => u.IsDead))
+        if (defendingSquad.Units.All(u => u.IsDeadOrRetreated))
             return attackingSquad;
 
         foreach (var attackingSquadUnit in attackingSquad.Units)
         {
-            if (attackingSquadUnit.IsDead)
+            if (attackingSquadUnit.IsDeadOrRetreated)
                 continue;
 
             attackingSquadUnit.HitPoints = 1;
@@ -65,7 +65,7 @@ internal class BattleAiProcessor
 
         foreach (var defendingSquadUnit in defendingSquad.Units)
         {
-            if (defendingSquadUnit.IsDead)
+            if (defendingSquadUnit.IsDeadOrRetreated)
                 continue;
 
             defendingSquadUnit.HitPoints = 0;
@@ -88,7 +88,7 @@ internal class BattleAiProcessor
         {
             var target = attackingSquad
                 .Units
-                .Where(u => u.HitPoints < u.MaxHitPoints && !u.IsDead)
+                .Where(u => u.HitPoints < u.MaxHitPoints && !u.IsDeadOrRetreated)
                 .MinBy(u => u.HitPoints);
             if (target != null)
                 return new BattleAiCommand { CommandType = BattleCommandType.Attack, Target = target };

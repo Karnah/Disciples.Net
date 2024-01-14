@@ -30,6 +30,11 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     private BattleUnitState _unitState;
 
     /// <summary>
+    /// Анимация какого направления отображается в данный момент.
+    /// </summary>
+    private BattleDirection _unitDirection;
+
+    /// <summary>
     /// Кадры анимации тени юнита.
     /// </summary>
     private AnimationFrames? _shadowFrames;
@@ -108,6 +113,15 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
             return;
         }
 
+        // Если юнит изменил направление (готовится к побегу),
+        // То заново запрашиваем анимации.
+        if (_battleUnit.Direction != _unitDirection)
+        {
+            BattleUnitAnimation = _battleUnitResourceProvider.GetBattleUnitAnimation(_battleUnit.Unit.UnitType, _battleUnit.Direction);
+            UpdateSource();
+            return;
+        }
+
         base.Update(tickCount);
     }
 
@@ -152,6 +166,7 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
     private void UpdateSource(int startFrameIndex = 0)
     {
         _unitState = _battleUnit.UnitState;
+        _unitDirection = _battleUnit.Direction;
 
         var frames = BattleUnitAnimation.BattleUnitFrames[_unitState];
         _shadowFrames = frames.ShadowFrames;

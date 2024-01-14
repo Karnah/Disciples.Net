@@ -62,6 +62,11 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IBitmap UnitPortraitDefendIcon { get; }
 
     /// <summary>
+    /// Иконка сбежавшего юнита.
+    /// </summary>
+    IBitmap UnitPortraitRetreatedIcon { get; }
+
+    /// <summary>
     /// Иконки для эффектов, воздействующих на юнита.
     /// </summary>
     IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; }

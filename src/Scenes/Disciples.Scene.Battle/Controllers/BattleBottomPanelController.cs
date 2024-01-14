@@ -168,7 +168,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteRetreat()
     {
-        // TODO
+        _unitActionController.Retreat();
     }
 
     /// <summary>
@@ -196,7 +196,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteAutoBattle()
     {
-        _context.IsAutoBattle = _autoBattleButton!.IsChecked;
+        _context.IsAutoBattle = _autoBattleButton.IsChecked;
     }
 
     /// <summary>

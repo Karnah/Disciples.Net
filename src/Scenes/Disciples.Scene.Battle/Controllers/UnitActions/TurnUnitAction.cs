@@ -50,9 +50,9 @@ internal class TurnUnitAction : BaseBattleUnitAction
 
         var hasBattleEffects = ProcessNextBattleEffect();
 
-        // Сбрасываем признак защиты.
+        // Если никаких эффектов нет, то сразу переходим к защите/отступлению.
         if (!hasBattleEffects)
-            CurrentBattleUnit.Unit.Effects.IsDefended = false;
+            ProcessDefendAndRetreatEvents(false);
     }
 
     /// <inheritdoc />
@@ -104,10 +104,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
             if (ProcessNextBattleEffect())
                 return;
 
-            CurrentBattleUnit.Unit.Effects.IsDefended = false;
-
-            // Если все эффекты были обработаны, до ждём немного и завершаем действие.
-            AddAction(new DelayBattleAction());
+            ProcessDefendAndRetreatEvents(true);
         }
     }
 
@@ -167,5 +164,32 @@ internal class TurnUnitAction : BaseBattleUnitAction
 
             return true;
         }
+    }
+
+    /// <summary>
+    /// Обработать события защиты и отступления.
+    /// </summary>
+    /// <param name="shouldDelay">Добавлять ли задержку после всех действий.</param>
+    private void ProcessDefendAndRetreatEvents(bool shouldDelay)
+    {
+        if (CurrentBattleUnit.Unit.Effects.IsDefended)
+            CurrentBattleUnit.Unit.Effects.IsDefended = false;
+
+        // Если ранее по эффектам юнит должен пропускать ход (например, из-за паралича),
+        // То побег осуществляться не будет.
+        if (CurrentBattleUnit.Unit.Effects.IsRetreating && !CurrentBattleUnit.Unit.IsDead && !ShouldPassTurn)
+        {
+            CurrentBattleUnit.UnitState = BattleUnitState.Retreated;
+            CurrentBattleUnit.Unit.IsRetreated = true;
+            CurrentBattleUnit.Unit.Effects.Clear();
+            ShouldPassTurn = true;
+
+            // В случае отступления задержка минимальна.
+            AddAction(new DelayBattleAction(1));
+            return;
+        }
+
+        if (shouldDelay)
+            AddAction(new DelayBattleAction());
     }
 }
