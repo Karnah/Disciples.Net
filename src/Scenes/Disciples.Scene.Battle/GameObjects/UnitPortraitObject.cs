@@ -58,6 +58,10 @@ internal class UnitPortraitObject : GameObject
     /// Идентификатор в ресурсах с текстом "Иммунитет".
     /// </summary>
     private const string IMMUNITY_TEXT_ID = "X008TA0002";
+    /// <summary>
+    /// Идентификатор в ресурсах с текстом "Страх".
+    /// </summary>
+    private const string FEAT_TEXT_ID = "X008TA0007";
 
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -263,6 +267,13 @@ internal class UnitPortraitObject : GameObject
                 break;
 
             case UnitActionType.Retreating:
+                // Если юнит отступает по команде, то дополнительная информация выводится не будет.
+                if (eventData.AttackType == UnitAttackType.Fear)
+                {
+                    _instantaneousEffectImage = AddColorImage(BattleColors.Damage);
+                    _instantaneousEffectText = AddText(FEAT_TEXT_ID);
+                }
+
                 break;
 
             case UnitActionType.Waiting:

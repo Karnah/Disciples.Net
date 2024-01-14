@@ -27,11 +27,11 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     /// <summary>
     /// Признак, что проигрывается звук типа атаки.
     /// </summary>
-    private bool _isAttackSoundPlaying = false;
+    private bool _isAttackSoundPlaying;
     /// <summary>
     /// Признак, что проигрывается звук смерти.
     /// </summary>
-    private bool _isDeathSoundPlaying = false;
+    private bool _isDeathSoundPlaying;
 
     /// <summary>
     /// Создать объект типа <see cref="BaseBattleUnitAction" />.
@@ -166,6 +166,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     /// </summary>
     protected virtual void ProcessBeginUnitAction(UnitBattleAction unitAction)
     {
+        if (unitAction.ActionType == UnitActionType.Retreating)
+        {
+            unitAction.TargetUnit.Direction = unitAction.TargetUnit.Direction == BattleDirection.Back
+                ? BattleDirection.Face
+                : BattleDirection.Back;
+            unitAction.TargetUnit.Unit.Effects.IsRetreating = true;
+        }
+
         var portrait = _unitPortraitPanelController.GetUnitPortrait(unitAction.TargetUnit);
         portrait?.ProcessBeginUnitPortraitEvent(unitAction.GetUnitPortraitEventData());
 
@@ -315,6 +323,10 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
             case AttackResult.Immunity:
                 AddAction(new UnitBattleAction(targetUnit, UnitActionType.Immunity));
+                break;
+
+            case AttackResult.Fear:
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Retreating, attackResult.AttackType, attackSource: attackResult.AttackSource));
                 break;
 
             default:

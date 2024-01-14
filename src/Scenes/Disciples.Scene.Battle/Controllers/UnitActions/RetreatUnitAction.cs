@@ -39,7 +39,7 @@ internal class RetreatUnitAction : BaseBattleUnitAction
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
-        AddAction(new UnitBattleAction(CurrentBattleUnit, UnitActionType.Retreating));
+        AddAction(new UnitBattleAction(CurrentBattleUnit, UnitActionType.Retreating, touchUnitActionDuration: 1));
     }
 
     /// <inheritdoc />
@@ -62,16 +62,5 @@ internal class RetreatUnitAction : BaseBattleUnitAction
                 ProcessCompletedUnitAction(unitBattleAction);
                 return;
         }
-    }
-
-    /// <inheritdoc />
-    protected override void ProcessCompletedUnitAction(UnitBattleAction unitAction)
-    {
-        CurrentBattleUnit.Direction = CurrentBattleUnit.Direction == BattleDirection.Back
-            ? BattleDirection.Face
-            : BattleDirection.Back;
-        CurrentBattleUnit.Unit.Effects.IsRetreating = true;
-
-        base.ProcessCompletedUnitAction(unitAction);
     }
 }

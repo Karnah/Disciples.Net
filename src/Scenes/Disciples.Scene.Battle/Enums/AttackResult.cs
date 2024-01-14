@@ -36,5 +36,10 @@ internal enum AttackResult
     /// <summary>
     /// Иммунитет от атаки.
     /// </summary>
-    Immunity
+    Immunity,
+
+    /// <summary>
+    /// Юнит испугался и собирается сбежать.
+    /// </summary>
+    Fear
 }

@@ -33,6 +33,9 @@
     <None Update="Saves\debugPosition.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Saves\fearSave.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Saves\wardImmunitySave.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

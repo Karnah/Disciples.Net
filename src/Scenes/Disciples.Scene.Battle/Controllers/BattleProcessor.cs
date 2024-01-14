@@ -238,9 +238,6 @@ internal class BattleProcessor
         if (chanceOfFirstAttack > accuracy)
             return new BattleProcessorAttackResult(AttackResult.Miss);
 
-        // todo Сразу обработать иммунитет + сопротивления. Также вернуть результат.
-        // Вторая атака не будет действовать, если первая упёрлась в иммунитет.
-
         switch (attack.AttackType)
         {
             case UnitAttackType.Damage:
@@ -288,6 +285,12 @@ internal class BattleProcessor
                 break;
 
             case UnitAttackType.Fear:
+                // TODO Если нельзя отступить (например, отряд в городе),
+                // То страх действует как паралич.
+                return new BattleProcessorAttackResult(AttackResult.Fear,
+                    attack.AttackType,
+                    attack.AttackSource);
+
             case UnitAttackType.BoostDamage:
             case UnitAttackType.LowerDamage:
             case UnitAttackType.LowerInitiative:

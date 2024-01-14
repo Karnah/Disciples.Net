@@ -14,14 +14,18 @@ internal class UnitBattleAction : ComplexBattleAction
     /// </summary>
     private const int TOUCH_UNIT_ACTION_DURATION = 1000;
 
+    /// <summary>
+    /// Создать объект типа <see cref="UnitBattleAction" />.
+    /// </summary>
     public UnitBattleAction(
         BattleUnit targetUnit,
         UnitActionType actionType,
         UnitAttackType? attackType = null,
         int? power = null,
         AnimationBattleAction? animationBattleAction = null,
-        UnitAttackSource? attackSource = null
-        ) : base(GetBattleActions(actionType, animationBattleAction))
+        UnitAttackSource? attackSource = null,
+        int? touchUnitActionDuration = null
+        ) : base(GetBattleActions(animationBattleAction, touchUnitActionDuration ?? TOUCH_UNIT_ACTION_DURATION))
     {
         TargetUnit = targetUnit;
         ActionType = actionType;
@@ -66,12 +70,8 @@ internal class UnitBattleAction : ComplexBattleAction
     /// <summary>
     /// Получить все действия.
     /// </summary>
-    private static IReadOnlyList<IBattleAction> GetBattleActions(UnitActionType unitActionType, AnimationBattleAction? animationBattleAction)
+    private static IReadOnlyList<IBattleAction> GetBattleActions(AnimationBattleAction? animationBattleAction, int touchUnitActionDuration)
     {
-        var touchUnitActionDuration = unitActionType == UnitActionType.Retreating
-            ? 1
-            : TOUCH_UNIT_ACTION_DURATION;
-
         if (animationBattleAction == null)
             return new[] { new DelayBattleAction(touchUnitActionDuration) };
 
