@@ -26,4 +26,16 @@ internal interface IBattleGameObjectContainer : IGameObjectContainer
     /// <param name="portraitBounds">Положение портрета юнита.</param>
     /// <param name="hitPointsBounds">Положение информации здоровья юнита.</param>
     UnitPortraitObject AddUnitPortrait(Unit unit, BattleSquadPosition unitSquadPosition, RectangleD portraitBounds, RectangleD hitPointsBounds);
+
+    /// <summary>
+    /// Добавить портрет юнита в нижнюю панель на сцену.
+    /// </summary>
+    /// <param name="isLeft">Признак, что это левая панель.</param>
+    /// <param name="portraitSceneElement">Элемент портрета юнита.</param>
+    /// <param name="leaderPanelSceneElement">Панель лидера.</param>
+    /// <param name="unitInfoSceneElement">Информация о юните.</param>
+    BottomUnitPortraitObject AddBottomUnitPortrait(bool isLeft,
+        SceneElement portraitSceneElement,
+        SceneElement leaderPanelSceneElement,
+        SceneElement unitInfoSceneElement);
 }

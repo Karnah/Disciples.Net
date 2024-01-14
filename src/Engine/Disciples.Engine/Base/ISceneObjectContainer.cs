@@ -68,6 +68,13 @@ public interface ISceneObjectContainer
     ITextSceneObject AddText(TextContainer? text, TextStyle? textStyle, RectangleD bounds, int layer);
 
     /// <summary>
+    /// Добавить текст на сцену.
+    /// </summary>
+    /// <param name="textBlockSceneElement">Текст.</param>
+    /// <param name="layer">Слой на котором будет отображаться текст.</param>
+    ITextSceneObject AddText(TextBlockSceneElement textBlockSceneElement, int layer);
+
+    /// <summary>
     /// Добавить видео из файла на сцену.
     /// </summary>
     /// <param name="videoStream">Видеопоток.</param>

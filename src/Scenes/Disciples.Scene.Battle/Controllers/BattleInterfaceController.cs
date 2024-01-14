@@ -97,6 +97,12 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
                 ProcessActionsBegin();
                 break;
 
+            // Для нижней панели также отслеживаем окончание одного действия и начало другого.
+            // Необходимо для обновления портретов.
+            case BattleState.BeginNextUnitAction:
+                _bottomPanelController.ProcessBeginNextUnitAction();
+                break;
+
             case BattleState.CompletedUnitAction:
                 ProcessActionsCompleted();
                 break;
@@ -184,6 +190,14 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         // Но сейчас они позиционируются только как картинки, а не как объекты.
 
         ShowDetailUnitInfo(unitPortrait.Unit);
+    }
+
+    /// <inheritdoc />
+    public void BottomUnitPortraitRightMouseButtonPressed(BottomUnitPortraitObject bottomUnitPortrait)
+    {
+        var unit = bottomUnitPortrait.BattleUnit?.Unit;
+        if (unit != null)
+            ShowDetailUnitInfo(unit);
     }
 
     /// <inheritdoc />

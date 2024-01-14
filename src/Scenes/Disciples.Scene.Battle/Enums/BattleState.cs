@@ -16,6 +16,11 @@ internal enum BattleState
     BeginUnitAction,
 
     /// <summary>
+    /// Завершение одного действия и переход к следующему.
+    /// </summary>
+    BeginNextUnitAction,
+
+    /// <summary>
     /// Выполнения действия юнитом.
     /// </summary>
     ProcessingUnitAction,

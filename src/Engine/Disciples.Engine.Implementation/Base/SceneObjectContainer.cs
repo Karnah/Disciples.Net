@@ -71,6 +71,12 @@ public sealed class SceneObjectContainer : ISceneObjectContainer
     }
 
     /// <inheritdoc />
+    public ITextSceneObject AddText(TextBlockSceneElement textBlockSceneElement, int layer)
+    {
+        return AddText(textBlockSceneElement.Text, textBlockSceneElement.TextStyle, textBlockSceneElement.Position, layer);
+    }
+
+    /// <inheritdoc />
     public IVideoSceneObject AddVideo(Stream videoStream, RectangleD bounds, int layer)
     {
         return PlatformSceneObjectContainer.AddVideoSceneObject(videoStream, bounds, layer);

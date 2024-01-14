@@ -58,4 +58,16 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
             unit, unitSquadPosition, portraitBounds, hitPointsBounds);
         return AddObject(unitPortrait);
     }
+
+    /// <inheritdoc />
+    public BottomUnitPortraitObject AddBottomUnitPortrait(bool isLeft,
+        SceneElement portraitSceneElement,
+        SceneElement leaderPanelSceneElement,
+        SceneElement unitInfoSceneElement)
+    {
+        var bottomUnitPortrait = new BottomUnitPortraitObject(_sceneObjectContainer, _textProvider, _battleUnitResourceProvider, isLeft,
+            portraitSceneElement, leaderPanelSceneElement, unitInfoSceneElement,
+            _battleInterfaceController.Value.BottomUnitPortraitRightMouseButtonPressed);
+        return AddObject(bottomUnitPortrait);
+    }
 }

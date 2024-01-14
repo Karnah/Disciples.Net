@@ -165,10 +165,9 @@ internal class BattleContext : BaseSupportLoading
             {
                 CompletedUnitAction = UnitAction;
                 UnitAction = GetNextUnitAction();
-
-                // Если следующего действия нет, то выставляем признак завершения.
-                if (UnitAction == null)
-                    BattleState = BattleState.CompletedUnitAction;
+                BattleState = UnitAction == null
+                    ? BattleState.CompletedUnitAction
+                    : BattleState.BeginNextUnitAction;
             }
         }
     }
@@ -198,7 +197,7 @@ internal class BattleContext : BaseSupportLoading
 
             BattleState = CompletedUnitAction == null
                 ? BattleState.BeginUnitAction
-                : BattleState.ProcessingUnitAction;
+                : BattleState.BeginNextUnitAction;
             UnitAction = unitAction;
         }
         else if (NextUnitAction == null)
@@ -245,6 +244,7 @@ internal class BattleContext : BaseSupportLoading
         {
             BattleState.WaitPlayerTurn => BattleState.WaitPlayerTurn,
             BattleState.BeginUnitAction => BattleState.ProcessingUnitAction,
+            BattleState.BeginNextUnitAction => BattleState.ProcessingUnitAction,
             BattleState.ProcessingUnitAction => BattleState.ProcessingUnitAction,
             BattleState.CompletedUnitAction => BattleState.WaitPlayerTurn,
             BattleState.CompletedBattle => BattleState.WaitExit,

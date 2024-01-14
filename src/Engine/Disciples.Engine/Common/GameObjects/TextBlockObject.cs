@@ -43,7 +43,7 @@ public class TextBlockObject : GameObject
     {
         base.Initialize();
 
-        _textSceneObject = _sceneObjectContainer.AddText(_textBlock.Text, _textBlock.TextStyle, _textBlock.Position, _layer);
+        _textSceneObject = _sceneObjectContainer.AddText(_textBlock, _layer);
     }
 
     /// <inheritdoc />

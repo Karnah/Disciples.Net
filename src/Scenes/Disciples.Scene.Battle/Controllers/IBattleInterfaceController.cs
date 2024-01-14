@@ -68,5 +68,10 @@ internal interface IBattleInterfaceController : ISupportLoading
     /// </summary>
     void UnitPortraitRightMouseButtonPressed(UnitPortraitObject unitPortrait);
 
+    /// <summary>
+    /// Зажатая ПКМ портрете юнита нижней панели.
+    /// </summary>
+    void BottomUnitPortraitRightMouseButtonPressed(BottomUnitPortraitObject bottomUnitPortrait);
+
     #endregion
 }

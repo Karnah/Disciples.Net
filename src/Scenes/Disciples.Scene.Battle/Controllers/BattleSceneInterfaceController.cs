@@ -1,6 +1,5 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Constants;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Common.Controllers;
@@ -29,17 +28,6 @@ internal class BattleSceneInterfaceController : SceneInterfaceController
     /// <inheritdoc />
     protected override GameObject? GetElement(SceneElement sceneElement, Layers layers)
     {
-        // В Interf.dlg эти элементы почему-то в виде Image. Конвертируем их в текст.
-        if (sceneElement.Name is BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK or BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK &&
-            sceneElement.Type != SceneElementType.TextBlock)
-        {
-            return base.GetElement(new TextBlockSceneElement
-            {
-                Name = sceneElement.Name,
-                Position = sceneElement.Position,
-            }, layers);
-        }
-
         // Эти элементы выступают в роли плейсхолдеров. Для них нет необходимости создавать объекты.
         if (sceneElement.Name.StartsWith(BattleUnitPanelElementNames.LEFT_PANEL_DISPLAY_PLACEHOLDER) ||
             sceneElement.Name.StartsWith(BattleUnitPanelElementNames.LEFT_UNIT_PANEL_PORTRAIT_PATTERN_PLACEHOLDER) ||
@@ -47,7 +35,15 @@ internal class BattleSceneInterfaceController : SceneInterfaceController
             sceneElement.Name.StartsWith(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_PORTRAIT_PATTERN_PLACEHOLDER) ||
             sceneElement.Name.StartsWith(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_HP_PATTERN_PLACEHOLDER) ||
             sceneElement.Name.StartsWith(BattlegroundElementNames.ATTACK_UNIT_PATTERN_PLACEHOLDER) ||
-            sceneElement.Name.StartsWith(BattlegroundElementNames.DEFEND_UNIT_PATTERN_PLACEHOLDER))
+            sceneElement.Name.StartsWith(BattlegroundElementNames.DEFEND_UNIT_PATTERN_PLACEHOLDER) ||
+            sceneElement.Name
+                is BattleBottomPanelElementNames.LEFT_UNIT_PORTRAIT_IMAGE
+                or BattleBottomPanelElementNames.LEFT_LEADER_ITEMS_IMAGE
+                or BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK ||
+            sceneElement.Name
+                is BattleBottomPanelElementNames.RIGHT_UNIT_PORTRAIT_IMAGE
+                or BattleBottomPanelElementNames.RIGHT_LEADER_ITEMS_IMAGE
+                or BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK)
         {
             return null;
         }

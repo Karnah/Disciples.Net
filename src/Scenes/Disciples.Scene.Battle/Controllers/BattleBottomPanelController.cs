@@ -1,16 +1,15 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.GameObjects;
-using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Constants;
+using Disciples.Scene.Battle.Controllers.UnitActions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -23,8 +22,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     private readonly BattleUnitActionController _unitActionController;
     private readonly BattleContext _context;
     private readonly IGameController _gameController;
-    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
-    private readonly ITextProvider _textProvider;
+    private readonly IBattleInterfaceProvider _battleInterfaceProvider;
 
     private ButtonObject _defendButton = null!;
     private ButtonObject _retreatButton = null!;
@@ -35,8 +33,8 @@ internal class BattleBottomPanelController : BaseSupportLoading
     private ButtonObject _openSquadInventoryButton = null!;
     private ButtonObject _exitButton = null!;
 
-    private BattleUnitBottomPanelData _rightUnitPanel = null!;
-    private BattleUnitBottomPanelData _leftUnitPanel = null!;
+    private BottomUnitPortraitObject _rightUnitPortrait = null!;
+    private BottomUnitPortraitObject _leftUnitPortrait = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleBottomPanelController" />.
@@ -46,15 +44,13 @@ internal class BattleBottomPanelController : BaseSupportLoading
         BattleUnitActionController unitActionController,
         BattleContext context,
         IGameController gameController,
-        IBattleUnitResourceProvider battleUnitResourceProvider,
-        ITextProvider textProvider)
+        IBattleInterfaceProvider battleInterfaceProvider)
     {
         _gameObjectContainer = gameObjectContainer;
         _unitActionController = unitActionController;
         _context = context;
         _gameController = gameController;
-        _battleUnitResourceProvider = battleUnitResourceProvider;
-        _textProvider = textProvider;
+        _battleInterfaceProvider = battleInterfaceProvider;
     }
 
     /// <summary>
@@ -62,7 +58,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     public void ProcessTargetUnitChanged(BattleUnit? targetBattleUnit)
     {
-        UpdateBattleUnitPanel(targetBattleUnit, _rightUnitPanel);
+        UpdateTargetUnitPortrait(targetBattleUnit);
     }
 
     /// <summary>
@@ -71,6 +67,18 @@ internal class BattleBottomPanelController : BaseSupportLoading
     public void ProcessActionsBegin()
     {
         DisableButtons(_defendButton, _retreatButton, _waitButton);
+        ProcessBeginNextUnitAction();
+    }
+
+    /// <summary>
+    /// Обработать начало нового действия на сцене.
+    /// </summary>
+    public void ProcessBeginNextUnitAction()
+    {
+        UpdateCurrentUnitPortrait();
+
+        if (_context.UnitAction is MainAttackUnitAction mainAttackUnitAction)
+            UpdateTargetUnitPortrait(mainAttackUnitAction.TargetBattleUnit);
     }
 
     /// <summary>
@@ -88,7 +96,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
                 ActivateButtons(_waitButton);
         }
 
-        UpdateBattleUnitPanel(_context.CurrentBattleUnit, _leftUnitPanel);
+        UpdateCurrentUnitPortrait();
     }
 
     /// <summary>
@@ -132,22 +140,17 @@ internal class BattleBottomPanelController : BaseSupportLoading
         if (_context.BattleState == BattleState.WaitPlayerTurn)
             ActivateButtons(_defendButton, _retreatButton, _waitButton);
 
-        _leftUnitPanel = new BattleUnitBottomPanelData
-        {
-            Portrait = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.LEFT_UNIT_PORTRAIT_IMAGE),
-            Info = gameObjects.Get<TextBlockObject>(BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK),
-            LeaderItemsPanel = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.LEFT_LEADER_ITEMS_IMAGE, true)
-        };
-        UpdateBattleUnitPanel(_context.CurrentBattleUnit, _leftUnitPanel);
-
-        _rightUnitPanel = new BattleUnitBottomPanelData
-        {
-            Portrait = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.RIGHT_UNIT_PORTRAIT_IMAGE),
-            Info = gameObjects.Get<TextBlockObject>(BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK),
-            LeaderItemsPanel = gameObjects.Get<ImageObject>(BattleBottomPanelElementNames.RIGHT_LEADER_ITEMS_IMAGE, true)
-        };
-        // На правой панели используется развёрнутое изображение.
-        _rightUnitPanel.Portrait.IsReflected = true;
+        var battleInterfaceElements = _battleInterfaceProvider.BattleInterface.Elements;
+        _leftUnitPortrait = _gameObjectContainer.AddBottomUnitPortrait(true,
+            battleInterfaceElements[BattleBottomPanelElementNames.LEFT_UNIT_PORTRAIT_IMAGE],
+            battleInterfaceElements[BattleBottomPanelElementNames.LEFT_LEADER_ITEMS_IMAGE],
+            battleInterfaceElements[BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK]);
+        _leftUnitPortrait.BattleUnit = _context.CurrentBattleUnit;
+        _rightUnitPortrait = _gameObjectContainer.AddBottomUnitPortrait(false,
+            battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_UNIT_PORTRAIT_IMAGE],
+            battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_LEADER_ITEMS_IMAGE],
+            battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK]
+        );
     }
 
     /// <inheritdoc />
@@ -216,32 +219,28 @@ internal class BattleBottomPanelController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Получить тестовое описание юнита.
+    /// Обновить портрет текущего юнита.
     /// </summary>
-    private TextContainer GetUnitInfoText(Unit unit)
+    private void UpdateCurrentUnitPortrait()
     {
-        return _textProvider
-            .GetText("X100TA0608")
-            .ReplacePlaceholders(new[]
-            {
-                ("%NAME%", new TextContainer(unit.Name)),
-                ("%HP%", new TextContainer(unit.HitPoints.ToString())),
-                ("%HPMAX%", new TextContainer(unit.MaxHitPoints.ToString())),
-            });
+        var portrait = _context.CurrentBattleUnit.IsAttacker
+            ? _leftUnitPortrait
+            : _rightUnitPortrait;
+        portrait.BattleUnit = _context.CurrentBattleUnit;
     }
 
     /// <summary>
-    /// Обновить данные юнита на выбранной панели.
+    /// Обновить портрет юнита-цели.
     /// </summary>
-    private void UpdateBattleUnitPanel(BattleUnit? battleUnit, BattleUnitBottomPanelData panelData)
+    private void UpdateTargetUnitPortrait(BattleUnit? battleUnit)
     {
-        if (battleUnit == null || panelData.BattleUnit == battleUnit)
+        if (battleUnit == null)
             return;
 
-        panelData.BattleUnit = battleUnit;
-        panelData.Portrait.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(battleUnit.Unit.UnitType);
-        panelData.Info.Text = GetUnitInfoText(battleUnit.Unit);
-        panelData.LeaderItemsPanel.IsHidden = !battleUnit.Unit.IsLeader;
+        var portrait = _context.CurrentBattleUnit.IsAttacker
+            ? _rightUnitPortrait
+            : _leftUnitPortrait;
+        portrait.BattleUnit = battleUnit;
     }
 
     /// <summary>
