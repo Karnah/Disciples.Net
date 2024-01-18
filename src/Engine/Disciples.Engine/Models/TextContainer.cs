@@ -40,6 +40,7 @@ public class TextContainer
     /// <remarks>
     /// В replaces предполагается, что TextContainer содержит только одну строку без стиля.
     /// В теории, можно поддержать несколько кусочков с разными стилями, но вроде это не требуется.
+    /// TODO Разделять всё-таки требуется, нужно для модификаторов информации о юните.
     /// </remarks>
     public TextContainer ReplacePlaceholders(IReadOnlyList<(string placeholder, TextContainer text)> replaces)
     {

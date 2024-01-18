@@ -61,7 +61,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Идентификатор в ресурсах с текстом "Страх".
     /// </summary>
-    private const string FEAT_TEXT_ID = "X008TA0007";
+    private const string FEAR_TEXT_ID = "X008TA0007";
 
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -243,77 +243,9 @@ internal class UnitPortraitObject : GameObject
             RemoveSceneObject(ref _instantaneousEffectText);
         }
 
-        switch (eventData.UnitActionType)
-        {
-            case UnitActionType.Damaged:
-                _instantaneousEffectImage = AddColorImage(BattleColors.Damage);
-                _instantaneousEffectText = AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
-                _unitHitpoints.Text = GetUnitHitPoints();
-                break;
-
-            case UnitActionType.Healed:
-                _instantaneousEffectImage = AddColorImage(BattleColors.Heal);
-                _instantaneousEffectText = AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
-                _unitHitpoints.Text = GetUnitHitPoints();
-                break;
-
-            case UnitActionType.Miss:
-                _instantaneousEffectImage = AddColorImage(BattleColors.Miss);
-                _instantaneousEffectText = AddText(MISS_TEXT_ID);
-                break;
-
-            case UnitActionType.Defend:
-                _instantaneousEffectText = AddText(DEFEND_TEXT_ID);
-                break;
-
-            case UnitActionType.Retreating:
-                // Если юнит отступает по команде, то дополнительная информация выводится не будет.
-                if (eventData.AttackType == UnitAttackType.Fear)
-                {
-                    _instantaneousEffectImage = AddColorImage(BattleColors.Damage);
-                    _instantaneousEffectText = AddText(FEAT_TEXT_ID);
-                }
-
-                break;
-
-            case UnitActionType.Waiting:
-                _instantaneousEffectText = AddText(WAIT_TEXT_ID);
-                break;
-
-            case UnitActionType.Dying:
-                break;
-
-            case UnitActionType.UnderEffect:
-            {
-                var effectColor = GetEffectTypeColor(eventData.AttackType!.Value);
-                if (effectColor != null)
-                    _instantaneousEffectImage = AddColorImage(effectColor.Value, false);
-
-                _instantaneousEffectText = AddText(GetEffectTextId(eventData.AttackType!.Value, false));
-
-                break;
-            }
-
-            case UnitActionType.TriggeredEffect:
-            {
-                _instantaneousEffectText = AddDamageText(
-                    GetEffectTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
-                    eventData.AttackType!.Value,
-                    eventData.Power);
-                break;
-            }
-
-            case UnitActionType.Ward:
-                _instantaneousEffectText = AddText(WARD_TEXT_ID);
-                break;
-
-            case UnitActionType.Immunity:
-                _instantaneousEffectText = AddText(IMMUNITY_TEXT_ID);
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        _instantaneousEffectImage = AddColorImage(eventData.UnitActionType, eventData.AttackType);
+        _instantaneousEffectText = AddText(eventData);
+        _unitHitpoints.Text = GetUnitHitPoints();
     }
 
     /// <summary>
@@ -473,18 +405,38 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Получить цвет эффекта.
+    /// Получить цвет фона, когда на юнита накладывается эффект.
     /// </summary>
-    private static Color? GetEffectTypeColor(UnitAttackType unitEffectAttackType)
+    private static Color? GetUnitAttackTypeColor(UnitAttackType? unitAttackType)
     {
-        return unitEffectAttackType switch
+        return unitAttackType switch
         {
+            UnitAttackType.Damage => BattleColors.Damage,
             UnitAttackType.Paralyze => BattleColors.Paralyze,
+            UnitAttackType.Heal => BattleColors.Heal,
+            UnitAttackType.Fear => BattleColors.Damage,
+            UnitAttackType.BoostDamage => BattleColors.BoostDamage,
             UnitAttackType.Poison => BattleColors.Poison,
             UnitAttackType.Frostbite => BattleColors.Frostbite,
             UnitAttackType.Blister => BattleColors.Blister,
             _ => null
         };
+    }
+
+    /// <summary>
+    /// Получить цвет эффекта.
+    /// </summary>
+    private static Color? GetEffectTypeColor(UnitAttackType unitEffectAttackType)
+    {
+        if (unitEffectAttackType is UnitAttackType.Paralyze
+            or UnitAttackType.Poison
+            or UnitAttackType.Frostbite
+            or UnitAttackType.Blister)
+        {
+            return GetUnitAttackTypeColor(unitEffectAttackType);
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -529,6 +481,32 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Добавить на портрет изображение указанного цвета.
     /// </summary>
+    private IImageSceneObject? AddColorImage(UnitActionType unitActionType, UnitAttackType? unitAttackType)
+    {
+        switch (unitActionType)
+        {
+            case UnitActionType.Miss:
+                return AddColorImage(BattleColors.Miss);
+
+            case UnitActionType.Defend:
+            case UnitActionType.Waiting:
+            case UnitActionType.Dying:
+            case UnitActionType.TriggeredEffect:
+            case UnitActionType.Ward:
+            case UnitActionType.Immunity:
+                return null;
+        }
+
+        var color = GetUnitAttackTypeColor(unitAttackType);
+        if (color != null)
+            return AddColorImage(color.Value, unitActionType != UnitActionType.UnderEffect);
+
+        return null;
+    }
+
+    /// <summary>
+    /// Добавить на портрет изображение указанного цвета.
+    /// </summary>
     private IImageSceneObject AddColorImage(Color color, bool shouldRemoveDamageImage = true)
     {
         // Если мы добавляем изображение поверх портрета, то в некоторых случаях должны на время очистить изображение с % здоровья.
@@ -563,6 +541,54 @@ internal class UnitPortraitObject : GameObject
         }
 
         return AddText(text);
+    }
+
+    /// <summary>
+    /// Добавить на портрет указанный текст.
+    /// </summary>
+    private ITextSceneObject? AddText(BattleUnitPortraitEventData eventData)
+    {
+        switch (eventData.UnitActionType)
+        {
+            case UnitActionType.Damaged:
+            case UnitActionType.Healed:
+                return AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+
+            case UnitActionType.Miss:
+                return AddText(MISS_TEXT_ID);
+
+            case UnitActionType.Defend:
+                return AddText(DEFEND_TEXT_ID);
+
+            case UnitActionType.Waiting:
+                return AddText(WAIT_TEXT_ID);
+
+            case UnitActionType.Retreating:
+                return eventData.AttackType == UnitAttackType.Fear
+                    ? AddText(FEAR_TEXT_ID)
+                    : null;
+
+            case UnitActionType.Dying:
+                return null;
+
+            case UnitActionType.UnderEffect:
+                return AddText(GetEffectTextId(eventData.AttackType!.Value, false));
+
+            case UnitActionType.TriggeredEffect:
+                return AddDamageText(
+                    GetEffectTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
+                    eventData.AttackType!.Value,
+                    eventData.Power);
+
+            case UnitActionType.Ward:
+                return AddText(WARD_TEXT_ID);
+
+            case UnitActionType.Immunity:
+                return AddText(IMMUNITY_TEXT_ID);
+
+            default:
+                return null;
+        }
     }
 
     /// <summary>

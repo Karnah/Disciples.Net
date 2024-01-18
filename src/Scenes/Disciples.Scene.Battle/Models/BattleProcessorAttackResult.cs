@@ -20,7 +20,8 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType,
+        UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         AttackType = attackType;
@@ -41,11 +42,12 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, int? power, EffectDuration effectDuration, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, int? power, EffectDuration effectDuration, Unit effectDurationControlUnit, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         Power = power;
         EffectDuration = effectDuration;
+        EffectDurationControlUnit = effectDurationControlUnit;
         AttackType = attackType;
         AttackSource = attackSource;
     }
@@ -61,6 +63,11 @@ internal class BattleProcessorAttackResult
     /// Длительность эффекта.
     /// </summary>
     public EffectDuration? EffectDuration { get; }
+
+    /// <summary>
+    /// Юнит, к ходу которого привязана длительность.
+    /// </summary>
+    public Unit? EffectDurationControlUnit { get; }
 
     /// <summary>
     /// Тип атаки.

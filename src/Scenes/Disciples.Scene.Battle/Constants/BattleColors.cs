@@ -41,4 +41,9 @@ internal static class BattleColors
     /// Цвет ожога.
     /// </summary>
     public static Color Blister { get; } = Color.FromArgb(128, 255, 102, 0);
+
+    /// <summary>
+    /// Цвет усиления урона.
+    /// </summary>
+    public static Color BoostDamage { get; } = Color.FromArgb(128, 0, 128, 0);
 }

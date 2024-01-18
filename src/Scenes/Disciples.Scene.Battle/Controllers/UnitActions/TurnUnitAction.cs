@@ -1,5 +1,4 @@
-﻿using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Common.Enums.Units;
+﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -52,7 +51,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
 
         // Если никаких эффектов нет, то сразу переходим к защите/отступлению.
         if (!hasBattleEffects)
-            ProcessDefendAndRetreatEvents(false);
+            ProcessOtherEvents(false);
     }
 
     /// <inheritdoc />
@@ -104,7 +103,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
             if (ProcessNextBattleEffect())
                 return;
 
-            ProcessDefendAndRetreatEvents(true);
+            ProcessOtherEvents(true);
         }
     }
 
@@ -124,7 +123,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
                 return false;
 
             var unitEffect = _unitEffects[_currentUnitEffectIndex.Value];
-            var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, unitEffect, _battleContext.RoundNumber);
+            var attackResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, CurrentBattleUnit.Unit, unitEffect, _battleContext.RoundNumber);
             if (attackResult == null)
                 continue;
 
@@ -167,13 +166,34 @@ internal class TurnUnitAction : BaseBattleUnitAction
     }
 
     /// <summary>
-    /// Обработать события защиты и отступления.
+    /// Обработать остальные события (защита, срабатывания эффектов на других юнитах и отступления).
     /// </summary>
     /// <param name="shouldDelay">Добавлять ли задержку после всех действий.</param>
-    private void ProcessDefendAndRetreatEvents(bool shouldDelay)
+    private void ProcessOtherEvents(bool shouldDelay)
     {
         if (CurrentBattleUnit.Unit.Effects.IsDefended)
             CurrentBattleUnit.Unit.Effects.IsDefended = false;
+
+        // Обрабатываем все эффекты на других юнитах, которые должны закончиться на ходу этого юнита.
+        // Например, эффекты типа "Усиление урона" и "Даровать защиту".
+        // Эти эффекты заканчиваются мгновенно и не требуют анимацию.
+        var allUnits = _battleContext
+            .AttackingBattleSquad
+            .Squad
+            .Units
+            .Concat(_battleContext.DefendingBattleSquad.Squad.Units)
+            .Where(u => u != CurrentBattleUnit.Unit);
+        foreach (var targetUnit in allUnits)
+        {
+            foreach (var targetUnitEffect in targetUnit.Effects.GetBattleEffects())
+            {
+                var processResult = _battleProcessor.ProcessEffect(CurrentBattleUnit.Unit, targetUnit, targetUnitEffect, _battleContext.RoundNumber);
+
+                // Если эффект закончился, то удаляем его.
+                if (processResult != null && targetUnitEffect.Duration.IsCompleted)
+                    targetUnit.Effects.Remove(targetUnitEffect.AttackType);
+            }
+        }
 
         // Если ранее по эффектам юнит должен пропускать ход (например, из-за паралича),
         // То побег осуществляться не будет.

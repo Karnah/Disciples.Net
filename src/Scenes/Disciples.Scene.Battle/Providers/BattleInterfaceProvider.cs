@@ -65,6 +65,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         UnitBattleEffectsIcon = new Dictionary<UnitAttackType, IBitmap>
         {
             { UnitAttackType.Paralyze, _battleResourceProvider.GetBattleBitmap("FIPARALYZE") },
+            // Для BoostDamage есть 4 иконки (FIBOOST1/2/3/4), но между ними нет никакой разницы.
+            { UnitAttackType.BoostDamage, _battleResourceProvider.GetBattleBitmap("FIBOOST1") },
             { UnitAttackType.Petrify, _battleResourceProvider.GetBattleBitmap("FIPETRIFY") },
             { UnitAttackType.Poison, _battleResourceProvider.GetBattleBitmap("FIPOISON") },
             { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleBitmap("F1FROSTBITE") },

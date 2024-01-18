@@ -2,6 +2,7 @@
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Enums;
+using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Controllers;
@@ -30,10 +31,21 @@ internal class BattleAiProcessor
     /// <returns>Команда для юнита.</returns>
     public BattleAiCommand GetAiCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad)
     {
-        if (attackingUnit.HasAllyAbility())
-            return GetOwnSquadCommand(attackingUnit, attackingSquad, defendingSquad);
+        var hasAllyAbility = attackingUnit.HasAllyAbility();
+        var targetSquad = hasAllyAbility
+            ? attackingSquad
+            : defendingSquad;
+        var targetUnits = GetTargetUnits(attackingUnit, attackingSquad, targetSquad);
+        if (targetUnits.Count == 0)
+            return new BattleAiCommand(BattleCommandType.Defend);
 
-        return GetEnemySquadCommand(attackingUnit, attackingSquad, defendingSquad);
+        // Если бьёт по площади, не важно какой юнит выбран целью.
+        if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.All)
+            return new BattleAiCommand(targetUnits[0].Unit);
+
+        return hasAllyAbility
+            ? GetOwnSquadCommand(attackingUnit, targetUnits)
+            : GetEnemySquadCommand(attackingUnit, targetUnits);
     }
 
     /// <summary>
@@ -79,61 +91,105 @@ internal class BattleAiProcessor
     /// Получить команду для использования на союзниках.
     /// </summary>
     /// <param name="attackingUnit">Атакующий юнит.</param>
-    /// <param name="attackingSquad">Отряд атакующего юнита.</param>
-    /// <param name="defendingSquad">Защищающийся отряд.</param>
+    /// <param name="targetUnits">Доступные юниты-цели.</param>
     /// <returns>Команда для юнита.</returns>
-    private BattleAiCommand GetOwnSquadCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad)
+    private static BattleAiCommand GetOwnSquadCommand(Unit attackingUnit, IReadOnlyList<AiTargetUnit> targetUnits)
     {
-        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
+        // Если усиливается урон, то выбираем самого сильного юнита.
+        if (IsBoostDamageAttack(attackingUnit.UnitType.MainAttack) ||
+            IsBoostDamageAttack(attackingUnit.UnitType.SecondaryAttack))
         {
-            var target = attackingSquad
-                .Units
-                .Where(u => u.HitPoints < u.MaxHitPoints && !u.IsDeadOrRetreated)
-                .MinBy(u => u.HitPoints);
-            if (target != null)
-                return new BattleAiCommand { CommandType = BattleCommandType.Attack, Target = target };
+            var targetUnit = targetUnits
+                .OrderByPower()
+                // Если на юнита наложен уже эффект усиления, то понижаем ему приоритет в зависимости от силы эффекта.
+                .ThenBy(tu =>
+                {
+                    if (tu.Unit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostDamageEffect))
+                        return boostDamageEffect.Power ?? 0;
+
+                    return 0;
+                })
+                .First();
+            return new BattleAiCommand(targetUnit.Unit);
         }
 
-        return new BattleAiCommand { CommandType = BattleCommandType.Defend };
+        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
+        {
+            var target = targetUnits
+                .Where(tu => tu.Unit.HitPoints < tu.Unit.MaxHitPoints && !tu.Unit.IsDeadOrRetreated)
+                .OrderByWeakness()
+                .FirstOrDefault()
+                ?.Unit;
+            if (target != null)
+                return new BattleAiCommand (target);
+        }
+
+        return new BattleAiCommand(BattleCommandType.Defend);
     }
 
     /// <summary>
     /// Получить команду для использования на врагах.
     /// </summary>
     /// <param name="attackingUnit">Атакующий юнит.</param>
-    /// <param name="attackingSquad">Отряд атакующего юнита.</param>
-    /// <param name="defendingSquad">Защищающийся отряд.</param>
+    /// <param name="targetUnits">Доступные юниты-цели.</param>
     /// <returns>Команда для юнита.</returns>
-    private BattleAiCommand GetEnemySquadCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad)
+    private static BattleAiCommand GetEnemySquadCommand(Unit attackingUnit, IReadOnlyList<AiTargetUnit> targetUnits)
     {
-        var availableForAttackUnits =
-            defendingSquad
-                .Units
-                .Where(u => _battleProcessor.CanAttack(attackingUnit, attackingSquad, u, defendingSquad))
-                .Select(u => new
-                {
-                    TargetUnit = u,
-                    _battleProcessor.ProcessMainAttack(attackingUnit, u)?.AttackResult
-                } )
-                .Where(r => r.AttackResult is not null and not AttackResult.Immunity)
-                .ToList();
+        // Если одна из атак выводит из строя, то выбираем самого сильного юнита.
+        var isMainAttackDisabled = IsDisableAttack(attackingUnit.UnitType.MainAttack);
+        var isSecondaryAttackDisabled = IsDisableAttack(attackingUnit.UnitType.SecondaryAttack);
+        if (isMainAttackDisabled || isSecondaryAttackDisabled)
+        {
+            var targetUnit = targetUnits
+                .OrderByPower()
+                .FirstOrDefault(tu => !tu.Unit.Effects.IsDisabled &&
+                                      tu.MainAttackResult != AttackResult.Ward &&
+                                      (!isSecondaryAttackDisabled || tu.SecondaryAttackResult != AttackResult.Ward));
+            if (targetUnit != null)
+                return new BattleAiCommand(targetUnit.Unit);
+        }
 
-        if (availableForAttackUnits.Count == 0)
-            return new BattleAiCommand { CommandType = BattleCommandType.Defend };
-
-        var target = availableForAttackUnits
+        var target = targetUnits
             // Если у юнита есть защита от атаки, то снижаем ему приоритет.
-            .OrderBy(unit => unit.AttackResult == AttackResult.Ward
+            .OrderBy(unit => unit.MainAttackResult == AttackResult.Ward
                 ? 1
                 : 0)
-            // TODO Для юнитов с окаменением/параличом логичнее атаковать самых сильных юнитов.
-            .ThenBy(a => a.TargetUnit.HitPoints)
+            .ThenByWeakness()
             .First()
-            .TargetUnit;
-        return new BattleAiCommand
-        {
-            CommandType = BattleCommandType.Attack,
-            Target = target
-        };
+            .Unit;
+        return new BattleAiCommand(target);
+    }
+
+    /// <summary>
+    /// Получить список юнитов для атаки.
+    /// </summary>
+    private IReadOnlyList<AiTargetUnit> GetTargetUnits(Unit attackingUnit, Squad attackingSquad, Squad targetSquad)
+    {
+        return targetSquad
+            .Units
+            .Where(u => _battleProcessor.CanAttack(attackingUnit, attackingSquad, u, targetSquad))
+            .Select(u => new AiTargetUnit(u,
+                _battleProcessor.ProcessMainAttack(attackingUnit, u)?.AttackResult,
+                attackingUnit.UnitType.SecondaryAttack != null
+                    ? _battleProcessor.ProcessSecondaryAttack(attackingUnit, u, null)?.AttackResult
+                    : null))
+            .Where(r => r.MainAttackResult is not null and not AttackResult.Immunity)
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Признак, что атака выводит юнита из строя.
+    /// </summary>
+    private static bool IsDisableAttack(UnitAttack? unitAttack)
+    {
+        return unitAttack?.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify or UnitAttackType.Fear;
+    }
+
+    /// <summary>
+    /// Признак, что атака усилена.
+    /// </summary>
+    private static bool IsBoostDamageAttack(UnitAttack? unitAttack)
+    {
+        return unitAttack?.AttackType is UnitAttackType.BoostDamage;
     }
 }

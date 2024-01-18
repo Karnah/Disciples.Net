@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Disciples.Engine.Common.Enums.Units;
 
@@ -32,6 +33,7 @@ public class UnitEffects
     /// </summary>
     public bool IsDefended { get; set; }
 
+    // TODO Переделать на эффект страха?
     /// <summary>
     /// Признак, что юнит собирается сбежать.
     /// </summary>
@@ -42,6 +44,11 @@ public class UnitEffects
     /// </summary>
     public bool IsParalyzed =>
         ExistsBattleEffect(UnitAttackType.Paralyze) || ExistsBattleEffect(UnitAttackType.Petrify);
+
+    /// <summary>
+    /// Признак, что юнит не сможет выполнить следующий ход.
+    /// </summary>
+    public bool IsDisabled => IsParalyzed || IsRetreating;
 
     /// <summary>
     /// Добавить эффект в поединке.
@@ -60,6 +67,14 @@ public class UnitEffects
     }
 
     /// <summary>
+    /// Проверить, что на юнита наложен эффект указанного типа и получить его.
+    /// </summary>
+    public bool TryGetBattleEffect(UnitAttackType effectAttackType, [NotNullWhen(true)]out UnitBattleEffect? battleEffect)
+    {
+        return _battleEffects.TryGetValue(effectAttackType, out battleEffect);
+    }
+
+    /// <summary>
     /// Удалить эффект указанного типа.
     /// </summary>
     public void Remove(UnitAttackType effectAttackType)
@@ -73,6 +88,21 @@ public class UnitEffects
     public IReadOnlyList<UnitBattleEffect> GetBattleEffects()
     {
         return _battleEffects.Values.ToArray();
+    }
+
+    /// <summary>
+    /// Получить модификатор силы атаки.
+    /// </summary>
+    public decimal GetPowerModifier()
+    {
+        var modifier = 1M;
+
+        if (_battleEffects.TryGetValue(UnitAttackType.BoostDamage, out var boostDamage))
+        {
+            modifier *= boostDamage.Power!.Value / 100M + 1;
+        }
+
+        return modifier - 1M;
     }
 
     /// <summary>

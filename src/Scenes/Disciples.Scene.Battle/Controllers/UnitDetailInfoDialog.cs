@@ -141,7 +141,6 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// </summary>
     private TextContainer ReplacePlaceholders(TextContainer value, Unit unit)
     {
-        // TODO Модификаторы разбирать на зелёный/красный.
         return value
             .ReplacePlaceholders(new []
             {
@@ -149,7 +148,7 @@ internal class UnitDetailInfoDialog : BaseDialog
                 ("%XP%", new TextContainer($"{unit.Experience}/{unit.UnitType.XpNext}")),
                 ("%HP1%", new TextContainer(unit.HitPoints.ToString())),
                 ("%HP2%", new TextContainer(unit.MaxHitPoints.ToString())),
-                ("%ARMOR%", GetValueWithModifier(unit.BaseArmor, unit.ArmorModifier)),
+                ("%ARMOR%", GetValueWithModifier(unit.BaseArmor.ToString(), unit.ArmorModifier)),
                 ("%IMMU%", GetProtectionInfo(unit, ProtectionCategory.Immunity)),
                 ("%WARD%", GetProtectionInfo(unit, ProtectionCategory.Ward)),
 
@@ -157,15 +156,14 @@ internal class UnitDetailInfoDialog : BaseDialog
                 ("%ALTATTACK%", new TextContainer(string.Empty)), // todo Что это?
                 ("%ATTACK%", new TextContainer(unit.UnitType.MainAttack.Description)),
                 ("%SECOND%", new TextContainer(unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {unit.UnitType.SecondaryAttack.Description}")),
-                ("%HIT%", new TextContainer($"{GetValueWithModifier(unit.BaseFirstAttackAccuracy, unit.FirstAttackAccuracyModifier)}%")),
+                ("%HIT%", new TextContainer($"{GetValueWithModifier(unit.MainAttackBaseAccuracy.ToString(), unit.MainAttackAccuracyModifier)}%")),
                 ("%HIT2%", new TextContainer(unit.SecondaryAttackAccuracy == null ? string.Empty : $" / {unit.SecondaryAttackAccuracy}%")),
 
                 ("%EFFECT%", GetUnitEffectTitle()),
-                ("%DAMAGE%", new TextContainer(GetValueWithModifier(unit.BaseFirstAttackPower, unit.FirstAttackPowerModifier).ToString()
-                             + (unit.SecondAttackPower > 0 ? $" / {unit.SecondAttackPower}" : string.Empty))),
+                ("%DAMAGE%", GetDamage(unit)),
                 ("%SOURCE%", GetAttackSourceTitle(unit.UnitType.MainAttack.AttackSource)),
                 ("%SOURCE2%", new TextContainer(unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {GetAttackSourceTitle(unit.UnitType.MainAttack.AttackSource)}")),
-                ("%INIT%", GetValueWithModifier(unit.BaseInitiative, unit.InitiativeModifier)),
+                ("%INIT%", GetValueWithModifier(unit.BaseInitiative.ToString(), unit.InitiativeModifier)),
                 ("%REACH%", GetReachTitle(unit)),
                 ("%TARGETS%", GetReachCount(unit))
             })
@@ -173,19 +171,64 @@ internal class UnitDetailInfoDialog : BaseDialog
     }
 
     /// <summary>
+    /// Получить урон юнита.
+    /// </summary>
+    private static TextContainer GetDamage(Unit unit)
+    {
+        var mainAttack = GetValueWithModifier(
+            GetAttackPower(unit.MainAttackBasePower, unit.UnitType.MainAttack.AttackType),
+            unit.MainAttackPowerModifier);
+
+        if (unit.SecondaryAttackPower > 0)
+        {
+            var secondaryAttackPower = GetValueWithModifier(
+                GetAttackPower(unit.SecondaryAttackPower.Value, unit.UnitType.SecondaryAttack!.AttackType),
+                unit.MainAttackPowerModifier);
+            return new TextContainer(mainAttack
+                .TextPieces
+                .Append(new TextPiece($" / {secondaryAttackPower}"))
+                .ToArray());
+        }
+
+        return mainAttack;
+    }
+
+    /// <summary>
+    /// Получить строковое значение силы атаки.
+    /// </summary>
+    private static string GetAttackPower(int power, UnitAttackType unitAttackType)
+    {
+        return unitAttackType switch
+        {
+            UnitAttackType.BoostDamage => $"+{power}%",
+            _ => power.ToString()
+        };
+    }
+
+    /// <summary>
     /// Получить строковое значение характеристики и её модификатора.
     /// </summary>
     /// <param name="value">Значение характеристики.</param>
     /// <param name="modifier">Модификатор характеристики.</param>
-    private static TextContainer GetValueWithModifier(int value, int modifier)
+    private static TextContainer GetValueWithModifier(string value, int modifier)
     {
         if (modifier == 0)
-            return new TextContainer(value.ToString());
+            return new TextContainer(value);
 
         if (modifier > 0)
-            return new TextContainer($"{value} + {modifier}");
+        {
+            return new TextContainer(new[]
+            {
+                new TextPiece(value),
+                new TextPiece(new TextStyle { ForegroundColor = BattleColors.BoostDamage }, $" + {modifier}")
+            });
+        }
 
-        return new TextContainer($"{value} - {-modifier}");
+        return new TextContainer(new[]
+        {
+            new TextPiece(value),
+            new TextPiece(new TextStyle { ForegroundColor = BattleColors.Damage }, $" - {-modifier}")
+        });
     }
 
     /// <summary>

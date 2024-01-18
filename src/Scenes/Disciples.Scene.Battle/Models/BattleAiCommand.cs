@@ -9,9 +9,29 @@ namespace Disciples.Scene.Battle.Models;
 internal class BattleAiCommand
 {
     /// <summary>
+    /// Создать объект типа <see cref="BattleAiCommand" /> с командой выполнить указанное действие.
+    /// </summary>
+    public BattleAiCommand(BattleCommandType commandType)
+    {
+        if (commandType == BattleCommandType.Attack)
+            throw new ArgumentException("При атаки требуется передать юнита", nameof(commandType));
+
+        CommandType = commandType;
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="BattleAiCommand" /> с командой атаковать указанного юнита.
+    /// </summary>
+    public BattleAiCommand(Unit? target)
+    {
+        CommandType = BattleCommandType.Attack;
+        Target = target;
+    }
+
+    /// <summary>
     /// Тип команды.
     /// </summary>
-    public BattleCommandType CommandType { get; init; }
+    public BattleCommandType CommandType { get; }
 
     /// <summary>
     /// Цель команды.
@@ -19,5 +39,5 @@ internal class BattleAiCommand
     /// <remarks>
     /// NotNull, если <see cref="CommandType" /> равно <see cref="BattleCommandType.Attack" />.
     /// </remarks>
-    public Unit? Target { get; init; }
+    public Unit? Target { get; }
 }

@@ -10,21 +10,23 @@ public class UnitBattleEffect
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, Unit durationControlUnit)
     {
         AttackType = attackType;
         AttackSource = attackSource;
         Duration = duration;
+        DurationControlUnit = durationControlUnit;
     }
 
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, int? power)
+    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, Unit durationControlUnit, int? power)
     {
         AttackType = attackType;
         AttackSource = attackSource;
         Duration = duration;
+        DurationControlUnit = durationControlUnit;
         Power = power;
     }
 
@@ -47,6 +49,11 @@ public class UnitBattleEffect
     /// Длительность эффекта.
     /// </summary>
     public EffectDuration Duration { get; }
+
+    /// <summary>
+    /// Юнит, к ходу которого привязана длительность.
+    /// </summary>
+    public Unit DurationControlUnit { get; }
 
     /// <summary>
     /// Сила эффекта.

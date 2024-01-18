@@ -69,13 +69,28 @@ internal class BattleProcessor
 
         // Лекарь по одиночной цели без второй атаки может лечить только тех,
         // у кого меньше максимального значения здоровья.
-        if (attackingUnit.Player == targetUnit.Player &&
-            attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal &&
+        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal &&
             attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any &&
             attackingUnit.UnitType.SecondaryAttack == null &&
-            targetUnit.HitPoints == targetUnit.UnitType.HitPoints)
+            targetUnit.HitPoints == targetUnit.MaxHitPoints)
         {
             return false;
+        }
+
+        // TODO При обработке эффекта "Cure" изменить проверку. Даже если нельзя баффать, эффект снимать будет можно.
+        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.BoostDamage &&
+            attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any)
+        {
+            // Усилять можно только юнитов с прямым уроном от первой атаки.
+            if (targetUnit.UnitType.MainAttack.AttackType != UnitAttackType.Damage)
+                return false;
+
+            // Усилить юнита можно только большим эффектом.
+            if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostEffect) &&
+                attackingUnit.MainAttackPower <= boostEffect.Power)
+            {
+                return false;
+            }
         }
 
         // Если юнит может атаковать только ближайшего, то проверяем препятствия.
@@ -150,10 +165,10 @@ internal class BattleProcessor
     /// </summary>
     public BattleProcessorAttackResult? ProcessMainAttack(Unit attackingUnit, Unit targetUnit)
     {
-        var power = attackingUnit.FirstAttackPower;
+        var power = attackingUnit.MainAttackPower;
         var attack = attackingUnit.UnitType.MainAttack;
         var accuracy = attackingUnit.MainAttackAccuracy;
-        return ProcessAttack(targetUnit, attack, power, accuracy);
+        return ProcessAttack(attackingUnit, targetUnit, attack, power, accuracy);
     }
 
     /// <summary>
@@ -161,17 +176,21 @@ internal class BattleProcessor
     /// </summary>
     public BattleProcessorAttackResult? ProcessSecondaryAttack(Unit attackingUnit, Unit targetUnit, int? externalPower)
     {
-        var power = externalPower ?? attackingUnit.SecondAttackPower;
+        var power = externalPower ?? attackingUnit.SecondaryAttackPower;
         var attack = attackingUnit.UnitType.SecondaryAttack!;
         var accuracy = attackingUnit.SecondaryAttackAccuracy!.Value;
-        return ProcessAttack(targetUnit, attack, power, accuracy);
+        return ProcessAttack(attackingUnit, targetUnit, attack, power, accuracy);
     }
 
     /// <summary>
     /// Обработать действие эффекта.
     /// </summary>
-    public BattleProcessorAttackResult? ProcessEffect(Unit targetUnit, UnitBattleEffect effect, int roundNumber)
+    public BattleProcessorAttackResult? ProcessEffect(Unit turnUnit, Unit targetUnit, UnitBattleEffect effect, int roundNumber)
     {
+        // Эффект будет сбрасываться на ходе другого юнита.
+        if (effect.DurationControlUnit != turnUnit)
+            return null;
+
         int? power = null;
 
         // Яд, заморозка и ожег единственный эффекты, которые наносят урон.
@@ -189,17 +208,18 @@ internal class BattleProcessor
         effect.RoundTriggered = roundNumber;
         effect.Duration.DecreaseTurn();
 
-        return new BattleProcessorAttackResult(AttackResult.Effect, power, effect.Duration, effect.AttackType, effect.AttackSource);
+        return new BattleProcessorAttackResult(AttackResult.Effect, power, effect.Duration, effect.DurationControlUnit, effect.AttackType, effect.AttackSource);
     }
 
     /// <summary>
     /// Обработать действие одного юнита на другого.
     /// </summary>
+    /// <param name="attackingUnit">Атакующий юнит.</param>
     /// <param name="targetUnit">Юнит, на которого воздействует.</param>
     /// <param name="attack">Тип атаки.</param>
     /// <param name="power">Сила атаки.</param>
     /// <param name="accuracy">Точность атаки.</param>
-    private static BattleProcessorAttackResult? ProcessAttack(Unit targetUnit, UnitAttack attack, int? power, int accuracy)
+    private static BattleProcessorAttackResult? ProcessAttack(Unit attackingUnit, Unit targetUnit, UnitAttack attack, int? power, int accuracy)
     {
         if (targetUnit.IsRetreated)
             return null;
@@ -234,8 +254,8 @@ internal class BattleProcessor
         }
 
         // Проверяем меткость юнита.
-        var chanceOfFirstAttack = RandomGenerator.Get(0, 100);
-        if (chanceOfFirstAttack > accuracy)
+        var chanceOfAttack = RandomGenerator.Get(0, 100);
+        if (chanceOfAttack > accuracy)
             return new BattleProcessorAttackResult(AttackResult.Miss);
 
         switch (attack.AttackType)
@@ -268,6 +288,7 @@ internal class BattleProcessor
                     AttackResult.Effect,
                     null,
                     GetEffectDuration(attack),
+                    targetUnit,
                     attack.AttackType,
                     attack.AttackSource);
 
@@ -292,6 +313,14 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.BoostDamage:
+                return new BattleProcessorAttackResult(
+                    AttackResult.Effect,
+                    power,
+                    GetEffectDuration(attack),
+                    attackingUnit,
+                    attack.AttackType,
+                    attack.AttackSource);
+
             case UnitAttackType.LowerDamage:
             case UnitAttackType.LowerInitiative:
                 break;
@@ -303,6 +332,7 @@ internal class BattleProcessor
                     AttackResult.Effect,
                     power,
                     GetEffectDuration(attack),
+                    targetUnit,
                     attack.AttackType,
                     attack.AttackSource);
 

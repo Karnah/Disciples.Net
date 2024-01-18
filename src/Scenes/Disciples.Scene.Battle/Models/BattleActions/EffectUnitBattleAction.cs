@@ -11,16 +11,22 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 internal class EffectUnitBattleAction : UnitBattleAction
 {
     /// <inheritdoc />
-    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, int? power, AnimationBattleAction? animationBattleAction)
+    public EffectUnitBattleAction(BattleUnit targetUnit, UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, Unit durationControlUnit, int? power, AnimationBattleAction? animationBattleAction)
         : base(targetUnit, UnitActionType.UnderEffect, attackType, power, animationBattleAction, attackSource)
     {
         Duration = duration;
+        DurationControlUnit = durationControlUnit;
     }
 
     /// <summary>
     /// Продолжительность эффекта.
     /// </summary>
     public EffectDuration Duration { get; }
+
+    /// <summary>
+    /// Юнит, к ходу которого привязана длительность.
+    /// </summary>
+    public Unit DurationControlUnit { get; }
 
     /// <inheritdoc />
     /// <remarks>

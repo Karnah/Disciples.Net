@@ -111,20 +111,22 @@ public class Unit
     /// <summary>
     /// Базовое значение силы первой атаки.
     /// </summary>
-    public int BaseFirstAttackPower => UnitType.MainAttack.HealPower > 0
-        ? UnitType.MainAttack.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower)
-        : UnitType.MainAttack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower);
+    public int MainAttackBasePower => GetAttackBasePower(UnitType.MainAttack);
 
     /// <summary>
     /// Модификатор значения силы первой атаки.
-    /// todo Рассчитывать, зависит от эффектов.
     /// </summary>
-    public int FirstAttackPowerModifier => 0;
+    public int MainAttackPowerModifier => UnitType.MainAttack.AttackType switch
+    {
+        UnitAttackType.Heal => 0,
+        UnitAttackType.BoostDamage => 0,
+        _ => (int)(MainAttackBasePower * Effects.GetPowerModifier())
+    };
 
     /// <summary>
     /// Текущее значение силы первой атаки.
     /// </summary>
-    public int FirstAttackPower => BaseFirstAttackPower + FirstAttackPowerModifier;
+    public int MainAttackPower => MainAttackBasePower + MainAttackPowerModifier;
 
     /// <summary>
     /// Базовое значение силы второй атаки.
@@ -132,25 +134,25 @@ public class Unit
     /// <remarks>
     /// На вторую атаку модификаторы не распространяются.
     /// </remarks>
-    public int? SecondAttackPower => UnitType.SecondaryAttack?.HealPower > 0
-        ? UnitType.SecondaryAttack?.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower)
-        : UnitType.SecondaryAttack?.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower);
+    public int? SecondaryAttackPower => UnitType.SecondaryAttack != null
+        ? GetAttackBasePower(UnitType.SecondaryAttack)
+        : null;
 
     /// <summary>
     /// Базовое значение точности первой атаки.
     /// </summary>
-    public int BaseFirstAttackAccuracy => UnitType.MainAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
+    public int MainAttackBaseAccuracy => UnitType.MainAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
 
     /// <summary>
     /// Модификатор точности первой атаки.
     /// todo Рассчитывать, зависит эффектов.
     /// </summary>
-    public int FirstAttackAccuracyModifier => 0;
+    public int MainAttackAccuracyModifier => 0;
 
     /// <summary>
     /// Текущее значение точность первой атаки.
     /// </summary>
-    public int MainAttackAccuracy => BaseFirstAttackAccuracy + FirstAttackAccuracyModifier;
+    public int MainAttackAccuracy => MainAttackBaseAccuracy + MainAttackAccuracyModifier;
 
     /// <summary>
     /// Значение точности второй атаки.
@@ -207,6 +209,19 @@ public class Unit
     public List<UnitAttackTypeProtection> AttackTypeProtections { get; init; }
 
     /// <summary>
+    /// Получить силу атаки.
+    /// </summary>
+    private int GetAttackBasePower(UnitAttack attack)
+    {
+        return attack.AttackType switch
+        {
+            UnitAttackType.Heal => attack.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower),
+            UnitAttackType.BoostDamage => GetBoostPowerPercent(attack.AttackPowerLevel),
+            _ => attack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower)
+        };
+    }
+
+    /// <summary>
     /// Рассчитать повышение значения в зависимости от уровня юнита.
     /// </summary>
     private int CalculateLevelUpgrade(Func<UnitLevelUpgrade, int> propertyGetter)
@@ -219,5 +234,23 @@ public class Unit
             propertyGetter.Invoke(UnitType.LowLevelUpgrade) * lowLevelDiff
             +
             propertyGetter.Invoke(UnitType.HighLevelUpgrade) * highLevelDiff;
+    }
+
+    /// <summary>
+    /// Получить усиления атаки в процентах.
+    /// </summary>
+    /// <remarks>
+    /// TODO Тащить эти значения из GVars, BATBOOSTD1/2/3/4.
+    /// </remarks>
+    private static int GetBoostPowerPercent(int boostPowerLevel)
+    {
+        return boostPowerLevel switch
+        {
+            1 => 25,
+            2 => 50,
+            3 => 75,
+            4 => 100,
+            _ => 0
+        };
     }
 }
