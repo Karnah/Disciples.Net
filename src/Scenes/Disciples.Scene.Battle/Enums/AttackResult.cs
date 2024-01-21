@@ -41,5 +41,10 @@ internal enum AttackResult
     /// <summary>
     /// Юнит испугался и собирается сбежать.
     /// </summary>
-    Fear
+    Fear,
+
+    /// <summary>
+    /// Юнит получает дополнительную атаку.
+    /// </summary>
+    AdditionalAttack
 }

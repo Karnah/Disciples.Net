@@ -52,6 +52,9 @@ internal class BattleProcessorAttackResult
         AttackSource = attackSource;
     }
 
+    /// <summary>
+    /// Результат атаки/действия.
+    /// </summary>
     public AttackResult AttackResult { get; }
 
     /// <summary>

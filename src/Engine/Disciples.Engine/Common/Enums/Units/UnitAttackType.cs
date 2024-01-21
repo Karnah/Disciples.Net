@@ -88,7 +88,7 @@ public enum UnitAttackType
     /// <summary>
     /// Дать дополнительную атаку.
     /// </summary>
-    GiveAttack = 19,
+    GiveAdditionalAttack = 19,
 
     /// <summary>
     /// Превратить себя в выбранного юнита на поле боя.

@@ -62,6 +62,10 @@ internal class UnitPortraitObject : GameObject
     /// Идентификатор в ресурсах с текстом "Страх".
     /// </summary>
     private const string FEAR_TEXT_ID = "X008TA0007";
+    /// <summary>
+    /// Идентификатор в ресурсах с текстом "Дополнительная атака".
+    /// </summary>
+    private const string ADDITIONAL_ATTACK_TEXT_ID = "X008TA0019";
 
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -465,7 +469,6 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Revive => "X008TA0016",
             UnitAttackType.Cure => "X008TA0017",
             UnitAttackType.DrainLevel => "X008TA0018",
-            UnitAttackType.GiveAttack => "X008TA0019",
             UnitAttackType.Doppelganger => "X008TA0022",
             UnitAttackType.TransformSelf => "X008TA0022",
             UnitAttackType.TransformOther => "X008TA0022",
@@ -585,6 +588,9 @@ internal class UnitPortraitObject : GameObject
 
             case UnitActionType.Immunity:
                 return AddText(IMMUNITY_TEXT_ID);
+
+            case UnitActionType.GiveAdditionalAttack:
+                return AddText(ADDITIONAL_ATTACK_TEXT_ID);
 
             default:
                 return null;

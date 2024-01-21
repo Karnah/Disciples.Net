@@ -64,5 +64,10 @@ internal enum UnitActionType
     /// <summary>
     /// Иммунитет от атаки.
     /// </summary>
-    Immunity
+    Immunity,
+
+    /// <summary>
+    /// Юнит получил дополнительную атаку.
+    /// </summary>
+    GiveAdditionalAttack
 }

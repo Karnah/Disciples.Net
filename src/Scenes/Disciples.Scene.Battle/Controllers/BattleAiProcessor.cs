@@ -96,8 +96,8 @@ internal class BattleAiProcessor
     private static BattleAiCommand GetOwnSquadCommand(Unit attackingUnit, IReadOnlyList<AiTargetUnit> targetUnits)
     {
         // Если усиливается урон, то выбираем самого сильного юнита.
-        if (IsBoostDamageAttack(attackingUnit.UnitType.MainAttack) ||
-            IsBoostDamageAttack(attackingUnit.UnitType.SecondaryAttack))
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.BoostDamage ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.BoostDamage)
         {
             var targetUnit = targetUnits
                 .OrderByPower()
@@ -113,7 +113,21 @@ internal class BattleAiProcessor
             return new BattleAiCommand(targetUnit.Unit);
         }
 
-        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
+        // Для дополнительной атаки аналогично выбираем самого сильно юнита.
+        // Но чисто теоретически, можно было бы проверять лекарей и других полезных юнитов.
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.GiveAdditionalAttack ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.GiveAdditionalAttack)
+        {
+            var targetUnit = targetUnits
+                .OrderByPower()
+                .First();
+            return new BattleAiCommand(targetUnit.Unit);
+        }
+
+        // Если юнит лечит, то выбираем самого слабого юнита.
+        // Также, возможно стоит отдавать приоритет тем юнитам, которым будет восстановлено большее количество здоровья.
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.Heal ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.Heal)
         {
             var target = targetUnits
                 .Where(tu => tu.Unit.HitPoints < tu.Unit.MaxHitPoints && !tu.Unit.IsDeadOrRetreated)
@@ -183,13 +197,5 @@ internal class BattleAiProcessor
     private static bool IsDisableAttack(UnitAttack? unitAttack)
     {
         return unitAttack?.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify or UnitAttackType.Fear;
-    }
-
-    /// <summary>
-    /// Признак, что атака усилена.
-    /// </summary>
-    private static bool IsBoostDamageAttack(UnitAttack? unitAttack)
-    {
-        return unitAttack?.AttackType is UnitAttackType.BoostDamage;
     }
 }

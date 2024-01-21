@@ -322,7 +322,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.Cure => "X005TA0793",
             UnitAttackType.Summon => "X005TA0803",
             UnitAttackType.DrainLevel => "X005TA0804",
-            UnitAttackType.GiveAttack => "X005TA0805",
+            UnitAttackType.GiveAdditionalAttack => "X005TA0805",
             UnitAttackType.Doppelganger => "X005TA0806",
             UnitAttackType.TransformSelf => "X005TA0807",
             UnitAttackType.TransformOther => "X005TA0808",

@@ -205,14 +205,13 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         // На юнита наложен эффект.
         if (unitAction is EffectUnitBattleAction effectAction)
         {
-            effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
+            var targetUnit = effectAction.TargetUnit.Unit;
+            targetUnit.Effects.AddBattleEffect(
                 new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.Duration, effectAction.DurationControlUnit, effectAction.Power));
 
             // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
             if (effectAction.AttackType == UnitAttackType.ReduceInitiative)
             {
-                var targetUnit = effectAction.TargetUnit.Unit;
-
                 // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
                 // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
                 _context.UnitTurnQueue.ReorderUnitTurnOrder(targetUnit, targetUnit.Initiative);
@@ -236,6 +235,9 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                     asp.UnitAttackSource == unitAction.AttackSource &&
                     asp.ProtectionCategory == ProtectionCategory.Ward);
         }
+
+        if (unitAction.AttackType == UnitAttackType.GiveAdditionalAttack)
+            _context.UnitTurnQueue.AddUnitAdditionalAttack(unitAction.TargetUnit.Unit);
 
         _unitPortraitPanelController
             .GetUnitPortrait(unitAction.TargetUnit)
@@ -338,6 +340,10 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
             case AttackResult.Fear:
                 AddAction(new UnitBattleAction(targetUnit, UnitActionType.Retreating, attackResult.AttackType, attackSource: attackResult.AttackSource));
+                break;
+
+            case AttackResult.AdditionalAttack:
+                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GiveAdditionalAttack, attackResult.AttackType, attackSource: attackResult.AttackSource));
                 break;
 
             default:

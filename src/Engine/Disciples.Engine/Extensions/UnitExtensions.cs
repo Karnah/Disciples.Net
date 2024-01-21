@@ -18,7 +18,7 @@ public static class UnitExtensions
             or UnitAttackType.BoostDamage
             or UnitAttackType.Revive
             or UnitAttackType.Cure
-            or UnitAttackType.GiveAttack
+            or UnitAttackType.GiveAdditionalAttack
             or UnitAttackType.TransformSelf
             or UnitAttackType.BestowWards)
         {

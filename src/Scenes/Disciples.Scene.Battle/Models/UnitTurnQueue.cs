@@ -88,4 +88,12 @@ internal class UnitTurnQueue
 
         unitTurnOrder.Initiative = initiative;
     }
+
+    /// <summary>
+    /// Добавить юнита с дополнительной атакой в очередь.
+    /// </summary>
+    public void AddUnitAdditionalAttack(Unit unit)
+    {
+        _turnOrder.AddLast(new UnitTurnOrder(unit, int.MaxValue));
+    }
 }

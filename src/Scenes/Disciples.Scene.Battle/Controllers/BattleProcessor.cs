@@ -93,6 +93,13 @@ internal class BattleProcessor
             }
         }
 
+        // Нельзя давать дополнительную атаку для юнита, который сам даёт дополнительную атаку.
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.GiveAdditionalAttack &&
+            targetUnit.UnitType.MainAttack.AttackType is UnitAttackType.GiveAdditionalAttack)
+        {
+            return false;
+        }
+
         // Если юнит может атаковать только ближайшего, то проверяем препятствия.
         if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Adjacent)
         {
@@ -313,6 +320,14 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.BoostDamage:
+                return new BattleProcessorAttackResult(
+                    AttackResult.Effect,
+                    power,
+                    GetEffectDuration(attack),
+                    attackingUnit,
+                    attack.AttackType,
+                    attack.AttackSource);
+
             case UnitAttackType.ReduceDamage:
             case UnitAttackType.ReduceInitiative:
             case UnitAttackType.Poison:
@@ -326,12 +341,17 @@ internal class BattleProcessor
                     attack.AttackType,
                     attack.AttackSource);
 
+            case UnitAttackType.GiveAdditionalAttack:
+                return new BattleProcessorAttackResult(
+                    AttackResult.AdditionalAttack,
+                    attack.AttackType,
+                    attack.AttackSource);
+
             case UnitAttackType.Revive:
             case UnitAttackType.DrainOverflow:
             case UnitAttackType.Cure:
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:
-            case UnitAttackType.GiveAttack:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
@@ -391,7 +411,7 @@ internal class BattleProcessor
             case UnitAttackType.Revive:
             case UnitAttackType.DrainOverflow:
             case UnitAttackType.Cure:
-            case UnitAttackType.GiveAttack:
+            case UnitAttackType.GiveAdditionalAttack:
             default:
                 throw new ArgumentOutOfRangeException();
         }
