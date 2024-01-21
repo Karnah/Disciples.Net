@@ -93,13 +93,45 @@ public class UnitEffects
     /// <summary>
     /// Получить модификатор силы атаки.
     /// </summary>
-    public decimal GetPowerModifier()
+    public decimal GetDamagePowerModifier()
     {
         var modifier = 1M;
 
         if (_battleEffects.TryGetValue(UnitAttackType.BoostDamage, out var boostDamage))
         {
             modifier *= boostDamage.Power!.Value / 100M + 1;
+        }
+
+        if (_battleEffects.TryGetValue(UnitAttackType.ReduceDamage, out var reduceDamage))
+        {
+            modifier *= 1 - reduceDamage.Power!.Value / 100M;
+        }
+
+        return modifier - 1M;
+    }
+
+    /// <summary>
+    /// Получить модификатор инициативы.
+    /// </summary>
+    /// <remarks>
+    /// Нет атак юнитов, которые влияют на точность.
+    /// Только зелья или заклинания. Поэтому сейчас 0.
+    /// </remarks>
+    public decimal GetAccuracyModifier()
+    {
+        return 0;
+    }
+
+    /// <summary>
+    /// Получить модификатор инициативы.
+    /// </summary>
+    public decimal GetInitiativeModifier()
+    {
+        var modifier = 1M;
+
+        if (_battleEffects.TryGetValue(UnitAttackType.ReduceInitiative, out var reduceInitiative))
+        {
+            modifier *= 1 - reduceInitiative.Power!.Value / 100M;
         }
 
         return modifier - 1M;

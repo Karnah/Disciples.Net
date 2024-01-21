@@ -90,6 +90,8 @@ internal class SaveProvider
         UnitAttackType.Fear,
         UnitAttackType.BoostDamage,
         UnitAttackType.Petrify,
+        UnitAttackType.ReduceDamage,
+        UnitAttackType.ReduceInitiative,
         UnitAttackType.Poison,
         UnitAttackType.Frostbite,
         UnitAttackType.Blister

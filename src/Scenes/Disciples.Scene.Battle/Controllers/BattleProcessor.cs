@@ -30,13 +30,13 @@ internal class BattleProcessor
     /// </summary>
     /// <param name="attackingSquad">Атакующий отряд.</param>
     /// <param name="defendingSquad">Защищающийся отряд.</param>
-    public Queue<Unit> GetTurnOrder(Squad attackingSquad, Squad defendingSquad)
+    public LinkedList<UnitTurnOrder> GetTurnOrder(Squad attackingSquad, Squad defendingSquad)
     {
-        return new Queue<Unit>(
+        return new LinkedList<UnitTurnOrder>(
             attackingSquad.Units
                 .Concat(defendingSquad.Units)
                 .Where(u => !u.IsDeadOrRetreated)
-                .OrderByDescending(u => u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE)));
+                .Select(u => new UnitTurnOrder(u,u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE) )));
     }
 
     #endregion
@@ -313,18 +313,8 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.BoostDamage:
-                return new BattleProcessorAttackResult(
-                    AttackResult.Effect,
-                    power,
-                    GetEffectDuration(attack),
-                    attackingUnit,
-                    attack.AttackType,
-                    attack.AttackSource);
-
-            case UnitAttackType.LowerDamage:
-            case UnitAttackType.LowerInitiative:
-                break;
-
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:
             case UnitAttackType.Blister:
@@ -371,7 +361,7 @@ internal class BattleProcessor
                     : EffectDuration.Create(1);
 
             case UnitAttackType.BoostDamage:
-            case UnitAttackType.LowerDamage:
+            case UnitAttackType.ReduceDamage:
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:
             case UnitAttackType.Doppelganger:
@@ -382,7 +372,7 @@ internal class BattleProcessor
                     ? EffectDuration.CreateInfinitive()
                     : EffectDuration.Create(1);
 
-            case UnitAttackType.LowerInitiative:
+            case UnitAttackType.ReduceInitiative:
                 return attack.IsInfinitive
                     ? EffectDuration.CreateInfinitive()
                     : EffectDuration.CreateRandom(2, 4);

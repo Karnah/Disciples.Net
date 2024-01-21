@@ -10,7 +10,7 @@ internal class UnitTurnQueue
     /// <summary>
     /// Основная очередь хода юнитов.
     /// </summary>
-    private Queue<Unit> _turnOrder = new();
+    private LinkedList<UnitTurnOrder> _turnOrder = new();
 
     /// <summary>
     /// Очередность хода юнитов, которые выбрали ожидание во время своего хода.
@@ -25,7 +25,7 @@ internal class UnitTurnQueue
     /// <summary>
     /// Определить очередность ходов в новом раунде.
     /// </summary>
-    public Unit NextRound(Queue<Unit> turnOrder)
+    public Unit NextRound(LinkedList<UnitTurnOrder> turnOrder)
     {
         _turnOrder = turnOrder;
         IsWaitingUnitTurn = false;
@@ -43,12 +43,14 @@ internal class UnitTurnQueue
     public Unit? GetNextUnit()
     {
         // Очередь из основных ходов юнитов.
-        do
+        foreach (var nextUnitTurnOrder in _turnOrder.OrderByDescending(to => to.Initiative))
         {
-            if (_turnOrder.TryDequeue(out var nextUnit) && !nextUnit.IsDeadOrRetreated)
-                return nextUnit;
-        } while (_turnOrder.Count > 0);
+            if (nextUnitTurnOrder.Unit.IsDeadOrRetreated)
+                continue;
 
+            _turnOrder.Remove(nextUnitTurnOrder);
+            return nextUnitTurnOrder.Unit;
+        }
 
         // Стек из юнитов, которые "ждали".
         if (_waitingTurnOrder.Count > 0)
@@ -71,5 +73,19 @@ internal class UnitTurnQueue
     public void UnitWait(Unit unit)
     {
         _waitingTurnOrder.Push(unit);
+    }
+
+    /// <summary>
+    /// Поменять порядок хода юнита.
+    /// </summary>
+    public void ReorderUnitTurnOrder(Unit unit, int initiative)
+    {
+        var unitTurnOrder = _turnOrder.FirstOrDefault(to => to.Unit == unit);
+
+        // Юнит в этом ходу уже сходил, ничего ему менять не нужно.
+        if (unitTurnOrder == null)
+            return;
+
+        unitTurnOrder.Initiative = initiative;
     }
 }

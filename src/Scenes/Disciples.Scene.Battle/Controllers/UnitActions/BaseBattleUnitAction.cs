@@ -207,6 +207,16 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         {
             effectAction.TargetUnit.Unit.Effects.AddBattleEffect(
                 new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.Duration, effectAction.DurationControlUnit, effectAction.Power));
+
+            // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
+            if (effectAction.AttackType == UnitAttackType.ReduceInitiative)
+            {
+                var targetUnit = effectAction.TargetUnit.Unit;
+
+                // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
+                // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
+                _context.UnitTurnQueue.ReorderUnitTurnOrder(targetUnit, targetUnit.Initiative);
+            }
         }
 
         // Если была защита, то удаляем её из списка.

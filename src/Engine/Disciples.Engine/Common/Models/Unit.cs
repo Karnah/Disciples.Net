@@ -120,7 +120,7 @@ public class Unit
     {
         UnitAttackType.Heal => 0,
         UnitAttackType.BoostDamage => 0,
-        _ => (int)(MainAttackBasePower * Effects.GetPowerModifier())
+        _ => (int)(MainAttackBasePower * Effects.GetDamagePowerModifier())
     };
 
     /// <summary>
@@ -145,9 +145,13 @@ public class Unit
 
     /// <summary>
     /// Модификатор точности первой атаки.
-    /// todo Рассчитывать, зависит эффектов.
     /// </summary>
-    public int MainAttackAccuracyModifier => 0;
+    public int MainAttackAccuracyModifier => UnitType.MainAttack.AttackType switch
+    {
+        UnitAttackType.Heal => 0,
+        UnitAttackType.BoostDamage => 0,
+        _ => (int) (MainAttackBaseAccuracy * Effects.GetAccuracyModifier())
+    };
 
     /// <summary>
     /// Текущее значение точность первой атаки.
@@ -169,9 +173,8 @@ public class Unit
 
     /// <summary>
     /// Модификатор инициативы.
-    /// todo Рассчитывать, зависит от эффектов.
     /// </summary>
-    public int InitiativeModifier => 0;
+    public int InitiativeModifier => (int) (BaseInitiative * Effects.GetInitiativeModifier());
 
     /// <summary>
     /// Текущее значение инициативы.
@@ -216,7 +219,9 @@ public class Unit
         return attack.AttackType switch
         {
             UnitAttackType.Heal => attack.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower),
-            UnitAttackType.BoostDamage => GetBoostPowerPercent(attack.AttackPowerLevel),
+            UnitAttackType.BoostDamage => GetBoostDamagePercent(attack.AttackPowerLevel),
+            UnitAttackType.ReduceDamage => GetReduceDamagePercent(attack.AttackPowerLevel),
+            UnitAttackType.ReduceInitiative => GetReduceInitiativePercent(attack.AttackPowerLevel),
             _ => attack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower)
         };
     }
@@ -242,7 +247,7 @@ public class Unit
     /// <remarks>
     /// TODO Тащить эти значения из GVars, BATBOOSTD1/2/3/4.
     /// </remarks>
-    private static int GetBoostPowerPercent(int boostPowerLevel)
+    private static int GetBoostDamagePercent(int boostPowerLevel)
     {
         return boostPowerLevel switch
         {
@@ -250,6 +255,37 @@ public class Unit
             2 => 50,
             3 => 75,
             4 => 100,
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Получить ослабление атаки в процентах.
+    /// </summary>
+    /// <remarks>
+    /// TODO Тащить эти значения из GVars, BATLOWERD1/2.
+    /// </remarks>
+    private static int GetReduceDamagePercent(int reduceDamageLevel)
+    {
+        return reduceDamageLevel switch
+        {
+            1 => 50,
+            2 => 33,
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Получить уменьшение инициативы в процентах.
+    /// </summary>
+    /// <remarks>
+    /// TODO Тащить эти значения из GVars, BATLOWERI1.
+    /// </remarks>
+    private static int GetReduceInitiativePercent(int reduceInitiativeLevel)
+    {
+        return reduceInitiativeLevel switch
+        {
+            1 => 50,
             _ => 0
         };
     }

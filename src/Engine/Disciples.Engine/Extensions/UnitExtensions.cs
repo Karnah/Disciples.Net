@@ -39,8 +39,8 @@ public static class UnitExtensions
             or UnitAttackType.Paralyze
             or UnitAttackType.Fear
             or UnitAttackType.Petrify
-            or UnitAttackType.LowerDamage
-            or UnitAttackType.LowerInitiative
+            or UnitAttackType.ReduceDamage
+            or UnitAttackType.ReduceInitiative
             or UnitAttackType.Poison
             or UnitAttackType.Frostbite
             or UnitAttackType.DrainOverflow

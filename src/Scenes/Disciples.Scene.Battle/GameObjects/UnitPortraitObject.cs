@@ -454,8 +454,8 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Petrify => isEffectCompleted
                 ? "X008TA0025"
                 : "X008TA0009",
-            UnitAttackType.LowerDamage => "X008TA0012",
-            UnitAttackType.LowerInitiative => "X008TA0013",
+            UnitAttackType.ReduceDamage => "X008TA0012",
+            UnitAttackType.ReduceInitiative => "X008TA0013",
             UnitAttackType.Poison => power == null
                 ? "X008TA0026"
                 : "X008TA0014",

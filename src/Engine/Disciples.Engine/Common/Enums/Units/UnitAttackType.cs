@@ -43,12 +43,12 @@ public enum UnitAttackType
     /// <summary>
     /// Снижение повреждения.
     /// </summary>
-    LowerDamage = 10,
+    ReduceDamage = 10,
 
     /// <summary>
     /// Снижение инициативы.
     /// </summary>
-    LowerInitiative = 11,
+    ReduceInitiative = 11,
 
     /// <summary>
     /// Отравление.

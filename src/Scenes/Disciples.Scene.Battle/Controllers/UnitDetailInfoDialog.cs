@@ -145,7 +145,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             .ReplacePlaceholders(new []
             {
                 ("%LEVEL%", new TextContainer(unit.Level.ToString())),
-                ("%XP%", new TextContainer($"{unit.Experience}/{unit.UnitType.XpNext}")),
+                ("%XP%", new TextContainer($"{unit.Experience} / {unit.UnitType.XpNext}")),
                 ("%HP1%", new TextContainer(unit.HitPoints.ToString())),
                 ("%HP2%", new TextContainer(unit.MaxHitPoints.ToString())),
                 ("%ARMOR%", GetValueWithModifier(unit.BaseArmor.ToString(), unit.ArmorModifier)),
@@ -179,7 +179,8 @@ internal class UnitDetailInfoDialog : BaseDialog
             GetAttackPower(unit.MainAttackBasePower, unit.UnitType.MainAttack.AttackType),
             unit.MainAttackPowerModifier);
 
-        if (unit.SecondaryAttackPower > 0)
+        if (unit.SecondaryAttackPower > 0 &&
+            unit.UnitType.SecondaryAttack!.AttackType is not UnitAttackType.ReduceDamage and not UnitAttackType.ReduceInitiative)
         {
             var secondaryAttackPower = GetValueWithModifier(
                 GetAttackPower(unit.SecondaryAttackPower.Value, unit.UnitType.SecondaryAttack!.AttackType),
@@ -198,11 +199,16 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// </summary>
     private static string GetAttackPower(int power, UnitAttackType unitAttackType)
     {
-        return unitAttackType switch
+        switch (unitAttackType)
         {
-            UnitAttackType.BoostDamage => $"+{power}%",
-            _ => power.ToString()
-        };
+            case UnitAttackType.BoostDamage:
+                return $"+{power}%";
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+                return $"-{power}%";
+            default:
+                return power.ToString();
+        }
     }
 
     /// <summary>
@@ -307,8 +313,8 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.Fear => "X005TA0794",
             UnitAttackType.BoostDamage => "X005TA0795",
             UnitAttackType.Petrify => "X005TA0790",
-            UnitAttackType.LowerDamage => "X005TA0796",
-            UnitAttackType.LowerInitiative => "X005TA0797",
+            UnitAttackType.ReduceDamage => "X005TA0796",
+            UnitAttackType.ReduceInitiative => "X005TA0797",
             UnitAttackType.Poison => "X005TA0798",
             UnitAttackType.Frostbite => "X005TA0799",
             UnitAttackType.Revive => "X005TA0800",

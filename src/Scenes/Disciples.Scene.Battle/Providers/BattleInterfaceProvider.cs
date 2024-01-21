@@ -68,6 +68,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
             // Для BoostDamage есть 4 иконки (FIBOOST1/2/3/4), но между ними нет никакой разницы.
             { UnitAttackType.BoostDamage, _battleResourceProvider.GetBattleBitmap("FIBOOST1") },
             { UnitAttackType.Petrify, _battleResourceProvider.GetBattleBitmap("FIPETRIFY") },
+            // Для ReduceDamage есть 2 иконки (FILOWER1/2), но между ними нет никакой разницы.
+            { UnitAttackType.ReduceDamage, _battleResourceProvider.GetBattleBitmap("FILOWER1") },
+            { UnitAttackType.ReduceInitiative, _battleResourceProvider.GetBattleBitmap("FILOWERINIT") },
             { UnitAttackType.Poison, _battleResourceProvider.GetBattleBitmap("FIPOISON") },
             { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleBitmap("F1FROSTBITE") },
             { UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleBitmap("F1DRAINLEVEL") },
