@@ -60,6 +60,9 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     public AnimationFrames BigUnitTargetAnimationFrames { get; private set; } = null!;
 
     /// <inheritdoc />
+    public AnimationFrames DrainLifeHealAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
     public IBitmap GetUnitFace(UnitType unitType)
     {
         return _unitInfoProvider.GetUnitFace(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
@@ -118,6 +121,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         BigUnitTurnAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKCURLARGEA");
         SmallUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKSMALLA");
         BigUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKLARGEA");
+        DrainLifeHealAnimationFrames = GetAnimationFrames(new StaticResourceKey("HEALTUCHA1B00"));
     }
 
     /// <inheritdoc />

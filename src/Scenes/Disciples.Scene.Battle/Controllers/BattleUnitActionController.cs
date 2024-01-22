@@ -56,7 +56,7 @@ internal class BattleUnitActionController
     /// <summary>
     /// Обработать результат второй атаки текущего юнита.
     /// </summary>
-    public void BeginSecondaryAttack(BattleUnit attackerBattleUnit, IReadOnlyList<BattleUnit> targetBattleUnits, int? power, bool shouldPassTurn)
+    public void BeginSecondaryAttack(BattleUnit attackerBattleUnit, IReadOnlyList<BattleUnit> targetBattleUnits, bool shouldPassTurn)
     {
         var secondaryAttack = new SecondaryAttackUnitAction(
             _battleContext,
@@ -67,7 +67,6 @@ internal class BattleUnitActionController
             _battleProcessor,
             attackerBattleUnit,
             targetBattleUnits,
-            power,
             shouldPassTurn);
         _battleContext.AddUnitAction(secondaryAttack);
     }

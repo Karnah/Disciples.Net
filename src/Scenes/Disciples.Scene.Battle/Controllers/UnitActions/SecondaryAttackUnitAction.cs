@@ -15,7 +15,6 @@ internal class SecondaryAttackUnitAction : BaseBattleUnitAction
 
     private readonly BattleUnit _attackerBattleUnit;
     private readonly IReadOnlyList<BattleUnit> _targetBattleUnits;
-    private readonly int? _power;
 
     /// <summary>
     /// Создать объект типа <see cref="SecondaryAttackUnitAction" />.
@@ -29,14 +28,12 @@ internal class SecondaryAttackUnitAction : BaseBattleUnitAction
         BattleProcessor battleProcessor,
         BattleUnit attackerBattleUnit,
         IReadOnlyList<BattleUnit> targetBattleUnits,
-        int? power,
         bool shouldPassTurn
         ) : base(context, battleGameObjectContainer, unitPortraitPanelController, unitResourceProvider, battleSoundController)
     {
         _battleProcessor = battleProcessor;
         _attackerBattleUnit = attackerBattleUnit;
         _targetBattleUnits = targetBattleUnits;
-        _power = power;
 
         ShouldPassTurn = shouldPassTurn;
     }
@@ -55,7 +52,7 @@ internal class SecondaryAttackUnitAction : BaseBattleUnitAction
     {
         foreach (var targetBattleUnit in _targetBattleUnits)
         {
-            var attackResult = _battleProcessor.ProcessSecondaryAttack(_attackerBattleUnit.Unit, targetBattleUnit.Unit, _power);
+            var attackResult = _battleProcessor.ProcessSecondaryAttack(_attackerBattleUnit.Unit, targetBattleUnit.Unit);
             ProcessAttackResult(_attackerBattleUnit, targetBattleUnit, attackResult, false);
         }
     }

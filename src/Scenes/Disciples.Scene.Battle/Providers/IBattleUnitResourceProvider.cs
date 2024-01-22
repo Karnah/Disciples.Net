@@ -33,6 +33,11 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     AnimationFrames BigUnitTargetAnimationFrames { get; }
 
     /// <summary>
+    /// Анимация исцеления вампиризмом.
+    /// </summary>
+    AnimationFrames DrainLifeHealAnimationFrames { get; }
+
+    /// <summary>
     /// Получить изображение юнита.
     /// </summary>
     /// <param name="unitType">Тип юнита.</param>

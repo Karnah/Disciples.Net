@@ -11,9 +11,9 @@ public enum UnitAttackType
     Damage = 1,
 
     /// <summary>
-    /// Выпить жизненную силу и передать себе.
+    /// Выпить жизненную силу и вылечить себя.
     /// </summary>
-    Drain = 2,
+    DrainLife = 2,
 
     /// <summary>
     /// Паралич.
@@ -66,9 +66,9 @@ public enum UnitAttackType
     Revive = 14,
 
     /// <summary>
-    /// Выпить жизненную силу и передать себе и/или союзникам.
+    /// Выпить жизненную силу и вылечить себя и/или союзников.
     /// </summary>
-    DrainOverflow = 15,
+    DrainLifeOverflow = 15,
 
     /// <summary>
     /// Снятие негативных эффектов.

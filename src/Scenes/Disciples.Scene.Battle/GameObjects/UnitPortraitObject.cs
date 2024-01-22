@@ -416,12 +416,14 @@ internal class UnitPortraitObject : GameObject
         return unitAttackType switch
         {
             UnitAttackType.Damage => BattleColors.Damage,
+            UnitAttackType.DrainLife => BattleColors.Damage,
             UnitAttackType.Paralyze => BattleColors.Paralyze,
             UnitAttackType.Heal => BattleColors.Heal,
             UnitAttackType.Fear => BattleColors.Damage,
             UnitAttackType.BoostDamage => BattleColors.BoostDamage,
             UnitAttackType.Poison => BattleColors.Poison,
             UnitAttackType.Frostbite => BattleColors.Frostbite,
+            UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Blister => BattleColors.Blister,
             _ => null
         };
@@ -532,8 +534,10 @@ internal class UnitPortraitObject : GameObject
         switch (attackType)
         {
             case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:
+            case UnitAttackType.DrainLifeOverflow:
             case UnitAttackType.Blister:
                 text = text.ReplacePlaceholders(new []{ ("%DAMAGE%", new TextContainer($"-{power}")) });
                 break;

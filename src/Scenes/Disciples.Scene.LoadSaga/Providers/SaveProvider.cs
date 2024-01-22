@@ -85,6 +85,7 @@ internal class SaveProvider
     private static readonly UnitAttackType[] SupportedAttackTypes =
     {
         UnitAttackType.Damage,
+        UnitAttackType.DrainLife,
         UnitAttackType.Paralyze,
         UnitAttackType.Heal,
         UnitAttackType.Fear,
@@ -94,6 +95,7 @@ internal class SaveProvider
         UnitAttackType.ReduceInitiative,
         UnitAttackType.Poison,
         UnitAttackType.Frostbite,
+        UnitAttackType.DrainLifeOverflow,
         UnitAttackType.GiveAdditionalAttack,
         UnitAttackType.Blister
     };

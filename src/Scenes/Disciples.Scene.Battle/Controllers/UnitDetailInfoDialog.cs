@@ -307,7 +307,7 @@ internal class UnitDetailInfoDialog : BaseDialog
         var attackTypeTextId = attackType switch
         {
             UnitAttackType.Damage => "X005TA0791",
-            UnitAttackType.Drain => "X005TA0792",
+            UnitAttackType.DrainLife => "X005TA0792",
             UnitAttackType.Paralyze => "X005TA0789",
             UnitAttackType.Heal => "X005TA0802",
             UnitAttackType.Fear => "X005TA0794",
@@ -318,7 +318,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.Poison => "X005TA0798",
             UnitAttackType.Frostbite => "X005TA0799",
             UnitAttackType.Revive => "X005TA0800",
-            UnitAttackType.DrainOverflow => "X005TA0801", // TODO перепроверить.
+            UnitAttackType.DrainLifeOverflow => "X005TA0801",
             UnitAttackType.Cure => "X005TA0793",
             UnitAttackType.Summon => "X005TA0803",
             UnitAttackType.DrainLevel => "X005TA0804",

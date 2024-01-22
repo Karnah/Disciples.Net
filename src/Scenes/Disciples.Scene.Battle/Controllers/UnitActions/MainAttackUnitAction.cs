@@ -1,6 +1,7 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -18,6 +19,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
+    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly BattleUnitActionController _unitActionController;
 
     /// <summary>
@@ -36,6 +38,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         _context = context;
         _battleProcessor = battleProcessor;
         _battleGameObjectContainer = battleGameObjectContainer;
+        _battleUnitResourceProvider = unitResourceProvider;
         _unitActionController = unitActionController;
 
         TargetBattleUnit = targetBattleUnit;
@@ -135,19 +138,9 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
             ? GetUnitBattleSquad(mainAttackAction.Target)
             : new[] { mainAttackAction.Target };
 
-        // Некоторые вторые атаки, например, выпить жизненную силу обрабатываются особым образом.
-        // Мы должны посчитать весь урон, который нанесли первой атакой, а потом сделать целями других юнитов.
-        var unitSecondAttack = currentUnit.UnitType.SecondaryAttack;
-        bool shouldCalculateDamage = false;
-        int damage = 0;
-
-        if (unitSecondAttack?.AttackType is UnitAttackType.DrainOverflow or UnitAttackType.Doppelganger)
-        {
-            shouldCalculateDamage = true;
-        }
-
         var secondaryAttackUnits = new List<BattleUnit>();
         var hasSuccessAttack = false;
+        var totalDamage = 0;
 
         foreach (var targetBattleUnit in targetBattleUnits)
         {
@@ -160,7 +153,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
             ProcessAttackResult(CurrentBattleUnit, targetBattleUnit, attackResult, true);
 
             if (attackResult.AttackResult == AttackResult.Attack)
-                damage += attackResult.Power!.Value;
+                totalDamage += attackResult.Power!.Value;
 
             var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss
                 and not AttackResult.Ward
@@ -168,8 +161,31 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
             hasSuccessAttack |= isSuccessAttack;
 
             // Сразу добавляем действие второй атаки, если первая была успешная.
-            if (unitSecondAttack != null && isSuccessAttack && !shouldCalculateDamage)
+            if (currentUnit.UnitType.SecondaryAttack != null && isSuccessAttack)
                 secondaryAttackUnits.Add(targetBattleUnit);
+        }
+
+        // Лечение от эффекта вампиризма проявляется сразу.
+        if (currentUnit.UnitType.MainAttack.AttackType is UnitAttackType.DrainLife or UnitAttackType.DrainLifeOverflow)
+        {
+            var squad = CurrentBattleUnit.IsAttacker
+                ? _context.AttackingSquad
+                : _context.DefendingSquad;
+            var drainLifeHealUnits = _battleProcessor.ProcessDrainLifeHeal(currentUnit, squad, totalDamage);
+            foreach (var drainLifeHealUnit in drainLifeHealUnits)
+            {
+                drainLifeHealUnit.TargetUnit.HitPoints += drainLifeHealUnit.HealPower;
+
+                var targetBattleUnit = _context.GetBattleUnit(drainLifeHealUnit.TargetUnit);
+                var animationPoint = targetBattleUnit.AnimationComponent.AnimationPoint;
+                var drainLifeHealAnimation = _battleGameObjectContainer.AddAnimation(
+                    _battleUnitResourceProvider.DrainLifeHealAnimationFrames,
+                    animationPoint.X,
+                    animationPoint.Y,
+                    targetBattleUnit.AnimationComponent.Layer + 2,
+                    false);
+                AddAction(new AnimationBattleAction(drainLifeHealAnimation.AnimationComponent));
+            }
         }
 
         // Если есть анимация, применяемая на площадь, то добавляем её на сцену.
@@ -206,19 +222,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         // Если у атакующего юнита есть вторая атака и есть хотя бы одно успешное попадание, добавляем обработки второй атаки.
         // Она начнёт выполняться позже, после завершения всех анимаций, связанных с первой.
         if (secondaryAttackUnits.Count > 0)
-        {
-            var secondAttackPower = shouldCalculateDamage
-                ? damage
-                : (int?)null;
-            _unitActionController.BeginSecondaryAttack(CurrentBattleUnit, secondaryAttackUnits, secondAttackPower, ShouldPassTurn);
-        }
-
-        // TODO Добавить обработка выпить жизнь.
-        // По идее, нужно будет разделить урон на каждого юнита.
-        // Но если юнит здоров, то делить нужно между оставшимися.
-        if (shouldCalculateDamage)
-        {
-        }
+            _unitActionController.BeginSecondaryAttack(CurrentBattleUnit, secondaryAttackUnits, ShouldPassTurn);
     }
 
     /// <summary>

@@ -185,7 +185,7 @@ internal class BattleAiProcessor
             .Select(u => new AiTargetUnit(u,
                 _battleProcessor.ProcessMainAttack(attackingUnit, u)?.AttackResult,
                 attackingUnit.UnitType.SecondaryAttack != null
-                    ? _battleProcessor.ProcessSecondaryAttack(attackingUnit, u, null)?.AttackResult
+                    ? _battleProcessor.ProcessSecondaryAttack(attackingUnit, u)?.AttackResult
                     : null))
             .Where(r => r.MainAttackResult is not null and not AttackResult.Immunity)
             .ToArray();

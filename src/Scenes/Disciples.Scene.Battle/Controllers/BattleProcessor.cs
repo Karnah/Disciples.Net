@@ -82,8 +82,13 @@ internal class BattleProcessor
             attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any)
         {
             // Усилять можно только юнитов с прямым уроном от первой атаки.
-            if (targetUnit.UnitType.MainAttack.AttackType != UnitAttackType.Damage)
+            if (targetUnit.UnitType.MainAttack.AttackType
+                is not UnitAttackType.Damage
+                and not UnitAttackType.DrainLife
+                and not UnitAttackType.DrainLifeOverflow)
+            {
                 return false;
+            }
 
             // Усилить юнита можно только большим эффектом.
             if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostEffect) &&
@@ -181,12 +186,70 @@ internal class BattleProcessor
     /// <summary>
     /// Выполнить одну атаку юнита на другого с помощью второстепенной атаки.
     /// </summary>
-    public BattleProcessorAttackResult? ProcessSecondaryAttack(Unit attackingUnit, Unit targetUnit, int? externalPower)
+    public BattleProcessorAttackResult? ProcessSecondaryAttack(Unit attackingUnit, Unit targetUnit)
     {
-        var power = externalPower ?? attackingUnit.SecondaryAttackPower;
+        var power = attackingUnit.SecondaryAttackPower;
         var attack = attackingUnit.UnitType.SecondaryAttack!;
         var accuracy = attackingUnit.SecondaryAttackAccuracy!.Value;
         return ProcessAttack(attackingUnit, targetUnit, attack, power, accuracy);
+    }
+
+    /// <summary>
+    /// Обработать лечение вампиризмом.
+    /// </summary>
+    public IReadOnlyList<DrainLifeHealUnit> ProcessDrainLifeHeal(Unit vampireUnit, Squad vampireUnitSquad, int totalDamage)
+    {
+        var attackType = vampireUnit.UnitType.MainAttack.AttackType;
+        if (attackType is not UnitAttackType.DrainLife and not UnitAttackType.DrainLifeOverflow)
+        {
+            throw new ArgumentException(
+                $"Вампиризм может быть обработан только для атак типа {UnitAttackType.DrainLife} и {UnitAttackType.DrainLifeOverflow}",
+                nameof(attackType));
+        }
+
+        var totalHeal = totalDamage / 2;
+        if (totalHeal == 0)
+            return Array.Empty<DrainLifeHealUnit>();
+
+        // DrainLife может лечить только себя, если его здоровье меньше максимального.
+        // DrainLifeOverflow может лечить любого у кого здоровье меньше максимального.
+        var canHealByDrain = attackType is UnitAttackType.DrainLife &&
+                             vampireUnit.HitPoints < vampireUnit.MaxHitPoints;
+        var canHealByDrainOverFlow = attackType is UnitAttackType.DrainLifeOverflow &&
+                                     vampireUnitSquad.Units.Any(u => !u.IsDeadOrRetreated && u.HitPoints < u.MaxHitPoints);
+        if (!canHealByDrain && !canHealByDrainOverFlow)
+            return Array.Empty<DrainLifeHealUnit>();
+
+        var result = new List<DrainLifeHealUnit>();
+
+        var vampireHealPower = Math.Min(vampireUnit.MaxHitPoints - vampireUnit.HitPoints, totalHeal);
+        if (vampireHealPower > 0)
+        {
+            totalHeal -= vampireHealPower;
+            result.Add(new DrainLifeHealUnit(vampireUnit, vampireHealPower));
+        }
+
+        if (canHealByDrain || totalHeal == 0)
+            return result;
+
+        var damagedUnits = vampireUnitSquad
+            .Units
+            .Where(u => u != vampireUnit && !u.IsDeadOrRetreated && u.HitPoints < u.MaxHitPoints)
+            .OrderBy(u => u.MaxHitPoints - u.HitPoints)
+            .ToArray();
+        for (int unitIndex = 0; unitIndex < damagedUnits.Length; unitIndex++)
+        {
+            // Лечение юнитов делится поровну между всеми.
+            // Но если есть слабо раненые юниты (нужно восстановить меньше, чем среднее), то остальные получат больше.
+            var targetUnit = damagedUnits[unitIndex];
+            var unitHealPower = Math.Min(
+                targetUnit.MaxHitPoints - targetUnit.HitPoints,
+                totalHeal / (damagedUnits.Length - unitIndex));
+            totalHeal -= unitHealPower;
+            result.Add(new DrainLifeHealUnit(targetUnit, unitHealPower));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -268,6 +331,8 @@ internal class BattleProcessor
         switch (attack.AttackType)
         {
             case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
+            case UnitAttackType.DrainLifeOverflow:
                 // todo Максимальное значение атаки - 250/300/400.
                 var attackPower = power!.Value + RandomGenerator.Get(ATTACK_RANGE);
 
@@ -285,9 +350,6 @@ internal class BattleProcessor
                     attackPower,
                     attack.AttackType,
                     attack.AttackSource);
-
-            case UnitAttackType.Drain:
-                break;
 
             case UnitAttackType.Paralyze:
             case UnitAttackType.Petrify:
@@ -348,7 +410,6 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.Revive:
-            case UnitAttackType.DrainOverflow:
             case UnitAttackType.Cure:
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:
@@ -405,11 +466,11 @@ internal class BattleProcessor
                     : EffectDuration.Create(1);
 
             case UnitAttackType.Damage:
-            case UnitAttackType.Drain:
+            case UnitAttackType.DrainLife:
             case UnitAttackType.Heal:
             case UnitAttackType.Fear:
             case UnitAttackType.Revive:
-            case UnitAttackType.DrainOverflow:
+            case UnitAttackType.DrainLifeOverflow:
             case UnitAttackType.Cure:
             case UnitAttackType.GiveAdditionalAttack:
             default:

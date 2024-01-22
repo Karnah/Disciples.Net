@@ -35,7 +35,7 @@ public static class UnitExtensions
     {
         var attackClass = unit.UnitType.MainAttack.AttackType;
         if (attackClass is UnitAttackType.Damage
-            or UnitAttackType.Drain
+            or UnitAttackType.DrainLife
             or UnitAttackType.Paralyze
             or UnitAttackType.Fear
             or UnitAttackType.Petrify
@@ -43,7 +43,7 @@ public static class UnitExtensions
             or UnitAttackType.ReduceInitiative
             or UnitAttackType.Poison
             or UnitAttackType.Frostbite
-            or UnitAttackType.DrainOverflow
+            or UnitAttackType.DrainLifeOverflow
             or UnitAttackType.DrainLevel
             or UnitAttackType.Doppelganger
             or UnitAttackType.TransformOther
