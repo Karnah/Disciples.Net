@@ -10,7 +10,7 @@
         xmlns:so="clr-namespace:Disciples.Avalonia.SceneObjects"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Disciples.Avalonia.GameWindow"
-        WindowState="Maximized" Background="Black" SystemDecorations="None" CanResize="False"
+        WindowState="FullScreen" Background="Black" SystemDecorations="None" CanResize="False"
         Title="Avalonia Disciples II">
 
     <Design.DataContext>

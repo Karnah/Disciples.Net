@@ -60,7 +60,8 @@ public partial class GameWindow : Window
             return;
 
         // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
-        var scale = Math.Min(screen.WorkingArea.Width / GameInfo.OriginalWidth, screen.WorkingArea.Height / GameInfo.OriginalHeight);
+        var scale = Math.Min(Width / GameInfo.OriginalWidth, Height / GameInfo.OriginalHeight);
+        scale /= screen.Scaling;
 
         var gameField = this.Find<Grid>("Field")!;
         gameField.RenderTransform = new ScaleTransform(scale, scale);
