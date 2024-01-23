@@ -16,19 +16,6 @@ internal enum AttackResult
     Attack,
 
     /// <summary>
-    /// Исцеление юнита.
-    /// </summary>
-    Heal,
-
-    /// <summary>
-    /// Наложение эффекта.
-    /// </summary>
-    /// <remarks>
-    /// Отравления, усиления, проклятия и т.д.
-    /// </remarks>
-    Effect,
-
-    /// <summary>
     /// Разовая защита от атаки
     /// </summary>
     Ward,
@@ -39,12 +26,7 @@ internal enum AttackResult
     Immunity,
 
     /// <summary>
-    /// Юнит испугался и собирается сбежать.
+    /// Пропустить первую атаку и перейти сразу ко второй.
     /// </summary>
-    Fear,
-
-    /// <summary>
-    /// Юнит получает дополнительную атаку.
-    /// </summary>
-    AdditionalAttack
+    Skip
 }

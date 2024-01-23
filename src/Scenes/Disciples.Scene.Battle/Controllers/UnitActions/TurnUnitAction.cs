@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Models.BattleActions;
@@ -79,23 +80,19 @@ internal class TurnUnitAction : BaseBattleUnitAction
     /// <inheritdoc />
     protected override void ProcessCompletedUnitAction(UnitBattleAction unitAction)
     {
-        if (unitAction is UnitTriggeredEffectAction unitTriggeredEffectAction)
-        {
-            if (unitTriggeredEffectAction.AttackType is UnitAttackType.Poison
-                or UnitAttackType.Frostbite
-                or UnitAttackType.Blister)
-            {
-                CurrentBattleUnit.Unit.HitPoints -= unitTriggeredEffectAction.Power!.Value;
+        base.ProcessCompletedUnitAction(unitAction);
 
-                if (CurrentBattleUnit.Unit.HitPoints == 0)
-                {
-                    ProcessUnitDeath(CurrentBattleUnit);
-                    ShouldPassTurn = true;
-                }
+        // Обрабатываем урон, который наносит эффект при наступлении хода юнита.
+        if (unitAction.IsEffectTriggered && unitAction.AttackType!.Value.IsDamageEffect())
+        {
+            CurrentBattleUnit.Unit.HitPoints -= unitAction.Power!.Value;
+
+            if (CurrentBattleUnit.Unit.HitPoints == 0)
+            {
+                ProcessUnitDeath(CurrentBattleUnit);
+                ShouldPassTurn = true;
             }
         }
-
-        base.ProcessCompletedUnitAction(unitAction);
 
         // Если завершилось последнее действие, то обрабатываем статус и запускаем следующий эффект.
         if (IsNoActions)
@@ -139,21 +136,21 @@ internal class TurnUnitAction : BaseBattleUnitAction
                     if (!CurrentBattleUnit.Unit.Effects.IsParalyzed)
                         CurrentBattleUnit.UnitState = BattleUnitState.Waiting;
 
-                    // При любом эффекте паралича, юнит пропускает ход.
+                    // Даже если эффект паралича закончился, юнит всё равно пропускает ход.
                     ShouldPassTurn = true;
 
-                    AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, unitEffect.AttackType, unitEffect.Power, unitEffect.Duration));
+                    AddAction(new UnitBattleAction(CurrentBattleUnit, attackResult, true));
                     PlayAttackSound(unitEffect.AttackType);
                     break;
 
                 case UnitAttackType.Poison:
                 case UnitAttackType.Frostbite:
                 case UnitAttackType.Blister:
-                    var effectAnimationAction = GetUnitEffectAnimationAction(CurrentBattleUnit, attackResult.AttackType!.Value);
+                    var effectAnimationAction = GetAttackTypeAnimationAction(CurrentBattleUnit, attackResult.AttackType!.Value);
                     if (effectAnimationAction != null)
                         AddAction(effectAnimationAction);
 
-                    AddAction(new UnitTriggeredEffectAction(CurrentBattleUnit, attackResult.AttackType!.Value, attackResult.Power!.Value, unitEffect.Duration, animationBattleAction: effectAnimationAction));
+                    AddAction(new UnitBattleAction(CurrentBattleUnit, attackResult, true, effectAnimationAction));
                     PlayAttackSound(attackResult.AttackType.Value);
                     break;
 

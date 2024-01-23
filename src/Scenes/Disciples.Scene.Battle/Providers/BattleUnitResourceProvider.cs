@@ -92,13 +92,21 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
-    public AnimationFrames GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall)
+    public AnimationFrames? GetAttackTypeAnimation(UnitAttackType effectAttackType, bool isSmallUnit)
     {
-        var animationKey = (effectAttackType, isSmall);
-        if (!_effectsAnimation.ContainsKey(animationKey))
-            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmall).Key);
+        if (effectAttackType is UnitAttackType.Poison
+            or UnitAttackType.Frostbite
+            or UnitAttackType.Revive
+            or UnitAttackType.Blister)
+        {
+            var animationKey = (effectAttackType, isSmall: isSmallUnit);
+            if (!_effectsAnimation.ContainsKey(animationKey))
+                _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
 
-        return _effectsAnimation[animationKey];
+            return _effectsAnimation[animationKey];
+        }
+
+        return null;
     }
 
     /// <inheritdoc />

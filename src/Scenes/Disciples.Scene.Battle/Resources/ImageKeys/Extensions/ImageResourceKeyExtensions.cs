@@ -102,14 +102,15 @@ internal static class ImageResourceKeyExtensions
     /// <summary>
     /// Получить ключ в ресурсах, который соответствует определённой анимации атаки.
     /// </summary>
-    public static string GetResourceKey(this UnitAttackType effectAttackType)
+    public static string GetResourceKey(this UnitAttackType attackType)
     {
-        return effectAttackType switch
+        return attackType switch
         {
             UnitAttackType.Poison => "POISONANIM",
             UnitAttackType.Frostbite => "FROSTBITEANIM",
+            UnitAttackType.Revive => "REVIVEANIM",
             UnitAttackType.Blister => "BLISTERANIM",
-            _ => throw new ArgumentOutOfRangeException(nameof(effectAttackType), effectAttackType, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
     }
 

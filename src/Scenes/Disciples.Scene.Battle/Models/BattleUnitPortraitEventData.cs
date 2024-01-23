@@ -12,12 +12,13 @@ internal readonly ref struct BattleUnitPortraitEventData
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitPortraitEventData" />.
     /// </summary>
-    public BattleUnitPortraitEventData(UnitActionType unitActionType, UnitAttackType? attackType, int? power = null, EffectDuration? effectDuration = null)
+    public BattleUnitPortraitEventData(UnitActionType unitActionType, UnitAttackType? attackType, int? power, EffectDuration? effectDuration, bool isEffectTriggered)
     {
         UnitActionType = unitActionType;
         AttackType = attackType;
         Power = power;
         EffectDuration = effectDuration;
+        IsEffectTriggered = isEffectTriggered;
     }
 
     /// <summary>
@@ -39,4 +40,9 @@ internal readonly ref struct BattleUnitPortraitEventData
     /// Длительность эффекта.
     /// </summary>
     public EffectDuration? EffectDuration { get; }
+
+    /// <summary>
+    /// Признак, что это срабатывание эффекта на ходу юнита.
+    /// </summary>
+    public bool IsEffectTriggered { get; }
 }

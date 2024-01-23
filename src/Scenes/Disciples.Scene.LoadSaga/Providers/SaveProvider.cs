@@ -95,6 +95,7 @@ internal class SaveProvider
         UnitAttackType.ReduceInitiative,
         UnitAttackType.Poison,
         UnitAttackType.Frostbite,
+        UnitAttackType.Revive,
         UnitAttackType.DrainLifeOverflow,
         UnitAttackType.GiveAdditionalAttack,
         UnitAttackType.Blister

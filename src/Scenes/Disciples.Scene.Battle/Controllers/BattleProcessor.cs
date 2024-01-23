@@ -62,48 +62,9 @@ internal class BattleProcessor
             return false;
         }
 
-        // BUG Патриарх может воскресить юнита, так что эта проверка не совсем корректна.
-        // Если юнит бьёт по площади, то разрешаем кликнуть на мертвого юнита.
-        if (targetUnit.IsDead && attackingUnit.UnitType.MainAttack.Reach != UnitAttackReach.All)
-            return false;
-
-        // Лекарь по одиночной цели без второй атаки может лечить только тех,
-        // у кого меньше максимального значения здоровья.
-        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.Heal &&
-            attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any &&
-            attackingUnit.UnitType.SecondaryAttack == null &&
-            targetUnit.HitPoints == targetUnit.MaxHitPoints)
-        {
-            return false;
-        }
-
-        // TODO При обработке эффекта "Cure" изменить проверку. Даже если нельзя баффать, эффект снимать будет можно.
-        if (attackingUnit.UnitType.MainAttack.AttackType == UnitAttackType.BoostDamage &&
-            attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Any)
-        {
-            // Усилять можно только юнитов с прямым уроном от первой атаки.
-            if (targetUnit.UnitType.MainAttack.AttackType
-                is not UnitAttackType.Damage
-                and not UnitAttackType.DrainLife
-                and not UnitAttackType.DrainLifeOverflow)
-            {
-                return false;
-            }
-
-            // Усилить юнита можно только большим эффектом.
-            if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostEffect) &&
-                attackingUnit.MainAttackPower <= boostEffect.Power)
-            {
-                return false;
-            }
-        }
-
-        // Нельзя давать дополнительную атаку для юнита, который сам даёт дополнительную атаку.
-        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.GiveAdditionalAttack &&
-            targetUnit.UnitType.MainAttack.AttackType is UnitAttackType.GiveAdditionalAttack)
-        {
-            return false;
-        }
+        // Для юнитов бьющих по всей площади, разрешаем кликнуть на любого юнита (даже на мёртвого).
+        if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.All)
+            return true;
 
         // Если юнит может атаковать только ближайшего, то проверяем препятствия.
         if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.Adjacent)
@@ -127,7 +88,89 @@ internal class BattleProcessor
             }
         }
 
-        return true;
+        var mainAttackType = attackingUnit.UnitType.MainAttack.AttackType;
+        var canAttackMainAttack = CanAttack(attackingUnit.UnitType.MainAttack.AttackType, attackingUnit.MainAttackPower, targetUnit);
+        if (canAttackMainAttack)
+            return true;
+
+        // Для атак на союзников есть особые условия. Первая атака может быть невозможна, но вторая да, и она должна быть выполнена.
+        // Например, Иерофант: он не может лечить мёртвого (первая атака), но может воскресить второй.
+        // Также архидруидресса: она может не иметь возможности усилить, но может второй снять дебаффы.
+        if (mainAttackType.IsAllyAttack() && attackingUnit.UnitType.SecondaryAttack != null)
+        {
+            var canAttackSecondaryAttack = CanAttack(attackingUnit.UnitType.SecondaryAttack.AttackType, attackingUnit.SecondaryAttackPower, targetUnit);
+            if (canAttackSecondaryAttack)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Проверить, можно ли атаковать юнита типом атаки.
+    /// </summary>
+    private static bool CanAttack(UnitAttackType attackType, int? power, Unit targetUnit)
+    {
+        if (targetUnit.IsDead && attackType != UnitAttackType.Revive)
+            return false;
+
+        switch (attackType)
+        {
+            case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.DrainLevel:
+            case UnitAttackType.DrainLifeOverflow:
+            case UnitAttackType.Blister:
+            case UnitAttackType.Shatter:
+                return true;
+
+            case UnitAttackType.Heal:
+                return targetUnit.HitPoints < targetUnit.MaxHitPoints;
+
+            case UnitAttackType.Fear:
+                return !targetUnit.Effects.IsRetreating;
+
+            case UnitAttackType.BoostDamage:
+            {
+                // Усилять можно только юнитов с прямым уроном от первой атаки.
+                if (!targetUnit.UnitType.MainAttack.AttackType.IsDirectDamage())
+                    return false;
+
+                // Усилить юнита можно только большим эффектом.
+                if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostEffect) &&
+                    power <= boostEffect.Power)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            case UnitAttackType.Revive:
+                return targetUnit.IsDead && !targetUnit.IsRevived;
+
+            case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
+                return false;
+
+            case UnitAttackType.GiveAdditionalAttack:
+                return targetUnit.UnitType.MainAttack.AttackType != UnitAttackType.GiveAdditionalAttack;
+
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.TransformOther:
+            case UnitAttackType.BestowWards:
+                return false;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null);
+        }
     }
 
     /// <summary>
@@ -263,10 +306,7 @@ internal class BattleProcessor
 
         int? power = null;
 
-        // Яд, заморозка и ожег единственный эффекты, которые наносят урон.
-        if (effect.AttackType is UnitAttackType.Poison or
-            UnitAttackType.Frostbite or
-            UnitAttackType.Blister)
+        if (effect.AttackType.IsDamageEffect())
         {
             // Если этот эффект уже срабатывал в этом ходу, то второго срабатывания не будет.
             if (effect.RoundTriggered == roundNumber)
@@ -278,7 +318,7 @@ internal class BattleProcessor
         effect.RoundTriggered = roundNumber;
         effect.Duration.DecreaseTurn();
 
-        return new BattleProcessorAttackResult(AttackResult.Effect, power, effect.Duration, effect.DurationControlUnit, effect.AttackType, effect.AttackSource);
+        return new BattleProcessorAttackResult(AttackResult.Attack, power, effect.Duration, effect.DurationControlUnit, effect.AttackType, effect.AttackSource);
     }
 
     /// <summary>
@@ -298,9 +338,14 @@ internal class BattleProcessor
         if (targetUnit.IsDead
             && attack.AttackType is not UnitAttackType.Revive or UnitAttackType.Summon)
         {
+            // Если вторая атака у юнита воскрешает, то нужно будет перейти сразу к ней.
+            if (attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.Revive)
+                return new BattleProcessorAttackResult(AttackResult.Skip);
+
             return null;
         }
 
+        // BUG Иммунитет проверяется до меткость, но защита - после.
         var attackTypeProtection = targetUnit
             .AttackTypeProtections
             .FirstOrDefault(atp => atp.UnitAttackType == attack.AttackType);
@@ -340,6 +385,7 @@ internal class BattleProcessor
                 attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
 
                 // Если юнит защитился, то урон уменьшается в два раза.
+                // BUG Механизм хитрее и зависит от брони юнита. Кроме того есть параметр в GVar.
                 if (targetUnit.Effects.IsDefended)
                     attackPower /= 2;
 
@@ -353,9 +399,14 @@ internal class BattleProcessor
 
             case UnitAttackType.Paralyze:
             case UnitAttackType.Petrify:
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.Blister:
                 return new BattleProcessorAttackResult(
-                    AttackResult.Effect,
-                    null,
+                    AttackResult.Attack,
+                    power,
                     GetEffectDuration(attack),
                     targetUnit,
                     attack.AttackType,
@@ -366,7 +417,7 @@ internal class BattleProcessor
                 if (healPower != 0)
                 {
                     return new BattleProcessorAttackResult(
-                        AttackResult.Heal,
+                        AttackResult.Attack,
                         healPower,
                         attack.AttackType,
                         attack.AttackSource);
@@ -377,39 +428,34 @@ internal class BattleProcessor
             case UnitAttackType.Fear:
                 // TODO Если нельзя отступить (например, отряд в городе),
                 // То страх действует как паралич.
-                return new BattleProcessorAttackResult(AttackResult.Fear,
+                return new BattleProcessorAttackResult(AttackResult.Attack,
                     attack.AttackType,
                     attack.AttackSource);
 
             case UnitAttackType.BoostDamage:
                 return new BattleProcessorAttackResult(
-                    AttackResult.Effect,
+                    AttackResult.Attack,
                     power,
                     GetEffectDuration(attack),
                     attackingUnit,
                     attack.AttackType,
                     attack.AttackSource);
 
-            case UnitAttackType.ReduceDamage:
-            case UnitAttackType.ReduceInitiative:
-            case UnitAttackType.Poison:
-            case UnitAttackType.Frostbite:
-            case UnitAttackType.Blister:
+            case UnitAttackType.Revive:
+                if (!targetUnit.IsDead || targetUnit.IsRevived)
+                    return null;
+
                 return new BattleProcessorAttackResult(
-                    AttackResult.Effect,
-                    power,
-                    GetEffectDuration(attack),
-                    targetUnit,
+                    AttackResult.Attack,
                     attack.AttackType,
                     attack.AttackSource);
 
             case UnitAttackType.GiveAdditionalAttack:
                 return new BattleProcessorAttackResult(
-                    AttackResult.AdditionalAttack,
+                    AttackResult.Attack,
                     attack.AttackType,
                     attack.AttackSource);
 
-            case UnitAttackType.Revive:
             case UnitAttackType.Cure:
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:

@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
@@ -166,7 +167,8 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     /// </summary>
     protected virtual void ProcessBeginUnitAction(UnitBattleAction unitAction)
     {
-        if (unitAction.ActionType == UnitActionType.Retreating)
+        if (unitAction.ActionType == UnitActionType.Retreating ||
+            unitAction.ActionType == UnitActionType.Attacked && unitAction.AttackType == UnitAttackType.Fear)
         {
             unitAction.TargetUnit.Direction = unitAction.TargetUnit.Direction == BattleDirection.Back
                 ? BattleDirection.Face
@@ -178,7 +180,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         portrait?.ProcessBeginUnitPortraitEvent(unitAction.GetUnitPortraitEventData());
 
         // При накладывании эффекта, сразу переводим в статус парализовано.
-        if (unitAction.ActionType == UnitActionType.UnderEffect &&
+        if (unitAction.ActionType == UnitActionType.Attacked &&
             unitAction.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify)
         {
             unitAction.TargetUnit.UnitState = BattleUnitState.Paralyzed;
@@ -203,14 +205,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         }
 
         // На юнита наложен эффект.
-        if (unitAction is EffectUnitBattleAction effectAction)
+        if (unitAction.AttackType?.IsEffect() == true && !unitAction.IsEffectTriggered)
         {
-            var targetUnit = effectAction.TargetUnit.Unit;
+            var targetUnit = unitAction.TargetUnit.Unit;
             targetUnit.Effects.AddBattleEffect(
-                new UnitBattleEffect(effectAction.AttackType!.Value, effectAction.AttackSource!.Value, effectAction.Duration, effectAction.DurationControlUnit, effectAction.Power));
+                new UnitBattleEffect(unitAction.AttackType!.Value, unitAction.AttackSource!.Value, unitAction.EffectDuration!, unitAction.EffectDurationControlUnit!, unitAction.Power));
 
             // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
-            if (effectAction.AttackType == UnitAttackType.ReduceInitiative)
+            if (unitAction.AttackType == UnitAttackType.ReduceInitiative)
             {
                 // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
                 // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
@@ -239,6 +241,15 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (unitAction.AttackType == UnitAttackType.GiveAdditionalAttack)
             _context.UnitTurnQueue.AddUnitAdditionalAttack(unitAction.TargetUnit.Unit);
 
+        if (unitAction.AttackType == UnitAttackType.Revive)
+        {
+            var targetUnit = unitAction.TargetUnit;
+            targetUnit.UnitState = BattleUnitState.Waiting;
+            targetUnit.Unit.IsDead = false;
+            targetUnit.Unit.IsRevived = true;
+            targetUnit.Unit.HitPoints = targetUnit.Unit.MaxHitPoints / 2;
+        }
+
         _unitPortraitPanelController
             .GetUnitPortrait(unitAction.TargetUnit)
             ?.ProcessCompletedUnitPortraitEvent();
@@ -262,88 +273,68 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             {
                 // Если промахнулись дополнительно атакой, то "Промах" выводить не нужно.
                 if (isMainAttack)
-                    AddAction(new UnitBattleAction(targetUnit, UnitActionType.Miss));
+                    AddAction(new UnitBattleAction(targetUnit, attackResult));
 
                 break;
             }
 
             case AttackResult.Attack:
             {
-                var power = attackResult.Power!.Value;
-                var attackClass = attackResult.AttackType!.Value;
-
-                targetUnit.Unit.HitPoints -= power;
-                targetUnit.UnitState = BattleUnitState.TakingDamage;
-
-                AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Damaged, attackClass, power));
-
-                // Если будет задето несколько юнитов, то звук удара получит только первый из них.
-                if (!_isAttackSoundPlaying)
+                var attackType = attackResult.AttackType!.Value;
+                switch (attackType)
                 {
-                    PlayRandomSound(targetUnit.SoundComponent.Sounds.DamagedSounds);
-                    _isAttackSoundPlaying = true;
+                    case UnitAttackType.Damage:
+                    case UnitAttackType.DrainLife:
+                    case UnitAttackType.DrainLifeOverflow:
+                    {
+                        targetUnit.Unit.HitPoints -= attackResult.Power!.Value;
+                        targetUnit.UnitState = BattleUnitState.TakingDamage;
+
+                        AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));
+
+                        // Если будет задето несколько юнитов, то звук удара получит только первый из них.
+                        if (!_isAttackSoundPlaying)
+                        {
+                            PlayRandomSound(targetUnit.SoundComponent.Sounds.DamagedSounds);
+                            _isAttackSoundPlaying = true;
+                        }
+
+                        break;
+                    }
+
+                    case UnitAttackType.Heal:
+                    {
+                        targetUnit.Unit.HitPoints += attackResult.Power!.Value;
+                        break;
+                    }
+
+                    // В отличие от заморозки и яда, для вспышки выводится анимация при наложении эффекта.
+                    case UnitAttackType.Blister:
+                    case UnitAttackType.Revive:
+                    {
+                        var attackTypeAnimationAction = GetAttackTypeAnimationAction(targetUnit, attackType);
+                        if (attackTypeAnimationAction != null)
+                            AddAction(attackTypeAnimationAction);
+                        break;
+                    }
                 }
-
-                break;
-            }
-
-            case AttackResult.Heal:
-            {
-                var healPower = attackResult.Power!.Value;
-                var attackClass = attackResult.AttackType!.Value;
-
-                targetUnit.Unit.HitPoints += healPower;
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Healed, attackClass, healPower));
 
                 if (!isMainAttack && !_isAttackSoundPlaying)
                 {
-                    PlayAttackSound(attackClass);
+                    PlayAttackSound(attackType);
                     _isAttackSoundPlaying = true;
                 }
 
-                break;
-            }
-
-            case AttackResult.Effect:
-            {
-                var power = attackResult.Power;
-                var effectDuration = attackResult.EffectDuration!;
-                var effectDurationControlUnit = attackResult.EffectDurationControlUnit!;
-                var attackClass = attackResult.AttackType!.Value;
-                var attackSource = attackResult.AttackSource!.Value;
-
-                var effectAnimationAction = ShouldShowEffectAnimation(attackClass)
-                    ? GetUnitEffectAnimationAction(targetUnit, attackClass)
-                    : null;
-                if (effectAnimationAction != null)
-                    AddAction(effectAnimationAction);
-
-                AddAction(new EffectUnitBattleAction(targetUnit, attackClass, attackSource, effectDuration, effectDurationControlUnit, power, effectAnimationAction));
-
-                if (!isMainAttack && !_isAttackSoundPlaying)
-                {
-                    PlayAttackSound(attackClass);
-                    _isAttackSoundPlaying = true;
-                }
-
+                AddAction(new UnitBattleAction(targetUnit, attackResult));
                 break;
             }
 
             case AttackResult.Ward:
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Ward, attackResult.AttackType!.Value, attackSource: attackResult.AttackSource!.Value));
-                break;
-
             case AttackResult.Immunity:
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Immunity));
+                AddAction(new UnitBattleAction(targetUnit, attackResult));
                 break;
 
-            case AttackResult.Fear:
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.Retreating, attackResult.AttackType, attackSource: attackResult.AttackSource));
-                break;
-
-            case AttackResult.AdditionalAttack:
-                AddAction(new UnitBattleAction(targetUnit, UnitActionType.GiveAdditionalAttack, attackResult.AttackType, attackSource: attackResult.AttackSource));
+            case AttackResult.Skip:
                 break;
 
             default:
@@ -398,12 +389,14 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     }
 
     /// <summary>
-    /// Получить анимацию эффекта.
+    /// Получить анимацию атаки.
     /// </summary>
-    protected AnimationBattleAction? GetUnitEffectAnimationAction(BattleUnit battleUnit, UnitAttackType effectAttackType)
+    protected AnimationBattleAction? GetAttackTypeAnimationAction(BattleUnit battleUnit, UnitAttackType effectAttackType)
     {
-        // TODO Анимации может не быть. Например, для паралича.
-        var animationFrames = _unitResourceProvider.GetEffectAnimation(effectAttackType, battleUnit.Unit.UnitType.IsSmall);
+        var animationFrames = _unitResourceProvider.GetAttackTypeAnimation(effectAttackType, battleUnit.Unit.UnitType.IsSmall);
+        if (animationFrames == null)
+            return null;
+
         var animationPoint = battleUnit.AnimationComponent.AnimationPoint;
         var animation = _battleGameObjectContainer.AddAnimation(
             animationFrames,
@@ -436,17 +429,5 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             return;
 
         _playingSounds.Add(playingSound);
-    }
-
-    /// <summary>
-    /// Необходимо ли показывать анимацию при наложении эффекта.
-    /// </summary>
-    /// <remarks>
-    /// Некоторые эффекты (например, яд и обморожении) имеют анимацию срабатывания эффекта.
-    /// Но она не используется при наложении эффекта.
-    /// </remarks>
-    private static bool ShouldShowEffectAnimation(UnitAttackType attackType)
-    {
-        return attackType == UnitAttackType.Blister;
     }
 }

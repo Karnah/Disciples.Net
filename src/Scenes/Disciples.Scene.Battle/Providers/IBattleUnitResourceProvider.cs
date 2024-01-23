@@ -63,9 +63,9 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction);
 
     /// <summary>
-    /// Получить анимацию эффекта, применяемую к юниту.
+    /// Получить анимацию атаки, применяемую к юниту.
     /// </summary>
-    AnimationFrames GetEffectAnimation(UnitAttackType effectAttackType, bool isSmall);
+    AnimationFrames? GetAttackTypeAnimation(UnitAttackType effectAttackType, bool isSmallUnit);
 
 
     /// <summary>

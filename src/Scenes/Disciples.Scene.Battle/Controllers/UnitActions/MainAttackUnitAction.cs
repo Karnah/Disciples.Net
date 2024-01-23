@@ -1,7 +1,7 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -145,19 +145,15 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         foreach (var targetBattleUnit in targetBattleUnits)
         {
             var attackResult = _battleProcessor.ProcessMainAttack(currentUnit, targetBattleUnit.Unit);
+            if (attackResult != null)
+            {
+                ProcessAttackResult(CurrentBattleUnit, targetBattleUnit, attackResult, true);
 
-            // Атака не выполнялась, либо еще не умеем обрабатывать данный тип атаки.
-            if (attackResult == null)
-                continue;
+                if (attackResult.AttackResult == AttackResult.Attack && attackResult.AttackType!.Value.IsDirectDamage())
+                    totalDamage += attackResult.Power!.Value;
+            }
 
-            ProcessAttackResult(CurrentBattleUnit, targetBattleUnit, attackResult, true);
-
-            if (attackResult.AttackResult == AttackResult.Attack)
-                totalDamage += attackResult.Power!.Value;
-
-            var isSuccessAttack = attackResult.AttackResult is not AttackResult.Miss
-                and not AttackResult.Ward
-                and not AttackResult.Immunity;
+            var isSuccessAttack = attackResult?.AttackResult is AttackResult.Attack or AttackResult.Skip;
             hasSuccessAttack |= isSuccessAttack;
 
             // Сразу добавляем действие второй атаки, если первая была успешная.

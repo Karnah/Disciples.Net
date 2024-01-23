@@ -75,8 +75,8 @@ public interface IBattleInterfaceProvider : ISupportLoading
     /// <summary>
     /// Получить анимацию рамки для юнита, которого можно атаковать.
     /// </summary>
-    /// <param name="sizeSmall">Юнит занимает только одну клетку.</param>
-    AnimationFrames GetUnitAttackBorder(bool sizeSmall);
+    /// <param name="isSmallUnit">Юнит занимает только одну клетку.</param>
+    AnimationFrames GetUnitAttackBorder(bool isSmallUnit);
 
     /// <summary>
     /// Получить анимацию рамки атаки для юнита, который атакует всё поле боя.
@@ -87,15 +87,15 @@ public interface IBattleInterfaceProvider : ISupportLoading
     /// <summary>
     /// Получить анимацию рамки для юнита, который ходит в данный момент.
     /// </summary>
-    /// <param name="sizeSmall">Юнит занимает только одну клетку.</param>
-    AnimationFrames GetUnitSelectionBorder(bool sizeSmall);
+    /// <param name="isSmallUnit">Юнит занимает только одну клетку.</param>
+    AnimationFrames GetUnitSelectionBorder(bool isSmallUnit);
 
 
     /// <summary>
     /// Получить анимацию исцеления для юнита, на которого можно наложить эффект.
     /// </summary>
-    /// <param name="sizeSmall">Юнит занимает только одну клетку.</param>
-    AnimationFrames GetUnitHealBorder(bool sizeSmall);
+    /// <param name="isSmallUnit">Юнит занимает только одну клетку.</param>
+    AnimationFrames GetUnitHealBorder(bool isSmallUnit);
 
     /// <summary>
     /// Получить анимацию рамки исцеления для юнита, который накладывает эффект на всё поле боя.

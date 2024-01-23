@@ -58,14 +58,6 @@ internal class UnitPortraitObject : GameObject
     /// Идентификатор в ресурсах с текстом "Иммунитет".
     /// </summary>
     private const string IMMUNITY_TEXT_ID = "X008TA0002";
-    /// <summary>
-    /// Идентификатор в ресурсах с текстом "Страх".
-    /// </summary>
-    private const string FEAR_TEXT_ID = "X008TA0007";
-    /// <summary>
-    /// Идентификатор в ресурсах с текстом "Дополнительная атака".
-    /// </summary>
-    private const string ADDITIONAL_ATTACK_TEXT_ID = "X008TA0019";
 
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
@@ -250,6 +242,10 @@ internal class UnitPortraitObject : GameObject
         _instantaneousEffectImage = AddColorImage(eventData.UnitActionType, eventData.AttackType);
         _instantaneousEffectText = AddText(eventData);
         _unitHitpoints.Text = GetUnitHitPoints();
+
+        // При воскрешении юнита, сразу убираем значок смерти.
+        if (eventData.AttackType == UnitAttackType.Revive)
+            RemoveSceneObject(ref _deathIcon);
     }
 
     /// <summary>
@@ -424,6 +420,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Poison => BattleColors.Poison,
             UnitAttackType.Frostbite => BattleColors.Frostbite,
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
+            UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Blister => BattleColors.Blister,
             _ => null
         };
@@ -448,7 +445,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Получить наименования эффекта, что воздействует на юнита.
     /// </summary>
-    private static string GetEffectTextId(UnitAttackType attackType, bool isEffectCompleted, int? power = null)
+    private static string GetAttackTypeTextId(UnitAttackType attackType, bool isEffectCompleted, int? power = null)
     {
         return attackType switch
         {
@@ -471,6 +468,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Revive => "X008TA0016",
             UnitAttackType.Cure => "X008TA0017",
             UnitAttackType.DrainLevel => "X008TA0018",
+            UnitAttackType.GiveAdditionalAttack => "X008TA0019",
             UnitAttackType.Doppelganger => "X008TA0022",
             UnitAttackType.TransformSelf => "X008TA0022",
             UnitAttackType.TransformOther => "X008TA0022",
@@ -496,7 +494,6 @@ internal class UnitPortraitObject : GameObject
             case UnitActionType.Defend:
             case UnitActionType.Waiting:
             case UnitActionType.Dying:
-            case UnitActionType.TriggeredEffect:
             case UnitActionType.Ward:
             case UnitActionType.Immunity:
                 return null;
@@ -504,7 +501,11 @@ internal class UnitPortraitObject : GameObject
 
         var color = GetUnitAttackTypeColor(unitAttackType);
         if (color != null)
-            return AddColorImage(color.Value, unitActionType != UnitActionType.UnderEffect);
+        {
+            return AddColorImage(color.Value, color == BattleColors.Damage
+                                              || color == BattleColors.Heal
+                                              || color == BattleColors.BoostDamage);
+        }
 
         return null;
     }
@@ -557,9 +558,52 @@ internal class UnitPortraitObject : GameObject
     {
         switch (eventData.UnitActionType)
         {
-            case UnitActionType.Damaged:
-            case UnitActionType.Healed:
-                return AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+            case UnitActionType.Attacked:
+            {
+                switch (eventData.AttackType)
+                {
+                    case UnitAttackType.Damage:
+                    case UnitAttackType.DrainLife:
+                    case UnitAttackType.DrainLifeOverflow:
+                    case UnitAttackType.Heal:
+                        return AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+
+                    case UnitAttackType.Paralyze:
+                    case UnitAttackType.Fear:
+                    case UnitAttackType.BoostDamage:
+                    case UnitAttackType.Petrify:
+                    case UnitAttackType.ReduceDamage:
+                    case UnitAttackType.ReduceInitiative:
+                    case UnitAttackType.Revive:
+                    case UnitAttackType.Cure:
+                    case UnitAttackType.Summon:
+                    case UnitAttackType.DrainLevel:
+                    case UnitAttackType.GiveAdditionalAttack:
+                    case UnitAttackType.Doppelganger:
+                    case UnitAttackType.TransformSelf:
+                    case UnitAttackType.TransformOther:
+                    case UnitAttackType.BestowWards:
+                    case UnitAttackType.Shatter:
+                        return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, false));
+
+                    case UnitAttackType.Poison:
+                    case UnitAttackType.Frostbite:
+                    case UnitAttackType.Blister:
+                    {
+                        // Если идёт срабатывание эффекта, то выводим урон.
+                        // Иначе просто название эффекта.
+                        return eventData.IsEffectTriggered
+                            ? AddDamageText(
+                                GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
+                                eventData.AttackType!.Value,
+                                eventData.Power)
+                            : AddText(GetAttackTypeTextId(eventData.AttackType!.Value, false));
+                    }
+
+                    default:
+                        return null;
+                }
+            }
 
             case UnitActionType.Miss:
                 return AddText(MISS_TEXT_ID);
@@ -570,35 +614,17 @@ internal class UnitPortraitObject : GameObject
             case UnitActionType.Waiting:
                 return AddText(WAIT_TEXT_ID);
 
-            case UnitActionType.Retreating:
-                return eventData.AttackType == UnitAttackType.Fear
-                    ? AddText(FEAR_TEXT_ID)
-                    : null;
-
             case UnitActionType.Dying:
                 return null;
-
-            case UnitActionType.UnderEffect:
-                return AddText(GetEffectTextId(eventData.AttackType!.Value, false));
-
-            case UnitActionType.TriggeredEffect:
-                return AddDamageText(
-                    GetEffectTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
-                    eventData.AttackType!.Value,
-                    eventData.Power);
 
             case UnitActionType.Ward:
                 return AddText(WARD_TEXT_ID);
 
             case UnitActionType.Immunity:
                 return AddText(IMMUNITY_TEXT_ID);
-
-            case UnitActionType.GiveAdditionalAttack:
-                return AddText(ADDITIONAL_ATTACK_TEXT_ID);
-
-            default:
-                return null;
         }
+
+        return null;
     }
 
     /// <summary>

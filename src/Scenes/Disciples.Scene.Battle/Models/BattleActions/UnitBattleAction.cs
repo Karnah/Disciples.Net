@@ -1,4 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -19,19 +20,32 @@ internal class UnitBattleAction : ComplexBattleAction
     /// </summary>
     public UnitBattleAction(
         BattleUnit targetUnit,
+        BattleProcessorAttackResult attackResult,
+        bool isEffectTriggered = false,
+        AnimationBattleAction? animationBattleAction = null)
+        : base(GetBattleActions(animationBattleAction, TOUCH_UNIT_ACTION_DURATION))
+    {
+        TargetUnit = targetUnit;
+        ActionType = GetAttackActionType(attackResult.AttackResult);
+        AttackType = attackResult.AttackType;
+        AttackSource = attackResult.AttackSource;
+        Power = attackResult.Power;
+        EffectDuration = attackResult.EffectDuration;
+        EffectDurationControlUnit = attackResult.EffectDurationControlUnit;
+        IsEffectTriggered = isEffectTriggered;
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="UnitBattleAction" />.
+    /// </summary>
+    public UnitBattleAction(
+        BattleUnit targetUnit,
         UnitActionType actionType,
-        UnitAttackType? attackType = null,
-        int? power = null,
-        AnimationBattleAction? animationBattleAction = null,
-        UnitAttackSource? attackSource = null,
         int? touchUnitActionDuration = null
-        ) : base(GetBattleActions(animationBattleAction, touchUnitActionDuration ?? TOUCH_UNIT_ACTION_DURATION))
+        ) : base(GetBattleActions(null, touchUnitActionDuration ?? TOUCH_UNIT_ACTION_DURATION))
     {
         TargetUnit = targetUnit;
         ActionType = actionType;
-        AttackType = attackType;
-        AttackSource = attackSource;
-        Power = power;
     }
 
     /// <summary>
@@ -60,11 +74,26 @@ internal class UnitBattleAction : ComplexBattleAction
     public int? Power { get; }
 
     /// <summary>
+    /// Продолжительность эффекта.
+    /// </summary>
+    public EffectDuration? EffectDuration { get; }
+
+    /// <summary>
+    /// Юнит, к ходу которого привязана длительность.
+    /// </summary>
+    public Unit? EffectDurationControlUnit { get; }
+
+    /// <summary>
+    /// Признак, что это срабатывание эффекта на ходу юнита.
+    /// </summary>
+    public bool IsEffectTriggered { get; }
+
+    /// <summary>
     /// Получить данные для отображения на портрете юнита.
     /// </summary>
-    public virtual BattleUnitPortraitEventData GetUnitPortraitEventData()
+    public BattleUnitPortraitEventData GetUnitPortraitEventData()
     {
-        return new BattleUnitPortraitEventData(ActionType, AttackType, Power);
+        return new BattleUnitPortraitEventData(ActionType, AttackType, Power, EffectDuration, IsEffectTriggered);
     }
 
     /// <summary>
@@ -79,6 +108,21 @@ internal class UnitBattleAction : ComplexBattleAction
         {
             new DelayBattleAction(touchUnitActionDuration),
             animationBattleAction
+        };
+    }
+
+    /// <summary>
+    /// Получить действие в зависимости от результата атаки.
+    /// </summary>
+    private static UnitActionType GetAttackActionType(AttackResult attackResult)
+    {
+        return attackResult switch
+        {
+            AttackResult.Miss => UnitActionType.Miss,
+            AttackResult.Attack => UnitActionType.Attacked,
+            AttackResult.Ward => UnitActionType.Ward,
+            AttackResult.Immunity => UnitActionType.Immunity,
+            _ => throw new ArgumentOutOfRangeException(nameof(attackResult), attackResult, null)
         };
     }
 }

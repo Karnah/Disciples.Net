@@ -8,12 +8,10 @@ internal enum UnitActionType
     /// <summary>
     /// Попадание атаки в этого юнита.
     /// </summary>
-    Damaged,
-
-    /// <summary>
-    /// Юнит вылечен.
-    /// </summary>
-    Healed,
+    /// <remarks>
+    /// Положительные эффекты, тоже считаются атаками.
+    /// </remarks>
+    Attacked,
 
     /// <summary>
     /// Юнит уклонился от атаки (промах атакующего).
@@ -41,22 +39,6 @@ internal enum UnitActionType
     Dying,
 
     /// <summary>
-    /// Наложение эффекта.
-    /// </summary>
-    /// <remarks>
-    /// Отравления, усиления, проклятия и т.д.
-    /// </remarks>
-    UnderEffect,
-
-    /// <summary>
-    /// Срабатывание эффекта.
-    /// </summary>
-    /// <remarks>
-    /// Отравления, усиления, проклятия и т.д.
-    /// </remarks>
-    TriggeredEffect,
-
-    /// <summary>
     /// Разовая защита от атаки
     /// </summary>
     Ward,
@@ -65,9 +47,4 @@ internal enum UnitActionType
     /// Иммунитет от атаки.
     /// </summary>
     Immunity,
-
-    /// <summary>
-    /// Юнит получил дополнительную атаку.
-    /// </summary>
-    GiveAdditionalAttack
 }

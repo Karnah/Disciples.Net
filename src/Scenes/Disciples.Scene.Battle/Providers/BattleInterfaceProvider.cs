@@ -119,9 +119,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     #region UnitPanelBorders
 
     /// <inheritdoc />
-    public AnimationFrames GetUnitAttackBorder(bool sizeSmall)
+    public AnimationFrames GetUnitAttackBorder(bool isSmallUnit)
     {
-        return GetAttackBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
+        return GetAttackBorder(isSmallUnit ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
 
     /// <inheritdoc />
@@ -144,9 +144,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public AnimationFrames GetUnitSelectionBorder(bool sizeSmall)
+    public AnimationFrames GetUnitSelectionBorder(bool isSmallUnit)
     {
-        return GetSelectionBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
+        return GetSelectionBorder(isSmallUnit ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
 
     /// <summary>
@@ -164,9 +164,9 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
 
     /// <inheritdoc />
-    public AnimationFrames GetUnitHealBorder(bool sizeSmall)
+    public AnimationFrames GetUnitHealBorder(bool isSmallUnit)
     {
-        return GetHealBorder(sizeSmall ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
+        return GetHealBorder(isSmallUnit ? BattleBorderSize.SmallUnit : BattleBorderSize.LargeUnit);
     }
 
     /// <inheritdoc />

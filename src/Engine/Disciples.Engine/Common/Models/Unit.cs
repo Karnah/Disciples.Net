@@ -197,6 +197,11 @@ public class Unit
     public bool IsRetreated { get; set; }
 
     /// <summary>
+    /// Признак, что в этом бою юнит был воскрешен способностью <see cref="UnitAttackType.Revive" />.
+    /// </summary>
+    public bool IsRevived { get; set; }
+
+    /// <summary>
     /// Эффекты, воздействующие на юнита.
     /// </summary>
     public UnitEffects Effects { get; }
