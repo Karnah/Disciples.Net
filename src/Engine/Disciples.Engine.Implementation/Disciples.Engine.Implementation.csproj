@@ -26,15 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="NAudio">
-      <HintPath>..\..\..\..\.nuget\packages\naudio\1.8.4\lib\net35\NAudio.dll</HintPath>
-    </Reference>
-    <Reference Include="NLayer.NAudioSupport">
-      <HintPath>..\..\..\..\.nuget\packages\nlayer.naudiosupport\1.0.0\lib\net35\NLayer.NAudioSupport.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="bass.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
