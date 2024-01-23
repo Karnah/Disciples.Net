@@ -192,14 +192,17 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     /// </summary>
     protected virtual void ProcessCompletedUnitAction(UnitBattleAction unitAction)
     {
+        var targetBattleUnit = unitAction.TargetUnit;
+        var targetUnit = targetBattleUnit.Unit;
+
         // Если юнит умер, то превращаем его в кучу костей.
         if (unitAction.ActionType == UnitActionType.Dying)
         {
-            unitAction.TargetUnit.UnitState = BattleUnitState.Dead;
+            targetBattleUnit.UnitState = BattleUnitState.Dead;
 
             // Если юнит отступал, то возвращаем его положение на место,
             // Чтобы корректно отображались кости.
-            unitAction.TargetUnit.Direction = unitAction.TargetUnit.IsAttacker
+            targetBattleUnit.Direction = targetBattleUnit.IsAttacker
                 ? BattleDirection.Face
                 : BattleDirection.Back;
         }
@@ -207,7 +210,6 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         // На юнита наложен эффект.
         if (unitAction.AttackType?.IsEffect() == true && !unitAction.IsEffectTriggered)
         {
-            var targetUnit = unitAction.TargetUnit.Unit;
             targetUnit.Effects.AddBattleEffect(
                 new UnitBattleEffect(unitAction.AttackType!.Value, unitAction.AttackSource!.Value, unitAction.EffectDuration!, unitAction.EffectDurationControlUnit!, unitAction.Power));
 
@@ -224,14 +226,12 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         // TODO Не знаю, корректно это или нет. Но если есть защита и от типа, и от источника, то снимем сразу оба.
         if (unitAction.ActionType == UnitActionType.Ward)
         {
-            unitAction.TargetUnit
-                .Unit
+            targetUnit
                 .AttackTypeProtections
                 .RemoveAll(atp =>
                     atp.UnitAttackType == unitAction.AttackType &&
                     atp.ProtectionCategory == ProtectionCategory.Ward);
-            unitAction.TargetUnit
-                .Unit
+            targetUnit
                 .AttackSourceProtections
                 .RemoveAll(asp =>
                     asp.UnitAttackSource == unitAction.AttackSource &&
@@ -239,19 +239,32 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         }
 
         if (unitAction.AttackType == UnitAttackType.GiveAdditionalAttack)
-            _context.UnitTurnQueue.AddUnitAdditionalAttack(unitAction.TargetUnit.Unit);
+            _context.UnitTurnQueue.AddUnitAdditionalAttack(targetUnit);
 
         if (unitAction.AttackType == UnitAttackType.Revive)
         {
-            var targetUnit = unitAction.TargetUnit;
-            targetUnit.UnitState = BattleUnitState.Waiting;
-            targetUnit.Unit.IsDead = false;
-            targetUnit.Unit.IsRevived = true;
-            targetUnit.Unit.HitPoints = targetUnit.Unit.MaxHitPoints / 2;
+            targetBattleUnit.UnitState = BattleUnitState.Waiting;
+            targetUnit.IsDead = false;
+            targetUnit.IsRevived = true;
+            targetUnit.HitPoints = targetUnit.MaxHitPoints / 2;
+        }
+
+        if (unitAction.AttackType == UnitAttackType.Cure)
+        {
+            var curableEffects = targetUnit.Effects
+                .GetBattleEffects()
+                .Where(e => e.CanCure());
+            foreach (var unitBattleEffect in curableEffects)
+            {
+                targetUnit.Effects.Remove(unitBattleEffect.AttackType);
+            }
+
+            // Если юнит был парализован, то переводим его в обычное состояние.
+            targetBattleUnit.UnitState = BattleUnitState.Waiting;
         }
 
         _unitPortraitPanelController
-            .GetUnitPortrait(unitAction.TargetUnit)
+            .GetUnitPortrait(targetBattleUnit)
             ?.ProcessCompletedUnitPortraitEvent();
     }
 

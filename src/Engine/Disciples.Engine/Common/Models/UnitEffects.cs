@@ -83,6 +83,14 @@ public class UnitEffects
     }
 
     /// <summary>
+    /// Имеются ли эффекты, которые могут быть вылечены.
+    /// </summary>
+    public bool HasCurableEffects()
+    {
+        return _battleEffects.Values.Any(e => e.CanCure());
+    }
+
+    /// <summary>
     /// Получить эффекты, воздействующие на юнита.
     /// </summary>
     public IReadOnlyList<UnitBattleEffect> GetBattleEffects()

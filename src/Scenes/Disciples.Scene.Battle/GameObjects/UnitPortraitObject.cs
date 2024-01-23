@@ -421,6 +421,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Frostbite => BattleColors.Frostbite,
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
+            UnitAttackType.Cure => BattleColors.Heal,
             UnitAttackType.Blister => BattleColors.Blister,
             _ => null
         };
@@ -584,20 +585,20 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.TransformOther:
                     case UnitAttackType.BestowWards:
                     case UnitAttackType.Shatter:
-                        return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, false));
+                        return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration?.IsCompleted == true));
 
                     case UnitAttackType.Poison:
                     case UnitAttackType.Frostbite:
                     case UnitAttackType.Blister:
                     {
-                        // Если идёт срабатывание эффекта, то выводим урон.
-                        // Иначе просто название эффекта.
+                        // Если идёт наложение эффекта, то выводим просто его название.
+                        // При срабатывании эффекта и нанесения урона, выводим еще и его.
                         return eventData.IsEffectTriggered
                             ? AddDamageText(
                                 GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration!.IsCompleted, eventData.Power),
                                 eventData.AttackType!.Value,
                                 eventData.Power)
-                            : AddText(GetAttackTypeTextId(eventData.AttackType!.Value, false));
+                            : AddText(GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration?.IsCompleted == true));
                     }
 
                     default:

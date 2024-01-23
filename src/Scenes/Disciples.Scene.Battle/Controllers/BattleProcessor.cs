@@ -156,6 +156,8 @@ internal class BattleProcessor
                 return targetUnit.IsDead && !targetUnit.IsRevived;
 
             case UnitAttackType.Cure:
+                return targetUnit.Effects.HasCurableEffects();
+
             case UnitAttackType.Summon:
                 return false;
 
@@ -373,6 +375,9 @@ internal class BattleProcessor
         if (chanceOfAttack > accuracy)
             return new BattleProcessorAttackResult(AttackResult.Miss);
 
+        if (!CanAttack(attack.AttackType, power, targetUnit))
+            return new BattleProcessorAttackResult(AttackResult.Skip);
+
         switch (attack.AttackType)
         {
             case UnitAttackType.Damage:
@@ -457,6 +462,13 @@ internal class BattleProcessor
                     attack.AttackSource);
 
             case UnitAttackType.Cure:
+                return targetUnit.Effects.HasCurableEffects()
+                    ? new BattleProcessorAttackResult(
+                        AttackResult.Attack,
+                        attack.AttackType,
+                        attack.AttackSource)
+                    : null;
+
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:
             case UnitAttackType.Doppelganger:

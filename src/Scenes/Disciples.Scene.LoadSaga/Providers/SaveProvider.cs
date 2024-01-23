@@ -97,6 +97,7 @@ internal class SaveProvider
         UnitAttackType.Frostbite,
         UnitAttackType.Revive,
         UnitAttackType.DrainLifeOverflow,
+        UnitAttackType.Cure,
         UnitAttackType.GiveAdditionalAttack,
         UnitAttackType.Blister
     };
