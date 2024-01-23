@@ -99,9 +99,8 @@ public class Unit
 
     /// <summary>
     /// Модификатор брони.
-    /// todo Рассчитывать, зависит от эффектов.
     /// </summary>
-    public int ArmorModifier => 0;
+    public int ArmorModifier => Effects.GetArmorModifier();
 
     /// <summary>
     /// Текущая броня юнита.

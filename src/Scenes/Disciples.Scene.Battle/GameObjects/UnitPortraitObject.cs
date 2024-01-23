@@ -423,6 +423,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
             UnitAttackType.Blister => BattleColors.Blister,
+            UnitAttackType.ReduceArmor => BattleColors.ReduceArmor,
             _ => null
         };
     }
@@ -477,7 +478,7 @@ internal class UnitPortraitObject : GameObject
                 ? "X160TA0011"
                 : "X160TA0022",
             UnitAttackType.BestowWards => "X160TA0013",
-            UnitAttackType.Shatter => "X160TA0019",
+            UnitAttackType.ReduceArmor => "X160TA0019",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
     }
@@ -505,7 +506,8 @@ internal class UnitPortraitObject : GameObject
         {
             return AddColorImage(color.Value, color == BattleColors.Damage
                                               || color == BattleColors.Heal
-                                              || color == BattleColors.BoostDamage);
+                                              || color == BattleColors.BoostDamage
+                                              || color == BattleColors.ReduceArmor);
         }
 
         return null;
@@ -584,7 +586,7 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.TransformSelf:
                     case UnitAttackType.TransformOther:
                     case UnitAttackType.BestowWards:
-                    case UnitAttackType.Shatter:
+                    case UnitAttackType.ReduceArmor:
                         return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration?.IsCompleted == true));
 
                     case UnitAttackType.Poison:

@@ -118,5 +118,5 @@ public enum UnitAttackType
     /// <summary>
     /// Разбить броню.
     /// </summary>
-    Shatter = 25
+    ReduceArmor = 25
 }

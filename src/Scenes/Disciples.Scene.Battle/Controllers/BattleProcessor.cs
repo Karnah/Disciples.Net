@@ -127,7 +127,6 @@ internal class BattleProcessor
             case UnitAttackType.DrainLevel:
             case UnitAttackType.DrainLifeOverflow:
             case UnitAttackType.Blister:
-            case UnitAttackType.Shatter:
                 return true;
 
             case UnitAttackType.Heal:
@@ -169,6 +168,9 @@ internal class BattleProcessor
             case UnitAttackType.TransformOther:
             case UnitAttackType.BestowWards:
                 return false;
+
+            case UnitAttackType.ReduceArmor:
+                return targetUnit.Armor > 0;
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null);
@@ -475,8 +477,19 @@ internal class BattleProcessor
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
             case UnitAttackType.BestowWards:
-            case UnitAttackType.Shatter:
                 break;
+
+            case UnitAttackType.ReduceArmor:
+                if (targetUnit.Armor == 0)
+                    return null;
+
+                // Эффект разрушения брони складывается.
+                targetUnit.Effects.TryGetBattleEffect(UnitAttackType.ReduceArmor, out var reduceArmorBattleEffect);
+                return new BattleProcessorAttackResult(
+                    AttackResult.Attack,
+                    Math.Min(power!.Value, targetUnit.Armor) + (reduceArmorBattleEffect?.Power ?? 0),
+                    attack.AttackType,
+                    attack.AttackSource);
 
             default:
                 throw new ArgumentOutOfRangeException();
@@ -506,7 +519,7 @@ internal class BattleProcessor
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.BestowWards:
-            case UnitAttackType.Shatter:
+            case UnitAttackType.ReduceArmor:
                 return attack.IsInfinitive
                     ? EffectDuration.CreateInfinitive()
                     : EffectDuration.Create(1);

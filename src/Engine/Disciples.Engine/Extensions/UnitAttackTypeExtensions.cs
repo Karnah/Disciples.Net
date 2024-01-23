@@ -49,7 +49,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformOther:
             case UnitAttackType.Blister:
-            case UnitAttackType.Shatter:
+            case UnitAttackType.ReduceArmor:
                 return true;
 
             default:
@@ -76,7 +76,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
             case UnitAttackType.BestowWards:
-            case UnitAttackType.Shatter:
+            case UnitAttackType.ReduceArmor:
                 return true;
 
             default:

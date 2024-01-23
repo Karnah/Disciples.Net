@@ -16,7 +16,7 @@ internal static class SoundResourceKeyExtensions
             UnitAttackType.Poison or
             UnitAttackType.Frostbite or
             UnitAttackType.Blister or
-            UnitAttackType.Shatter;
+            UnitAttackType.ReduceArmor;
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ internal static class SoundResourceKeyExtensions
             UnitAttackType.Poison => "POISON",
             UnitAttackType.Frostbite => "FRSTBITE",
             UnitAttackType.Blister => "BLISTER",
-            UnitAttackType.Shatter => "SHATTER",
+            UnitAttackType.ReduceArmor => "SHATTER",
             _ => throw new ArgumentOutOfRangeException(nameof(unitAttackType), unitAttackType, null)
         };
     }

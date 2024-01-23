@@ -12,11 +12,10 @@ internal class AnimationBattleAction : IBattleAction
     /// </summary>
     public AnimationBattleAction(BaseAnimationComponent animationComponent, int endFrameIndex)
     {
-        if (endFrameIndex >= animationComponent.FramesCount)
-            throw new ArgumentException("Кадр завершения больше количества кадров в анимации");
-
         AnimationComponent = animationComponent;
-        EndFrameIndex = endFrameIndex;
+
+        // Бага ресурсов: иногда endFrameIndex > FramesCount.
+        EndFrameIndex = Math.Min(endFrameIndex, animationComponent.FramesCount - 1);
     }
 
     /// <inheritdoc />

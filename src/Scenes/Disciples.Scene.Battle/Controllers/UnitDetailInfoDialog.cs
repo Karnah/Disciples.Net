@@ -180,7 +180,9 @@ internal class UnitDetailInfoDialog : BaseDialog
             unit.MainAttackPowerModifier);
 
         if (unit.SecondaryAttackPower > 0 &&
-            unit.UnitType.SecondaryAttack!.AttackType is not UnitAttackType.ReduceDamage and not UnitAttackType.ReduceInitiative)
+            unit.UnitType.SecondaryAttack!.AttackType is not UnitAttackType.ReduceDamage
+                and not UnitAttackType.ReduceInitiative
+                and not UnitAttackType.ReduceArmor)
         {
             var secondaryAttackPower = GetValueWithModifier(
                 GetAttackPower(unit.SecondaryAttackPower.Value, unit.UnitType.SecondaryAttack!.AttackType),
@@ -328,7 +330,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.TransformOther => "X005TA0808",
             UnitAttackType.Blister => "X160TA0012",
             UnitAttackType.BestowWards => "X160TA0014",
-            UnitAttackType.Shatter => "X160TA0020",
+            UnitAttackType.ReduceArmor => "X160TA0020",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
 

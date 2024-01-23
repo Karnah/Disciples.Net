@@ -100,6 +100,21 @@ internal static class ImageResourceKeyExtensions
     }
 
     /// <summary>
+    /// Проверить, есть ли в ресурсах определённая анимации атаки.
+    /// </summary>
+    public static bool HasResourceKey(this UnitAttackType attackType)
+    {
+        return attackType switch
+        {
+            UnitAttackType.Poison => true,
+            UnitAttackType.Frostbite => true,
+            UnitAttackType.Revive => true,
+            UnitAttackType.Blister => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
     /// Получить ключ в ресурсах, который соответствует определённой анимации атаки.
     /// </summary>
     public static string GetResourceKey(this UnitAttackType attackType)

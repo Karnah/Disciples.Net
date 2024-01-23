@@ -124,6 +124,17 @@ internal class BattleAiProcessor
             return new BattleAiCommand(targetUnit.Unit);
         }
 
+        // Воскрешаем самого сильного юнита.
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.Revive ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.Revive)
+        {
+            var targetUnit = targetUnits
+                .OrderByPower()
+                .FirstOrDefault(u => u.Unit.IsDead && !u.Unit.IsRevived);
+            if (targetUnit != null)
+                return new BattleAiCommand(targetUnit.Unit);
+        }
+
         // Если юнит лечит, то выбираем самого слабого юнита.
         // Также, возможно стоит отдавать приоритет тем юнитам, которым будет восстановлено большее количество здоровья.
         if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.Heal ||

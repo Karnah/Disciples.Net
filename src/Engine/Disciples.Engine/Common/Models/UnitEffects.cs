@@ -99,18 +99,33 @@ public class UnitEffects
     }
 
     /// <summary>
+    /// Получить модификатор брони.
+    /// </summary>
+    public int GetArmorModifier()
+    {
+        var modifier = 0;
+
+        if (TryGetBattleEffect(UnitAttackType.ReduceArmor, out var reduceArmor))
+        {
+            modifier -= reduceArmor.Power!.Value;
+        }
+
+        return modifier;
+    }
+
+    /// <summary>
     /// Получить модификатор силы атаки.
     /// </summary>
     public decimal GetDamagePowerModifier()
     {
         var modifier = 1M;
 
-        if (_battleEffects.TryGetValue(UnitAttackType.BoostDamage, out var boostDamage))
+        if (TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostDamage))
         {
             modifier *= boostDamage.Power!.Value / 100M + 1;
         }
 
-        if (_battleEffects.TryGetValue(UnitAttackType.ReduceDamage, out var reduceDamage))
+        if (TryGetBattleEffect(UnitAttackType.ReduceDamage, out var reduceDamage))
         {
             modifier *= 1 - reduceDamage.Power!.Value / 100M;
         }
@@ -137,7 +152,7 @@ public class UnitEffects
     {
         var modifier = 1M;
 
-        if (_battleEffects.TryGetValue(UnitAttackType.ReduceInitiative, out var reduceInitiative))
+        if (TryGetBattleEffect(UnitAttackType.ReduceInitiative, out var reduceInitiative))
         {
             modifier *= 1 - reduceInitiative.Power!.Value / 100M;
         }

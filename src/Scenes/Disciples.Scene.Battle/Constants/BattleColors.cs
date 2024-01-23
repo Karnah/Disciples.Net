@@ -46,4 +46,9 @@ internal static class BattleColors
     /// Цвет усиления урона.
     /// </summary>
     public static Color BoostDamage { get; } = Color.FromArgb(128, 0, 128, 0);
+
+    /// <summary>
+    /// Цвет разбивания брони.
+    /// </summary>
+    public static Color ReduceArmor { get; } = Color.FromArgb(128, 48, 213, 200);
 }

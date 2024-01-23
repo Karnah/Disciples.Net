@@ -14,6 +14,7 @@ using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Resources;
 using Disciples.Scene.Battle.Resources.Enum;
 using Disciples.Scene.Battle.Resources.ImageKeys;
+using Disciples.Scene.Battle.Resources.ImageKeys.Extensions;
 
 namespace Disciples.Scene.Battle.Providers;
 
@@ -94,19 +95,14 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     public AnimationFrames? GetAttackTypeAnimation(UnitAttackType effectAttackType, bool isSmallUnit)
     {
-        if (effectAttackType is UnitAttackType.Poison
-            or UnitAttackType.Frostbite
-            or UnitAttackType.Revive
-            or UnitAttackType.Blister)
-        {
-            var animationKey = (effectAttackType, isSmall: isSmallUnit);
-            if (!_effectsAnimation.ContainsKey(animationKey))
-                _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
+        if (!effectAttackType.HasResourceKey())
+            return null;
 
-            return _effectsAnimation[animationKey];
-        }
+        var animationKey = (effectAttackType, isSmall: isSmallUnit);
+        if (!_effectsAnimation.ContainsKey(animationKey))
+            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
 
-        return null;
+        return _effectsAnimation[animationKey];
     }
 
     /// <inheritdoc />
