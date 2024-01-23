@@ -14,4 +14,13 @@ public class GameSettings
     /// Путь, где лежат сейвы пользователя.
     /// </summary>
     public string SavesFolder { get; init; } = null!;
+
+    /// <summary>
+    /// Выключить сломанные анимации перехода между страницами.
+    /// </summary>
+    /// <remarks>
+    /// Контролы, которые показывают анимацию перехода между страницами, перед показом всегда отображает черный экран.
+    /// Из-за этого такие переходы выглядят очень дёрганными.
+    /// </remarks>
+    public bool IsBrokenTransitionAnimationsDisabled { get; init; }
 }

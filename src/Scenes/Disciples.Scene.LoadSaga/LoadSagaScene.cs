@@ -5,6 +5,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Settings;
 using Disciples.Scene.LoadSaga.Controllers;
 using Disciples.Scene.LoadSaga.Providers;
 
@@ -16,6 +17,7 @@ internal class LoadSagaScene : BaseMenuScene, ILoadSagaScene
     private readonly LoadSagaInterfaceProvider _loadSagaInterfaceProvider;
     private readonly LoadSagaInterfaceController _interfaceController;
     private readonly MenuSoundController _soundController;
+    private readonly GameSettings _settings;
 
     /// <summary>
     /// Создать объект типа <see cref="LoadSagaScene" />.
@@ -27,16 +29,20 @@ internal class LoadSagaScene : BaseMenuScene, ILoadSagaScene
         IInterfaceProvider interfaceProvider,
         LoadSagaInterfaceProvider loadSagaInterfaceProvider,
         LoadSagaInterfaceController interfaceController,
-        MenuSoundController soundController
+        MenuSoundController soundController,
+        GameSettings settings
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController, interfaceProvider)
     {
         _loadSagaInterfaceProvider = loadSagaInterfaceProvider;
         _interfaceController = interfaceController;
         _soundController = soundController;
+        _settings = settings;
     }
 
     /// <inheritdoc />
-    protected override string TransitionAnimationName => "TRANS_SINGLE2NEW";
+    protected override string? TransitionAnimationName => _settings.IsBrokenTransitionAnimationsDisabled
+        ? null
+        : "TRANS_SINGLE2NEW";
 
     /// <inheritdoc />
     protected override void LoadInternal()

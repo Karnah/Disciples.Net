@@ -5,6 +5,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Settings;
 using Disciples.Scene.SinglePlayerGameMenu.Controllers;
 
 namespace Disciples.Scene.SinglePlayerGameMenu;
@@ -14,6 +15,7 @@ internal class SinglePlayerGameMenuScene : BaseMenuScene, ISinglePlayerGameMenuS
 {
     private readonly SinglePlayerGameMenuInterfaceController _interfaceController;
     private readonly MenuSoundController _soundController;
+    private readonly GameSettings _settings;
 
     /// <summary>
     /// Создать объект типа <see cref="SinglePlayerGameMenuScene" />.
@@ -24,15 +26,19 @@ internal class SinglePlayerGameMenuScene : BaseMenuScene, ISinglePlayerGameMenuS
         IDialogController dialogController,
         IInterfaceProvider interfaceProvider,
         SinglePlayerGameMenuInterfaceController interfaceController,
-        MenuSoundController soundController
+        MenuSoundController soundController,
+        GameSettings settings
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController, interfaceProvider)
     {
         _interfaceController = interfaceController;
         _soundController = soundController;
+        _settings = settings;
     }
 
     /// <inheritdoc />
-    protected override string TransitionAnimationName => "TRANS_MAIN2SINGLE";
+    protected override string? TransitionAnimationName => _settings.IsBrokenTransitionAnimationsDisabled
+        ? null
+        : "TRANS_MAIN2SINGLE";
 
     /// <inheritdoc />
     protected override void LoadInternal()
