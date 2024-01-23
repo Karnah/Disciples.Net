@@ -204,11 +204,14 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         var targetSymmetricAnimationFrames = TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, null));
         var targetAttackingFrames = targetSymmetricAnimationFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, BattleSquadPosition.Attacker));
         var targetDefenderFrames = targetSymmetricAnimationFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Single, BattleSquadPosition.Defender));
-        var areaDirectionFrames = TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Area, null));
-        if (areaDirectionFrames == null && targetAttackingFrames == null && targetDefenderFrames == null)
+
+        var areaSymmetricDirectionFrames = TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Area, null));
+        var areaAttackingFrames = areaSymmetricDirectionFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Area, BattleSquadPosition.Attacker));
+        var areaDefenderFrames = areaSymmetricDirectionFrames ?? TryGetAnimationFrames(new UnitAttackAnimationResourceKey(unitTypeId, UnitTargetAnimationType.Area, BattleSquadPosition.Defender));
+        if (areaSymmetricDirectionFrames == null && targetAttackingFrames == null && areaAttackingFrames == null && areaDefenderFrames == null)
             return null;
 
-        return new BattleUnitTargetAnimation(targetAttackingFrames, targetDefenderFrames, areaDirectionFrames);
+        return new BattleUnitTargetAnimation(targetAttackingFrames, targetDefenderFrames, areaAttackingFrames, areaDefenderFrames);
     }
 
     /// <summary>

@@ -11,25 +11,31 @@ internal class BattleUnitTargetAnimation
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitTargetAnimation" />.
     /// </summary>
-    public BattleUnitTargetAnimation(AnimationFrames? attackerDirectionFrames, AnimationFrames? defenderDirectionFrames, AnimationFrames? areaFrames)
+    public BattleUnitTargetAnimation(AnimationFrames? attackerUnitFrames, AnimationFrames? defenderUnitFrames, AnimationFrames? attackerAreaFrames, AnimationFrames? defenderAreaFrames)
     {
-        AttackerDirectionFrames = attackerDirectionFrames;
-        DefenderDirectionFrames = defenderDirectionFrames;
-        AreaFrames = areaFrames;
+        AttackerUnitFrames = attackerUnitFrames;
+        DefenderUnitFrames = defenderUnitFrames;
+        AttackerAreaFrames = attackerAreaFrames;
+        DefenderAreaFrames = defenderAreaFrames;
     }
 
     /// <summary>
-    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Attacker" />.
+    /// Кадры анимации, который применяются к юниту из отряда <see cref="BattleSquadPosition.Attacker" />.
     /// </summary>
-    public AnimationFrames? AttackerDirectionFrames { get; }
+    public AnimationFrames? AttackerUnitFrames { get; }
 
     /// <summary>
-    /// Кадры анимации, который применяются к юниту/отряду <see cref="BattleSquadPosition.Defender" />.
+    /// Кадры анимации, который применяются к юниту из отряда <see cref="BattleSquadPosition.Defender" />.
     /// </summary>
-    public AnimationFrames? DefenderDirectionFrames { get; }
+    public AnimationFrames? DefenderUnitFrames { get; }
 
     /// <summary>
-    /// Кадры анимации, применяемые к области.
+    /// Кадры анимации, который применяются к области <see cref="BattleSquadPosition.Attacker" />.
     /// </summary>
-    public AnimationFrames? AreaFrames { get; }
+    public AnimationFrames? AttackerAreaFrames { get; }
+
+    /// <summary>
+    /// Кадры анимации, который применяются к области <see cref="BattleSquadPosition.Defender" />.
+    /// </summary>
+    public AnimationFrames? DefenderAreaFrames { get; }
 }

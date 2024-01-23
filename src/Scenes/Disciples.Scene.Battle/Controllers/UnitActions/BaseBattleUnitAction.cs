@@ -359,8 +359,8 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         if (isMainAttack)
         {
             var targetAnimationFrames = targetUnit.IsAttacker
-                ? attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.AttackerDirectionFrames
-                : attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.DefenderDirectionFrames;
+                ? attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.AttackerUnitFrames
+                : attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.DefenderUnitFrames;
             if (targetAnimationFrames != null)
             {
                 var animationPoint = targetUnit.AnimationComponent.AnimationPoint;

@@ -185,7 +185,10 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
         }
 
         // Если есть анимация, применяемая на площадь, то добавляем её на сцену.
-        if (currentUnitAnimation.BattleUnitAnimation.TargetAnimation?.AreaFrames != null)
+        var areaFrames = mainAttackAction.Target.IsAttacker
+            ? currentUnitAnimation.BattleUnitAnimation.TargetAnimation?.AttackerAreaFrames
+            : currentUnitAnimation.BattleUnitAnimation.TargetAnimation?.DefenderAreaFrames;
+        if (areaFrames != null)
         {
             // Центр анимации будет приходиться на середину между первым и вторым рядом.
             var isTargetAttacker = targetBattleUnits.First().IsAttacker;
@@ -198,7 +201,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
                             (backPosition.X + frontPosition.X) / 2 + BattleUnit.SmallBattleUnitAnimationOffset.X,
                             (backPosition.Y + frontPosition.Y) / 2 + BattleUnit.SmallBattleUnitAnimationOffset.Y);
             var areaAnimation = _battleGameObjectContainer.AddAnimation(
-                currentUnitAnimation.BattleUnitAnimation.TargetAnimation.AreaFrames,
+                areaFrames,
                 point.X,
                 point.Y,
                 isTargetAttacker
