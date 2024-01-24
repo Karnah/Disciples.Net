@@ -190,77 +190,104 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     /// <summary>
     /// Обработать завершение действия юнита.
     /// </summary>
+    /// <remarks>
+    /// TODO Метод плохо читается, отрефакторить.
+    /// </remarks>
     protected virtual void ProcessCompletedUnitAction(UnitBattleAction unitAction)
     {
         var targetBattleUnit = unitAction.TargetUnit;
         var targetUnit = targetBattleUnit.Unit;
 
-        // Если юнит умер, то превращаем его в кучу костей.
-        if (unitAction.ActionType == UnitActionType.Dying)
+        switch (unitAction.ActionType)
         {
-            targetBattleUnit.UnitState = BattleUnitState.Dead;
-
-            // Если юнит отступал, то возвращаем его положение на место,
-            // Чтобы корректно отображались кости.
-            targetBattleUnit.Direction = targetBattleUnit.IsAttacker
-                ? BattleDirection.Face
-                : BattleDirection.Back;
-        }
-
-        // На юнита наложен эффект.
-        if (unitAction.AttackType?.IsEffect() == true && !unitAction.IsEffectTriggered)
-        {
-            targetUnit.Effects.AddBattleEffect(
-                new UnitBattleEffect(unitAction.AttackType!.Value, unitAction.AttackSource!.Value, unitAction.EffectDuration!, unitAction.EffectDurationControlUnit!, unitAction.Power));
-
-            // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
-            if (unitAction.AttackType == UnitAttackType.ReduceInitiative)
+            case UnitActionType.Attacked:
             {
-                // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
-                // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
-                _context.UnitTurnQueue.ReorderUnitTurnOrder(targetUnit, targetUnit.Initiative);
-            }
-        }
+                switch (unitAction.AttackType)
+                {
+                    case > 0 when unitAction.AttackType?.IsEffect() == true:
+                    {
+                        // Накладываем новый эффект на юнита.
+                        if (!unitAction.IsEffectTriggered)
+                        {
+                            targetUnit.Effects.AddBattleEffect(
+                                new UnitBattleEffect(unitAction.AttackType!.Value, unitAction.AttackSource!.Value, unitAction.EffectDuration!, unitAction.EffectDurationControlUnit!, unitAction.Power));
 
-        // Если была защита, то удаляем её из списка.
-        // TODO Не знаю, корректно это или нет. Но если есть защита и от типа, и от источника, то снимем сразу оба.
-        if (unitAction.ActionType == UnitActionType.Ward)
-        {
-            targetUnit
-                .AttackTypeProtections
-                .RemoveAll(atp =>
-                    atp.UnitAttackType == unitAction.AttackType &&
-                    atp.ProtectionCategory == ProtectionCategory.Ward);
-            targetUnit
-                .AttackSourceProtections
-                .RemoveAll(asp =>
-                    asp.UnitAttackSource == unitAction.AttackSource &&
-                    asp.ProtectionCategory == ProtectionCategory.Ward);
-        }
+                            // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
+                            if (unitAction.AttackType == UnitAttackType.ReduceInitiative)
+                            {
+                                // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
+                                // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
+                                _context.UnitTurnQueue.ReorderUnitTurnOrder(targetUnit, targetUnit.Initiative);
+                            }
+                        }
 
-        if (unitAction.AttackType == UnitAttackType.GiveAdditionalAttack)
-            _context.UnitTurnQueue.AddUnitAdditionalAttack(targetUnit);
+                        break;
+                    }
 
-        if (unitAction.AttackType == UnitAttackType.Revive)
-        {
-            targetBattleUnit.UnitState = BattleUnitState.Waiting;
-            targetUnit.IsDead = false;
-            targetUnit.IsRevived = true;
-            targetUnit.HitPoints = targetUnit.MaxHitPoints / 2;
-        }
+                    case UnitAttackType.GiveAdditionalAttack:
+                    {
+                        _context.UnitTurnQueue.AddUnitAdditionalAttack(targetUnit);
+                        break;
+                    }
 
-        if (unitAction.AttackType == UnitAttackType.Cure)
-        {
-            var curableEffects = targetUnit.Effects
-                .GetBattleEffects()
-                .Where(e => e.CanCure());
-            foreach (var unitBattleEffect in curableEffects)
-            {
-                targetUnit.Effects.Remove(unitBattleEffect.AttackType);
+                    case UnitAttackType.Revive:
+                    {
+                        targetBattleUnit.UnitState = BattleUnitState.Waiting;
+                        targetUnit.IsDead = false;
+                        targetUnit.IsRevived = true;
+                        targetUnit.HitPoints = targetUnit.MaxHitPoints / 2;
+
+                        break;
+                    }
+
+                    case UnitAttackType.Cure:
+                    {
+                        var curableEffects = targetUnit.Effects
+                            .GetBattleEffects()
+                            .Where(e => e.CanCure());
+                        foreach (var unitBattleEffect in curableEffects)
+                        {
+                            targetUnit.Effects.Remove(unitBattleEffect.AttackType);
+                        }
+
+                        // Если юнит был парализован, то переводим его в обычное состояние.
+                        targetBattleUnit.UnitState = BattleUnitState.Waiting;
+                        break;
+                    }
+                }
+
+                break;
             }
 
-            // Если юнит был парализован, то переводим его в обычное состояние.
-            targetBattleUnit.UnitState = BattleUnitState.Waiting;
+            case UnitActionType.Dying:
+            {
+                // Превращаем его в кучу костей.
+                targetBattleUnit.UnitState = BattleUnitState.Dead;
+
+                // Если юнит отступал, то возвращаем его положение на место,
+                // Чтобы корректно отображались кости.
+                targetBattleUnit.Direction = targetBattleUnit.IsAttacker
+                    ? BattleDirection.Face
+                    : BattleDirection.Back;
+                break;
+            }
+
+            case UnitActionType.Ward:
+            {
+                // Если была защита, то удаляем её из списка.
+                // TODO Не знаю, корректно это или нет. Но если есть защита и от типа, и от источника, то снимем сразу оба.
+                targetUnit
+                    .AttackTypeProtections
+                    .RemoveAll(atp =>
+                        atp.UnitAttackType == unitAction.AttackType &&
+                        atp.ProtectionCategory == ProtectionCategory.Ward);
+                targetUnit
+                    .AttackSourceProtections
+                    .RemoveAll(asp =>
+                        asp.UnitAttackSource == unitAction.AttackSource &&
+                        asp.ProtectionCategory == ProtectionCategory.Ward);
+                break;
+            }
         }
 
         _unitPortraitPanelController

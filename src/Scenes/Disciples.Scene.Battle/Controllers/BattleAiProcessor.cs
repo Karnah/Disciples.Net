@@ -101,6 +101,7 @@ internal class BattleAiProcessor
         {
             var targetUnit = targetUnits
                 .OrderByPower()
+                // BUG неправильно работает уменьшение приоритета.
                 // Если на юнита наложен уже эффект усиления, то понижаем ему приоритет в зависимости от силы эффекта.
                 .ThenBy(tu =>
                 {
