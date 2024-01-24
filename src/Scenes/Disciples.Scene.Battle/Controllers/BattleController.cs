@@ -123,6 +123,20 @@ internal class BattleController : BaseSupportLoading, IBattleController
     // Начать новый раунд.
     private void StartNewRound()
     {
+        // BUG Сейчас есть проблемы с эффектами, которые привязаны в ходу юнита, который наложил его.
+        // Например, усиление урона или даровать защиту.
+        // Если юнит умирает, то игра не сбрасывает такие эффекты.
+        // По-хорошему, таких юнитов нужно сохранять в очереди и вызывать для них обработку.
+        // Но пока просто сделал, что эффекты мёртвых юнитов сбрасываются между раундами.
+        foreach (var battleUnit in _context.BattleUnits)
+        {
+            foreach (var unitBattleEffect in battleUnit.Unit.Effects.GetBattleEffects())
+            {
+                if (!unitBattleEffect.Duration.IsInfinitive && unitBattleEffect.DurationControlUnit.IsDead)
+                    battleUnit.Unit.Effects.Remove(unitBattleEffect.AttackType);
+            }
+        }
+
         ++_context.RoundNumber;
         var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad);
         var nextUnit = _context.UnitTurnQueue.NextRound(turnOrder);
