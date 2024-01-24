@@ -224,10 +224,11 @@ internal class BattleProcessor
     /// </summary>
     public BattleProcessorAttackResult? ProcessMainAttack(Unit attackingUnit, Unit targetUnit)
     {
+        var basePower = attackingUnit.MainAttackBasePower;
         var power = attackingUnit.MainAttackPower;
         var attack = attackingUnit.UnitType.MainAttack;
         var accuracy = attackingUnit.MainAttackAccuracy;
-        return ProcessAttack(attackingUnit, targetUnit, attack, power, accuracy);
+        return ProcessAttack(attackingUnit, targetUnit, attack, basePower, power, accuracy);
     }
 
     /// <summary>
@@ -238,7 +239,7 @@ internal class BattleProcessor
         var power = attackingUnit.SecondaryAttackPower;
         var attack = attackingUnit.UnitType.SecondaryAttack!;
         var accuracy = attackingUnit.SecondaryAttackAccuracy!.Value;
-        return ProcessAttack(attackingUnit, targetUnit, attack, power, accuracy);
+        return ProcessAttack(attackingUnit, targetUnit, attack, power, power, accuracy);
     }
 
     /// <summary>
@@ -331,9 +332,10 @@ internal class BattleProcessor
     /// <param name="attackingUnit">Атакующий юнит.</param>
     /// <param name="targetUnit">Юнит, на которого воздействует.</param>
     /// <param name="attack">Тип атаки.</param>
+    /// <param name="basePower">Базовая сила атаки.</param>
     /// <param name="power">Сила атаки.</param>
     /// <param name="accuracy">Точность атаки.</param>
-    private static BattleProcessorAttackResult? ProcessAttack(Unit attackingUnit, Unit targetUnit, UnitAttack attack, int? power, int accuracy)
+    private static BattleProcessorAttackResult? ProcessAttack(Unit attackingUnit, Unit targetUnit, UnitAttack attack, int? basePower, int? power, int accuracy)
     {
         if (targetUnit.IsRetreated)
             return null;
@@ -386,7 +388,8 @@ internal class BattleProcessor
             case UnitAttackType.DrainLife:
             case UnitAttackType.DrainLifeOverflow:
                 // todo Максимальное значение атаки - 250/300/400.
-                var attackPower = power!.Value + RandomGenerator.Get(ATTACK_RANGE);
+                var attackRandomBonus = RandomGenerator.Get(ATTACK_RANGE);
+                var attackPower = power!.Value + attackRandomBonus;
 
                 // Уменьшаем входящий урон в зависимости от защиты.
                 attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
@@ -396,11 +399,19 @@ internal class BattleProcessor
                 if (targetUnit.Effects.IsDefended)
                     attackPower /= 2;
 
+                // Критический урон вычисляется от базового, без учёта усилений,
+                // Но с учётом случайного разброса.
+                int? criticalDamage = null;
+                if (attack.IsCritical)
+                    criticalDamage = Math.Min((int)((basePower!.Value + attackRandomBonus) * 0.05), targetUnit.HitPoints);
+
                 // Мы не можем нанести урон больше, чем осталось очков здоровья.
-                attackPower = Math.Min(attackPower, targetUnit.HitPoints);
+                attackPower = Math.Min(attackPower, targetUnit.HitPoints - (criticalDamage ?? 0));
+
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
                     attackPower,
+                    criticalDamage,
                     attack.AttackType,
                     attack.AttackSource);
 
@@ -426,6 +437,7 @@ internal class BattleProcessor
                     return new BattleProcessorAttackResult(
                         AttackResult.Attack,
                         healPower,
+                        null,
                         attack.AttackType,
                         attack.AttackSource);
                 }
@@ -488,6 +500,7 @@ internal class BattleProcessor
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
                     Math.Min(power!.Value, targetUnit.Armor) + (reduceArmorBattleEffect?.Power ?? 0),
+                    null,
                     attack.AttackType,
                     attack.AttackSource);
 

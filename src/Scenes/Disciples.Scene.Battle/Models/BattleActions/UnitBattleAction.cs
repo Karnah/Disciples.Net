@@ -30,6 +30,7 @@ internal class UnitBattleAction : ComplexBattleAction
         AttackType = attackResult.AttackType;
         AttackSource = attackResult.AttackSource;
         Power = attackResult.Power;
+        CriticalDamage = attackResult.CriticalDamage;
         EffectDuration = attackResult.EffectDuration;
         EffectDurationControlUnit = attackResult.EffectDurationControlUnit;
         IsEffectTriggered = isEffectTriggered;
@@ -74,6 +75,11 @@ internal class UnitBattleAction : ComplexBattleAction
     public int? Power { get; }
 
     /// <summary>
+    /// Критический урон.
+    /// </summary>
+    public int? CriticalDamage { get; }
+
+    /// <summary>
     /// Продолжительность эффекта.
     /// </summary>
     public EffectDuration? EffectDuration { get; }
@@ -93,7 +99,7 @@ internal class UnitBattleAction : ComplexBattleAction
     /// </summary>
     public BattleUnitPortraitEventData GetUnitPortraitEventData()
     {
-        return new BattleUnitPortraitEventData(ActionType, AttackType, Power, EffectDuration, IsEffectTriggered);
+        return new BattleUnitPortraitEventData(ActionType, AttackType, Power, CriticalDamage, EffectDuration, IsEffectTriggered);
     }
 
     /// <summary>

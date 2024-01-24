@@ -328,6 +328,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                     case UnitAttackType.DrainLifeOverflow:
                     {
                         targetUnit.Unit.HitPoints -= attackResult.Power!.Value;
+                        targetUnit.Unit.HitPoints -= attackResult.CriticalDamage ?? 0;
                         targetUnit.UnitState = BattleUnitState.TakingDamage;
 
                         AddAction(new AnimationBattleAction(targetUnit.AnimationComponent));

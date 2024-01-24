@@ -31,10 +31,11 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, int power, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, int power, int? criticalDamage, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         Power = power;
+        CriticalDamage = criticalDamage;
         AttackType = attackType;
         AttackSource = attackSource;
     }
@@ -61,6 +62,11 @@ internal class BattleProcessorAttackResult
     /// Сила воздействия.
     /// </summary>
     public int? Power { get; }
+
+    /// <summary>
+    /// Критический урон.
+    /// </summary>
+    public int? CriticalDamage { get; }
 
     /// <summary>
     /// Длительность эффекта.

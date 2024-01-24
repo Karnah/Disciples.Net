@@ -150,7 +150,7 @@ internal class MainAttackUnitAction : BaseBattleUnitAction
                 ProcessAttackResult(CurrentBattleUnit, targetBattleUnit, attackResult, true);
 
                 if (attackResult.AttackResult == AttackResult.Attack && attackResult.AttackType!.Value.IsDirectDamage())
-                    totalDamage += attackResult.Power!.Value;
+                    totalDamage += attackResult.Power!.Value + (attackResult.CriticalDamage ?? 0);
             }
 
             var isSuccessAttack = attackResult?.AttackResult is AttackResult.Attack or AttackResult.Skip;

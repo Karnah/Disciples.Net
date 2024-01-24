@@ -39,6 +39,10 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private const string DAMAGE_TEXT_ID = "X008TA0004";
     /// <summary>
+    /// Идентификатор в ресурсах для урона с критическим уроном.
+    /// </summary>
+    private const string CRITICAL_DAMAGE_TEXT_ID = "X160TA0021";
+    /// <summary>
     /// Идентификатор в ресурсах с текстом "Промах".
     /// </summary>
     private const string MISS_TEXT_ID = "X008TA0001";
@@ -555,6 +559,18 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
+    /// Добавить на портрет повреждение с критическим уроном.
+    /// </summary>
+    private ITextSceneObject AddCriticalDamageText(int power, int criticalDamage)
+    {
+        var text = _textProvider
+            .GetText(CRITICAL_DAMAGE_TEXT_ID)
+            .ReplacePlaceholders(new []{ ("%DAMAGE%", new TextContainer(power.ToString())) })
+            .ReplacePlaceholders(new []{ ("%CRITICAL%", new TextContainer(criticalDamage.ToString())) });
+        return AddText(text);
+    }
+
+    /// <summary>
     /// Добавить на портрет указанный текст.
     /// </summary>
     private ITextSceneObject? AddText(BattleUnitPortraitEventData eventData)
@@ -569,7 +585,9 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.DrainLife:
                     case UnitAttackType.DrainLifeOverflow:
                     case UnitAttackType.Heal:
-                        return AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
+                        return eventData.CriticalDamage > 0
+                            ? AddCriticalDamageText(eventData.Power!.Value, eventData.CriticalDamage.Value)
+                            : AddDamageText(DAMAGE_TEXT_ID, eventData.AttackType!.Value, eventData.Power);
 
                     case UnitAttackType.Paralyze:
                     case UnitAttackType.Fear:

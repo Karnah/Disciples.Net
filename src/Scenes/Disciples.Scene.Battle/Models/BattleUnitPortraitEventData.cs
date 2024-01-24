@@ -12,13 +12,15 @@ internal readonly ref struct BattleUnitPortraitEventData
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitPortraitEventData" />.
     /// </summary>
-    public BattleUnitPortraitEventData(UnitActionType unitActionType, UnitAttackType? attackType, int? power, EffectDuration? effectDuration, bool isEffectTriggered)
+    public BattleUnitPortraitEventData(UnitActionType unitActionType, UnitAttackType? attackType, int? power,
+        int? criticalDamage, EffectDuration? effectDuration, bool isEffectTriggered)
     {
         UnitActionType = unitActionType;
         AttackType = attackType;
         Power = power;
         EffectDuration = effectDuration;
         IsEffectTriggered = isEffectTriggered;
+        CriticalDamage = criticalDamage;
     }
 
     /// <summary>
@@ -35,6 +37,11 @@ internal readonly ref struct BattleUnitPortraitEventData
     /// Сила воздействия.
     /// </summary>
     public int? Power { get; }
+
+    /// <summary>
+    /// Критический урон.
+    /// </summary>
+    public int? CriticalDamage { get; }
 
     /// <summary>
     /// Длительность эффекта.
