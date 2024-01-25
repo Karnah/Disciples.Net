@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Disciples.Resources.Database.Sqlite.Mappings;
+namespace Disciples.Resources.Database.Sqlite.Configurations;
 
 /// <summary>
 /// Конфигурация EF для <see cref="UnitType" />.
@@ -27,5 +27,25 @@ internal class UnitAttackConfiguration : IEntityTypeConfiguration<UnitAttack>
             .HasOne(ua => ua.AlternativeAttack)
             .WithOne()
             .HasForeignKey<UnitAttack>("AlternativeUnitAttackId");
+
+        builder
+            .HasOne(ua => ua.Ward1)
+            .WithOne()
+            .HasForeignKey<UnitAttack>("Ward1Id");
+
+        builder
+            .HasOne(ua => ua.Ward2)
+            .WithOne()
+            .HasForeignKey<UnitAttack>("Ward2Id");
+
+        builder
+            .HasOne(ua => ua.Ward3)
+            .WithOne()
+            .HasForeignKey<UnitAttack>("Ward3Id");
+
+        builder
+            .HasOne(ua => ua.Ward4)
+            .WithOne()
+            .HasForeignKey<UnitAttack>("Ward4Id");
     }
 }

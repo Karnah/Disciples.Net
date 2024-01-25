@@ -27,12 +27,7 @@ internal class UnitBattleAction : ComplexBattleAction
     {
         TargetUnit = targetUnit;
         ActionType = GetAttackActionType(attackResult.AttackResult);
-        AttackType = attackResult.AttackType;
-        AttackSource = attackResult.AttackSource;
-        Power = attackResult.Power;
-        CriticalDamage = attackResult.CriticalDamage;
-        EffectDuration = attackResult.EffectDuration;
-        EffectDurationControlUnit = attackResult.EffectDurationControlUnit;
+        AttackResult = attackResult;
         IsEffectTriggered = isEffectTriggered;
     }
 
@@ -60,34 +55,9 @@ internal class UnitBattleAction : ComplexBattleAction
     public UnitActionType ActionType { get; }
 
     /// <summary>
-    /// Тип атаки.
+    /// Результат атаки.
     /// </summary>
-    public UnitAttackType? AttackType { get; }
-
-    /// <summary>
-    /// Источник атаки.
-    /// </summary>
-    public UnitAttackSource? AttackSource { get; }
-
-    /// <summary>
-    /// Сила воздействия.
-    /// </summary>
-    public int? Power { get; }
-
-    /// <summary>
-    /// Критический урон.
-    /// </summary>
-    public int? CriticalDamage { get; }
-
-    /// <summary>
-    /// Продолжительность эффекта.
-    /// </summary>
-    public EffectDuration? EffectDuration { get; }
-
-    /// <summary>
-    /// Юнит, к ходу которого привязана длительность.
-    /// </summary>
-    public Unit? EffectDurationControlUnit { get; }
+    public BattleProcessorAttackResult? AttackResult { get; }
 
     /// <summary>
     /// Признак, что это срабатывание эффекта на ходу юнита.
@@ -99,7 +69,13 @@ internal class UnitBattleAction : ComplexBattleAction
     /// </summary>
     public BattleUnitPortraitEventData GetUnitPortraitEventData()
     {
-        return new BattleUnitPortraitEventData(ActionType, AttackType, Power, CriticalDamage, EffectDuration, IsEffectTriggered);
+        return new BattleUnitPortraitEventData(
+            ActionType,
+            AttackResult?.AttackType,
+            AttackResult?.Power,
+            AttackResult?.CriticalDamage,
+            AttackResult?.EffectDuration,
+            IsEffectTriggered);
     }
 
     /// <summary>
@@ -124,10 +100,10 @@ internal class UnitBattleAction : ComplexBattleAction
     {
         return attackResult switch
         {
-            AttackResult.Miss => UnitActionType.Miss,
-            AttackResult.Attack => UnitActionType.Attacked,
-            AttackResult.Ward => UnitActionType.Ward,
-            AttackResult.Immunity => UnitActionType.Immunity,
+            Enums.AttackResult.Miss => UnitActionType.Miss,
+            Enums.AttackResult.Attack => UnitActionType.Attacked,
+            Enums.AttackResult.Ward => UnitActionType.Ward,
+            Enums.AttackResult.Immunity => UnitActionType.Immunity,
             _ => throw new ArgumentOutOfRangeException(nameof(attackResult), attackResult, null)
         };
     }

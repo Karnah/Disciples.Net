@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper.Internal;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 
@@ -29,8 +30,8 @@ public class Unit
         HitPoints = UnitType.HitPoints;
         Effects = new UnitEffects();
 
-        AttackSourceProtections = unitType.AttackSourceProtections.ToList();
-        AttackTypeProtections = unitType.AttackTypeProtections.ToList();
+        BaseAttackTypeProtections = unitType.AttackTypeProtections.ToList();
+        BaseAttackSourceProtections = unitType.AttackSourceProtections.ToList();
     }
 
     /// <summary>
@@ -206,14 +207,28 @@ public class Unit
     public UnitEffects Effects { get; }
 
     /// <summary>
-    /// Защита от источников атак.
+    /// Базовая для типа юнита защита от типов атак.
     /// </summary>
-    public List<UnitAttackSourceProtection> AttackSourceProtections { get; init; }
+    public List<UnitAttackTypeProtection> BaseAttackTypeProtections { get; }
 
     /// <summary>
     /// Защита от типов атак.
     /// </summary>
-    public List<UnitAttackTypeProtection> AttackTypeProtections { get; init; }
+    public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections => BaseAttackTypeProtections
+            .Concat(Effects.GetUnitAttackTypeProtections())
+            .ToArray();
+
+    /// <summary>
+    /// Базовая для типа юнита защита от источников атак.
+    /// </summary>
+    public List<UnitAttackSourceProtection> BaseAttackSourceProtections { get; }
+
+    /// <summary>
+    /// Защита от источников атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections => BaseAttackSourceProtections
+        .Concat(Effects.GetUnitAttackSourceProtections())
+        .ToArray();
 
     /// <summary>
     /// Получить силу атаки.

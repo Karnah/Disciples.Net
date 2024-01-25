@@ -123,8 +123,20 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
                 .Include(ut => ut.MainAttack.Description)
                 .Include(ut => ut.MainAttack.AlternativeAttack!.Name)
                 .Include(ut => ut.MainAttack.AlternativeAttack!.Description)
+                // Каждый модификатор должен давать только защиту от одного типа урона.
+                // Поэтому грузим сразу здесь.
+                .Include(ut => ut.MainAttack.Ward1!.ModifierItems)
+                .Include(ut => ut.MainAttack.Ward2!.ModifierItems)
+                .Include(ut => ut.MainAttack.Ward3!.ModifierItems)
+                .Include(ut => ut.MainAttack.Ward4!.ModifierItems)
                 .Include(ut => ut.SecondaryAttack!.Name)
                 .Include(ut => ut.SecondaryAttack!.Description)
+                // Каждый модификатор должен давать только защиту от одного типа урона.
+                // Поэтому грузим сразу здесь.
+                .Include(ut => ut.SecondaryAttack!.Ward1!.ModifierItems)
+                .Include(ut => ut.SecondaryAttack!.Ward2!.ModifierItems)
+                .Include(ut => ut.SecondaryAttack!.Ward3!.ModifierItems)
+                .Include(ut => ut.SecondaryAttack!.Ward4!.ModifierItems)
                 .Include(ut => ut.LowLevelUpgrade)
                 .Include(ut => ut.HighLevelUpgrade)
                 .FirstOrDefault(ut => ut.Id == unitTypeId);

@@ -3,6 +3,9 @@
 /// <summary>
 /// Источник атаки юнита.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LAttS.dbf.
+/// </remarks>
 public enum UnitAttackSource
 {
     /// <summary>

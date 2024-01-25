@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Disciples.Resources.Database.Sqlite.Mappings;
+namespace Disciples.Resources.Database.Sqlite.Configurations;
 
 /// <summary>
 /// Конфигурация EF для <see cref="InterfaceTextResource" />.

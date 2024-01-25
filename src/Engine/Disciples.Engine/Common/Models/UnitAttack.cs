@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using System.Collections.Generic;
+using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -81,32 +82,14 @@ public class UnitAttack
     public bool IsInfinitive { get; init; }
 
     /// <summary>
-    /// Количество защит, которые накладывается на цель при атаке.
+    /// Наложение защиты от типов атак.
     /// </summary>
-    /// <remarks>
-    /// В зависимости от этого значения берётся <see cref="Ward1" />, <see cref="Ward2" />, <see cref="Ward3" /> и <see cref="Ward4" />.
-    /// </remarks>
-    public int WardsCount { get; init; }
+    public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; init; } = null!;
 
     /// <summary>
-    /// Тип первой защиты, которая накладывается при атаке.
+    /// Наложение защиты от источников атак.
     /// </summary>
-    public string? Ward1 { get; init; }
-
-    /// <summary>
-    /// Тип второй защиты, которая накладывается при атаке.
-    /// </summary>
-    public string? Ward2 { get; init; }
-
-    /// <summary>
-    /// Тип третьей защиты, которая накладывается при атаке.
-    /// </summary>
-    public string? Ward3 { get; init; }
-
-    /// <summary>
-    /// Тип четвертой защиты, которая накладывается при атаке.
-    /// </summary>
-    public string? Ward4 { get; init; }
+    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
 
     /// <summary>
     /// Признак, что при ударе наносится критический урон.

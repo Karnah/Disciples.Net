@@ -1,9 +1,9 @@
 ﻿using Disciples.Resources.Database.Sqlite.Extensions;
 using Disciples.Resources.Database.Sqlite.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Disciples.Resources.Database.Sqlite.Mappings;
+namespace Disciples.Resources.Database.Sqlite.Configurations;
 
 /// <summary>
 /// Конфигурация EF для <see cref="Race" />.

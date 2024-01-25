@@ -3,6 +3,9 @@
 /// <summary>
 /// Ветка юнита.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LunitB.dbf.
+/// </remarks>
 public enum UnitBranch
 {
     /// <summary>

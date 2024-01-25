@@ -83,9 +83,9 @@ internal class TurnUnitAction : BaseBattleUnitAction
         base.ProcessCompletedUnitAction(unitAction);
 
         // Обрабатываем урон, который наносит эффект при наступлении хода юнита.
-        if (unitAction.IsEffectTriggered && unitAction.AttackType!.Value.IsDamageEffect())
+        if (unitAction.IsEffectTriggered && unitAction.AttackResult!.AttackType!.Value.IsDamageEffect())
         {
-            CurrentBattleUnit.Unit.HitPoints -= unitAction.Power!.Value;
+            CurrentBattleUnit.Unit.HitPoints -= unitAction.AttackResult.Power!.Value;
 
             if (CurrentBattleUnit.Unit.HitPoints == 0)
             {
@@ -126,7 +126,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
 
             // Если эффект закончился, то удаляем его.
             if (unitEffect.Duration.IsCompleted)
-                CurrentBattleUnit.Unit.Effects.Remove(unitEffect.AttackType);
+                CurrentBattleUnit.Unit.Effects.Remove(unitEffect);
 
             switch (unitEffect.AttackType)
             {
@@ -188,7 +188,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
 
                 // Если эффект закончился, то удаляем его.
                 if (processResult != null && targetUnitEffect.Duration.IsCompleted)
-                    targetUnit.Effects.Remove(targetUnitEffect.AttackType);
+                    targetUnit.Effects.Remove(targetUnitEffect);
             }
         }
 

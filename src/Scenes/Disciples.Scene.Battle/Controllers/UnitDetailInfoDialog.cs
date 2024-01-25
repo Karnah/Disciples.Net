@@ -228,7 +228,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             return new TextContainer(new[]
             {
                 new TextPiece(value),
-                new TextPiece(new TextStyle { ForegroundColor = BattleColors.BoostDamage }, $" + {modifier}")
+                new TextPiece(new TextStyle { ForegroundColor = BattleColors.Boost }, $" + {modifier}")
             });
         }
 
@@ -329,7 +329,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.TransformSelf => "X005TA0807",
             UnitAttackType.TransformOther => "X005TA0808",
             UnitAttackType.Blister => "X160TA0012",
-            UnitAttackType.BestowWards => "X160TA0014",
+            UnitAttackType.GiveProtection => "X160TA0014",
             UnitAttackType.ReduceArmor => "X160TA0020",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };

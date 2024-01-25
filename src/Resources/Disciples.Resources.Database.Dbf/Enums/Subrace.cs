@@ -3,6 +3,9 @@
 /// <summary>
 /// Подрасы.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LSubRace.dbf.
+/// </remarks>
 public enum Subrace
 {
     /// <summary>

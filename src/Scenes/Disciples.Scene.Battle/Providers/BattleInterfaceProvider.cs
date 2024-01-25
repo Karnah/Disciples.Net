@@ -62,6 +62,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         // Вообще есть 4 иконки для побега: для большого и маленького юнита, для атакующего и защищающегося отряда.
         // Но они одинаковые, поэтому используем только одну.
         UnitPortraitRetreatedIcon = _battleResourceProvider.GetBattleBitmap("FIRETREATLA");
+        UnitPortraitPositiveModifierIcon = _battleResourceProvider.GetBattleBitmap("FIISOSPELLBOOST");
+        UnitPortraitNegativeModifierIcon = _battleResourceProvider.GetBattleBitmap("FIISOSPELLLOWER");
         UnitBattleEffectsIcon = new Dictionary<UnitAttackType, IBitmap>
         {
             { UnitAttackType.Paralyze, _battleResourceProvider.GetBattleBitmap("FIPARALYZE") },
@@ -111,6 +113,12 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
     /// <inheritdoc />
     public IBitmap UnitPortraitRetreatedIcon { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap UnitPortraitPositiveModifierIcon { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public IBitmap UnitPortraitNegativeModifierIcon { get; private set; } = null!;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; private set; } = null!;

@@ -13,20 +13,15 @@ public class UnitEffects
     /// <summary>
     /// Эффекты, которые наложены и действуют во время схватки.
     /// </summary>
-    private readonly Dictionary<UnitAttackType, UnitBattleEffect> _battleEffects;
+    private readonly List<UnitBattleEffect> _battleEffects;
 
     /// <summary>
     /// Создать объект типа <see cref="UnitEffects" />.
     /// </summary>
     public UnitEffects()
     {
-        _battleEffects = new Dictionary<UnitAttackType, UnitBattleEffect>();
+        _battleEffects = new List<UnitBattleEffect>();
     }
-
-    /// <summary>
-    /// Есть ли на юните эффекты, которые наложены во время битвы.
-    /// </summary>
-    public bool HasBattleEffects => IsDefended || IsRetreating || _battleEffects.Count > 0;
 
     /// <summary>
     /// Признак, что юнит защитился.
@@ -51,11 +46,21 @@ public class UnitEffects
     public bool IsDisabled => IsParalyzed || IsRetreating;
 
     /// <summary>
+    /// Признак, что на юните есть позитивные модификаторы.
+    /// </summary>
+    public bool HasPositiveModifiers => _battleEffects.Any(be => be.AttackType == UnitAttackType.GiveProtection);
+
+    /// <summary>
     /// Добавить эффект в поединке.
     /// </summary>
     public void AddBattleEffect(UnitBattleEffect battleEffect)
     {
-        _battleEffects[battleEffect.AttackType] = battleEffect;
+        // Эффект от типа атаки должен быть только один.
+        // Но для наложение защиты это работает по-другому, так как может быть несколько эффектов на разные типы защиты.
+        if (battleEffect.AttackType != UnitAttackType.GiveProtection)
+            Remove(battleEffect);
+
+        _battleEffects.Add(battleEffect);
     }
 
     /// <summary>
@@ -63,7 +68,7 @@ public class UnitEffects
     /// </summary>
     public bool ExistsBattleEffect(UnitAttackType effectAttackType)
     {
-        return _battleEffects.ContainsKey(effectAttackType);
+        return _battleEffects.Any(be => be.AttackType == effectAttackType);
     }
 
     /// <summary>
@@ -71,15 +76,58 @@ public class UnitEffects
     /// </summary>
     public bool TryGetBattleEffect(UnitAttackType effectAttackType, [NotNullWhen(true)]out UnitBattleEffect? battleEffect)
     {
-        return _battleEffects.TryGetValue(effectAttackType, out battleEffect);
+        battleEffect = _battleEffects.FirstOrDefault(be => be.AttackType == effectAttackType);
+        return battleEffect != null;
     }
 
     /// <summary>
     /// Удалить эффект указанного типа.
     /// </summary>
-    public void Remove(UnitAttackType effectAttackType)
+    public void Remove(UnitBattleEffect effect)
     {
-        _battleEffects.Remove(effectAttackType);
+        _battleEffects.Remove(effect);
+    }
+
+    /// <summary>
+    /// Удалить эффект защиты.
+    /// </summary>
+    public void RemoveBattleProtectionEffect(UnitAttackTypeProtection attackTypeProtection)
+    {
+        var protectionEffect = _battleEffects.FirstOrDefault(be => be.AttackType == UnitAttackType.GiveProtection
+                                                                   && be.AttackTypeProtections.Contains(attackTypeProtection));
+        if (protectionEffect != null)
+        {
+            if (protectionEffect.AttackTypeProtections.Count == 1
+                && protectionEffect.AttackSourceProtections.Count == 0)
+            {
+                Remove(protectionEffect);
+            }
+            else
+            {
+                protectionEffect.AttackTypeProtections.Remove(attackTypeProtection);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Удалить эффект защиты.
+    /// </summary>
+    public void RemoveBattleProtectionEffect(UnitAttackSourceProtection attackSourceProtection)
+    {
+        var protectionEffect = _battleEffects.FirstOrDefault(be => be.AttackType == UnitAttackType.GiveProtection
+                                                                   && be.AttackSourceProtections.Contains(attackSourceProtection));
+        if (protectionEffect != null)
+        {
+            if (protectionEffect.AttackTypeProtections.Count == 0
+                && protectionEffect.AttackSourceProtections.Count == 1)
+            {
+                Remove(protectionEffect);
+            }
+            else
+            {
+                protectionEffect.AttackSourceProtections.Remove(attackSourceProtection);
+            }
+        }
     }
 
     /// <summary>
@@ -87,7 +135,7 @@ public class UnitEffects
     /// </summary>
     public bool HasCurableEffects()
     {
-        return _battleEffects.Values.Any(e => e.CanCure());
+        return _battleEffects.Any(e => e.CanCure());
     }
 
     /// <summary>
@@ -95,7 +143,7 @@ public class UnitEffects
     /// </summary>
     public IReadOnlyList<UnitBattleEffect> GetBattleEffects()
     {
-        return _battleEffects.Values.ToArray();
+        return _battleEffects.ToArray();
     }
 
     /// <summary>
@@ -111,6 +159,28 @@ public class UnitEffects
         }
 
         return modifier;
+    }
+
+    /// <summary>
+    /// Получить список защит от типов атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackTypeProtection> GetUnitAttackTypeProtections()
+    {
+        return _battleEffects
+            .Where(be => be.AttackType == UnitAttackType.GiveProtection)
+            .SelectMany(be => be.AttackTypeProtections)
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Получить список защит от типов атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackSourceProtection> GetUnitAttackSourceProtections()
+    {
+        return _battleEffects
+            .Where(be => be.AttackType == UnitAttackType.GiveProtection)
+            .SelectMany(be => be.AttackSourceProtections)
+            .ToArray();
     }
 
     /// <summary>

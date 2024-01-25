@@ -3,6 +3,9 @@
 /// <summary>
 /// Категория юнита.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LunitC.dbf.
+/// </remarks>
 public enum UnitCategory
 {
     /// <summary>

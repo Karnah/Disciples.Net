@@ -111,9 +111,9 @@ public enum UnitAttackType
     Blister = 23,
 
     /// <summary>
-    /// Даровать защиту от стихий.
+    /// Даровать защиту от типов/источников атак.
     /// </summary>
-    BestowWards = 24,
+    GiveProtection = 24,
 
     /// <summary>
     /// Разбить броню.

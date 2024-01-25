@@ -100,6 +100,7 @@ internal class SaveProvider
         UnitAttackType.Cure,
         UnitAttackType.GiveAdditionalAttack,
         UnitAttackType.Blister,
+        UnitAttackType.GiveProtection,
         UnitAttackType.ReduceArmor,
     };
 

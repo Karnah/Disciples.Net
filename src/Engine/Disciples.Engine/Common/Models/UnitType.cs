@@ -220,12 +220,12 @@ public class UnitType
     public UnitDeathAnimationType DeathAnimationType { get; init; }
 
     /// <summary>
-    /// Защита от источников атак.
-    /// </summary>
-    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
-
-    /// <summary>
     /// Защита от типов атак.
     /// </summary>
     public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; init; } = null!;
+
+    /// <summary>
+    /// Защита от источников атак.
+    /// </summary>
+    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; init; } = null!;
 }

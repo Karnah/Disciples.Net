@@ -3,6 +3,9 @@
 /// <summary>
 /// Анимация смерти юнита.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LDthAnim.dbf.
+/// </remarks>
 public enum UnitDeathAnimationType
 {
     /// <summary>

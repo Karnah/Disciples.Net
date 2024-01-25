@@ -84,29 +84,29 @@ public class UnitAttack : IEntity
     /// Количество защит, которые накладывается на цель при атаке.
     /// </summary>
     /// <remarks>
-    /// В зависимости от этого значения берётся <see cref="Ward1Id" />, <see cref="Ward2Id" />, <see cref="Ward3Id" /> и <see cref="Ward4Id" />.
+    /// В зависимости от этого значения берётся <see cref="Ward1" />, <see cref="Ward2" />, <see cref="Ward3" /> и <see cref="Ward4" />.
     /// </remarks>
     public int WardsCount { get; init; }
 
     /// <summary>
     /// Тип первой защиты, которая накладывается при атаке.
     /// </summary>
-    public string? Ward1Id { get; init; }
+    public UnitModifier? Ward1 { get; init; }
 
     /// <summary>
     /// Тип второй защиты, которая накладывается при атаке.
     /// </summary>
-    public string? Ward2Id { get; init; }
+    public UnitModifier? Ward2 { get; init; }
 
     /// <summary>
     /// Тип третьей защиты, которая накладывается при атаке.
     /// </summary>
-    public string? Ward3Id { get; init; }
+    public UnitModifier? Ward3 { get; init; }
 
     /// <summary>
     /// Тип четвертой защиты, которая накладывается при атаке.
     /// </summary>
-    public string? Ward4Id { get; init; }
+    public UnitModifier? Ward4 { get; init; }
 
     /// <summary>
     /// Признак, что при ударе наносится критический урон.

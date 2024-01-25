@@ -51,6 +51,8 @@ public class GameDataContext
         UnitLevelUpgrades = GetTable<UnitLevelUpgrade>();
         UnitAttackSourceProtections = GetUnionTable<UnitAttackSourceProtection>();
         UnitAttackTypeProtections = GetUnionTable<UnitAttackTypeProtection>();
+        UnitModifiers = GetTable<UnitModifier>();
+        UnitModifierItems = GetUnionTable<UnitModifierItem>();
         Races = GetTable<Race>();
     }
 
@@ -88,6 +90,16 @@ public class GameDataContext
     /// Защита юнита от типов атак.
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<UnitAttackTypeProtection>> UnitAttackTypeProtections { get; }
+
+    /// <summary>
+    /// Модификатор характеристик или способностей юнитов.
+    /// </summary>
+    public IReadOnlyDictionary<string, UnitModifier> UnitModifiers { get; }
+
+    /// <summary>
+    /// Модификатор отдельных характеристик или способностей юнитов.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<UnitModifierItem>> UnitModifierItems { get; }
 
     /// <summary>
     /// Список рас.
@@ -220,6 +232,9 @@ public class GameDataContext
         if (propertyType == typeof(int?))
             return (int?)reader.GetDecimal(columnName);
 
+        if (IsNullableEnum(propertyType))
+            return ConvertNullableEnum(propertyType, (int?)reader.GetDecimal(columnName));
+
         if (propertyType.IsEnum || propertyType == typeof(int))
             return (int)(reader.GetDecimal(columnName) ?? 0);
 
@@ -230,5 +245,26 @@ public class GameDataContext
             return ResourceSet.Parse(reader.GetString(columnName));
 
         throw new ArgumentException($"Некорректный тип для разбора {propertyType.Name}");
+    }
+
+    /// <summary>
+    /// Проверить, что тип nullable от перечисления.
+    /// </summary>
+    private static bool IsNullableEnum(Type t)
+    {
+        return t.IsGenericType &&
+               t.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+               t.GetGenericArguments()[0].IsEnum;
+    }
+
+    /// <summary>
+    /// Сконвертировать значение в Enum.
+    /// </summary>
+    private static object? ConvertNullableEnum(Type t, int? value)
+    {
+        if (value == null)
+            return null;
+
+        return Enum.ToObject(t.GetGenericArguments()[0], value.Value);
     }
 }

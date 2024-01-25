@@ -24,6 +24,8 @@ public class DataMigration : Migration
         AddTableData("GlobalTextResource", database.GlobalTextResources.Values.ToArray());
         AddTableData("InterfaceTextResource", database.InterfaceTextResources.Values.ToArray());
         AddTableData("Race", database.Races.Values.ToArray());
+        AddTableData("UnitModifier", database.UnitModifiers.Values.ToArray());
+        AddTableData("UnitModifierItem", database.UnitModifierItems.Values.SelectMany(um => um).ToArray());
         AddTableData("UnitAttack", database.UnitAttacks.Values.ToArray());
         AddTableData("UnitAttackSourceProtection", database.UnitAttackSourceProtections.Values.SelectMany(p => p).ToArray());
         AddTableData("UnitAttackTypeProtection", database.UnitAttackTypeProtections.Values.SelectMany(p => p).ToArray());
@@ -78,6 +80,10 @@ public class DataMigration : Migration
             {
                 dictionary.Add(entityProperty.Name, (int)entityValue!);
             }
+            else if (IsNullableEnum(entityProperty.PropertyType) && entityValue != null)
+            {
+                dictionary.Add(entityProperty.Name, Convert.ToInt32(entityValue));
+            }
             else
             {
                 dictionary.Add(entityProperty.Name, entityValue);
@@ -85,5 +91,15 @@ public class DataMigration : Migration
         }
 
         return dictionary;
+    }
+
+    /// <summary>
+    /// Проверить, что тип nullable от перечисления.
+    /// </summary>
+    private static bool IsNullableEnum(Type t)
+    {
+        return t.IsGenericType &&
+               t.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+               t.GetGenericArguments()[0].IsEnum;
     }
 }

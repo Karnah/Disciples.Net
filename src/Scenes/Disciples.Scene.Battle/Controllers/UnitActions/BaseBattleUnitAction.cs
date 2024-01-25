@@ -168,7 +168,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
     protected virtual void ProcessBeginUnitAction(UnitBattleAction unitAction)
     {
         if (unitAction.ActionType == UnitActionType.Retreating ||
-            unitAction.ActionType == UnitActionType.Attacked && unitAction.AttackType == UnitAttackType.Fear)
+            unitAction.ActionType == UnitActionType.Attacked && unitAction.AttackResult!.AttackType == UnitAttackType.Fear)
         {
             unitAction.TargetUnit.Direction = unitAction.TargetUnit.Direction == BattleDirection.Back
                 ? BattleDirection.Face
@@ -181,7 +181,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
         // При накладывании эффекта, сразу переводим в статус парализовано.
         if (unitAction.ActionType == UnitActionType.Attacked &&
-            unitAction.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify)
+            unitAction.AttackResult!.AttackType is UnitAttackType.Paralyze or UnitAttackType.Petrify)
         {
             unitAction.TargetUnit.UnitState = BattleUnitState.Paralyzed;
         }
@@ -202,18 +202,23 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         {
             case UnitActionType.Attacked:
             {
-                switch (unitAction.AttackType)
+                var attackResult = unitAction.AttackResult!;
+                switch (attackResult.AttackType)
                 {
-                    case > 0 when unitAction.AttackType?.IsEffect() == true:
+                    case > 0 when attackResult.AttackType?.IsEffect() == true:
                     {
                         // Накладываем новый эффект на юнита.
                         if (!unitAction.IsEffectTriggered)
                         {
                             targetUnit.Effects.AddBattleEffect(
-                                new UnitBattleEffect(unitAction.AttackType!.Value, unitAction.AttackSource!.Value, unitAction.EffectDuration!, unitAction.EffectDurationControlUnit!, unitAction.Power));
+                                new UnitBattleEffect(attackResult.AttackType!.Value, attackResult.AttackSource!.Value,
+                                    attackResult.EffectDuration!, attackResult.EffectDurationControlUnit!,
+                                    attackResult.Power,
+                                    attackResult.AttackTypeProtections,
+                                    attackResult.AttackSourceProtections));
 
                             // Если у юнита изменилась инициатива, то пересматриваем очерёдность ходов.
-                            if (unitAction.AttackType == UnitAttackType.ReduceInitiative)
+                            if (attackResult.AttackType == UnitAttackType.ReduceInitiative)
                             {
                                 // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
                                 // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
@@ -247,7 +252,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                             .Where(e => e.CanCure());
                         foreach (var unitBattleEffect in curableEffects)
                         {
-                            targetUnit.Effects.Remove(unitBattleEffect.AttackType);
+                            targetUnit.Effects.Remove(unitBattleEffect);
                         }
 
                         // Если юнит был парализован, то переводим его в обычное состояние.
@@ -276,16 +281,15 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             {
                 // Если была защита, то удаляем её из списка.
                 // TODO Не знаю, корректно это или нет. Но если есть защита и от типа, и от источника, то снимем сразу оба.
-                targetUnit
-                    .AttackTypeProtections
-                    .RemoveAll(atp =>
-                        atp.UnitAttackType == unitAction.AttackType &&
-                        atp.ProtectionCategory == ProtectionCategory.Ward);
-                targetUnit
-                    .AttackSourceProtections
-                    .RemoveAll(asp =>
-                        asp.UnitAttackSource == unitAction.AttackSource &&
-                        asp.ProtectionCategory == ProtectionCategory.Ward);
+                var attackResult = unitAction.AttackResult!;
+                var attackTypeProtection = new UnitAttackTypeProtection(attackResult.AttackType!.Value, ProtectionCategory.Ward);
+                targetUnit.BaseAttackTypeProtections.Remove(attackTypeProtection);
+                targetUnit.Effects.RemoveBattleProtectionEffect(attackTypeProtection);
+
+                var attackSourceProtection = new UnitAttackSourceProtection(attackResult.AttackSource!.Value, ProtectionCategory.Ward);
+                targetUnit.BaseAttackSourceProtections.Remove(attackSourceProtection);
+                targetUnit.Effects.RemoveBattleProtectionEffect(attackSourceProtection);
+
                 break;
             }
         }

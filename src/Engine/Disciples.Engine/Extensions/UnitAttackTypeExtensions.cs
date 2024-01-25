@@ -20,7 +20,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.Cure:
             case UnitAttackType.GiveAdditionalAttack:
             case UnitAttackType.TransformSelf:
-            case UnitAttackType.BestowWards:
+            case UnitAttackType.GiveProtection:
                 return true;
 
             default:
@@ -75,7 +75,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.DrainLevel:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
-            case UnitAttackType.BestowWards:
+            case UnitAttackType.GiveProtection:
             case UnitAttackType.ReduceArmor:
                 return true;
 

@@ -111,6 +111,10 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private IImageSceneObject? _retreatedIcon;
     /// <summary>
+    /// Иконка положительных модификаторов.
+    /// </summary>
+    private IImageSceneObject? _positiveModifiersIcon;
+    /// <summary>
     /// Иконки эффектов, которые воздействуют на юнита.
     /// </summary>
     private readonly Dictionary<UnitAttackType, IImageSceneObject> _battleEffectsIcons;
@@ -221,6 +225,7 @@ internal class UnitPortraitObject : GameObject
         RemoveSceneObject(ref _highLevelUnitIcon);
         RemoveSceneObject(ref _defendIcon);
         RemoveSceneObject(ref _retreatedIcon);
+        RemoveSceneObject(ref _positiveModifiersIcon);
 
         foreach (var battleEffectsIcon in _battleEffectsIcons)
             _sceneObjectContainer.RemoveSceneObject(battleEffectsIcon.Value);
@@ -406,6 +411,20 @@ internal class UnitPortraitObject : GameObject
                 }
             }
         }
+
+        if (Unit.Effects.HasPositiveModifiers && _positiveModifiersIcon == null)
+        {
+            var icon = _battleInterfaceProvider.UnitPortraitPositiveModifierIcon;
+            _positiveModifiersIcon = _sceneObjectContainer.AddImage(
+                icon,
+                PortraitBounds.X,
+                PortraitBounds.Y,
+                BattleLayers.INTERFACE_LAYER + EFFECTS_LAYER_SHIFT);
+        }
+        else if (!Unit.Effects.HasPositiveModifiers && _positiveModifiersIcon != null)
+        {
+            RemoveSceneObject(ref _positiveModifiersIcon);
+        }
     }
 
     /// <summary>
@@ -420,7 +439,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Paralyze => BattleColors.Paralyze,
             UnitAttackType.Heal => BattleColors.Heal,
             UnitAttackType.Fear => BattleColors.Damage,
-            UnitAttackType.BoostDamage => BattleColors.BoostDamage,
+            UnitAttackType.BoostDamage => BattleColors.Boost,
             UnitAttackType.Poison => BattleColors.Poison,
             UnitAttackType.Frostbite => BattleColors.Frostbite,
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
@@ -428,6 +447,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Cure => BattleColors.Heal,
             UnitAttackType.Blister => BattleColors.Blister,
             UnitAttackType.ReduceArmor => BattleColors.ReduceArmor,
+            UnitAttackType.GiveProtection => BattleColors.Boost,
             _ => null
         };
     }
@@ -481,7 +501,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Blister => power == null
                 ? "X160TA0011"
                 : "X160TA0022",
-            UnitAttackType.BestowWards => "X160TA0013",
+            UnitAttackType.GiveProtection => "X160TA0013",
             UnitAttackType.ReduceArmor => "X160TA0019",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };
@@ -510,7 +530,7 @@ internal class UnitPortraitObject : GameObject
         {
             return AddColorImage(color.Value, color == BattleColors.Damage
                                               || color == BattleColors.Heal
-                                              || color == BattleColors.BoostDamage
+                                              || color == BattleColors.Boost
                                               || color == BattleColors.ReduceArmor);
         }
 
@@ -603,7 +623,7 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.Doppelganger:
                     case UnitAttackType.TransformSelf:
                     case UnitAttackType.TransformOther:
-                    case UnitAttackType.BestowWards:
+                    case UnitAttackType.GiveProtection:
                     case UnitAttackType.ReduceArmor:
                         return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration?.IsCompleted == true));
 

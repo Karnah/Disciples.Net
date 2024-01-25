@@ -1,4 +1,6 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Extensions;
 
 namespace Disciples.Engine.Common.Models;
@@ -11,24 +13,22 @@ public class UnitBattleEffect
     /// <summary>
     /// Создать объект типа <see cref="UnitBattleEffect" />.
     /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, Unit durationControlUnit)
-    {
-        AttackType = attackType;
-        AttackSource = attackSource;
-        Duration = duration;
-        DurationControlUnit = durationControlUnit;
-    }
-
-    /// <summary>
-    /// Создать объект типа <see cref="UnitBattleEffect" />.
-    /// </summary>
-    public UnitBattleEffect(UnitAttackType attackType, UnitAttackSource attackSource, EffectDuration duration, Unit durationControlUnit, int? power)
+    public UnitBattleEffect(
+        UnitAttackType attackType,
+        UnitAttackSource attackSource,
+        EffectDuration duration,
+        Unit durationControlUnit,
+        int? power,
+        IReadOnlyList<UnitAttackTypeProtection> attackTypeProtections,
+        IReadOnlyList<UnitAttackSourceProtection> attackSourceProtections)
     {
         AttackType = attackType;
         AttackSource = attackSource;
         Duration = duration;
         DurationControlUnit = durationControlUnit;
         Power = power;
+        AttackTypeProtections = attackTypeProtections.ToList();
+        AttackSourceProtections = attackSourceProtections.ToList();
     }
 
     /// <summary>
@@ -60,6 +60,16 @@ public class UnitBattleEffect
     /// Сила эффекта.
     /// </summary>
     public int? Power { get; }
+
+    /// <summary>
+    /// Защиты от типов атак.
+    /// </summary>
+    public List<UnitAttackTypeProtection> AttackTypeProtections { get; }
+
+    /// <summary>
+    /// Защиты от источников атак.
+    /// </summary>
+    public List<UnitAttackSourceProtection> AttackSourceProtections { get; }
 
     /// <summary>
     /// Признак, что эффект можно вылечить.

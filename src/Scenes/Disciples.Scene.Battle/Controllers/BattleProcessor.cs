@@ -89,7 +89,7 @@ internal class BattleProcessor
         }
 
         var mainAttackType = attackingUnit.UnitType.MainAttack.AttackType;
-        var canAttackMainAttack = CanAttack(attackingUnit.UnitType.MainAttack.AttackType, attackingUnit.MainAttackPower, targetUnit);
+        var canAttackMainAttack = CanAttack(attackingUnit.UnitType.MainAttack, attackingUnit.MainAttackPower, targetUnit);
         if (canAttackMainAttack)
             return true;
 
@@ -98,7 +98,7 @@ internal class BattleProcessor
         // Также архидруидресса: она может не иметь возможности усилить, но может второй снять дебаффы.
         if (mainAttackType.IsAllyAttack() && attackingUnit.UnitType.SecondaryAttack != null)
         {
-            var canAttackSecondaryAttack = CanAttack(attackingUnit.UnitType.SecondaryAttack.AttackType, attackingUnit.SecondaryAttackPower, targetUnit);
+            var canAttackSecondaryAttack = CanAttack(attackingUnit.UnitType.SecondaryAttack, attackingUnit.SecondaryAttackPower, targetUnit);
             if (canAttackSecondaryAttack)
                 return true;
         }
@@ -109,8 +109,9 @@ internal class BattleProcessor
     /// <summary>
     /// Проверить, можно ли атаковать юнита типом атаки.
     /// </summary>
-    private static bool CanAttack(UnitAttackType attackType, int? power, Unit targetUnit)
+    private static bool CanAttack(UnitAttack attack, int? power, Unit targetUnit)
     {
+        var attackType = attack.AttackType;
         if (targetUnit.IsDead && attackType != UnitAttackType.Revive)
             return false;
 
@@ -166,8 +167,11 @@ internal class BattleProcessor
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
-            case UnitAttackType.BestowWards:
                 return false;
+
+            case UnitAttackType.GiveProtection:
+                return GetGiveAttackSourceProtections(attack.AttackSourceProtections, targetUnit).Count > 0 ||
+                       GetGiveAttackTypeProtections(attack.AttackTypeProtections, targetUnit).Count > 0;
 
             case UnitAttackType.ReduceArmor:
                 return targetUnit.Armor > 0;
@@ -323,7 +327,7 @@ internal class BattleProcessor
         effect.RoundTriggered = roundNumber;
         effect.Duration.DecreaseTurn();
 
-        return new BattleProcessorAttackResult(AttackResult.Attack, power, effect.Duration, effect.DurationControlUnit, effect.AttackType, effect.AttackSource);
+        return new BattleProcessorAttackResult(AttackResult.Attack, effect.AttackType, effect.AttackSource, power, effect.Duration, effect.DurationControlUnit);
     }
 
     /// <summary>
@@ -379,7 +383,7 @@ internal class BattleProcessor
         if (chanceOfAttack > accuracy)
             return new BattleProcessorAttackResult(AttackResult.Miss);
 
-        if (!CanAttack(attack.AttackType, power, targetUnit))
+        if (!CanAttack(attack, power, targetUnit))
             return new BattleProcessorAttackResult(AttackResult.Skip);
 
         switch (attack.AttackType)
@@ -410,10 +414,10 @@ internal class BattleProcessor
 
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
-                    attackPower,
-                    criticalDamage,
                     attack.AttackType,
-                    attack.AttackSource);
+                    attack.AttackSource,
+                    attackPower,
+                    criticalDamage);
 
             case UnitAttackType.Paralyze:
             case UnitAttackType.Petrify:
@@ -424,11 +428,11 @@ internal class BattleProcessor
             case UnitAttackType.Blister:
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
+                    attack.AttackType,
+                    attack.AttackSource,
                     power,
                     GetEffectDuration(attack),
-                    targetUnit,
-                    attack.AttackType,
-                    attack.AttackSource);
+                    targetUnit);
 
             case UnitAttackType.Heal:
                 var healPower = Math.Min(power!.Value, targetUnit.MaxHitPoints - targetUnit.HitPoints);
@@ -436,10 +440,9 @@ internal class BattleProcessor
                 {
                     return new BattleProcessorAttackResult(
                         AttackResult.Attack,
-                        healPower,
-                        null,
                         attack.AttackType,
-                        attack.AttackSource);
+                        attack.AttackSource,
+                        healPower);
                 }
 
                 break;
@@ -454,55 +457,48 @@ internal class BattleProcessor
             case UnitAttackType.BoostDamage:
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
+                    attack.AttackType,
+                    attack.AttackSource,
                     power,
                     GetEffectDuration(attack),
-                    attackingUnit,
-                    attack.AttackType,
-                    attack.AttackSource);
+                    attackingUnit);
 
             case UnitAttackType.Revive:
-                if (!targetUnit.IsDead || targetUnit.IsRevived)
-                    return null;
-
-                return new BattleProcessorAttackResult(
-                    AttackResult.Attack,
-                    attack.AttackType,
-                    attack.AttackSource);
-
             case UnitAttackType.GiveAdditionalAttack:
-                return new BattleProcessorAttackResult(
-                    AttackResult.Attack,
-                    attack.AttackType,
-                    attack.AttackSource);
-
             case UnitAttackType.Cure:
-                return targetUnit.Effects.HasCurableEffects()
-                    ? new BattleProcessorAttackResult(
+                return new BattleProcessorAttackResult(
                         AttackResult.Attack,
                         attack.AttackType,
-                        attack.AttackSource)
-                    : null;
+                        attack.AttackSource);
 
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
-            case UnitAttackType.BestowWards:
                 break;
 
-            case UnitAttackType.ReduceArmor:
-                if (targetUnit.Armor == 0)
-                    return null;
+            case UnitAttackType.GiveProtection:
+                var attackSourceProtections = GetGiveAttackSourceProtections(attack.AttackSourceProtections, targetUnit);
+                var attackTypeProtections = GetGiveAttackTypeProtections(attack.AttackTypeProtections, targetUnit);
+                return new BattleProcessorAttackResult(
+                    AttackResult.Attack,
+                    attack.AttackType,
+                    attack.AttackSource,
+                    power,
+                    GetEffectDuration(attack),
+                    attackingUnit,
+                    attackSourceProtections,
+                    attackTypeProtections);
 
+            case UnitAttackType.ReduceArmor:
                 // Эффект разрушения брони складывается.
                 targetUnit.Effects.TryGetBattleEffect(UnitAttackType.ReduceArmor, out var reduceArmorBattleEffect);
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
-                    Math.Min(power!.Value, targetUnit.Armor) + (reduceArmorBattleEffect?.Power ?? 0),
-                    null,
                     attack.AttackType,
-                    attack.AttackSource);
+                    attack.AttackSource,
+                    Math.Min(power!.Value, targetUnit.Armor) + (reduceArmorBattleEffect?.Power ?? 0));
 
             default:
                 throw new ArgumentOutOfRangeException();
@@ -531,7 +527,7 @@ internal class BattleProcessor
             case UnitAttackType.DrainLevel:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
-            case UnitAttackType.BestowWards:
+            case UnitAttackType.GiveProtection:
             case UnitAttackType.ReduceArmor:
                 return attack.IsInfinitive
                     ? EffectDuration.CreateInfinitive()
@@ -560,6 +556,30 @@ internal class BattleProcessor
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    /// <summary>
+    /// Получить список защит, которые могут быть наложены на юнита.
+    /// </summary>
+    private static IReadOnlyList<UnitAttackSourceProtection> GetGiveAttackSourceProtections(IReadOnlyList<UnitAttackSourceProtection> attackSourceProtections, Unit targetUnit)
+    {
+        return attackSourceProtections
+            .Where(asp => !targetUnit
+                .AttackSourceProtections
+                .Any(tasp => tasp == asp))
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Получить список защит, которые могут быть наложены на юнита.
+    /// </summary>
+    private static IReadOnlyList<UnitAttackTypeProtection> GetGiveAttackTypeProtections(IReadOnlyList<UnitAttackTypeProtection> attackTypeProtections, Unit targetUnit)
+    {
+        return attackTypeProtections
+            .Where(atp => !targetUnit
+                .AttackTypeProtections
+                .Any(tatp => tatp == atp))
+            .ToArray();
     }
 
     #endregion

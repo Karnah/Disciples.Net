@@ -20,8 +20,7 @@ internal class BattleProcessorAttackResult
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType,
-        UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource)
     {
         AttackResult = attackResult;
         AttackType = attackType;
@@ -29,9 +28,9 @@ internal class BattleProcessorAttackResult
     }
 
     /// <summary>
-    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" /> для прямой атаки юнита.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, int power, int? criticalDamage, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource, int power, int? criticalDamage = null)
     {
         AttackResult = attackResult;
         Power = power;
@@ -41,22 +40,36 @@ internal class BattleProcessorAttackResult
     }
 
     /// <summary>
-    /// Создать объект типа <see cref="BattleProcessorAttackResult" />.
+    /// Создать объект типа <see cref="BattleProcessorAttackResult" /> для наложение эффекта.
     /// </summary>
-    public BattleProcessorAttackResult(AttackResult attackResult, int? power, EffectDuration effectDuration, Unit effectDurationControlUnit, UnitAttackType attackType, UnitAttackSource attackSource)
+    public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource, int? power, EffectDuration effectDuration, Unit effectDurationControlUnit,
+        IReadOnlyList<UnitAttackSourceProtection>? attackSourceProtections = null,
+        IReadOnlyList<UnitAttackTypeProtection>? attackTypeProtections = null)
     {
         AttackResult = attackResult;
+        AttackType = attackType;
+        AttackSource = attackSource;
         Power = power;
         EffectDuration = effectDuration;
         EffectDurationControlUnit = effectDurationControlUnit;
-        AttackType = attackType;
-        AttackSource = attackSource;
+        AttackSourceProtections = attackSourceProtections ?? Array.Empty<UnitAttackSourceProtection>();
+        AttackTypeProtections = attackTypeProtections ?? Array.Empty<UnitAttackTypeProtection>();
     }
 
     /// <summary>
     /// Результат атаки/действия.
     /// </summary>
     public AttackResult AttackResult { get; }
+
+    /// <summary>
+    /// Тип атаки.
+    /// </summary>
+    public UnitAttackType? AttackType { get; }
+
+    /// <summary>
+    /// Источник атаки.
+    /// </summary>
+    public UnitAttackSource? AttackSource { get; }
 
     /// <summary>
     /// Сила воздействия.
@@ -79,12 +92,12 @@ internal class BattleProcessorAttackResult
     public Unit? EffectDurationControlUnit { get; }
 
     /// <summary>
-    /// Тип атаки.
+    /// Защита от источников атак.
     /// </summary>
-    public UnitAttackType? AttackType { get; }
+    public IReadOnlyList<UnitAttackSourceProtection> AttackSourceProtections { get; } = Array.Empty<UnitAttackSourceProtection>();
 
     /// <summary>
-    /// Источник атаки.
+    /// Защита от типов атак.
     /// </summary>
-    public UnitAttackSource? AttackSource { get; }
+    public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; } = Array.Empty<UnitAttackTypeProtection>();
 }

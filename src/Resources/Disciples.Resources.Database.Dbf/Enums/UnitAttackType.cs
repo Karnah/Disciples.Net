@@ -3,6 +3,9 @@
 /// <summary>
 /// Тип того, что делает атака юнита.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LattC.dbf.
+/// </remarks>
 public enum UnitAttackType
 {
     /// <summary>
@@ -13,7 +16,7 @@ public enum UnitAttackType
     /// <summary>
     /// Выпить жизненную силу и передать себе.
     /// </summary>
-    Drain = 2,
+    DrainLife = 2,
 
     /// <summary>
     /// Паралич.
@@ -111,9 +114,9 @@ public enum UnitAttackType
     Blister = 23,
 
     /// <summary>
-    /// Даровать защиту от стихий.
+    /// Даровать защиту от типов/источников атак.
     /// </summary>
-    BestowWards = 24,
+    GiveProtection = 24,
 
     /// <summary>
     /// Разбить броню.

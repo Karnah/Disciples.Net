@@ -3,6 +3,9 @@
 /// <summary>
 /// Тип расы.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле Lrace.dbf.
+/// </remarks>
 public enum RaceType
 {
     /// <summary>

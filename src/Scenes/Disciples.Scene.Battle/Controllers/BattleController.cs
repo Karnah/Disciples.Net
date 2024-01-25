@@ -133,7 +133,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             foreach (var unitBattleEffect in battleUnit.Unit.Effects.GetBattleEffects())
             {
                 if (!unitBattleEffect.Duration.IsInfinitive && unitBattleEffect.DurationControlUnit.IsDead)
-                    battleUnit.Unit.Effects.Remove(unitBattleEffect.AttackType);
+                    battleUnit.Unit.Effects.Remove(unitBattleEffect);
             }
         }
 

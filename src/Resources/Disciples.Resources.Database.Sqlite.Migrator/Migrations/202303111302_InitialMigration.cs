@@ -49,6 +49,24 @@ public class InitialMigration : Migration
             .WithColumn("IsPlayable").AsBoolean().NotNullable().WithColumnDescription("Можно ли играть данной расой")
             ;
 
+        Create.Table("UnitModifier").WithDescription("Модификатор характеристики или способности юнита")
+            .WithColumn("Id").AsString(ID_LENGTH).NotNullable().PrimaryKey().WithColumnDescription("Идентификатор модификатора")
+            .WithColumn("Type").AsInt32().NotNullable().WithColumnDescription("Тип модификатора")
+            .WithColumn("Comment").AsString(TEXT_LENGTH).NotNullable().WithColumnDescription("Комментарий")
+            ;
+
+        Create.Table("UnitModifierItem").WithDescription("Модификатор одной характеристики или способности юнита")
+            .WithColumn("Id").AsString(ID_LENGTH).NotNullable().Indexed().WithColumnDescription("Идентификатор модификатора").ForeignKey("UnitModifier", "Id")
+            .WithColumn("DescriptionTextId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Описание модификатора").ForeignKey("GlobalTextResource", "Id")
+            .WithColumn("ModifierItemType").AsInt32().NotNullable().WithColumnDescription("Тип модификатора")
+            .WithColumn("Percent").AsInt32().Nullable().WithColumnDescription("Процент, на который изменяется характеристика")
+            .WithColumn("Number").AsInt32().Nullable().WithColumnDescription("Численное значение на которое изменяется характеристика")
+            .WithColumn("LeaderAbilityType").AsInt32().Nullable().WithColumnDescription("Тип способности лидера")
+            .WithColumn("ProtectionType").AsInt32().Nullable().WithColumnDescription("Тип иммунитета/защиты")
+            .WithColumn("ProtectionCategory").AsInt32().Nullable().WithColumnDescription("Категория защиты от атаки")
+            .WithColumn("GroundType").AsInt32().Nullable().WithColumnDescription("Тип ландшафта")
+            ;
+
         Create.Table("UnitAttack").WithDescription("Атака юнита")
             .WithColumn("Id").AsString(ID_LENGTH).NotNullable().PrimaryKey().WithColumnDescription("Идентификатор атаки")
             .WithColumn("NameTextId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Название атаки").ForeignKey("GlobalTextResource", "Id")
@@ -64,10 +82,10 @@ public class InitialMigration : Migration
             .WithColumn("AlternativeUnitAttackId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Идентификатор альтернативной атаки").ForeignKey("UnitAttack", "Id")
             .WithColumn("IsInfinitive").AsBoolean().NotNullable().WithColumnDescription("Признак, что эффект, накладываемый атакой, длится до конца боя")
             .WithColumn("WardsCount").AsInt32().NotNullable().WithColumnDescription("Количество защит, которые накладывается на цель при атаке")
-            .WithColumn("Ward1Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип первой защиты, которая накладывается при атаке")
-            .WithColumn("Ward2Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип второй защиты, которая накладывается при атаке")
-            .WithColumn("Ward3Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип третьей защиты, которая накладывается при атаке")
-            .WithColumn("Ward4Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип четвертой защиты, которая накладывается при атаке")
+            .WithColumn("Ward1Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип первой защиты, которая накладывается при атаке").ForeignKey("UnitModifier", "Id")
+            .WithColumn("Ward2Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип второй защиты, которая накладывается при атаке").ForeignKey("UnitModifier", "Id")
+            .WithColumn("Ward3Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип третьей защиты, которая накладывается при атаке").ForeignKey("UnitModifier", "Id")
+            .WithColumn("Ward4Id").AsString(ID_LENGTH).Nullable().WithColumnDescription("Тип четвертой защиты, которая накладывается при атаке").ForeignKey("UnitModifier", "Id")
             .WithColumn("IsCritical").AsBoolean().NotNullable().WithColumnDescription("Признак, что при ударе наносится критический урон")
             ;
 

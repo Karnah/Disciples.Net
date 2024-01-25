@@ -67,6 +67,16 @@ public interface IBattleInterfaceProvider : ISupportLoading
     IBitmap UnitPortraitRetreatedIcon { get; }
 
     /// <summary>
+    /// Иконка для положительных модификаторов.
+    /// </summary>
+    IBitmap UnitPortraitPositiveModifierIcon { get; }
+
+    /// <summary>
+    /// Иконка для отрицательных модификаторов.
+    /// </summary>
+    IBitmap UnitPortraitNegativeModifierIcon { get; }
+
+    /// <summary>
     /// Иконки для эффектов, воздействующих на юнита.
     /// </summary>
     IReadOnlyDictionary<UnitAttackType, IBitmap> UnitBattleEffectsIcon { get; }

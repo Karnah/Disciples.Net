@@ -3,6 +3,9 @@
 /// <summary>
 /// Юниты, которые являются целями.
 /// </summary>
+/// <remarks>
+/// Описание содержится в файле LAttR.dbf.
+/// </remarks>
 public enum UnitAttackReach
 {
     /// <summary>
