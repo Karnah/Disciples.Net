@@ -33,7 +33,7 @@ public enum UnitAttackType
     /// <summary>
     /// Увеличение урона.
     /// </summary>
-    BoostDamage = 8,
+    IncreaseDamage = 8,
 
     /// <summary>
     /// Окаменение.

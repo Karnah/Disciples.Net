@@ -203,7 +203,7 @@ internal class UnitDetailInfoDialog : BaseDialog
     {
         switch (unitAttackType)
         {
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
                 return $"+{power}%";
             case UnitAttackType.ReduceDamage:
             case UnitAttackType.ReduceInitiative:
@@ -247,7 +247,7 @@ internal class UnitDetailInfoDialog : BaseDialog
         if (_unit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
             return _textProvider.GetText("X005TA0504");
 
-        if (_unit.UnitType.MainAttack.AttackType == UnitAttackType.BoostDamage)
+        if (_unit.UnitType.MainAttack.AttackType == UnitAttackType.IncreaseDamage)
             return _textProvider.GetText("X005TA0534");
 
         return _textProvider.GetText("X005TA0503");
@@ -313,7 +313,7 @@ internal class UnitDetailInfoDialog : BaseDialog
             UnitAttackType.Paralyze => "X005TA0789",
             UnitAttackType.Heal => "X005TA0802",
             UnitAttackType.Fear => "X005TA0794",
-            UnitAttackType.BoostDamage => "X005TA0795",
+            UnitAttackType.IncreaseDamage => "X005TA0795",
             UnitAttackType.Petrify => "X005TA0790",
             UnitAttackType.ReduceDamage => "X005TA0796",
             UnitAttackType.ReduceInitiative => "X005TA0797",

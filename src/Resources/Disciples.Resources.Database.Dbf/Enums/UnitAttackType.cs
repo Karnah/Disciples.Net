@@ -14,7 +14,7 @@ public enum UnitAttackType
     Damage = 1,
 
     /// <summary>
-    /// Выпить жизненную силу и передать себе.
+    /// Выпить жизненную силу и вылечить себя.
     /// </summary>
     DrainLife = 2,
 
@@ -36,7 +36,7 @@ public enum UnitAttackType
     /// <summary>
     /// Увеличение урона.
     /// </summary>
-    BoostDamage = 8,
+    IncreaseDamage = 8,
 
     /// <summary>
     /// Окаменение.
@@ -46,12 +46,12 @@ public enum UnitAttackType
     /// <summary>
     /// Снижение повреждения.
     /// </summary>
-    LowerDamage = 10,
+    ReduceDamage = 10,
 
     /// <summary>
     /// Снижение инициативы.
     /// </summary>
-    LowerInitiative = 11,
+    ReduceInitiative = 11,
 
     /// <summary>
     /// Отравление.
@@ -69,9 +69,9 @@ public enum UnitAttackType
     Revive = 14,
 
     /// <summary>
-    /// Выпить жизненную силу и передать себе и/или союзникам.
+    /// Выпить жизненную силу и вылечить себя и/или союзников.
     /// </summary>
-    DrainOverflow = 15,
+    DrainLifeOverflow = 15,
 
     /// <summary>
     /// Снятие негативных эффектов.
@@ -91,7 +91,7 @@ public enum UnitAttackType
     /// <summary>
     /// Дать дополнительную атаку.
     /// </summary>
-    GiveAttack = 19,
+    GiveAdditionalAttack = 19,
 
     /// <summary>
     /// Превратить себя в выбранного юнита на поле боя.
@@ -121,5 +121,5 @@ public enum UnitAttackType
     /// <summary>
     /// Разбить броню.
     /// </summary>
-    Shatter = 25
+    ReduceArmor = 25
 }

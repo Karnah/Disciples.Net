@@ -439,7 +439,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.Paralyze => BattleColors.Paralyze,
             UnitAttackType.Heal => BattleColors.Heal,
             UnitAttackType.Fear => BattleColors.Damage,
-            UnitAttackType.BoostDamage => BattleColors.Boost,
+            UnitAttackType.IncreaseDamage => BattleColors.Boost,
             UnitAttackType.Poison => BattleColors.Poison,
             UnitAttackType.Frostbite => BattleColors.Frostbite,
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
@@ -479,7 +479,7 @@ internal class UnitPortraitObject : GameObject
                 ? "X008TA0024"
                 : "X008TA0008",
             UnitAttackType.Fear => "X008TA0007",
-            UnitAttackType.BoostDamage => "X008TA0003",
+            UnitAttackType.IncreaseDamage => "X008TA0003",
             UnitAttackType.Petrify => isEffectCompleted
                 ? "X008TA0025"
                 : "X008TA0009",
@@ -611,7 +611,7 @@ internal class UnitPortraitObject : GameObject
 
                     case UnitAttackType.Paralyze:
                     case UnitAttackType.Fear:
-                    case UnitAttackType.BoostDamage:
+                    case UnitAttackType.IncreaseDamage:
                     case UnitAttackType.Petrify:
                     case UnitAttackType.ReduceDamage:
                     case UnitAttackType.ReduceInitiative:

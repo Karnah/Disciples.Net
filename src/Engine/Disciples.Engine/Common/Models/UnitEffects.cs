@@ -190,9 +190,9 @@ public class UnitEffects
     {
         var modifier = 1M;
 
-        if (TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostDamage))
+        if (TryGetBattleEffect(UnitAttackType.IncreaseDamage, out var increaseDamage))
         {
-            modifier *= boostDamage.Power!.Value / 100M + 1;
+            modifier *= increaseDamage.Power!.Value / 100M + 1;
         }
 
         if (TryGetBattleEffect(UnitAttackType.ReduceDamage, out var reduceDamage))

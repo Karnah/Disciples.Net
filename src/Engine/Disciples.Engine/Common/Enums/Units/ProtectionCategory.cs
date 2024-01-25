@@ -6,6 +6,11 @@
 public enum ProtectionCategory
 {
     /// <summary>
+    /// Нет защиты.
+    /// </summary>
+    NoProtection = 1,
+
+    /// <summary>
     /// Защита от одного удара.
     /// </summary>
     Ward = 2,

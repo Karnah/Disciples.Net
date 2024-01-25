@@ -136,15 +136,15 @@ internal class BattleProcessor
             case UnitAttackType.Fear:
                 return !targetUnit.Effects.IsRetreating;
 
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
             {
                 // Усилять можно только юнитов с прямым уроном от первой атаки.
                 if (!targetUnit.UnitType.MainAttack.AttackType.IsDirectDamage())
                     return false;
 
                 // Усилить юнита можно только большим эффектом.
-                if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostEffect) &&
-                    power <= boostEffect.Power)
+                if (targetUnit.Effects.TryGetBattleEffect(UnitAttackType.IncreaseDamage, out var increaseEffect) &&
+                    power <= increaseEffect.Power)
                 {
                     return false;
                 }
@@ -454,7 +454,7 @@ internal class BattleProcessor
                     attack.AttackType,
                     attack.AttackSource);
 
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
                 return new BattleProcessorAttackResult(
                     AttackResult.Attack,
                     attack.AttackType,
@@ -521,7 +521,7 @@ internal class BattleProcessor
                     ? EffectDuration.CreateRandom(1, 3)
                     : EffectDuration.Create(1);
 
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
             case UnitAttackType.ReduceDamage:
             case UnitAttackType.Summon:
             case UnitAttackType.DrainLevel:

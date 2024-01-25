@@ -119,7 +119,7 @@ public class Unit
     public int MainAttackPowerModifier => UnitType.MainAttack.AttackType switch
     {
         UnitAttackType.Heal => 0,
-        UnitAttackType.BoostDamage => 0,
+        UnitAttackType.IncreaseDamage => 0,
         _ => (int)(MainAttackBasePower * Effects.GetDamagePowerModifier())
     };
 
@@ -149,7 +149,7 @@ public class Unit
     public int MainAttackAccuracyModifier => UnitType.MainAttack.AttackType switch
     {
         UnitAttackType.Heal => 0,
-        UnitAttackType.BoostDamage => 0,
+        UnitAttackType.IncreaseDamage => 0,
         _ => (int) (MainAttackBaseAccuracy * Effects.GetAccuracyModifier())
     };
 
@@ -238,7 +238,7 @@ public class Unit
         return attack.AttackType switch
         {
             UnitAttackType.Heal => attack.HealPower + CalculateLevelUpgrade(ulu => ulu.HealPower),
-            UnitAttackType.BoostDamage => GetBoostDamagePercent(attack.AttackPowerLevel),
+            UnitAttackType.IncreaseDamage => GetBoostDamagePercent(attack.AttackPowerLevel),
             UnitAttackType.ReduceDamage => GetReduceDamagePercent(attack.AttackPowerLevel),
             UnitAttackType.ReduceInitiative => GetReduceInitiativePercent(attack.AttackPowerLevel),
             _ => attack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower)

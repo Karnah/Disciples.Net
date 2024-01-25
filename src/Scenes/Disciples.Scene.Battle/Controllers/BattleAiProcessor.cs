@@ -96,8 +96,8 @@ internal class BattleAiProcessor
     private static BattleAiCommand GetOwnSquadCommand(Unit attackingUnit, IReadOnlyList<AiTargetUnit> targetUnits)
     {
         // Если усиливается урон, то выбираем самого сильного юнита.
-        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.BoostDamage ||
-            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.BoostDamage)
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.IncreaseDamage ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.IncreaseDamage)
         {
             var targetUnit = targetUnits
                 .OrderByPower()
@@ -105,8 +105,8 @@ internal class BattleAiProcessor
                 // Если на юнита наложен уже эффект усиления, то понижаем ему приоритет в зависимости от силы эффекта.
                 .ThenBy(tu =>
                 {
-                    if (tu.Unit.Effects.TryGetBattleEffect(UnitAttackType.BoostDamage, out var boostDamageEffect))
-                        return boostDamageEffect.Power ?? 0;
+                    if (tu.Unit.Effects.TryGetBattleEffect(UnitAttackType.IncreaseDamage, out var increaseDamageEffect))
+                        return increaseDamageEffect.Power ?? 0;
 
                     return 0;
                 })

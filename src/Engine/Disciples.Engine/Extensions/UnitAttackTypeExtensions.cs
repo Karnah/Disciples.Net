@@ -15,7 +15,7 @@ public static class UnitAttackTypeExtensions
         switch (unitAttackType)
         {
             case UnitAttackType.Heal:
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
             case UnitAttackType.Revive:
             case UnitAttackType.Cure:
             case UnitAttackType.GiveAdditionalAttack:
@@ -71,7 +71,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:
             case UnitAttackType.Blister:
-            case UnitAttackType.BoostDamage:
+            case UnitAttackType.IncreaseDamage:
             case UnitAttackType.DrainLevel:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformOther:
