@@ -6,4 +6,4 @@
         x:Class="Disciples.Avalonia.OverlapWindow"
         Title="OverlapWindow" SystemDecorations="None"
         Background="Transparent" TransparencyLevelHint="Transparent"
-        WindowState="Maximized" ShowInTaskbar="False" />
+        WindowState="FullScreen" ShowInTaskbar="False" />
