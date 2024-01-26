@@ -53,6 +53,7 @@ public class GameDataContext
         UnitAttackTypeProtections = GetUnionTable<UnitAttackTypeProtection>();
         UnitModifiers = GetTable<UnitModifier>();
         UnitModifierItems = GetUnionTable<UnitModifierItem>();
+        UnitAttackSummonTransforms = GetUnionTable<UnitAttackSummonTransform>();
         Races = GetTable<Race>();
     }
 
@@ -100,6 +101,11 @@ public class GameDataContext
     /// Модификатор отдельных характеристик или способностей юнитов.
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<UnitModifierItem>> UnitModifierItems { get; }
+
+    /// <summary>
+    /// Идентификаторы вызываемых/превращаемых юнитов при атаке.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<UnitAttackSummonTransform>> UnitAttackSummonTransforms { get; }
 
     /// <summary>
     /// Список рас.

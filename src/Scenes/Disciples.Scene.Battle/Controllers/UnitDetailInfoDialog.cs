@@ -186,7 +186,7 @@ internal class UnitDetailInfoDialog : BaseDialog
         {
             var secondaryAttackPower = GetValueWithModifier(
                 GetAttackPower(unit.SecondaryAttackPower.Value, unit.UnitType.SecondaryAttack!.AttackType),
-                unit.MainAttackPowerModifier);
+                0);
             return new TextContainer(mainAttack
                 .TextPieces
                 .Append(new TextPiece($" / {secondaryAttackPower}"))

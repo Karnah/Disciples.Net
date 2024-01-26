@@ -135,8 +135,8 @@ public class InitialMigration : Migration
             .WithColumn("NameTextId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Имя типа юнита").ForeignKey("GlobalTextResource", "Id")
             .WithColumn("DescriptionTextId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Описание типа юнита").ForeignKey("GlobalTextResource", "Id")
             .WithColumn("AbilityTextId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Описание основной способности героя").ForeignKey("GlobalTextResource", "Id")
-            .WithColumn("MainUserAttackId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Основная атака").ForeignKey("UnitAttack", "Id")
-            .WithColumn("SecondaryUserAttackId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Дополнительная атака").ForeignKey("UnitAttack", "Id")
+            .WithColumn("MainUnitAttackId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Основная атака").ForeignKey("UnitAttack", "Id")
+            .WithColumn("SecondaryUnitAttackId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Дополнительная атака").ForeignKey("UnitAttack", "Id")
             .WithColumn("IsAttackTwice").AsBoolean().NotNullable().WithColumnDescription("Атакует ли юнит дважды")
             .WithColumn("HitPoints").AsInt32().NotNullable().WithColumnDescription("Количество жизней")
             .WithColumn("LeaderBaseUnitId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Базовый тип юнита для юнита-героя").ForeignKey("UnitType", "Id")
@@ -159,6 +159,11 @@ public class InitialMigration : Migration
             .WithColumn("HighLevelUpgradeId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня сверх UpgradeChangeLevel").ForeignKey("UnitLevelUpgrade", "Id")
             .WithColumn("IsLeaderWaterOnly").AsBoolean().NotNullable().WithColumnDescription("Признак, что юнит перемещается только по воде")
             .WithColumn("DeathAnimationType").AsInt32().NotNullable().WithColumnDescription("Анимация, которая отображается при смерти юнита")
+            ;
+
+        Create.Table("UnitAttackSummonTransform").WithDescription("Юнит, который вызывается / в кого превращается цель")
+            .WithColumn("Id").AsString(ID_LENGTH).NotNullable().Indexed().WithColumnDescription("Идентификатор атаки юнита").ForeignKey("UnitAttack", "Id")
+            .WithColumn("UnitTypeId").AsString(ID_LENGTH).NotNullable().WithColumnDescription("Идентификатор вызываемого юнита / юнита,в которого превратится цель").ForeignKey("UnitType", "Id")
             ;
     }
 

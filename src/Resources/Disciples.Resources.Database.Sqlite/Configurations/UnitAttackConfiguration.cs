@@ -47,5 +47,9 @@ internal class UnitAttackConfiguration : IEntityTypeConfiguration<UnitAttack>
             .HasOne(ua => ua.Ward4)
             .WithOne()
             .HasForeignKey<UnitAttack>("Ward4Id");
+
+        builder.HasMany(ua => ua.AttackSummonTransforms)
+            .WithOne(uast => uast.UnitAttack)
+            .HasForeignKey(uast => uast.Id);
     }
 }

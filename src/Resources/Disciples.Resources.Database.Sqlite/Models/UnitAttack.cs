@@ -115,4 +115,10 @@ public class UnitAttack : IEntity
     /// +5% от силы атаки.
     /// </remarks>
     public bool IsCritical { get; init; }
+
+    /// <summary>
+    /// Для атаки типа <see cref="UnitAttackType.Summon" />, идентификаторы вызываемых юнитов.
+    /// Для атак типа <see cref="UnitAttackType.TransformSelf" /> и <see cref="UnitAttackType.TransformOther" /> идентификаторы во что идёт превращение.
+    /// </summary>
+    public ICollection<UnitAttackSummonTransform> AttackSummonTransforms { get; init; } = null!;
 }

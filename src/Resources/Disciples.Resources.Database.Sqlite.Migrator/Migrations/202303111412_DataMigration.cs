@@ -31,6 +31,7 @@ public class DataMigration : Migration
         AddTableData("UnitAttackTypeProtection", database.UnitAttackTypeProtections.Values.SelectMany(p => p).ToArray());
         AddTableData("UnitLevelUpgrade", database.UnitLevelUpgrades.Values.ToArray());
         AddTableData("UnitType", database.UnitTypes.Values.ToArray());
+        AddTableData("UnitAttackSummonTransform", database.UnitAttackSummonTransforms.Values.SelectMany(p => p).ToArray());
 
         Execute.Sql("PRAGMA foreign_keys = ON;");
     }

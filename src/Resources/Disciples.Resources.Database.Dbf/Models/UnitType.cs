@@ -104,13 +104,13 @@ public class UnitType : IEntity
     /// Основная атака.
     /// </summary>
     [Column("ATTACK_ID")]
-    public string MainUserAttackId { get; init; } = null!;
+    public string MainUnitAttackId { get; init; } = null!;
 
     /// <summary>
     /// Дополнительная атака.
     /// </summary>
     [Column("ATTACK2_ID")]
-    public string? SecondaryUserAttackId { get; init; }
+    public string? SecondaryUnitAttackId { get; init; }
 
     /// <summary>
     /// Атакует ли юнит дважды.

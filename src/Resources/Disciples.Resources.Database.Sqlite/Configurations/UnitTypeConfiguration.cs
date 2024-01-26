@@ -40,10 +40,10 @@ internal class UnitTypeConfiguration : IEntityTypeConfiguration<UnitType>
 
         builder.HasOne(ut => ut.MainAttack)
             .WithOne()
-            .HasForeignKey<UnitType>("MainUserAttackId");
+            .HasForeignKey<UnitType>("MainUnitAttackId");
         builder.HasOne(ut => ut.SecondaryAttack)
             .WithOne()
-            .HasForeignKey<UnitType>("SecondaryUserAttackId");
+            .HasForeignKey<UnitType>("SecondaryUnitAttackId");
 
         builder.OwnsOne(
             ut => ut.ReviveCost,
