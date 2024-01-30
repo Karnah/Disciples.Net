@@ -12,6 +12,7 @@
         xmlns:sceneObjects="clr-namespace:Disciples.WPF.SceneObjects"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:GameWindowViewModel}"
+        FontFamily="/Disciples.WPF;component/Fonts/#PT Serif"
         Title="WPF Disciples II" WindowStyle="None" WindowState="Maximized" Background="Black">
 
     <Grid x:Name="Field" Width="{x:Static e:GameInfo.OriginalWidth}" Height="{x:Static e:GameInfo.OriginalHeight}"

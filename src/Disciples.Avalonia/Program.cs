@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Media;
 using System;
 
 namespace Disciples.Avalonia;
@@ -17,5 +18,9 @@ internal class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .With(new SkiaOptions{ MaxGpuResourceSizeBytes = 8096000 })
+            .With(new FontManagerOptions()
+            {
+                DefaultFamilyName = "avares://Disciples.Avalonia/Fonts#PT Serif"
+            })
             .LogToTrace();
 }

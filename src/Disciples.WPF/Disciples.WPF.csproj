@@ -28,4 +28,7 @@
     <ProjectReference Include="..\Engine\Disciples.Engine.Platform\Disciples.Engine.Platform.csproj" />
     <ProjectReference Include="..\Engine\Disciples.Engine\Disciples.Engine.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Fonts\*" />
+  </ItemGroup>
 </Project>

@@ -53,4 +53,7 @@
   <ItemGroup>
     <UpToDateCheckInput Remove="OverlapWindow.axaml" />
   </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Fonts\*" />
+  </ItemGroup>
 </Project>
