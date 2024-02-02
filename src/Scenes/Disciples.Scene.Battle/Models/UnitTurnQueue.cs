@@ -15,7 +15,7 @@ internal class UnitTurnQueue
     /// <summary>
     /// Очередность хода юнитов, которые выбрали ожидание во время своего хода.
     /// </summary>
-    private readonly Stack<Unit> _waitingTurnOrder = new ();
+    private readonly LinkedList<Unit> _waitingTurnOrder = new ();
 
     /// <summary>
     /// Признак, что ходит юнит, который "ждал" в этом раунде.
@@ -43,12 +43,13 @@ internal class UnitTurnQueue
     public Unit? GetNextUnit()
     {
         // Очередь из основных ходов юнитов.
-        foreach (var nextUnitTurnOrder in _turnOrder.OrderByDescending(to => to.Initiative))
+        foreach (var nextUnitTurnOrder in _turnOrder.OrderByDescending(to => to.Initiative).ToArray())
         {
+            _turnOrder.Remove(nextUnitTurnOrder);
+
             if (nextUnitTurnOrder.Unit.IsDeadOrRetreated)
                 continue;
 
-            _turnOrder.Remove(nextUnitTurnOrder);
             return nextUnitTurnOrder.Unit;
         }
 
@@ -57,11 +58,16 @@ internal class UnitTurnQueue
         {
             IsWaitingUnitTurn = true;
 
-            do
+            while (_waitingTurnOrder.Last != null)
             {
-                if (_waitingTurnOrder.TryPop(out var nextUnit) && !nextUnit.IsDeadOrRetreated)
-                    return nextUnit;
-            } while (_waitingTurnOrder.Count > 0);
+                var nextUnit = _waitingTurnOrder.Last.Value;
+                _waitingTurnOrder.RemoveLast();
+
+                if (nextUnit.IsDeadOrRetreated)
+                    continue;
+
+                return nextUnit;
+            }
         }
 
         return null;
@@ -72,7 +78,7 @@ internal class UnitTurnQueue
     /// </summary>
     public void UnitWait(Unit unit)
     {
-        _waitingTurnOrder.Push(unit);
+        _waitingTurnOrder.AddLast(unit);
     }
 
     /// <summary>
@@ -87,6 +93,26 @@ internal class UnitTurnQueue
             return;
 
         unitTurnOrder.Initiative = initiative;
+    }
+
+    /// <summary>
+    /// Изменить очередность из-за превращения юнита.
+    /// </summary>
+    public void ReorderTransformedUnitTurn(TransformedOtherUnit unit, int initiative)
+    {
+        var unitTurnOrder = _turnOrder.FirstOrDefault(to => to.Unit == unit.OriginalUnit);
+        if (unitTurnOrder != null)
+        {
+            _turnOrder.Remove(unitTurnOrder);
+            _turnOrder.AddLast(new UnitTurnOrder(unit, initiative));
+        }
+
+        var unitWaitingTurnOrder = _waitingTurnOrder.Find(unit.OriginalUnit);
+        if (unitWaitingTurnOrder != null)
+        {
+            _waitingTurnOrder.AddAfter(unitWaitingTurnOrder, unit.OriginalUnit);
+            _waitingTurnOrder.Remove(unitWaitingTurnOrder);
+        }
     }
 
     /// <summary>

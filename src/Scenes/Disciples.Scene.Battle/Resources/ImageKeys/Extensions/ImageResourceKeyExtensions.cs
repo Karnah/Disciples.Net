@@ -109,6 +109,7 @@ internal static class ImageResourceKeyExtensions
             UnitAttackType.Poison => true,
             UnitAttackType.Frostbite => true,
             UnitAttackType.Revive => true,
+            UnitAttackType.TransformOther => true,
             UnitAttackType.Blister => true,
             _ => false
         };
@@ -124,6 +125,7 @@ internal static class ImageResourceKeyExtensions
             UnitAttackType.Poison => "POISONANIM",
             UnitAttackType.Frostbite => "FROSTBITEANIM",
             UnitAttackType.Revive => "REVIVEANIM",
+            UnitAttackType.TransformOther => "TRANSF",
             UnitAttackType.Blister => "BLISTERANIM",
             _ => throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null)
         };

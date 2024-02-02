@@ -44,7 +44,8 @@ internal class BattleProcessorAttackResult
     /// </summary>
     public BattleProcessorAttackResult(AttackResult attackResult, UnitAttackType attackType, UnitAttackSource attackSource, int? power, EffectDuration effectDuration, Unit effectDurationControlUnit,
         IReadOnlyList<UnitAttackSourceProtection>? attackSourceProtections = null,
-        IReadOnlyList<UnitAttackTypeProtection>? attackTypeProtections = null)
+        IReadOnlyList<UnitAttackTypeProtection>? attackTypeProtections = null,
+        UnitType? transformUnitType = null)
     {
         AttackResult = attackResult;
         AttackType = attackType;
@@ -54,6 +55,7 @@ internal class BattleProcessorAttackResult
         EffectDurationControlUnit = effectDurationControlUnit;
         AttackSourceProtections = attackSourceProtections ?? Array.Empty<UnitAttackSourceProtection>();
         AttackTypeProtections = attackTypeProtections ?? Array.Empty<UnitAttackTypeProtection>();
+        TransformUnitType = transformUnitType;
     }
 
     /// <summary>
@@ -100,4 +102,9 @@ internal class BattleProcessorAttackResult
     /// Защита от типов атак.
     /// </summary>
     public IReadOnlyList<UnitAttackTypeProtection> AttackTypeProtections { get; } = Array.Empty<UnitAttackTypeProtection>();
+
+    /// <summary>
+    /// Тип юнита в которого необходимо превратить цель.
+    /// </summary>
+    public UnitType? TransformUnitType { get; }
 }

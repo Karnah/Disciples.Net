@@ -15,6 +15,7 @@ internal static class SoundResourceKeyExtensions
         return unitAttackType is UnitAttackType.Heal or
             UnitAttackType.Poison or
             UnitAttackType.Frostbite or
+            UnitAttackType.TransformOther or
             UnitAttackType.Blister or
             UnitAttackType.ReduceArmor;
     }
@@ -29,6 +30,7 @@ internal static class SoundResourceKeyExtensions
             UnitAttackType.Heal => "HEAL",
             UnitAttackType.Poison => "POISON",
             UnitAttackType.Frostbite => "FRSTBITE",
+            UnitAttackType.TransformOther => "UNTRANSF",
             UnitAttackType.Blister => "BLISTER",
             UnitAttackType.ReduceArmor => "SHATTER",
             _ => throw new ArgumentOutOfRangeException(nameof(unitAttackType), unitAttackType, null)

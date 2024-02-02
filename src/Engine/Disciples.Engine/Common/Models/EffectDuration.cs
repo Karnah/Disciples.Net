@@ -8,6 +8,11 @@ namespace Disciples.Engine.Common.Models;
 public class EffectDuration
 {
     /// <summary>
+    /// Эффект, который закончил действие.
+    /// </summary>
+    public static EffectDuration Completed { get; } = new() { IsCompleted = true };
+
+    /// <summary>
     /// Создать объект типа <see cref="EffectDuration" /> с указанным количеством ходов.
     /// </summary>
     public static EffectDuration Create(int turns)

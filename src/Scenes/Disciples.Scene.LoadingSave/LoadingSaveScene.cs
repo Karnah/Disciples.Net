@@ -125,7 +125,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
             .Units
             .Where(u => !u.IsDead)
             .Select(u => new Unit(u.Id.ToString(), _unitInfoProvider.GetUnitType(u.UnitTypeId), player, u.SquadLinePosition, u.SquadFlankPosition) { Level = u.Level, Experience = u.Experience, HitPoints = u.HitPoints})
-            .ToArray();
+            .ToList();
         return new Squad(player, units);
     }
 }

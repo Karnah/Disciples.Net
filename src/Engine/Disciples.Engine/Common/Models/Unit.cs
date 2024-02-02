@@ -18,7 +18,7 @@ public class Unit
     public Unit(string id, UnitType unitType, Player player, UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition)
     {
         Id = id;
-        IsLeader = unitType.UnitCategory is UnitCategory.Leader or UnitCategory.LeaderThief;
+        IsLeader = unitType.UnitCategory is UnitCategory.Leader or UnitCategory.NeutralLeader or UnitCategory.LeaderThief;
         UnitType = unitType;
         Player = player;
 
@@ -91,7 +91,7 @@ public class Unit
     /// Максимальное количество очков здоровья.
     /// TODO Также зависит от эликсиров.
     /// </summary>
-    public int MaxHitPoints => UnitType.HitPoints + CalculateLevelUpgrade(ulu => ulu.HitPoints);
+    public virtual int MaxHitPoints => UnitType.HitPoints + CalculateLevelUpgrade(ulu => ulu.HitPoints);
 
     /// <summary>
     /// Базовая броня юнита.
@@ -189,12 +189,12 @@ public class Unit
     /// <summary>
     /// Мёртв ли юнит.
     /// </summary>
-    public bool IsDead { get; set; }
+    public virtual bool IsDead { get; set; }
 
     /// <summary>
     /// Юнит сбежал.
     /// </summary>
-    public bool IsRetreated { get; set; }
+    public virtual bool IsRetreated { get; set; }
 
     /// <summary>
     /// Признак, что в этом бою юнит был воскрешен способностью <see cref="UnitAttackType.Revive" />.
@@ -204,7 +204,7 @@ public class Unit
     /// <summary>
     /// Эффекты, воздействующие на юнита.
     /// </summary>
-    public UnitEffects Effects { get; }
+    public virtual UnitEffects Effects { get; }
 
     /// <summary>
     /// Базовая для типа юнита защита от типов атак.

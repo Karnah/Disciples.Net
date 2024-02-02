@@ -29,6 +29,7 @@ internal class UnitAttackProfile : Profile
                 GetProtections(src)
                     .Where(p => p.ModifierItemType == UnitModifierItemType.AttackSourceProtection)
                     .Select(p => new UnitAttackSourceProtection((UnitAttackSource) p.ProtectionType!.Value, (ProtectionCategory)p.ProtectionCategory!.Value))))
+            .ForMember(dst => dst.SummonTransformUnitTypes, opt => opt.Ignore())
             ;
     }
 

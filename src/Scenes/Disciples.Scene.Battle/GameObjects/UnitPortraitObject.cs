@@ -66,9 +66,11 @@ internal class UnitPortraitObject : GameObject
     private readonly ITextProvider _textProvider;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
+    private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly BattleSquadPosition _unitSquadPosition;
 
-    private readonly IBitmap _unitFaceBitmap;
+    private IBitmap _unitFaceBitmap;
+    private string _unitTypeId;
 
     /// <summary>
     /// Картинка с портретом юнита.
@@ -149,8 +151,11 @@ internal class UnitPortraitObject : GameObject
         _textProvider = textProvider;
         _sceneObjectContainer = sceneObjectContainer;
         _battleInterfaceProvider = battleInterfaceProvider;
+        _battleUnitResourceProvider = battleUnitResourceProvider;
         _unitSquadPosition = unitSquadPosition;
+
         _unitFaceBitmap = battleUnitResourceProvider.GetUnitFace(unit.UnitType);
+        _unitTypeId = unit.UnitType.Id;
 
         Unit = unit;
         PortraitBounds = portraitBounds;
@@ -170,7 +175,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Юнит.
     /// </summary>
-    public Unit Unit { get; }
+    public Unit Unit { get; set; }
 
     /// <summary>
     /// Расположение портрета.
@@ -286,6 +291,14 @@ internal class UnitPortraitObject : GameObject
         _unitPortrait.IsReflected = Unit.IsRetreated || Unit.Effects.IsRetreating
             ? _unitSquadPosition == BattleSquadPosition.Attacker
             : _unitSquadPosition != BattleSquadPosition.Attacker;
+
+        // После превращение тип юнита меняется.
+        if (_unitTypeId != Unit.UnitType.Id)
+        {
+            _unitFaceBitmap = _battleUnitResourceProvider.GetUnitFace(Unit.UnitType);
+            _unitPortrait.Bitmap = _unitFaceBitmap;
+            _unitTypeId = Unit.UnitType.Id;
+        }
 
         // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
         if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
@@ -445,9 +458,10 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
+            UnitAttackType.TransformOther => BattleColors.Transform,
             UnitAttackType.Blister => BattleColors.Blister,
-            UnitAttackType.ReduceArmor => BattleColors.ReduceArmor,
             UnitAttackType.GiveProtection => BattleColors.Boost,
+            UnitAttackType.ReduceArmor => BattleColors.ReduceArmor,
             _ => null
         };
     }
@@ -493,11 +507,15 @@ internal class UnitPortraitObject : GameObject
                 : "X008TA0015",
             UnitAttackType.Revive => "X008TA0016",
             UnitAttackType.Cure => "X008TA0017",
-            UnitAttackType.DrainLevel => "X008TA0018",
+            UnitAttackType.DrainLevel => isEffectCompleted
+                ? "X008TA0029"
+                : "X008TA0018",
             UnitAttackType.GiveAdditionalAttack => "X008TA0019",
             UnitAttackType.Doppelganger => "X008TA0022",
             UnitAttackType.TransformSelf => "X008TA0022",
-            UnitAttackType.TransformOther => "X008TA0022",
+            UnitAttackType.TransformOther => isEffectCompleted
+                ? "X008TA0023"
+                : "X008TA0022",
             UnitAttackType.Blister => power == null
                 ? "X160TA0011"
                 : "X160TA0022",

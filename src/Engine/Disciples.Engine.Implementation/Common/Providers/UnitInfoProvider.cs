@@ -8,6 +8,7 @@ using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Database.Sqlite;
+using Disciples.Resources.Database.Sqlite.Models;
 using Microsoft.EntityFrameworkCore;
 using UnitType = Disciples.Engine.Common.Models.UnitType;
 
@@ -111,7 +112,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         using (var context = _gameDataContextFactory.Create())
         {
-            var unitType = context
+            var dbUnitType = context
                 .UnitTypes
                 .AsNoTracking()
                 .Include(ut => ut.LeaderBaseUnit)
@@ -140,18 +141,45 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
                 .Include(ut => ut.LowLevelUpgrade)
                 .Include(ut => ut.HighLevelUpgrade)
                 .FirstOrDefault(ut => ut.Id == unitTypeId);
-            if (unitType == null)
+            if (dbUnitType == null)
                 throw new ArgumentException($"Тип юнита {unitTypeId} не найден", nameof(unitTypeId));
 
             // Грузим их отдельными запросами, чтобы не увеличить количество строк в предыдущем запросе.
-            context.Entry(unitType)
+            context.Entry(dbUnitType)
                 .Collection(ut => ut.AttackSourceProtections)
                 .Load();
-            context.Entry(unitType)
+            context.Entry(dbUnitType)
                 .Collection(ut => ut.AttackTypeProtections)
                 .Load();
 
-            return _mapper.Map<UnitType>(unitType);
+            var unitType = _mapper.Map<UnitType>(dbUnitType);
+
+            unitType.MainAttack.SummonTransformUnitTypes = GetSummonTransformUnitTypes(context, dbUnitType.MainAttack);
+            if (unitType.SecondaryAttack != null)
+                unitType.SecondaryAttack.SummonTransformUnitTypes = GetSummonTransformUnitTypes(context, dbUnitType.SecondaryAttack!);
+
+            return unitType;
         }
+    }
+
+    /// <summary>
+    /// Получить список для вызова/превращения.
+    /// </summary>
+    /// <remarks>
+    /// Особенность: внутри используется метод GetUnitType, т.е. возникает рекурсия.
+    ///.Если вдруг будет цикличная зависимость, то будет ошибка.
+    /// </remarks>
+    private IReadOnlyList<UnitType> GetSummonTransformUnitTypes(GameDataContext context, UnitAttack unitAttack)
+    {
+        context.Entry(unitAttack)
+            .Collection(ua => ua.AttackSummonTransforms)
+            .Load();
+        if (unitAttack.AttackSummonTransforms.Count == 0)
+            return Array.Empty<UnitType>();
+
+        return unitAttack
+            .AttackSummonTransforms
+            .Select(ast => GetUnitType(ast.UnitTypeId))
+            .ToArray();
     }
 }

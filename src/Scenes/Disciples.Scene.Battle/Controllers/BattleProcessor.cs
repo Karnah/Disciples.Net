@@ -166,8 +166,13 @@ internal class BattleProcessor
 
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
-            case UnitAttackType.TransformOther:
                 return false;
+
+            // Можно превратить только в юнита того же размера, и нельзя превращать в того же юнита.
+            case UnitAttackType.TransformOther:
+                return attack
+                    .SummonTransformUnitTypes
+                    .Any(ut => ut.IsSmall == targetUnit.UnitType.IsSmall && ut.Id != targetUnit.UnitType.Id);
 
             case UnitAttackType.GiveProtection:
                 return GetGiveAttackSourceProtections(attack.AttackSourceProtections, targetUnit).Count > 0 ||
@@ -309,8 +314,8 @@ internal class BattleProcessor
     /// </summary>
     public BattleProcessorAttackResult? ProcessEffect(Unit turnUnit, Unit targetUnit, UnitBattleEffect effect, int roundNumber)
     {
-        // Эффект будет сбрасываться на ходе другого юнита.
-        if (effect.DurationControlUnit != turnUnit)
+        // Эффект будет сбрасываться на ходу другого юнита.
+        if (effect.DurationControlUnit.Id != turnUnit.Id)
             return null;
 
         int? power = null;
@@ -475,8 +480,22 @@ internal class BattleProcessor
             case UnitAttackType.DrainLevel:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
-            case UnitAttackType.TransformOther:
                 break;
+
+            case UnitAttackType.TransformOther:
+                var transformUnits = attack
+                    .SummonTransformUnitTypes
+                    .Where(ut => ut.IsSmall == targetUnit.UnitType.IsSmall && ut.Id != targetUnit.UnitType.Id)
+                    .ToArray();
+                var transformUnit = transformUnits[RandomGenerator.Get(transformUnits.Length)];
+                return new BattleProcessorAttackResult(
+                    AttackResult.Attack,
+                    attack.AttackType,
+                    attack.AttackSource,
+                    power,
+                    GetEffectDuration(attack),
+                    targetUnit,
+                    transformUnitType: transformUnit);
 
             case UnitAttackType.GiveProtection:
                 var attackSourceProtections = GetGiveAttackSourceProtections(attack.AttackSourceProtections, targetUnit);
@@ -516,7 +535,6 @@ internal class BattleProcessor
         {
             case UnitAttackType.Paralyze:
             case UnitAttackType.Petrify:
-            case UnitAttackType.TransformOther:
                 return attack.IsInfinitive
                     ? EffectDuration.CreateRandom(1, 3)
                     : EffectDuration.Create(1);
@@ -544,6 +562,11 @@ internal class BattleProcessor
                 return attack.IsInfinitive
                     ? EffectDuration.CreateRandom(2, 4)
                     : EffectDuration.Create(1);
+
+            case UnitAttackType.TransformOther:
+                return attack.IsInfinitive
+                    ? EffectDuration.CreateRandom(2, 3)
+                    : EffectDuration.Create(2);
 
             case UnitAttackType.Damage:
             case UnitAttackType.DrainLife:

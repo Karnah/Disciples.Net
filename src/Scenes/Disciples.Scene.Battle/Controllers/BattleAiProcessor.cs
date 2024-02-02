@@ -175,6 +175,19 @@ internal class BattleAiProcessor
                 return new BattleAiCommand(targetUnit.Unit);
         }
 
+        // Превращаем самого сильного юнита.
+        if (attackingUnit.UnitType.MainAttack.AttackType is UnitAttackType.TransformOther ||
+            attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.TransformOther)
+        {
+            var targetUnit = targetUnits
+                .OrderByPower()
+                .FirstOrDefault(tu => !tu.Unit.Effects.IsDisabled &&
+                                      tu.MainAttackResult != AttackResult.Ward &&
+                                      (!isSecondaryAttackDisabled || tu.SecondaryAttackResult != AttackResult.Ward));
+            if (targetUnit != null)
+                return new BattleAiCommand(targetUnit.Unit);
+        }
+
         var target = targetUnits
             // Если у юнита есть защита от атаки, то снижаем ему приоритет.
             .OrderBy(unit => unit.MainAttackResult == AttackResult.Ward

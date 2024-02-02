@@ -193,4 +193,18 @@ internal class BattleUnit : GameObject
         IsUnitTurn = false;
         IsTarget = false;
     }
+
+    /// <inheritdoc />
+    protected override void OnHiddenChanged(bool isHidden)
+    {
+        base.OnHiddenChanged(isHidden);
+
+        AnimationComponent.IsEnabled = !isHidden;
+
+        if (isHidden)
+        {
+            IsUnitTurn = false;
+            IsTarget = false;
+        }
+    }
 }

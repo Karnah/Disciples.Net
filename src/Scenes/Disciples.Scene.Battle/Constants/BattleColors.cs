@@ -51,4 +51,9 @@ internal static class BattleColors
     /// Цвет разбивания брони.
     /// </summary>
     public static Color ReduceArmor { get; } = Color.FromArgb(128, 48, 213, 200);
+
+    /// <summary>
+    /// Цвет перевоплощения.
+    /// </summary>
+    public static Color Transform { get; } = Color.FromArgb(255, 0, 0, 0);
 }

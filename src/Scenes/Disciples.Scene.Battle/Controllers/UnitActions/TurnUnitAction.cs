@@ -132,6 +132,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
             {
                 case UnitAttackType.Paralyze:
                 case UnitAttackType.Petrify:
+                {
                     // Если закончились все парализующие эффекты, то юнит снова начинает двигаться.
                     if (!CurrentBattleUnit.Unit.Effects.IsParalyzed)
                         CurrentBattleUnit.UnitState = BattleUnitState.Waiting;
@@ -142,10 +143,13 @@ internal class TurnUnitAction : BaseBattleUnitAction
                     AddAction(new UnitBattleAction(CurrentBattleUnit, attackResult, true));
                     PlayAttackSound(unitEffect.AttackType);
                     break;
+                }
 
                 case UnitAttackType.Poison:
                 case UnitAttackType.Frostbite:
+                case UnitAttackType.TransformOther when unitEffect.Duration.IsCompleted:
                 case UnitAttackType.Blister:
+                {
                     var effectAnimationAction = GetAttackTypeAnimationAction(CurrentBattleUnit, attackResult.AttackType!.Value);
                     if (effectAnimationAction != null)
                         AddAction(effectAnimationAction);
@@ -153,6 +157,7 @@ internal class TurnUnitAction : BaseBattleUnitAction
                     AddAction(new UnitBattleAction(CurrentBattleUnit, attackResult, true, effectAnimationAction));
                     PlayAttackSound(attackResult.AttackType.Value);
                     break;
+                }
 
                 default:
                     continue;

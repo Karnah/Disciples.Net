@@ -75,8 +75,10 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
             { UnitAttackType.ReduceInitiative, _battleResourceProvider.GetBattleBitmap("FILOWERINIT") },
             { UnitAttackType.Poison, _battleResourceProvider.GetBattleBitmap("FIPOISON") },
             { UnitAttackType.Frostbite, _battleResourceProvider.GetBattleBitmap("F1FROSTBITE") },
-            { UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleBitmap("F1DRAINLEVEL") },
-            { UnitAttackType.TransformOther, _battleResourceProvider.GetBattleBitmap("FITRANSFORM") },
+
+            // Иконки есть, но оригинальный движок Disciples её не использует.
+            //{ UnitAttackType.DrainLevel, _battleResourceProvider.GetBattleBitmap("F1DRAINLEVEL") },
+            //{ UnitAttackType.TransformOther, _battleResourceProvider.GetBattleBitmap("FITRANSFORM") },
         };
     }
 

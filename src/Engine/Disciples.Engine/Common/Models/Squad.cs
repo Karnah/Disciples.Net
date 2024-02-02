@@ -1,4 +1,6 @@
-﻿namespace Disciples.Engine.Common.Models;
+﻿using System.Collections.Generic;
+
+namespace Disciples.Engine.Common.Models;
 
 /// <summary>
 /// Отряд.
@@ -10,7 +12,7 @@ public class Squad
     /// </summary>
     /// <param name="player">Игрок, которому принадлежит отряд.</param>
     /// <param name="units">Юниты в отряде.</param>
-    public Squad(Player player, Unit[] units)
+    public Squad(Player player, List<Unit> units)
     {
         Player = player;
         Units = units;
@@ -24,5 +26,5 @@ public class Squad
     /// <summary>
     /// Юниты в отряде.
     /// </summary>
-    public Unit[] Units { get; }
+    public List<Unit> Units { get; }
 }

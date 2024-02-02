@@ -198,6 +198,10 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
         var targetBattleUnit = unitAction.TargetUnit;
         var targetUnit = targetBattleUnit.Unit;
 
+        _unitPortraitPanelController
+            .GetUnitPortrait(targetBattleUnit)
+            ?.ProcessCompletedUnitPortraitEvent();
+
         switch (unitAction.ActionType)
         {
             case UnitActionType.Attacked:
@@ -207,9 +211,19 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 {
                     case > 0 when attackResult.AttackType?.IsEffect() == true:
                     {
-                        // Накладываем новый эффект на юнита.
-                        if (!unitAction.IsEffectTriggered)
+                        // Эффект был наложен и сработал на ходу юнита.
+                        if (unitAction.IsEffectTriggered)
                         {
+                            if (unitAction.AttackResult!.EffectDuration!.IsCompleted &&
+                                attackResult.AttackType == UnitAttackType.TransformOther)
+                            {
+                                targetBattleUnit = ProcessUnitTransformBack(targetBattleUnit);
+                                targetUnit = targetBattleUnit.Unit;
+                            }
+                        }
+                        else
+                        {
+                            // Накладываем новый эффект на юнита.
                             targetUnit.Effects.AddBattleEffect(
                                 new UnitBattleEffect(attackResult.AttackType!.Value, attackResult.AttackSource!.Value,
                                     attackResult.EffectDuration!, attackResult.EffectDurationControlUnit!,
@@ -223,6 +237,12 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                                 // Если уменьшилась инициатива, то в очередь его засовываем без учёта случайного разброса.
                                 // В каких-то особых случаях, это уменьшит вероятность того, что у него инициатива станет в ходу больше, чем была.
                                 _context.UnitTurnQueue.ReorderUnitTurnOrder(targetUnit, targetUnit.Initiative);
+                            }
+                            // Обрабатываем перевоплощение юнита.
+                            else if (attackResult.AttackType == UnitAttackType.TransformOther)
+                            {
+                                targetBattleUnit = ProcessUnitTransform(targetBattleUnit, attackResult.TransformUnitType!);
+                                targetUnit = targetBattleUnit.Unit;
                             }
                         }
 
@@ -252,6 +272,19 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                             .Where(e => e.CanCure());
                         foreach (var unitBattleEffect in curableEffects)
                         {
+                            if (unitBattleEffect.AttackType == UnitAttackType.TransformOther)
+                            {
+                                var transformOtherAttack = new BattleProcessorAttackResult(AttackResult.Attack,
+                                    unitBattleEffect.AttackType, unitBattleEffect.AttackSource, unitBattleEffect.Power,
+                                    EffectDuration.Completed, targetUnit);
+                                var effectAnimationAction = GetAttackTypeAnimationAction(targetBattleUnit, transformOtherAttack.AttackType!.Value);
+                                if (effectAnimationAction != null)
+                                    AddAction(effectAnimationAction);
+
+                                AddAction(new UnitBattleAction(targetBattleUnit, transformOtherAttack, true, effectAnimationAction));
+                                PlayAttackSound(transformOtherAttack.AttackType.Value);
+                            }
+
                             targetUnit.Effects.Remove(unitBattleEffect);
                         }
 
@@ -266,6 +299,12 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
             case UnitActionType.Dying:
             {
+                if (targetUnit is TransformedOtherUnit)
+                {
+                    targetBattleUnit = ProcessUnitTransformBack(targetBattleUnit);
+                    targetUnit = targetBattleUnit.Unit;
+                }
+
                 // Превращаем его в кучу костей.
                 targetBattleUnit.UnitState = BattleUnitState.Dead;
 
@@ -293,10 +332,6 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                 break;
             }
         }
-
-        _unitPortraitPanelController
-            .GetUnitPortrait(targetBattleUnit)
-            ?.ProcessCompletedUnitPortraitEvent();
     }
 
     /// <summary>
@@ -356,6 +391,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
                     // В отличие от заморозки и яда, для вспышки выводится анимация при наложении эффекта.
                     case UnitAttackType.Blister:
                     case UnitAttackType.Revive:
+                    case UnitAttackType.TransformOther:
                     {
                         var attackTypeAnimationAction = GetAttackTypeAnimationAction(targetUnit, attackType);
                         if (attackTypeAnimationAction != null)
@@ -388,7 +424,7 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
 
         // Если у атакующего есть анимация, применяемая к юниту, то добавляем её на сцену.
         // Это требуется только для основной атаки.
-        if (isMainAttack)
+        if (isMainAttack && attackResult.AttackResult == AttackResult.Attack)
         {
             var targetAnimationFrames = targetUnit.IsAttacker
                 ? attackerUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation?.AttackerUnitFrames
@@ -474,5 +510,75 @@ internal abstract class BaseBattleUnitAction : IBattleUnitAction
             return;
 
         _playingSounds.Add(playingSound);
+    }
+
+    /// <summary>
+    /// Изменить форму юнита.
+    /// </summary>
+    /// <returns>
+    /// Объект трансформированного юнита.
+    /// </returns>
+    private BattleUnit ProcessUnitTransform(BattleUnit originalBattleUnit, UnitType transformedUnitType)
+    {
+        originalBattleUnit.IsHidden = true;
+
+        var originalUnit = originalBattleUnit.Unit;
+        var transformedUnit = new TransformedOtherUnit(originalUnit, transformedUnitType);
+        var transformedBattleUnit = _battleGameObjectContainer.AddBattleUnit(transformedUnit, originalBattleUnit.SquadPosition);
+        var squad = originalBattleUnit.IsAttacker
+            ? _context.AttackingBattleSquad
+            : _context.DefendingBattleSquad;
+        var targetUnitSquadIndex = squad.Squad.Units.IndexOf(originalUnit);
+        squad.Squad.Units[targetUnitSquadIndex] = transformedUnit;
+
+        var targetUnitBattleIndex = _context.BattleUnits.IndexOf(originalBattleUnit);
+        _context.BattleUnits[targetUnitBattleIndex] = transformedBattleUnit;
+
+        _context.TransformedUnits.Add(originalBattleUnit);
+
+        // Используем тоже базовую инициативу.
+        _context.UnitTurnQueue.ReorderTransformedUnitTurn(transformedUnit, transformedUnit.Initiative);
+
+        var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
+        if (unitPortrait != null)
+            unitPortrait.Unit = transformedUnit;
+
+        return transformedBattleUnit;
+    }
+
+    /// <summary>
+    /// Вернуть юниту прежнюю форму.
+    /// </summary>
+    /// <remarks>
+    /// Объект оригинального юнита.
+    /// </remarks>
+    private BattleUnit ProcessUnitTransformBack(BattleUnit transformedBattleUnit)
+    {
+        var transformedUnit = (TransformedOtherUnit)transformedBattleUnit.Unit;
+        var originalUnit = transformedUnit.OriginalUnit;
+
+        var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(transformedBattleUnit);
+        if (unitPortrait != null)
+            unitPortrait.Unit = originalUnit;
+
+        var originalBattleUnit = _context.TransformedUnits.First(tu => tu.Unit == originalUnit);
+        _context.TransformedUnits.Remove(originalBattleUnit);
+
+        var squad = transformedBattleUnit.IsAttacker
+            ? _context.AttackingBattleSquad
+            : _context.DefendingBattleSquad;
+        var targetUnitSquadIndex = squad.Squad.Units.IndexOf(transformedUnit);
+        squad.Squad.Units[targetUnitSquadIndex] = originalUnit;
+
+        var targetUnitBattleIndex = _context.BattleUnits.IndexOf(transformedBattleUnit);
+        _context.BattleUnits[targetUnitBattleIndex] = originalBattleUnit;
+
+        originalBattleUnit.IsHidden = false;
+        transformedBattleUnit.Destroy();
+
+        if (_context.CurrentBattleUnit == transformedBattleUnit)
+            _context.CurrentBattleUnit = originalBattleUnit;
+
+        return originalBattleUnit;
     }
 }

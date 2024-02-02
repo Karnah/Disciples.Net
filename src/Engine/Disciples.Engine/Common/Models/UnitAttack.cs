@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
@@ -98,4 +99,13 @@ public class UnitAttack
     /// +5% от силы атаки.
     /// </remarks>
     public bool IsCritical { get; init; }
+
+    /// <summary>
+    /// Призываемые / превращаемые типы юнитов.
+    /// </summary>
+    /// <remarks>
+    /// Для атаки типа <see cref="UnitAttackType.Summon" />, идентификаторы вызываемых юнитов.
+    /// Для атак типа <see cref="UnitAttackType.TransformSelf" /> и <see cref="UnitAttackType.TransformOther" /> идентификаторы во что идёт превращение.
+    /// </remarks>>
+    public IReadOnlyList<UnitType> SummonTransformUnitTypes { get; set; } = Array.Empty<UnitType>();
 }

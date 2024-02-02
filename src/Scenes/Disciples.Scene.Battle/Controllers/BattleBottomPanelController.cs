@@ -133,12 +133,9 @@ internal class BattleBottomPanelController : BaseSupportLoading
         _exitButton = gameObjects.GetButton(BattleBottomPanelElementNames.EXIT_BUTTON, ExecuteExit, true);
         _openSquadInventoryButton = gameObjects.GetButton(BattleBottomPanelElementNames.SQUAD_INVENTORY_BUTTON, ExecuteOpenSquadInventory, true);
 
-        // Эти кнопки доступны всегда.
-        ActivateButtons(_instantResolveButton, _autoBattleButton);
-
-        // Эти кнопки могут быть недоступны, если первый ход - компьютера.
-        if (_context.BattleState == BattleState.WaitPlayerTurn)
-            ActivateButtons(_defendButton, _retreatButton, _waitButton);
+        // Эти кнопки недоступны, если первый ход - компьютера.
+        if (_context.BattleState != BattleState.WaitPlayerTurn)
+            DisableButtons(_defendButton, _retreatButton, _waitButton);
 
         var battleInterfaceElements = _battleInterfaceProvider.BattleInterface.Elements;
         _leftUnitPortrait = _gameObjectContainer.AddBottomUnitPortrait(true,

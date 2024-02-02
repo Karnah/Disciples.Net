@@ -99,6 +99,7 @@ internal class SaveProvider
         UnitAttackType.DrainLifeOverflow,
         UnitAttackType.Cure,
         UnitAttackType.GiveAdditionalAttack,
+        UnitAttackType.TransformOther,
         UnitAttackType.Blister,
         UnitAttackType.GiveProtection,
         UnitAttackType.ReduceArmor,

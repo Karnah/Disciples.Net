@@ -100,6 +100,17 @@
               "Experience": 0,
               "HitPoints": 90,
               "IsDead": false
+            },
+            {
+              "Id": 14,
+              "Name": null,
+              "UnitTypeId": "G000UU0068", // колдунья.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 115,
+              "IsDead": false
             }
           ]
         }

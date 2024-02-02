@@ -115,7 +115,12 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Все юниты.
     /// </summary>
-    public IReadOnlyList<BattleUnit> BattleUnits { get; set; } = null!;
+    public List<BattleUnit> BattleUnits { get; set; } = null!;
+
+    /// <summary>
+    /// Юниты, которые были превращены.
+    /// </summary>
+    public List<BattleUnit> TransformedUnits { get; } = new();
 
     /// <summary>
     /// Очередность хода юнитов.
