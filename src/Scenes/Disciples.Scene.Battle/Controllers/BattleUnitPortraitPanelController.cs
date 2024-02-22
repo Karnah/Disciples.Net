@@ -12,6 +12,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -463,13 +464,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private bool CanAttack(BattleUnit targetBattleUnit)
     {
-        var attackingSquad = CurrentBattleUnit.IsAttacker
-            ? _context.AttackingSquad
-            : _context.DefendingSquad;
-        var targetSquad = targetBattleUnit.IsAttacker
-            ? _context.AttackingSquad
-            : _context.DefendingSquad;
-        return _battleProcessor.CanAttack(CurrentBattleUnit.Unit, attackingSquad, targetBattleUnit.Unit, targetSquad);
+        var attackContext = _context.CreateAttackProcessorContext(targetBattleUnit);
+        return _battleProcessor.CanAttack(attackContext);
     }
 
     /// <summary>

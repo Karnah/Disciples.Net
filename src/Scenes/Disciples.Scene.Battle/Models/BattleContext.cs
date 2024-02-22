@@ -2,7 +2,7 @@
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
-using Disciples.Scene.Battle.Controllers.UnitActions;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -130,17 +130,17 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Действие, которое выполняется юнитом в данный момент.
     /// </summary>
-    public IBattleUnitAction? UnitAction { get; private set; }
+    public IBattleUnitActionController? UnitAction { get; private set; }
 
     /// <summary>
     /// Действие юнита, которое будет выполняться следующим.
     /// </summary>
-    public IBattleUnitAction? NextUnitAction { get; private set; }
+    public IBattleUnitActionController? NextUnitAction { get; private set; }
 
     /// <summary>
     /// Завершившееся действие юнита.
     /// </summary>
-    public IBattleUnitAction? CompletedUnitAction { get; private set; }
+    public IBattleUnitActionController? CompletedUnitAction { get; private set; }
 
     /// <summary>
     /// Обновить данные контекста на основе данных об обновлении сцены.
@@ -186,9 +186,19 @@ internal class BattleContext : BaseSupportLoading
     }
 
     /// <summary>
+    /// Получить отряд указанного юнита.
+    /// </summary>
+    public Squad GetBattleUnitSquad(BattleUnit unit)
+    {
+        return unit.IsAttacker
+            ? AttackingSquad
+            : DefendingSquad;
+    }
+
+    /// <summary>
     /// Установить действие.
     /// </summary>
-    public void AddUnitAction(IBattleUnitAction unitAction)
+    public void AddUnitAction(IBattleUnitActionController unitAction)
     {
         if (UnitAction == null)
         {
@@ -223,6 +233,25 @@ internal class BattleContext : BaseSupportLoading
     {
         BattleState = BattleState.CompletedBattle;
         BattleWinnerSquad = battleWinnerSquad;
+    }
+
+    /// <summary>
+    /// Создать контекст атаки текущего юнита на другого.
+    /// </summary>
+    public AttackProcessorContext CreateAttackProcessorContext(BattleUnit targetBattleUnit)
+    {
+        var attackingSquad = CurrentBattleUnit.IsAttacker
+            ? AttackingSquad
+            : DefendingSquad;
+        var targetSquad = targetBattleUnit.IsAttacker
+            ? AttackingSquad
+            : DefendingSquad;
+        return new AttackProcessorContext(CurrentBattleUnit.Unit,
+            targetBattleUnit.Unit,
+            attackingSquad,
+            targetSquad,
+            UnitTurnQueue,
+            RoundNumber);
     }
 
     /// <inheritdoc />
@@ -261,7 +290,7 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Получить следующее действие юнита.
     /// </summary>
-    private IBattleUnitAction? GetNextUnitAction()
+    private IBattleUnitActionController? GetNextUnitAction()
     {
         if (NextUnitAction == null)
             return null;

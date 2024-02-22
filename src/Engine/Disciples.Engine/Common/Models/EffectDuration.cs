@@ -33,7 +33,7 @@ public class EffectDuration
         if (maxTurns < minTurns)
             throw new ArgumentException("Максимальное количество ходов до завершения эффекта должно быть больше минимального", nameof(maxTurns));
 
-        return new EffectDuration { Turns = RandomGenerator.Get(minTurns, maxTurns) };
+        return new EffectDuration { Turns = RandomGenerator.Get(minTurns, maxTurns + 1) };
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class EffectDuration
     /// </summary>
     public static EffectDuration CreateInfinitive()
     {
-        return new EffectDuration { IsInfinitive = true };
+        return new EffectDuration { IsInfinitive = true, Turns = int.MaxValue };
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public class EffectDuration
     /// <summary>
     /// Признак, что эффект действует бесконечно.
     /// </summary>
-    public bool IsInfinitive { get; private init; }
+    public bool IsInfinitive { get; private set; }
 
     /// <summary>
     /// Признак, что эффект завершился.
@@ -78,5 +78,23 @@ public class EffectDuration
 
         if (Turns <= 0)
             IsCompleted = true;
+    }
+
+    /// <summary>
+    /// Принудительно завершить действие эффекта.
+    /// </summary>
+    public void Complete()
+    {
+        IsInfinitive = false;
+        IsCompleted = true;
+        Turns = 0;
+    }
+
+    /// <summary>
+    /// Создать копию.
+    /// </summary>
+    public EffectDuration Clone()
+    {
+        return (EffectDuration)MemberwiseClone();
     }
 }

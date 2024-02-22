@@ -1,11 +1,15 @@
-﻿using Disciples.Engine.Base;
+﻿using DryIoc;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Controllers;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
-using DryIoc;
+using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
+using Disciples.Scene.Battle.Processors;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
 
 namespace Disciples.Scene.Battle;
 
@@ -19,11 +23,24 @@ public class BattleSceneModule : IGameModule
     {
         var sceneScopeReuse = new CurrentScopeReuse(nameof(IBattleScene));
         containerRegistrator.Register<BattleContext>(sceneScopeReuse);
+
+        RegisterImplementationTypes<IAttackTypeProcessor>(containerRegistrator, sceneScopeReuse);
+        containerRegistrator.RegisterDelegate<IReadOnlyDictionary<UnitAttackType, IAttackTypeProcessor>>(
+            resolverContext =>
+            {
+                return resolverContext
+                    .ResolveMany<IAttackTypeProcessor>()
+                    .ToDictionary(p => p.AttackType, p => p);
+            }, sceneScopeReuse);
+
+        // На каждое действие создаётся новый контроллер.
+        RegisterImplementationTypes<IBattleUnitActionController>(containerRegistrator, Reuse.Transient);
+
         containerRegistrator.Register<BattleProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleAiProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleUnitPortraitPanelController>(sceneScopeReuse);
         containerRegistrator.Register<BattleBottomPanelController>(sceneScopeReuse);
-        containerRegistrator.Register<BattleUnitActionController>(sceneScopeReuse);
+        containerRegistrator.Register<BattleUnitActionFactory>(sceneScopeReuse);
         containerRegistrator.Register<BattleSoundController>(sceneScopeReuse);
         containerRegistrator.Register<BattleDialogController>(sceneScopeReuse);
         containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(sceneScopeReuse);
@@ -34,5 +51,19 @@ public class BattleSceneModule : IGameModule
         containerRegistrator.Register<IBattleInterfaceController, BattleInterfaceController>(sceneScopeReuse);
         containerRegistrator.Register<IBattleGameObjectContainer, BattleGameObjectContainer>(sceneScopeReuse);
         containerRegistrator.Register<IBattleScene, BattleScene>(sceneScopeReuse);
+    }
+
+    /// <summary>
+    /// Зарегистрировать всех наследников указанного типа.
+    /// </summary>
+    private static void RegisterImplementationTypes<T>(IRegistrator containerRegistrator, IReuse reuse)
+    {
+        var types = typeof(BattleSceneModule)
+            .Assembly
+            .GetImplementationTypes(t => t.IsAssignableTo<T>());
+        foreach (var type in types)
+        {
+            containerRegistrator.RegisterMany(new []{ typeof(T), type }, type, reuse);
+        }
     }
 }

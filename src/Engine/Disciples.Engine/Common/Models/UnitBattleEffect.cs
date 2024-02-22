@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Extensions;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -70,17 +69,4 @@ public class UnitBattleEffect
     /// Защиты от источников атак.
     /// </summary>
     public List<UnitAttackSourceProtection> AttackSourceProtections { get; }
-
-    /// <summary>
-    /// Признак, что эффект можно вылечить.
-    /// </summary>
-    public bool CanCure()
-    {
-        // Можно снимать только те эффекты, которые могут пройти со временем.
-        if (Duration.IsInfinitive)
-            return false;
-
-        // Можно снимать только отрицательные эффекты.
-        return AttackType.IsEnemyAttack();
-    }
 }

@@ -56,4 +56,9 @@ internal static class BattleColors
     /// Цвет перевоплощения.
     /// </summary>
     public static Color Transform { get; } = Color.FromArgb(255, 0, 0, 0);
+
+    /// <summary>
+    /// Прозрачный цвет.
+    /// </summary>
+    public static Color Transparent { get; } = Color.FromArgb(0, 0, 0, 0);
 }

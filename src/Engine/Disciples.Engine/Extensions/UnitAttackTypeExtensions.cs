@@ -45,9 +45,9 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.Poison:
             case UnitAttackType.Frostbite:
             case UnitAttackType.DrainLifeOverflow:
-            case UnitAttackType.DrainLevel:
+            case UnitAttackType.ReduceLevel:
             case UnitAttackType.Doppelganger:
-            case UnitAttackType.TransformOther:
+            case UnitAttackType.TransformEnemy:
             case UnitAttackType.Blister:
             case UnitAttackType.ReduceArmor:
                 return true;
@@ -55,47 +55,6 @@ public static class UnitAttackTypeExtensions
             default:
                 return false;
         }
-    }
-
-    /// <summary>
-    /// Признак, что атака накладывается какой-то эффект.
-    /// </summary>
-    public static bool IsEffect(this UnitAttackType unitAttackType)
-    {
-        switch (unitAttackType)
-        {
-            case UnitAttackType.Paralyze:
-            case UnitAttackType.Petrify:
-            case UnitAttackType.ReduceDamage:
-            case UnitAttackType.ReduceInitiative:
-            case UnitAttackType.Poison:
-            case UnitAttackType.Frostbite:
-            case UnitAttackType.Blister:
-            case UnitAttackType.IncreaseDamage:
-            case UnitAttackType.DrainLevel:
-            case UnitAttackType.TransformSelf:
-            case UnitAttackType.TransformOther:
-            case UnitAttackType.GiveProtection:
-            case UnitAttackType.ReduceArmor:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Признак, что атака накладывается эффект, который наносит урон со временем.
-    /// </summary>
-    public static bool IsDamageEffect(this UnitAttackType unitAttackType)
-    {
-        return unitAttackType switch
-        {
-            UnitAttackType.Poison => true,
-            UnitAttackType.Frostbite => true,
-            UnitAttackType.Blister => true,
-            _ => false
-        };
     }
 
     /// <summary>

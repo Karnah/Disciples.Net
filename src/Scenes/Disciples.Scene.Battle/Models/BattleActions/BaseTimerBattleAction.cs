@@ -6,14 +6,16 @@
 internal abstract class BaseTimerBattleAction : IBattleAction
 {
     private readonly long _duration;
+    private readonly Action? _onCompleted;
     private long _time;
 
     /// <summary>
     /// Создать объект типа <see cref="BaseTimerBattleAction" />.
     /// </summary>
-    protected BaseTimerBattleAction(long duration)
+    protected BaseTimerBattleAction(long duration, Action? onCompleted = null)
     {
         _duration = duration;
+        _onCompleted = onCompleted;
         _time = 0;
     }
 
@@ -27,5 +29,11 @@ internal abstract class BaseTimerBattleAction : IBattleAction
 
         if (_time >= _duration)
             IsCompleted = true;
+    }
+
+    /// <inheritdoc />
+    public void ProcessCompleted()
+    {
+        _onCompleted?.Invoke();
     }
 }

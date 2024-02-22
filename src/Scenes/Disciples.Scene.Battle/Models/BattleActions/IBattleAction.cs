@@ -14,4 +14,9 @@ internal interface IBattleAction
     /// Обновить счетчик прошедшего времени.
     /// </summary>
     void UpdateTime(long ticks);
+
+    /// <summary>
+    /// Обработать завершение действия.
+    /// </summary>
+    void ProcessCompleted();
 }

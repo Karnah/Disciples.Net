@@ -11,6 +11,7 @@ using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -22,7 +23,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private readonly BattleProcessor _battleProcessor;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
-    private readonly BattleUnitActionController _unitActionController;
+    private readonly BattleUnitActionFactory _unitActionFactory;
     private readonly BattleDialogController _dialogController;
     private readonly BattleBottomPanelController _bottomPanelController;
     private readonly ISceneInterfaceController _sceneInterfaceController;
@@ -46,7 +47,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         BattleProcessor battleProcessor,
         ISceneObjectContainer sceneObjectContainer,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        BattleUnitActionController unitActionController,
+        BattleUnitActionFactory unitActionFactory,
         BattleDialogController dialogController,
         BattleBottomPanelController bottomPanelController,
         ISceneInterfaceController sceneInterfaceController)
@@ -56,7 +57,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         _battleProcessor = battleProcessor;
         _sceneObjectContainer = sceneObjectContainer;
         _unitPortraitPanelController = unitPortraitPanelController;
-        _unitActionController = unitActionController;
+        _unitActionFactory = unitActionFactory;
         _dialogController = dialogController;
         _bottomPanelController = bottomPanelController;
         _sceneInterfaceController = sceneInterfaceController;
@@ -186,9 +187,6 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// <inheritdoc />
     public void UnitPortraitRightMouseButtonPressed(UnitPortraitObject unitPortrait)
     {
-        // todo Вообще, при наведении на портреты внизу по бокам тоже нужно показывать информацию.
-        // Но сейчас они позиционируются только как картинки, а не как объекты.
-
         ShowDetailUnitInfo(unitPortrait.Unit);
     }
 
@@ -255,7 +253,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             return;
 
         if (CanAttack(targetBattleUnit))
-            _unitActionController.BeginMainAttack(targetBattleUnit);
+            _unitActionFactory.BeginMainAttack(targetBattleUnit);
     }
 
     /// <summary>
@@ -409,12 +407,25 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private bool CanAttack(BattleUnit targetBattleUnit)
     {
-        var attackingSquad = CurrentBattleUnit.IsAttacker
-            ? _context.AttackingSquad
-            : _context.DefendingSquad;
-        var targetSquad = targetBattleUnit.IsAttacker
-            ? _context.AttackingSquad
-            : _context.DefendingSquad;
-        return _battleProcessor.CanAttack(CurrentBattleUnit.Unit, attackingSquad, targetBattleUnit.Unit, targetSquad);
+        // Если текущий юнит атакует одну цель, то проверяем может ли он её атаковать.
+        if (CurrentBattleUnit.Unit.UnitType.MainAttack.Reach != UnitAttackReach.All)
+        {
+            var context = _context.CreateAttackProcessorContext(targetBattleUnit);
+            return _battleProcessor.CanAttack(context);
+        }
+
+        // Если юнит атакует весь отряд целиком, то проверяем может ли он атаковать хотя бы одного юнита в отряде.
+        // При этом юнит-цель может быть недоступна для атаки.
+        var targetUnitSquad = targetBattleUnit.IsAttacker
+            ? _context.AttackingBattleSquad
+            : _context.DefendingBattleSquad;
+        return targetUnitSquad
+            .Squad
+            .Units
+            .Any(u =>
+            {
+                var context = _context.CreateAttackProcessorContext(_context.GetBattleUnit(u));
+                return _battleProcessor.CanAttack(context);
+            });
     }
 }

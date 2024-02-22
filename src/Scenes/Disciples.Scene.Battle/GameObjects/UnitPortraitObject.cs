@@ -253,7 +253,10 @@ internal class UnitPortraitObject : GameObject
             RemoveSceneObject(ref _instantaneousEffectText);
         }
 
-        _instantaneousEffectImage = AddColorImage(eventData.UnitActionType, eventData.AttackType);
+        // Сразу добавляем иконки новых эффектов.
+        ProcessBattleEffects();
+
+        _instantaneousEffectImage = AddColorImage(eventData.UnitActionType, eventData.AttackType, eventData.EffectDuration);
         _instantaneousEffectText = AddText(eventData);
         _unitHitpoints.Text = GetUnitHitPoints();
 
@@ -412,7 +415,7 @@ internal class UnitPortraitObject : GameObject
                 }
             }
 
-            // Добавляем фон, связанный с воздействием эффекта яда и заморозки.
+            // Добавляем фон, если есть связанный с эффектом.
             if (!_battleEffectsForegrounds.ContainsKey(battleEffect.AttackType))
             {
                 var effectTypeColor = GetEffectTypeColor(battleEffect.AttackType);
@@ -441,15 +444,17 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Получить цвет фона, когда на юнита накладывается эффект.
+    /// Получить цвет фона для типа атаки.
     /// </summary>
-    private static Color? GetUnitAttackTypeColor(UnitAttackType? unitAttackType)
+    private static Color? GetUnitAttackTypeColor(UnitAttackType? unitAttackType, bool isCompleted)
     {
         return unitAttackType switch
         {
             UnitAttackType.Damage => BattleColors.Damage,
             UnitAttackType.DrainLife => BattleColors.Damage,
-            UnitAttackType.Paralyze => BattleColors.Paralyze,
+            UnitAttackType.Paralyze => isCompleted
+                ? BattleColors.Transparent
+                : BattleColors.Paralyze,
             UnitAttackType.Heal => BattleColors.Heal,
             UnitAttackType.Fear => BattleColors.Damage,
             UnitAttackType.IncreaseDamage => BattleColors.Boost,
@@ -458,7 +463,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
-            UnitAttackType.TransformOther => BattleColors.Transform,
+            UnitAttackType.TransformEnemy => BattleColors.Transform,
             UnitAttackType.Blister => BattleColors.Blister,
             UnitAttackType.GiveProtection => BattleColors.Boost,
             UnitAttackType.ReduceArmor => BattleColors.ReduceArmor,
@@ -476,7 +481,7 @@ internal class UnitPortraitObject : GameObject
             or UnitAttackType.Frostbite
             or UnitAttackType.Blister)
         {
-            return GetUnitAttackTypeColor(unitEffectAttackType);
+            return GetUnitAttackTypeColor(unitEffectAttackType, false);
         }
 
         return null;
@@ -507,13 +512,13 @@ internal class UnitPortraitObject : GameObject
                 : "X008TA0015",
             UnitAttackType.Revive => "X008TA0016",
             UnitAttackType.Cure => "X008TA0017",
-            UnitAttackType.DrainLevel => isEffectCompleted
+            UnitAttackType.ReduceLevel => isEffectCompleted
                 ? "X008TA0029"
                 : "X008TA0018",
             UnitAttackType.GiveAdditionalAttack => "X008TA0019",
             UnitAttackType.Doppelganger => "X008TA0022",
             UnitAttackType.TransformSelf => "X008TA0022",
-            UnitAttackType.TransformOther => isEffectCompleted
+            UnitAttackType.TransformEnemy => isEffectCompleted
                 ? "X008TA0023"
                 : "X008TA0022",
             UnitAttackType.Blister => power == null
@@ -528,7 +533,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Добавить на портрет изображение указанного цвета.
     /// </summary>
-    private IImageSceneObject? AddColorImage(UnitActionType unitActionType, UnitAttackType? unitAttackType)
+    private IImageSceneObject? AddColorImage(UnitActionType unitActionType, UnitAttackType? unitAttackType, EffectDuration? effectDuration)
     {
         switch (unitActionType)
         {
@@ -543,7 +548,10 @@ internal class UnitPortraitObject : GameObject
                 return null;
         }
 
-        var color = GetUnitAttackTypeColor(unitAttackType);
+        if (unitAttackType == null || _battleEffectsForegrounds.ContainsKey(unitAttackType.Value))
+            return null;
+
+        var color = GetUnitAttackTypeColor(unitAttackType, effectDuration?.IsCompleted == true);
         if (color != null)
         {
             return AddColorImage(color.Value, color == BattleColors.Damage
@@ -636,11 +644,11 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.Revive:
                     case UnitAttackType.Cure:
                     case UnitAttackType.Summon:
-                    case UnitAttackType.DrainLevel:
+                    case UnitAttackType.ReduceLevel:
                     case UnitAttackType.GiveAdditionalAttack:
                     case UnitAttackType.Doppelganger:
                     case UnitAttackType.TransformSelf:
-                    case UnitAttackType.TransformOther:
+                    case UnitAttackType.TransformEnemy:
                     case UnitAttackType.GiveProtection:
                     case UnitAttackType.ReduceArmor:
                         return AddText(GetAttackTypeTextId(eventData.AttackType!.Value, eventData.EffectDuration?.IsCompleted == true));

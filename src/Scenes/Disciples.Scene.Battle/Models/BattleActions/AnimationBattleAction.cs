@@ -7,19 +7,22 @@ namespace Disciples.Scene.Battle.Models.BattleActions;
 /// </summary>
 internal class AnimationBattleAction : IBattleAction
 {
+    private readonly Action? _onCompleted;
+
     /// <summary>
     /// Создать объект типа <see cref="AnimationBattleAction" />.
     /// </summary>
-    public AnimationBattleAction(BaseAnimationComponent animationComponent, int endFrameIndex)
+    public AnimationBattleAction(BaseAnimationComponent animationComponent, int endFrameIndex, Action? onCompleted = null)
     {
         AnimationComponent = animationComponent;
+        _onCompleted = onCompleted;
 
         // Бага ресурсов: иногда endFrameIndex > FramesCount.
         EndFrameIndex = Math.Min(endFrameIndex, animationComponent.FramesCount - 1);
     }
 
     /// <inheritdoc />
-    public AnimationBattleAction(BaseAnimationComponent animationComponent) : this(animationComponent, GetAnimationComponentEndIndex(animationComponent))
+    public AnimationBattleAction(BaseAnimationComponent animationComponent, Action? onCompleted = null) : this(animationComponent, GetAnimationComponentEndIndex(animationComponent), onCompleted)
     {
     }
 
@@ -39,6 +42,12 @@ internal class AnimationBattleAction : IBattleAction
     /// <inheritdoc />
     public void UpdateTime(long ticks)
     {
+    }
+
+    /// <inheritdoc />
+    public void ProcessCompleted()
+    {
+        _onCompleted?.Invoke();
     }
 
     /// <summary>

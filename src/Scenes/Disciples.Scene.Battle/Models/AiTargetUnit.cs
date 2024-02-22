@@ -11,7 +11,7 @@ internal class AiTargetUnit
     /// <summary>
     /// Создать объект типа <see cref="AiTargetUnit" />.
     /// </summary>
-    public AiTargetUnit(Unit unit, AttackResult? mainAttackResult, AttackResult? secondaryAttackResult)
+    public AiTargetUnit(Unit unit, UnitActionType? mainAttackResult, UnitActionType? secondaryAttackResult)
     {
         Unit = unit;
         MainAttackResult = mainAttackResult;
@@ -26,10 +26,10 @@ internal class AiTargetUnit
     /// <summary>
     /// Результат базовой атаки.
     /// </summary>
-    public AttackResult? MainAttackResult { get; }
+    public UnitActionType? MainAttackResult { get; }
 
     /// <summary>
     /// Результат вспомогательной атаки.
     /// </summary>
-    public AttackResult? SecondaryAttackResult { get; }
+    public UnitActionType? SecondaryAttackResult { get; }
 }

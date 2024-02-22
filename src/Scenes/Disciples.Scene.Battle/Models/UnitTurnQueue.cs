@@ -98,19 +98,19 @@ internal class UnitTurnQueue
     /// <summary>
     /// Изменить очередность из-за превращения юнита.
     /// </summary>
-    public void ReorderTransformedUnitTurn(TransformedOtherUnit unit, int initiative)
+    public void ReorderTransformedUnitTurn(Unit oldUnit, Unit newUnit, int initiative)
     {
-        var unitTurnOrder = _turnOrder.FirstOrDefault(to => to.Unit == unit.OriginalUnit);
+        var unitTurnOrder = _turnOrder.FirstOrDefault(to => to.Unit == oldUnit);
         if (unitTurnOrder != null)
         {
             _turnOrder.Remove(unitTurnOrder);
-            _turnOrder.AddLast(new UnitTurnOrder(unit, initiative));
+            _turnOrder.AddLast(new UnitTurnOrder(newUnit, initiative));
         }
 
-        var unitWaitingTurnOrder = _waitingTurnOrder.Find(unit.OriginalUnit);
+        var unitWaitingTurnOrder = _waitingTurnOrder.Find(oldUnit);
         if (unitWaitingTurnOrder != null)
         {
-            _waitingTurnOrder.AddAfter(unitWaitingTurnOrder, unit.OriginalUnit);
+            _waitingTurnOrder.AddAfter(unitWaitingTurnOrder, newUnit);
             _waitingTurnOrder.Remove(unitWaitingTurnOrder);
         }
     }

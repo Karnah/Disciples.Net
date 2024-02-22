@@ -8,7 +8,7 @@ namespace Disciples.Resources.Database.Dbf.Models;
 /// </summary>
 /// <remarks>
 /// Для атаки типа <see cref="UnitAttackType.Summon" />, идентификаторы вызываемых юнитов.
-/// Для атак типа <see cref="UnitAttackType.TransformSelf" /> и <see cref="UnitAttackType.TransformOther" /> идентификаторы во что идёт превращение.
+/// Для атак типа <see cref="UnitAttackType.TransformSelf" /> и <see cref="UnitAttackType.TransformEnemy" /> идентификаторы во что идёт превращение.
 /// </remarks>>
 [Table("Gtransf")]
 public class UnitAttackSummonTransform : IEntity

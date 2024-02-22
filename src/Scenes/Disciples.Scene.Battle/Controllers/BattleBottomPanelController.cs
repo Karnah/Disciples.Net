@@ -6,7 +6,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Constants;
-using Disciples.Scene.Battle.Controllers.UnitActions;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -19,7 +19,7 @@ namespace Disciples.Scene.Battle.Controllers;
 internal class BattleBottomPanelController : BaseSupportLoading
 {
     private readonly IBattleGameObjectContainer _gameObjectContainer;
-    private readonly BattleUnitActionController _unitActionController;
+    private readonly BattleUnitActionFactory _unitActionFactory;
     private readonly BattleContext _context;
     private readonly IGameController _gameController;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
@@ -41,13 +41,13 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     public BattleBottomPanelController(
         IBattleGameObjectContainer gameObjectContainer,
-        BattleUnitActionController unitActionController,
+        BattleUnitActionFactory unitActionFactory,
         BattleContext context,
         IGameController gameController,
         IBattleInterfaceProvider battleInterfaceProvider)
     {
         _gameObjectContainer = gameObjectContainer;
-        _unitActionController = unitActionController;
+        _unitActionFactory = unitActionFactory;
         _context = context;
         _gameController = gameController;
         _battleInterfaceProvider = battleInterfaceProvider;
@@ -77,7 +77,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     {
         UpdateCurrentUnitPortrait();
 
-        if (_context.UnitAction is MainAttackUnitAction mainAttackUnitAction)
+        if (_context.UnitAction is MainAttackActionController mainAttackUnitAction)
             UpdateTargetUnitPortrait(mainAttackUnitAction.TargetBattleUnit);
     }
 
@@ -160,7 +160,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteDefend()
     {
-        _unitActionController.Defend();
+        _unitActionFactory.Defend();
     }
 
     /// <summary>
@@ -168,7 +168,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteRetreat()
     {
-        _unitActionController.Retreat();
+        _unitActionFactory.Retreat();
     }
 
     /// <summary>
@@ -176,7 +176,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteWait()
     {
-        _unitActionController.Wait();
+        _unitActionFactory.Wait();
     }
 
     /// <summary>

@@ -68,9 +68,6 @@ internal class BattleUnit : GameObject
         Unit = unit;
         IsAttacker = unitSquadPosition == BattleSquadPosition.Attacker;
         SquadPosition = unitSquadPosition;
-        Direction = unitSquadPosition == BattleSquadPosition.Attacker
-            ? BattleDirection.Face
-            : BattleDirection.Back;
         UnitState = BattleUnitState.Waiting;
 
         var unitAnimationOffset = Unit.UnitType.IsSmall
@@ -147,7 +144,10 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Направление, куда смотрит юнит.
     /// </summary>
-    public BattleDirection Direction { get; set; }
+    public BattleDirection Direction =>
+        (IsAttacker && !Unit.Effects.IsRetreating) || (!IsAttacker && Unit.Effects.IsRetreating)
+            ? BattleDirection.Face
+            : BattleDirection.Back;
 
     /// <summary>
     /// Признак, что сейчас ход этого юнита.

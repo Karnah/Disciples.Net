@@ -3,6 +3,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -13,7 +14,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleContext _context;
     private readonly BattleAiProcessor _battleAiProcessor;
-    private readonly BattleUnitActionController _unitActionController;
+    private readonly BattleUnitActionFactory _unitActionFactory;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleController" />.
@@ -23,13 +24,13 @@ internal class BattleController : BaseSupportLoading, IBattleController
         BattleProcessor battleProcessor,
         BattleContext context,
         BattleAiProcessor battleAiProcessor,
-        BattleUnitActionController unitActionController)
+        BattleUnitActionFactory unitActionFactory)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _context = context;
         _battleAiProcessor = battleAiProcessor;
-        _unitActionController = unitActionController;
+        _unitActionFactory = unitActionFactory;
     }
 
     /// <summary>
@@ -174,24 +175,26 @@ internal class BattleController : BaseSupportLoading, IBattleController
         var command = _battleAiProcessor.GetAiCommand(
             CurrentBattleUnit.Unit,
             attackingSquad,
-            defendingSquad);
+            defendingSquad,
+            _context.UnitTurnQueue,
+            _context.RoundNumber);
 
         switch (command.CommandType)
         {
             case BattleCommandType.Attack:
-                _unitActionController.BeginMainAttack(_context.GetBattleUnit(command.Target!));
+                _unitActionFactory.BeginMainAttack(_context.GetBattleUnit(command.Target!));
                 break;
 
             case BattleCommandType.Defend:
-                _unitActionController.Defend();
+                _unitActionFactory.Defend();
                 break;
 
             case BattleCommandType.Wait:
-                _unitActionController.Wait();
+                _unitActionFactory.Wait();
                 break;
 
             case BattleCommandType.Retreat:
-                _unitActionController.Retreat();
+                _unitActionFactory.Retreat();
                 break;
 
             default:
@@ -207,7 +210,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         CurrentBattleUnit = _context.GetBattleUnit(unit);
 
         // Запускаем обработку эффектов юнита.
-        _unitActionController.UnitTurn();
+        _unitActionFactory.UnitTurn();
 
         // Если после этого не появилось нового действия, значит нет эффектов для обработки.
         if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)

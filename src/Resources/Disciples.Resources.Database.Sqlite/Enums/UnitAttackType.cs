@@ -83,7 +83,7 @@ public enum UnitAttackType
     /// <summary>
     /// Понизить уровень.
     /// </summary>
-    DrainLevel = 18,
+    ReduceLevel = 18,
 
     /// <summary>
     /// Дать дополнительную атаку.
@@ -101,9 +101,9 @@ public enum UnitAttackType
     TransformSelf = 21,
 
     /// <summary>
-    /// Превратить другого.
+    /// Превратить врага.
     /// </summary>
-    TransformOther = 22,
+    TransformEnemy = 22,
 
     /// <summary>
     /// Ожог.

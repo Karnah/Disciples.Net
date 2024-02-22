@@ -28,7 +28,6 @@ public class UnitEffects
     /// </summary>
     public bool IsDefended { get; set; }
 
-    // TODO Переделать на эффект страха?
     /// <summary>
     /// Признак, что юнит собирается сбежать.
     /// </summary>
@@ -55,11 +54,6 @@ public class UnitEffects
     /// </summary>
     public void AddBattleEffect(UnitBattleEffect battleEffect)
     {
-        // Эффект от типа атаки должен быть только один.
-        // Но для наложение защиты это работает по-другому, так как может быть несколько эффектов на разные типы защиты.
-        if (battleEffect.AttackType != UnitAttackType.GiveProtection)
-            Remove(battleEffect);
-
         _battleEffects.Add(battleEffect);
     }
 
@@ -95,17 +89,17 @@ public class UnitEffects
     {
         var protectionEffect = _battleEffects.FirstOrDefault(be => be.AttackType == UnitAttackType.GiveProtection
                                                                    && be.AttackTypeProtections.Contains(attackTypeProtection));
-        if (protectionEffect != null)
+        if (protectionEffect == null)
+            return;
+
+        if (protectionEffect.AttackTypeProtections.Count == 1
+            && protectionEffect.AttackSourceProtections.Count == 0)
         {
-            if (protectionEffect.AttackTypeProtections.Count == 1
-                && protectionEffect.AttackSourceProtections.Count == 0)
-            {
-                Remove(protectionEffect);
-            }
-            else
-            {
-                protectionEffect.AttackTypeProtections.Remove(attackTypeProtection);
-            }
+            Remove(protectionEffect);
+        }
+        else
+        {
+            protectionEffect.AttackTypeProtections.Remove(attackTypeProtection);
         }
     }
 
@@ -116,26 +110,18 @@ public class UnitEffects
     {
         var protectionEffect = _battleEffects.FirstOrDefault(be => be.AttackType == UnitAttackType.GiveProtection
                                                                    && be.AttackSourceProtections.Contains(attackSourceProtection));
-        if (protectionEffect != null)
-        {
-            if (protectionEffect.AttackTypeProtections.Count == 0
-                && protectionEffect.AttackSourceProtections.Count == 1)
-            {
-                Remove(protectionEffect);
-            }
-            else
-            {
-                protectionEffect.AttackSourceProtections.Remove(attackSourceProtection);
-            }
-        }
-    }
+        if (protectionEffect == null)
+            return;
 
-    /// <summary>
-    /// Имеются ли эффекты, которые могут быть вылечены.
-    /// </summary>
-    public bool HasCurableEffects()
-    {
-        return _battleEffects.Any(e => e.CanCure());
+        if (protectionEffect.AttackTypeProtections.Count == 0
+            && protectionEffect.AttackSourceProtections.Count == 1)
+        {
+            Remove(protectionEffect);
+        }
+        else
+        {
+            protectionEffect.AttackSourceProtections.Remove(attackSourceProtection);
+        }
     }
 
     /// <summary>
@@ -144,6 +130,14 @@ public class UnitEffects
     public IReadOnlyList<UnitBattleEffect> GetBattleEffects()
     {
         return _battleEffects.ToArray();
+    }
+
+    /// <summary>
+    /// Получить эффекты указанного типа, воздействующие на юнита.
+    /// </summary>
+    public IReadOnlyList<UnitBattleEffect> GetBattleEffects(UnitAttackType effectAttackType)
+    {
+        return _battleEffects.Where(be => be.AttackType == effectAttackType).ToArray();
     }
 
     /// <summary>
@@ -228,15 +222,5 @@ public class UnitEffects
         }
 
         return modifier - 1M;
-    }
-
-    /// <summary>
-    /// Удалить все действующие эффекты.
-    /// </summary>
-    public void Clear()
-    {
-        IsDefended = false;
-        IsRetreating = false;
-        _battleEffects.Clear();
     }
 }
