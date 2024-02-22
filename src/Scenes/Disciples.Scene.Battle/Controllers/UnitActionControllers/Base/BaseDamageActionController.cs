@@ -1,9 +1,9 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Resources.Sounds.Models;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
@@ -71,38 +71,29 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// <inheritdoc />
     public override bool ShouldPassTurn { get; protected set; }
 
+    /// <inheritdoc />
+    protected override void OnProcessorActionCompleted(IUnitActionProcessor unitActionProcessor, BattleUnit targetBattleUnit)
+    {
+        base.OnProcessorActionCompleted(unitActionProcessor, targetBattleUnit);
+
+        if (unitActionProcessor is IUnitEffectProcessor unitEffectProcessor)
+            OnEffectProcessorActionCompleted(unitEffectProcessor, targetBattleUnit);
+        else if (unitActionProcessor is UnitDeathProcessor unitDeathProcessor)
+            OnUnitDeathProcessorCompleted(unitDeathProcessor, targetBattleUnit);
+    }
+
     #region Очередь эффектов
 
     /// <summary>
-    /// Сформировать очередь из обработчиков эффектов.
+    /// Добавить в очередь обработчики эффектов.
     /// </summary>
-    protected void AddEffectProcessorsQueue(IReadOnlyList<IUnitEffectProcessor> effectProcessors)
+    protected void EnqueueEffectProcessors(IReadOnlyList<IUnitEffectProcessor> effectProcessors)
     {
         foreach (var unitEffectProcessor in effectProcessors)
-        {
             _unitEffectProcessors.Enqueue(unitEffectProcessor);
-        }
 
         if (!_isUnitEffectProcessing)
             ProcessNextBattleEffect();
-    }
-
-    /// <inheritdoc />
-    protected override BattleUnitPortraitEventData GetProcessorPortraitEventData(IUnitActionProcessor unitActionProcessor)
-    {
-        if (unitActionProcessor is AttackEffectProcessor attackEffectProcessor)
-            return new BattleUnitPortraitEventData(attackEffectProcessor.EffectResult);
-
-        return base.GetProcessorPortraitEventData(unitActionProcessor);
-    }
-
-    /// <inheritdoc />
-    protected override void ProcessCompletedAction(IUnitActionProcessor unitActionProcessor, BattleUnit targetBattleUnit)
-    {
-        base.ProcessCompletedAction(unitActionProcessor, targetBattleUnit);
-
-        if (unitActionProcessor is IUnitEffectProcessor unitEffectProcessor)
-            OnEffectProcessingCompleted(unitEffectProcessor, targetBattleUnit);
     }
 
     /// <summary>
@@ -127,7 +118,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// Добавить действие для обработки эффекта.
     /// </summary>
     /// <returns>
-    /// <see langword="true" />, если обработчик требует действия.
+    /// <see langword="true" />, если обработчик требует ожидания.
     /// <see langword="false" />, если обработчик выполняется мгновенно.
     /// </returns>
     protected virtual bool TryAddEffectProcessorAction(IUnitEffectProcessor effectProcessor, BattleUnit targetBattleUnit)
@@ -164,10 +155,19 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         return false;
     }
 
+    /// <inheritdoc />
+    protected override BattleUnitPortraitEventData GetProcessorPortraitEventData(IUnitActionProcessor unitActionProcessor)
+    {
+        if (unitActionProcessor is AttackEffectProcessor attackEffectProcessor)
+            return new BattleUnitPortraitEventData(attackEffectProcessor.EffectResult);
+
+        return base.GetProcessorPortraitEventData(unitActionProcessor);
+    }
+
     /// <summary>
     /// Обработать завершение обработки эффекта.
     /// </summary>
-    private void OnEffectProcessingCompleted(IUnitEffectProcessor unitEffectProcessor, BattleUnit targetBattleUnit)
+    private void OnEffectProcessorActionCompleted(IUnitEffectProcessor unitEffectProcessor, BattleUnit targetBattleUnit)
     {
         if (targetBattleUnit.Unit.HitPoints == 0 && !targetBattleUnit.Unit.IsDead)
         {
@@ -241,22 +241,21 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// <summary>
     /// Обработать смерть юнита.
     /// </summary>
-    protected virtual void ProcessUnitDeath(BattleUnit targetBattleUnit)
+    protected void ProcessUnitDeath(BattleUnit targetBattleUnit)
     {
         var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
         var effectsProcessor = _battleProcessor.GetForceCompleteEffectProcessors(attackProcessorContext);
         var unitDeathProcessor = new UnitDeathProcessor(targetBattleUnit.Unit, effectsProcessor);
-        unitDeathProcessor.ProcessBeginAction();
 
+        AddProcessorAction(unitDeathProcessor);
         AddUnitDeathAnimationAction(targetBattleUnit);
-        AddAction(new DelayBattleAction(COMMON_ACTION_DELAY, () => ProcessUnitDeathCompleted(unitDeathProcessor, targetBattleUnit)));
         PlayUnitDeathSound();
     }
 
     /// <summary>
     /// Обработать завершение смерти юнита.
     /// </summary>
-    protected virtual void ProcessUnitDeathCompleted(UnitDeathProcessor unitDeathProcessor, BattleUnit targetBattleUnit)
+    private void OnUnitDeathProcessorCompleted(UnitDeathProcessor unitDeathProcessor, BattleUnit targetBattleUnit)
     {
         unitDeathProcessor.ProcessCompletedAction();
 
@@ -282,7 +281,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
             animationPoint.Y,
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
-        AddAction(new AnimationBattleAction(deathAnimation.AnimationComponent));
+        AddActionDelay(new BattleAnimationDelay(deathAnimation.AnimationComponent));
     }
 
     /// <summary>
@@ -318,7 +317,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
             animationPoint.Y,
             battleUnit.AnimationComponent.Layer + 2,
             false);
-        AddAction(new AnimationBattleAction(animation.AnimationComponent));
+        AddActionDelay(new BattleAnimationDelay(animation.AnimationComponent));
     }
 
     /// <summary>

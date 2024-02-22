@@ -1,9 +1,9 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
@@ -54,7 +54,7 @@ internal class BeginUnitTurnController : BaseDamageActionController
                 : _context.AttackingSquad,
             _context.UnitTurnQueue,
             _context.RoundNumber);
-        AddEffectProcessorsQueue(unitEffectProcessors);
+        EnqueueEffectProcessors(unitEffectProcessors);
     }
 
     /// <inheritdoc />
@@ -97,7 +97,7 @@ internal class BeginUnitTurnController : BaseDamageActionController
 
             // Добавляем небольшую задержку, чтобы действие не закончилось сразу.
             // Это позволит обработать ShouldPassTurn для контроллера битвы.
-            AddAction(new DelayBattleAction(1));
+            AddActionDelay(new BattleTimerDelay(1));
         }
 
         return base.TryAddEffectProcessorAction(effectProcessor, targetBattleUnit);

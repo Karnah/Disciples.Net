@@ -1,22 +1,21 @@
-﻿namespace Disciples.Scene.Battle.Models.BattleActions;
+﻿namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 
 /// <summary>
-/// Базовое действие, продолжительность которого зависит от времени.
+/// Ожидание определённого промежутка времени.
 /// </summary>
-internal abstract class BaseTimerBattleAction : IBattleAction
+internal class BattleTimerDelay : IBattleActionDelay
 {
     private readonly long _duration;
     private readonly Action? _onCompleted;
     private long _time;
 
     /// <summary>
-    /// Создать объект типа <see cref="BaseTimerBattleAction" />.
+    /// Создать объект типа <see cref="BattleTimerDelay" />.
     /// </summary>
-    protected BaseTimerBattleAction(long duration, Action? onCompleted = null)
+    public BattleTimerDelay(long delay, Action? onCompletedAction = null)
     {
-        _duration = duration;
-        _onCompleted = onCompleted;
-        _time = 0;
+        _duration = delay;
+        _onCompleted = onCompletedAction;
     }
 
     /// <inheritdoc />

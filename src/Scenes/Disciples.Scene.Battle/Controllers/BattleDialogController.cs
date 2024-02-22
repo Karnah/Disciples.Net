@@ -2,6 +2,7 @@
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Models;
+using Disciples.Scene.Battle.Dialogs;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;

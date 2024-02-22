@@ -2,10 +2,10 @@
 using Disciples.Engine.Common.Enums;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
@@ -75,11 +75,13 @@ internal class MainAttackActionController : BaseAttackActionController
         var sounds = CurrentBattleUnit.SoundComponent.Sounds;
 
         // Проигрываем музыку на определённом кадре анимации атаки.
-        AddAction(new AnimationBattleAction(animationComponent, sounds.BeginAttackSoundFrameIndex - 1, PlayAttackSound));
+        AddActionDelay(new BattleAnimationDelay(animationComponent, sounds.BeginAttackSoundFrameIndex - 1,
+            PlayAttackSound));
 
         // Первую часть анимации юнит замахивается для удара, сам удар происходит на кадре EndAttackSoundFrameIndex.
         // Именно в этот момент идёт расчет шанса попадания и урона.
-        AddAction(new AnimationBattleAction(animationComponent, sounds.EndAttackSoundFrameIndex - 1, ProcessAttack));
+        AddActionDelay(new BattleAnimationDelay(animationComponent, sounds.EndAttackSoundFrameIndex - 1,
+            ProcessAttack));
     }
 
     /// <inheritdoc />
@@ -121,7 +123,7 @@ internal class MainAttackActionController : BaseAttackActionController
             _unitActionFactory.BeginSecondaryAttack(secondaryAttackUnits, ShouldPassTurn);
 
         // В любом случае дожидаемся завершения анимации атаки.
-        AddAction(new AnimationBattleAction(CurrentBattleUnit.AnimationComponent, OnAttackerAnimationCompleted));
+        AddActionDelay(new BattleAnimationDelay(CurrentBattleUnit.AnimationComponent, OnAttackerAnimationCompleted));
     }
 
     /// <inheritdoc />
@@ -129,21 +131,16 @@ internal class MainAttackActionController : BaseAttackActionController
     {
         base.AddSuccessAttackProcessorAction(unitSuccessAttackProcessor);
 
-        var areaAnimationAction = GetAttackAreaAnimationAction(CurrentBattleUnit, TargetBattleUnit);
-        if (areaAnimationAction != null)
-            AddAction(areaAnimationAction);
-
+        AddAttackAreaAnimationAction(CurrentBattleUnit, TargetBattleUnit);
         PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
     }
 
     /// <inheritdoc />
-    protected override void ProcessBeginActionAttackResult(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
+    protected override void ProcessBeginSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
-        base.ProcessBeginActionAttackResult(targetBattleUnit, attackResult);
+        base.ProcessBeginSuccessAttack(targetBattleUnit, attackResult);
 
-        var targetUnitAnimationAction = GetAttackTargetAnimationAction(CurrentBattleUnit, targetBattleUnit);
-        if (targetUnitAnimationAction != null)
-            AddAction(targetUnitAnimationAction);
+        AddAttackTargetAnimationAction(CurrentBattleUnit, targetBattleUnit);
     }
 
     /// <summary>
@@ -155,16 +152,16 @@ internal class MainAttackActionController : BaseAttackActionController
     }
 
     /// <summary>
-    /// Получить анимацию атаки, которая применяется к площади.
+    /// Добавить анимацию атаки, которая применяется к площади.
     /// </summary>
-    private AnimationBattleAction? GetAttackAreaAnimationAction(BattleUnit attackerBattleUnit, BattleUnit targetBattleUnit)
+    private void AddAttackAreaAnimationAction(BattleUnit attackerBattleUnit, BattleUnit targetBattleUnit)
     {
         var targetAnimation = attackerBattleUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
         var areaFrames = targetBattleUnit.IsAttacker
             ? targetAnimation?.AttackerAreaFrames
             : targetAnimation?.DefenderAreaFrames;
         if (areaFrames == null)
-            return null;
+            return;
 
         // Центр анимации будет приходиться на середину между первым и вторым рядом.
         var isTargetAttacker = targetBattleUnit.IsAttacker;
@@ -184,20 +181,21 @@ internal class MainAttackActionController : BaseAttackActionController
                 ? BattleLayers.ABOVE_ALL_ATTACKER_UNITS_LAYER
                 : BattleLayers.ABOVE_ALL_DEFENDER_UNITS_LAYER,
             false);
-        return new AnimationBattleAction(areaAnimation.AnimationComponent);
+        var animationDelay = new BattleAnimationDelay(areaAnimation.AnimationComponent);
+        AddActionDelay(animationDelay);
     }
 
     /// <summary>
-    /// Получить анимацию атаки, которая применяется к юниту-цели.
+    /// Добавить анимацию атаки, которая применяется к юниту-цели.
     /// </summary>
-    private AnimationBattleAction? GetAttackTargetAnimationAction(BattleUnit attackerBattleUnit, BattleUnit targetBattleUnit)
+    private void AddAttackTargetAnimationAction(BattleUnit attackerBattleUnit, BattleUnit targetBattleUnit)
     {
         var attackerTargetAnimation = attackerBattleUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
         var targetAnimationFrames = targetBattleUnit.IsAttacker
             ? attackerTargetAnimation?.AttackerUnitFrames
             : attackerTargetAnimation?.DefenderUnitFrames;
         if (targetAnimationFrames == null)
-            return null;
+            return;
 
         var animationPoint = targetBattleUnit.AnimationComponent.AnimationPoint;
         var targetAnimation = _battleGameObjectContainer.AddAnimation(
@@ -206,6 +204,7 @@ internal class MainAttackActionController : BaseAttackActionController
             animationPoint.Y,
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
-        return new AnimationBattleAction(targetAnimation.AnimationComponent);
+        var animationDelay = new BattleAnimationDelay(targetAnimation.AnimationComponent);
+        AddActionDelay(animationDelay);
     }
 }

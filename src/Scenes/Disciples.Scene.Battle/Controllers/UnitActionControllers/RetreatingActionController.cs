@@ -1,7 +1,7 @@
 ﻿using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActionControllers;
@@ -44,6 +44,6 @@ internal class RetreatingActionController : BaseUnitActionController
 
         // Добавляем небольшую задержку, чтобы действие не закончилось сразу.
         // Это позволит обработать ShouldPassTurn для контроллера битвы.
-        AddAction(new DelayBattleAction(1));
+        AddActionDelay(new BattleTimerDelay(1));
     }
 }

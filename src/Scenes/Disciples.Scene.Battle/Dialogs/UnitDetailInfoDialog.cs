@@ -12,8 +12,9 @@ using Disciples.Scene.Battle.Providers;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Constants;
+using Disciples.Scene.Battle.Controllers;
 
-namespace Disciples.Scene.Battle.Controllers;
+namespace Disciples.Scene.Battle.Dialogs;
 
 /// <summary>
 /// Диалог отображения информации о юните.
@@ -78,7 +79,7 @@ internal class UnitDetailInfoDialog : BaseDialog
         unitPortrait.VerticalAlignment = VerticalAlignment.Center;
 
         var unitName = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.NAME_TEXT_BLOCK);
-        unitName.Text = new TextContainer(new []{ new TextPiece(new TextStyle { FontWeight = FontWeight.Bold }, _unit.UnitType.Name) });
+        unitName.Text = new TextContainer(new[] { new TextPiece(new TextStyle { FontWeight = FontWeight.Bold }, _unit.UnitType.Name) });
 
         var unitDescription = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.DESCRIPTION_TEXT_BLOCK);
         unitDescription.Text = new TextContainer(_unit.UnitType.Description);
@@ -142,7 +143,7 @@ internal class UnitDetailInfoDialog : BaseDialog
     private TextContainer ReplacePlaceholders(TextContainer value, Unit unit)
     {
         return value
-            .ReplacePlaceholders(new []
+            .ReplacePlaceholders(new[]
             {
                 ("%LEVEL%", new TextContainer(unit.Level.ToString())),
                 ("%XP%", new TextContainer($"{unit.Experience} / {unit.UnitType.XpNext}")),

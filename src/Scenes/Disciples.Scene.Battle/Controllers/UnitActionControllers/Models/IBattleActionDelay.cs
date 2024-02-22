@@ -1,12 +1,12 @@
-﻿namespace Disciples.Scene.Battle.Models.BattleActions;
+﻿namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 
 /// <summary>
-/// Действие на поле боя.
+/// Ожидание перед выполнением какого-то действия.
 /// </summary>
-internal interface IBattleAction
+internal interface IBattleActionDelay
 {
     /// <summary>
-    /// Признак, что действие завершилось.
+    /// Признак, что ожидание завершилось.
     /// </summary>
     bool IsCompleted { get; }
 

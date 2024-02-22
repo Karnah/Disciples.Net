@@ -1,8 +1,8 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
@@ -71,14 +71,14 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
         foreach (var attackResult in unitSuccessAttackProcessor.AttackResults)
         {
             var targetBattleUnit = _context.GetBattleUnit(attackResult.Context.TargetUnit);
-            ProcessBeginActionAttackResult(targetBattleUnit, attackResult);
+            ProcessBeginSuccessAttack(targetBattleUnit, attackResult);
         }
 
         // Добавляем анимации исцеления вампиризмом.
         foreach (var drainLifeHealUnit in unitSuccessAttackProcessor.DrainLifeHealUnits)
             AddDrainLifeHealAnimationAction(_context.GetBattleUnit(drainLifeHealUnit));
 
-        AddAction(new DelayBattleAction(COMMON_ACTION_DELAY,
+        AddActionDelay(new BattleTimerDelay(COMMON_ACTION_DELAY,
             () => OnSuccessAttackProcessorActionCompleted(unitSuccessAttackProcessor)));
     }
 
@@ -92,14 +92,14 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
         foreach (var attackResult in unitSuccessAttackProcessor.AttackResults)
         {
             var targetBattleUnit = _context.GetBattleUnit(attackResult.Context.TargetUnit);
-            ProcessCompleteActionAttackResult(targetBattleUnit, attackResult);
+            ProcessCompleteSuccessAttack(targetBattleUnit, attackResult);
         }
     }
 
     /// <summary>
-    /// Обработать начало атаки.
+    /// Обработать начало атаки на конкретного юнита.
     /// </summary>
-    protected virtual void ProcessBeginActionAttackResult(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
+    protected virtual void ProcessBeginSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
         var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
         targetUnitPortrait?.ProcessBeginUnitPortraitEvent(new BattleUnitPortraitEventData(attackResult));
@@ -112,7 +112,8 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
             case UnitAttackType.DrainLifeOverflow:
             {
                 targetBattleUnit.UnitState = BattleUnitState.TakingDamage;
-                AddAction(new AnimationBattleAction(targetBattleUnit.AnimationComponent, () => OnUnitDamagedAnimationCompleted(targetBattleUnit)));
+                AddActionDelay(new BattleAnimationDelay(targetBattleUnit.AnimationComponent,
+                    () => OnUnitDamagedAnimationCompleted(targetBattleUnit)));
                 PlayRandomDamagedSound(targetBattleUnit.SoundComponent.Sounds.DamagedSounds);
                 break;
             }
@@ -138,9 +139,9 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
     }
 
     /// <summary>
-    /// Обработчик завершения атаки.
+    /// Обработать завершение атаки на конкретного юнита.
     /// </summary>
-    private void ProcessCompleteActionAttackResult(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
+    private void ProcessCompleteSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
         var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
         targetUnitPortrait?.ProcessCompletedUnitPortraitEvent();
@@ -158,7 +159,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
                 var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
                 var effectProcessors =
                     _battleProcessor.GetForceCompleteEffectProcessors(attackProcessorContext, attackResult.CuredEffects);
-                AddEffectProcessorsQueue(effectProcessors);
+                EnqueueEffectProcessors(effectProcessors);
                 break;
             }
 
@@ -198,7 +199,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
             animationPoint.Y,
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
-        AddAction(new AnimationBattleAction(drainLifeHealAnimation.AnimationComponent));
+        AddActionDelay(new BattleAnimationDelay(drainLifeHealAnimation.AnimationComponent));
     }
 
     #endregion

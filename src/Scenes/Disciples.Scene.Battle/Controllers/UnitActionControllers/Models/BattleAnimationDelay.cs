@@ -1,18 +1,18 @@
 ﻿using Disciples.Engine.Common.Components;
 
-namespace Disciples.Scene.Battle.Models.BattleActions;
+namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 
 /// <summary>
-/// Действие, продолжительность которого зависит от кадра анимации.
+/// Ожидание определённого кадра анимации.
 /// </summary>
-internal class AnimationBattleAction : IBattleAction
+internal class BattleAnimationDelay : IBattleActionDelay
 {
     private readonly Action? _onCompleted;
 
     /// <summary>
-    /// Создать объект типа <see cref="AnimationBattleAction" />.
+    /// Создать объект типа <see cref="BattleAnimationDelay" />.
     /// </summary>
-    public AnimationBattleAction(BaseAnimationComponent animationComponent, int endFrameIndex, Action? onCompleted = null)
+    public BattleAnimationDelay(BaseAnimationComponent animationComponent, int endFrameIndex, Action? onCompleted = null)
     {
         AnimationComponent = animationComponent;
         _onCompleted = onCompleted;
@@ -22,7 +22,7 @@ internal class AnimationBattleAction : IBattleAction
     }
 
     /// <inheritdoc />
-    public AnimationBattleAction(BaseAnimationComponent animationComponent, Action? onCompleted = null) : this(animationComponent, GetAnimationComponentEndIndex(animationComponent), onCompleted)
+    public BattleAnimationDelay(BaseAnimationComponent animationComponent, Action? onCompleted = null) : this(animationComponent, GetAnimationComponentEndIndex(animationComponent), onCompleted)
     {
     }
 

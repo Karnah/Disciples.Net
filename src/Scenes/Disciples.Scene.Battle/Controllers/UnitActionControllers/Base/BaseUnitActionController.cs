@@ -1,10 +1,10 @@
 ﻿using Disciples.Engine.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;
+using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Models.BattleActions;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 
 namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
@@ -21,7 +21,7 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly BattleSoundController _soundController;
 
-    private readonly BattleActionContainer _actions = new();
+    private readonly BattleActionDelayContainer _delays = new();
     private readonly List<IPlayingSound> _playingSounds = new();
 
     /// <summary>
@@ -38,15 +38,10 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     }
 
     /// <inheritdoc />
-    public bool IsCompleted { get; private set; }
+    public bool IsCompleted => _delays.IsCompleted;
 
     /// <inheritdoc />
     public abstract bool ShouldPassTurn { get; protected set; }
-
-    /// <summary>
-    /// Признак, что вообще в очереди никаких действий.
-    /// </summary>
-    private bool IsNoActions => _actions.IsNoActions;
 
     /// <summary>
     /// Текущий юнит.
@@ -61,38 +56,33 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
 
         InitializeInternal();
 
-        // Если после инициализации нет действий, то больше ничего делать будет не нужно.
-        if (IsNoActions)
-        {
-            IsCompleted = true;
+        // Если после инициализации ничего ожидать не нужно,
+        // То действие сразу завершается.
+        if (IsCompleted)
             OnCompleted();
-        }
     }
 
     /// <inheritdoc />
     public void BeforeSceneUpdate()
     {
-        _actions.BeforeSceneUpdate(_context.TicksCount);
+        _delays.BeforeSceneUpdate(_context.TicksCount);
     }
 
     /// <inheritdoc />
     public void AfterSceneUpdate()
     {
-        foreach (var completedAction in _actions.Completed)
+        foreach (var completedAction in _delays.Completed)
         {
             completedAction.ProcessCompleted();
         }
 
-        _actions.AfterSceneUpdate();
+        _delays.AfterSceneUpdate();
 
-        if (IsNoActions)
+        if (IsCompleted)
         {
-            IsCompleted = true;
-
+            // BUG Не нужно останавливать воспроизведение, так как некоторые звуки не успевают проиграться.
             foreach (var playingSound in _playingSounds)
-            {
                 playingSound.Stop();
-            }
 
             OnCompleted();
         }
@@ -116,11 +106,41 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     }
 
     /// <summary>
-    /// Добавить действие.
+    /// Добавить ожидание действия.
     /// </summary>
-    protected void AddAction(IBattleAction battleAction)
+    protected void AddActionDelay(IBattleActionDelay battleAction)
     {
-        _actions.Add(battleAction);
+        _delays.Add(battleAction);
+    }
+
+    /// <summary>
+    /// Начать обработку действия.
+    /// </summary>
+    protected virtual void AddProcessorAction(IUnitActionProcessor unitActionProcessor)
+    {
+        unitActionProcessor.ProcessBeginAction();
+
+        var targetBattleUnit = _context.GetBattleUnit(unitActionProcessor.TargetUnit);
+        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
+        var portraitEventData = GetProcessorPortraitEventData(unitActionProcessor);
+        targetUnitPortraitObject?.ProcessBeginUnitPortraitEvent(portraitEventData);
+
+        AddActionDelay(new BattleTimerDelay(COMMON_ACTION_DELAY,
+            () => OnProcessorActionCompleted(unitActionProcessor, targetBattleUnit)));
+    }
+
+    /// <summary>
+    /// Обработать завершение действия.
+    /// </summary>
+    protected virtual void OnProcessorActionCompleted(IUnitActionProcessor unitActionProcessor, BattleUnit targetBattleUnit)
+    {
+        unitActionProcessor.ProcessCompletedAction();
+
+        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
+        targetUnitPortraitObject?.ProcessCompletedUnitPortraitEvent();
+
+        // После отображения действия на портрете, всегда есть задержка в 250 мс.
+        AddActionDelay(new BattleTimerDelay(AFTER_ACTION_DELAY));
     }
 
     /// <summary>
@@ -129,43 +149,6 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     protected virtual BattleUnitPortraitEventData GetProcessorPortraitEventData(IUnitActionProcessor unitActionProcessor)
     {
         return new BattleUnitPortraitEventData(unitActionProcessor.ActionType);
-    }
-
-    /// <summary>
-    /// Добавить обработчик действия.
-    /// </summary>
-    protected virtual void AddProcessorAction(IUnitActionProcessor unitActionProcessor)
-    {
-        var targetBattleUnit = _context.GetBattleUnit(unitActionProcessor.TargetUnit);
-        AddProcessorAction(unitActionProcessor, targetBattleUnit, GetProcessorPortraitEventData(unitActionProcessor));
-    }
-
-    /// <summary>
-    /// Добавить обработчик действия.
-    /// </summary>
-    private void AddProcessorAction(IUnitActionProcessor unitActionProcessor, BattleUnit targetBattleUnit, BattleUnitPortraitEventData portraitEventData)
-    {
-        unitActionProcessor.ProcessBeginAction();
-
-        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        targetUnitPortraitObject?.ProcessBeginUnitPortraitEvent(portraitEventData);
-
-        AddAction(new DelayBattleAction(COMMON_ACTION_DELAY,
-            () => ProcessCompletedAction(unitActionProcessor, targetBattleUnit)));
-    }
-
-    /// <summary>
-    /// Обработать начало действия.
-    /// </summary>
-    protected virtual void ProcessCompletedAction(IUnitActionProcessor unitActionProcessor, BattleUnit targetBattleUnit)
-    {
-        unitActionProcessor.ProcessCompletedAction();
-
-        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        targetUnitPortraitObject?.ProcessCompletedUnitPortraitEvent();
-
-        // После отображения действия на портрете, всегда есть задержка в 250 мс.
-        AddAction(new DelayBattleAction(AFTER_ACTION_DELAY));
     }
 
     /// <summary>
