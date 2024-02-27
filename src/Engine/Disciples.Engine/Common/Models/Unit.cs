@@ -101,7 +101,7 @@ public class Unit
     /// <summary>
     /// Модификатор брони.
     /// </summary>
-    public int ArmorModifier => Effects.GetArmorModifier();
+    public int ArmorModifier => Effects.GetArmorBonus();
 
     /// <summary>
     /// Текущая броня юнита.
@@ -109,62 +109,23 @@ public class Unit
     public int Armor => BaseArmor + ArmorModifier;
 
     /// <summary>
-    /// Базовое значение силы первой атаки.
+    /// Основная атака юнита.
     /// </summary>
-    public int MainAttackBasePower => GetAttackBasePower(UnitType.MainAttack);
+    public CalculatedUnitAttack MainAttack => CalculateUnitAttack(UnitType.MainAttack, true);
 
     /// <summary>
-    /// Модификатор значения силы первой атаки.
+    /// Альтернативная основная атака юнита.
     /// </summary>
-    public int MainAttackPowerModifier => UnitType.MainAttack.AttackType switch
-    {
-        UnitAttackType.Heal => 0,
-        UnitAttackType.IncreaseDamage => 0,
-        _ => (int)(MainAttackBasePower * Effects.GetDamagePowerModifier())
-    };
+    public CalculatedUnitAttack? AlternativeAttack => UnitType.MainAttack.AlternativeAttack == null
+        ? null
+        : CalculateUnitAttack(UnitType.MainAttack.AlternativeAttack, true);
 
     /// <summary>
-    /// Текущее значение силы первой атаки.
+    /// Вторая атака юнита.
     /// </summary>
-    public int MainAttackPower => MainAttackBasePower + MainAttackPowerModifier;
-
-    /// <summary>
-    /// Базовое значение силы второй атаки.
-    /// </summary>
-    /// <remarks>
-    /// На вторую атаку модификаторы не распространяются.
-    /// </remarks>
-    public int? SecondaryAttackPower => UnitType.SecondaryAttack != null
-        ? GetAttackBasePower(UnitType.SecondaryAttack)
-        : null;
-
-    /// <summary>
-    /// Базовое значение точности первой атаки.
-    /// </summary>
-    public int MainAttackBaseAccuracy => UnitType.MainAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
-
-    /// <summary>
-    /// Модификатор точности первой атаки.
-    /// </summary>
-    public int MainAttackAccuracyModifier => UnitType.MainAttack.AttackType switch
-    {
-        UnitAttackType.Heal => 0,
-        UnitAttackType.IncreaseDamage => 0,
-        _ => (int) (MainAttackBaseAccuracy * Effects.GetAccuracyModifier())
-    };
-
-    /// <summary>
-    /// Текущее значение точность первой атаки.
-    /// </summary>
-    public int MainAttackAccuracy => MainAttackBaseAccuracy + MainAttackAccuracyModifier;
-
-    /// <summary>
-    /// Значение точности второй атаки.
-    /// </summary>
-    /// <remarks>
-    /// На вторую атаку модификаторы не распространяются.
-    /// </remarks>
-    public int? SecondaryAttackAccuracy => UnitType.SecondaryAttack?.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy);
+    public CalculatedUnitAttack? SecondaryAttack => UnitType.SecondaryAttack == null
+        ? null
+        : CalculateUnitAttack(UnitType.SecondaryAttack, false);
 
     /// <summary>
     /// Базовая инициатива.
@@ -231,6 +192,19 @@ public class Unit
         .ToArray();
 
     /// <summary>
+    /// Вычислить атаку юнита.
+    /// </summary>
+    private CalculatedUnitAttack CalculateUnitAttack(UnitAttack unitAttack, bool shouldUseModifiers)
+    {
+        return new CalculatedUnitAttack(
+            GetAttackBasePower(unitAttack),
+            shouldUseModifiers ? GetAttackPowerModifier(unitAttack) : 0,
+            unitAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy),
+            shouldUseModifiers ? GetAttackAccuracyModifier(unitAttack) : 0,
+            unitAttack);
+    }
+
+    /// <summary>
     /// Получить силу атаки.
     /// </summary>
     private int GetAttackBasePower(UnitAttack attack)
@@ -243,6 +217,80 @@ public class Unit
             UnitAttackType.ReduceInitiative => GetReduceInitiativePercent(attack.AttackPowerLevel),
             _ => attack.DamagePower + CalculateLevelUpgrade(ulu => ulu.DamagePower)
         };
+    }
+
+    /// <summary>
+    /// Получить модификатор силы атаки.
+    /// </summary>
+    private decimal GetAttackPowerModifier(UnitAttack attack)
+    {
+        switch (attack.AttackType)
+        {
+            case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.DrainLifeOverflow:
+            case UnitAttackType.Blister:
+                return Effects.GetDamagePowerModifier();
+
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Heal:
+            case UnitAttackType.Fear:
+            case UnitAttackType.IncreaseDamage:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+            case UnitAttackType.Revive:
+            case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
+            case UnitAttackType.ReduceLevel:
+            case UnitAttackType.GiveAdditionalAttack:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.TransformEnemy:
+            case UnitAttackType.GiveProtection:
+            case UnitAttackType.ReduceArmor:
+            default:
+                return 0;
+        }
+    }
+
+    /// <summary>
+    /// Получить модификатор точности.
+    /// </summary>
+    private decimal GetAttackAccuracyModifier(UnitAttack attack)
+    {
+        switch (attack.AttackType)
+        {
+            case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Fear:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.DrainLifeOverflow:
+            case UnitAttackType.ReduceLevel:
+            case UnitAttackType.TransformEnemy:
+            case UnitAttackType.Blister:
+            case UnitAttackType.ReduceArmor:
+                return Effects.GetAccuracyModifier();
+
+            case UnitAttackType.Heal:
+            case UnitAttackType.IncreaseDamage:
+            case UnitAttackType.Revive:
+            case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
+            case UnitAttackType.GiveAdditionalAttack:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.GiveProtection:
+            default:
+                return 0;
+        }
     }
 
     /// <summary>

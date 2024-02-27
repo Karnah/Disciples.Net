@@ -29,9 +29,6 @@ internal class WardAttackProcessor : IAttackUnitActionProcessor
     public Unit TargetUnit => _targetUnit;
 
     /// <inheritdoc />
-    public IReadOnlyList<Unit> SecondaryAttackUnits => Array.Empty<Unit>();
-
-    /// <inheritdoc />
     public void ProcessBeginAction()
     {
     }

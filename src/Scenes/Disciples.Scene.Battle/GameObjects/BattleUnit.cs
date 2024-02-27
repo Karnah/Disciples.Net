@@ -139,7 +139,7 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Позиция отряда юнита.
     /// </summary>
-    public BattleSquadPosition SquadPosition { get; set; }
+    public BattleSquadPosition SquadPosition { get; }
 
     /// <summary>
     /// Направление, куда смотрит юнит.

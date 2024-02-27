@@ -32,22 +32,21 @@ internal class CureAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => true;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return CanAttackFriend(context) &&
                GetCurableEffects(context.TargetUnit).Any();
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack,
-        int? power, int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         var curableEffects = GetCurableEffects(context.TargetUnit).ToArray();
         return new CalculatedAttackResult(
             context,
             unitAttack.AttackType,
             unitAttack.AttackSource,
-            power,
+            unitAttack.TotalPower,
             curableEffects);
     }
 

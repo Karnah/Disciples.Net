@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using System.Diagnostics.CodeAnalysis;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine;
 using Disciples.Scene.Battle.Models;
@@ -34,13 +35,27 @@ internal class BattleProcessor
     /// </summary>
     /// <param name="attackingSquad">Атакующий отряд.</param>
     /// <param name="defendingSquad">Защищающийся отряд.</param>
-    public LinkedList<UnitTurnOrder> GetTurnOrder(Squad attackingSquad, Squad defendingSquad)
+    /// <param name="roundNumber">Номер раунда.</param>
+    public LinkedList<UnitTurnOrder> GetTurnOrder(Squad attackingSquad, Squad defendingSquad, int roundNumber)
     {
-        return new LinkedList<UnitTurnOrder>(
-            attackingSquad.Units
-                .Concat(defendingSquad.Units)
-                .Where(u => !u.IsDeadOrRetreated)
-                .Select(u => new UnitTurnOrder(u, u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE))));
+        var allAvailableUnits = attackingSquad.Units
+            .Concat(defendingSquad.Units)
+            .Where(u => !u.IsDeadOrRetreated)
+            .ToArray();
+        var turnOrders = allAvailableUnits
+            .Select(u => new UnitTurnOrder(u, u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE)));
+
+        // На первом ходу доппельгангер получает дополнительный ход, раньше всех других юнитов.
+        // TODO В этот ход доппельгангер не может отступить и ждать, т.е. должен рассматриваться именно как дополнительный ход,
+        // А не просто добавление в очередь второй раз.
+        if (roundNumber == 1)
+        {
+            turnOrders = turnOrders.Concat(allAvailableUnits
+                .Where(u => u.UnitType.MainAttack.AttackType == UnitAttackType.Doppelganger)
+                .Select(u => new UnitTurnOrder(u, int.MaxValue)));
+        }
+
+        return new LinkedList<UnitTurnOrder>(turnOrders);
     }
 
     #endregion
@@ -52,20 +67,102 @@ internal class BattleProcessor
     /// </summary>
     public bool CanAttack(AttackProcessorContext attackProcessorContext)
     {
-        var attackingUnit = attackProcessorContext.CurrentUnit;
-        var mainAttack = attackingUnit.UnitType.MainAttack;
-        var mainAttackProcessor = _attackTypeProcessors[mainAttack.AttackType];
-        if (mainAttackProcessor.CanAttack(attackProcessorContext, mainAttack, attackingUnit.MainAttackPower))
+        return CanAttack(attackProcessorContext, out _, out _);
+    }
+
+    /// <summary>
+    /// Проверить, можно ли атаковать указанного юнита.
+    /// </summary>
+    /// <param name="attackProcessorContext">Контекст атаки.</param>
+    /// <param name="mainAttack">Информация о первой атаке.</param>
+    /// <param name="secondaryAttack">Информация о второй атаке.</param>
+    public bool CanAttack(AttackProcessorContext attackProcessorContext,
+        CalculatedUnitAttack mainAttack,
+        CalculatedUnitAttack? secondaryAttack)
+    {
+        var mainAttackTypeProcessor = _attackTypeProcessors[mainAttack.AttackType];
+        if (mainAttackTypeProcessor.CanAttack(attackProcessorContext, mainAttack))
             return true;
 
-        var secondaryAttack = attackingUnit.UnitType.SecondaryAttack;
-        if (mainAttackProcessor.CanMainAttackBeSkipped && secondaryAttack != null)
+        if (secondaryAttack != null && mainAttackTypeProcessor.CanMainAttackBeSkipped)
         {
-            var secondaryAttackProcessor = _attackTypeProcessors[secondaryAttack.AttackType];
-            if (secondaryAttackProcessor.CanAttack(attackProcessorContext, mainAttack, attackingUnit.MainAttackPower))
+            var secondaryAttackTypeProcessor = _attackTypeProcessors[secondaryAttack.AttackType];
+            if (secondaryAttackTypeProcessor.CanAttack(attackProcessorContext, secondaryAttack))
                 return true;
         }
 
+        return false;
+    }
+
+    /// <summary>
+    /// Получить юнитов, которые будут являться целями атаки.
+    /// </summary>
+    public IReadOnlyList<Unit> GetMainAttackTargetUnits(AttackProcessorContext attackProcessorContext)
+    {
+        return GetMainAttackTargetUnits(attackProcessorContext, out _, out _);
+    }
+
+    /// <summary>
+    /// Получить юнитов, которые будут являться целями атаки.
+    /// </summary>
+    private IReadOnlyList<Unit> GetMainAttackTargetUnits(
+        AttackProcessorContext attackProcessorContext,
+        out CalculatedUnitAttack? unitAttack,
+        out bool isAlternativeAttackUsed)
+    {
+        if (!CanAttack(attackProcessorContext, out unitAttack, out isAlternativeAttackUsed))
+            return Array.Empty<Unit>();
+
+        if (unitAttack.Reach != UnitAttackReach.All)
+            return new[] { attackProcessorContext.TargetUnit };
+
+        var mainAttack = unitAttack;
+        var secondaryAttack = attackProcessorContext.CurrentUnit.SecondaryAttack;
+        return attackProcessorContext
+            .TargetUnitSquad
+            .Units
+            .Where(u =>
+                {
+                    if (u == attackProcessorContext.TargetUnit)
+                        return true;
+
+                    var innerContext = new AttackProcessorContext(attackProcessorContext.CurrentUnit, u,
+                        attackProcessorContext.CurrentUnitSquad, attackProcessorContext.TargetUnitSquad,
+                        attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
+                    return CanAttack(innerContext, mainAttack, secondaryAttack);
+                })
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Проверить, можно ли атаковать указанного юнита.
+    /// </summary>
+    private bool CanAttack(AttackProcessorContext attackProcessorContext,
+        [NotNullWhen(true)] out CalculatedUnitAttack? unitAttack,
+        out bool isAlternativeAttackUsed)
+    {
+        var attackingUnit = attackProcessorContext.CurrentUnit;
+        var mainAttack = attackingUnit.MainAttack;
+        var secondaryAttack = attackingUnit.SecondaryAttack;
+        isAlternativeAttackUsed = false;
+
+        if (CanAttack(attackProcessorContext, mainAttack, secondaryAttack))
+        {
+            unitAttack = mainAttack;
+            return true;
+        }
+
+        // BUG Доппельгангер может атаковать альтернативной атакой только в том случае,
+        // Если не может ни в кого превратиться на поле боя.
+        var alternativeAttack = attackingUnit.AlternativeAttack;
+        if (alternativeAttack != null && CanAttack(attackProcessorContext, alternativeAttack, secondaryAttack))
+        {
+            unitAttack = alternativeAttack;
+            isAlternativeAttackUsed = true;
+            return true;
+        }
+
+        unitAttack = null;
         return false;
     }
 
@@ -77,50 +174,53 @@ internal class BattleProcessor
     /// Выполнить атаку юнита с помощью основной атаки.
     /// Атака выполняется на весь отряд, если атака по площади.
     /// </summary>
-    public IReadOnlyList<IAttackUnitActionProcessor> ProcessMainAttack(AttackProcessorContext attackProcessorContext)
+    public MainAttackResult ProcessMainAttack(AttackProcessorContext attackProcessorContext)
     {
-        var attackingUnit = attackProcessorContext.CurrentUnit;
-        var basePower = attackingUnit.MainAttackBasePower;
-        var power = attackingUnit.MainAttackPower;
-        var attack = attackingUnit.UnitType.MainAttack;
-        var accuracy = attackingUnit.MainAttackAccuracy;
-        var attackProcessor = _attackTypeProcessors[attack.AttackType];
-        var canUseSecondAttack = attackingUnit.UnitType.SecondaryAttack != null;
+        var targetUnits = GetMainAttackTargetUnits(attackProcessorContext,
+            out var attack,
+            out var isAlternativeAttackUsed);
+        if (attack == null)
+            throw new InvalidOperationException("Невозможно атаковать указанного юнита");
 
-        IReadOnlyList<Unit> targetUnits = attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.All
-            ? attackProcessorContext.TargetUnitSquad.Units
-            : new[] { attackProcessorContext.TargetUnit };
+        var attackingUnit = attackProcessorContext.CurrentUnit;
+        var attackProcessor = _attackTypeProcessors[attack.AttackType];
         var calculatedAttacks = new List<CalculatedAttackResult>();
         var resultProcessors = new List<IAttackUnitActionProcessor>();
+        var canUseSecondAttack = attackingUnit.UnitType.SecondaryAttack != null;
+        var secondaryUnits = new List<Unit>();
         foreach (var targetUnit in targetUnits)
         {
             var targetContext = new AttackProcessorContext(attackingUnit, targetUnit,
                 attackProcessorContext.CurrentUnitSquad, attackProcessorContext.TargetUnitSquad,
                 attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
 
-            if (!attackProcessor.CanAttack(targetContext, attack, power))
+            // Проверяем, можно ли атаковать основной атакой.
+            // Если нет, то точно можно атаковать второй, это особенность метода GetMainAttackTargetUnits.
+            if (!attackProcessor.CanAttack(targetContext, attack))
             {
-                if (attackProcessor.CanMainAttackBeSkipped && canUseSecondAttack)
-                    resultProcessors.Add(new SkipAttackProcessor(targetUnit));
-
+                resultProcessors.Add(new SkipAttackProcessor(targetUnit));
+                secondaryUnits.Add(targetUnit);
                 continue;
             }
 
-            var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attack, targetUnit, accuracy);
+            var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attackingUnit, targetUnit, attack);
             if (accuracyOrProtectionProcessor != null)
             {
                 resultProcessors.Add(accuracyOrProtectionProcessor);
                 continue;
             }
 
-            var calculatedAttack = attackProcessor.CalculateAttackResult(targetContext, attack, power, basePower);
+            var calculatedAttack = attackProcessor.CalculateAttackResult(targetContext, attack);
             calculatedAttacks.Add(calculatedAttack);
+
+            if (canUseSecondAttack)
+                secondaryUnits.Add(targetUnit);
         }
 
         if (calculatedAttacks.Count > 0)
-            resultProcessors.Add(new UnitSuccessAttackProcessor(attackProcessor, calculatedAttacks, canUseSecondAttack));
+            resultProcessors.Add(new UnitSuccessAttackProcessor(attackProcessor, calculatedAttacks, isAlternativeAttackUsed));
 
-        return resultProcessors;
+        return new MainAttackResult(isAlternativeAttackUsed, resultProcessors, secondaryUnits);
     }
 
     /// <summary>
@@ -129,19 +229,17 @@ internal class BattleProcessor
     public IAttackUnitActionProcessor? ProcessSecondaryAttack(AttackProcessorContext attackProcessorContext)
     {
         var attackingUnit = attackProcessorContext.CurrentUnit;
-        var power = attackingUnit.SecondaryAttackPower;
-        var attack = attackingUnit.UnitType.SecondaryAttack!;
-        var accuracy = attackingUnit.SecondaryAttackAccuracy!.Value;
-        var attackProcessor = _attackTypeProcessors[attack.AttackType];
+        var attack = attackingUnit.SecondaryAttack!;
 
-        if (!attackProcessor.CanAttack(attackProcessorContext, attack, power))
+        var attackProcessor = _attackTypeProcessors[attack.AttackType];
+        if (!attackProcessor.CanAttack(attackProcessorContext, attack))
             return null;
 
-        var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attack, attackProcessorContext.TargetUnit, accuracy);
+        var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attackingUnit, attackProcessorContext.TargetUnit, attack);
         if (accuracyOrProtectionProcessor != null)
             return accuracyOrProtectionProcessor;
 
-        var calculatedAttack = attackProcessor.CalculateAttackResult(attackProcessorContext, attack, power, power);
+        var calculatedAttack = attackProcessor.CalculateAttackResult(attackProcessorContext, attack);
         return new UnitSuccessAttackProcessor(attackProcessor, new[] { calculatedAttack }, false);
     }
 
@@ -150,37 +248,40 @@ internal class BattleProcessor
     /// </summary>
     public IAttackUnitActionProcessor? ProcessSingleMainAttack(AttackProcessorContext attackProcessorContext)
     {
-        var attackingUnit = attackProcessorContext.CurrentUnit;
-        var basePower = attackingUnit.MainAttackBasePower;
-        var power = attackingUnit.MainAttackPower;
-        var attack = attackingUnit.UnitType.MainAttack;
-        var accuracy = attackingUnit.MainAttackAccuracy;
-        var attackProcessor = _attackTypeProcessors[attack.AttackType];
-        var canUseSecondAttack = attackingUnit.UnitType.SecondaryAttack != null;
-
-        if (!attackProcessor.CanAttack(attackProcessorContext, attack, power))
-        {
-            if (attackProcessor.CanMainAttackBeSkipped && canUseSecondAttack)
-                return new SkipAttackProcessor(attackProcessorContext.TargetUnit);
-
+        if (!CanAttack(attackProcessorContext, out var attack, out var isAlternativeAttackUsed))
             return null;
-        }
 
-        var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attack, attackProcessorContext.TargetUnit, accuracy);
+        // Если можно атаковать юнита, но нельзя атаковать первой,
+        // Значит точно можно атаковать второй атакой.
+        var attackProcessor = _attackTypeProcessors[attack.AttackType];
+        if (!attackProcessor.CanAttack(attackProcessorContext, attack))
+            return new SkipAttackProcessor(attackProcessorContext.TargetUnit);
+
+        var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attackProcessorContext.CurrentUnit, attackProcessorContext.TargetUnit, attack);
         if (accuracyOrProtectionProcessor != null)
             return accuracyOrProtectionProcessor;
 
-        var calculatedAttack = attackProcessor.CalculateAttackResult(attackProcessorContext, attack, power, basePower);
-        return new UnitSuccessAttackProcessor(attackProcessor, new[] { calculatedAttack }, canUseSecondAttack);
+
+        var calculatedAttack = attackProcessor.CalculateAttackResult(attackProcessorContext, attack);
+        return new UnitSuccessAttackProcessor(attackProcessor, new[] { calculatedAttack }, isAlternativeAttackUsed);
     }
 
     /// <summary>
     /// Обработать защиты и точность юнита.
     /// </summary>
-    private static IAttackUnitActionProcessor? ProcessAccuracyAndProtections(UnitAttack unitAttack, Unit targetUnit, int accuracy)
+    private static IAttackUnitActionProcessor? ProcessAccuracyAndProtections(Unit attackingUnit, Unit targetUnit, CalculatedUnitAttack unitAttack)
     {
         var attackType = unitAttack.AttackType;
         var attackSource = unitAttack.AttackSource;
+
+        // Если атака по союзнику или доппельгангер, то все проверки.
+        // Точность для таких атак всегда равна 100%.
+        if (attackingUnit.Player.Id == targetUnit.Player.Id ||
+            attackType == UnitAttackType.Doppelganger)
+        {
+            return null;
+        }
+
 
         var attackTypeProtection = targetUnit
             .AttackTypeProtections
@@ -195,7 +296,7 @@ internal class BattleProcessor
             return new ImmunityAttackProcessor(targetUnit);
 
         var chanceOfAttack = RandomGenerator.Get(0, 100);
-        if (chanceOfAttack >= accuracy)
+        if (chanceOfAttack >= unitAttack.TotalAccuracy)
             return new MissAttackProcessor(targetUnit);
 
         if (attackTypeProtection?.ProtectionCategory == ProtectionCategory.Ward ||

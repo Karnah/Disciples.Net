@@ -16,13 +16,13 @@ internal class UnitSuccessAttackProcessor : IAttackUnitActionProcessor
     /// <summary>
     /// Создать объект типа <see cref="UnitSuccessAttackProcessor" />.
     /// </summary>
-    public UnitSuccessAttackProcessor(IAttackTypeProcessor attackTypeProcessor, IReadOnlyList<CalculatedAttackResult> attackResults, bool canUseSecondaryAttack)
+    public UnitSuccessAttackProcessor(IAttackTypeProcessor attackTypeProcessor,
+        IReadOnlyList<CalculatedAttackResult> attackResults,
+        bool isAlternativeAttackUsed)
     {
         AttackTypeProcessor = attackTypeProcessor;
         AttackResults = attackResults;
-        SecondaryAttackUnits = canUseSecondaryAttack
-            ? attackResults.Select(ar => ar.Context.TargetUnit).ToArray()
-            : Array.Empty<Unit>();
+        IsAlternativeAttackUsed = isAlternativeAttackUsed;
 
         _shouldProcessOnBeginAction = GetShouldProcessOnBeginAction(attackTypeProcessor.AttackType);
     }
@@ -57,8 +57,10 @@ internal class UnitSuccessAttackProcessor : IAttackUnitActionProcessor
     /// </remarks>
     public IReadOnlyList<Unit> DrainLifeHealUnits { get; private set; } = Array.Empty<Unit>();
 
-    /// <inheritdoc />
-    public IReadOnlyList<Unit> SecondaryAttackUnits { get; }
+    /// <summary>
+    /// Признак, что использована альтернативная атака юнита.
+    /// </summary>
+    public bool IsAlternativeAttackUsed { get; }
 
     /// <inheritdoc />
     public void ProcessBeginAction()

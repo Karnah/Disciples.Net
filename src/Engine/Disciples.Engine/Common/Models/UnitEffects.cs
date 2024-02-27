@@ -141,18 +141,17 @@ public class UnitEffects
     }
 
     /// <summary>
-    /// Получить модификатор брони.
+    /// Получить бонус брони.
     /// </summary>
-    public int GetArmorModifier()
+    public int GetArmorBonus()
     {
-        var modifier = 0;
+        var armorBonus = 0;
 
-        if (TryGetBattleEffect(UnitAttackType.ReduceArmor, out var reduceArmor))
-        {
-            modifier -= reduceArmor.Power!.Value;
-        }
+        armorBonus -= _battleEffects
+            .Where(be => be.AttackType == UnitAttackType.ReduceArmor)
+            .Sum(be => be.Power!.Value);
 
-        return modifier;
+        return armorBonus;
     }
 
     /// <summary>

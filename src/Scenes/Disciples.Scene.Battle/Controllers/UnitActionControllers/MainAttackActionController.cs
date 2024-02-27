@@ -22,6 +22,9 @@ internal class MainAttackActionController : BaseAttackActionController
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleUnitActionFactory _unitActionFactory;
 
+    private MainAttackResult _mainAttackResult = null!;
+    private bool _isAnimationAndSoundDisabled;
+
     /// <summary>
     /// Создать объект типа <see cref="MainAttackActionController" />.
     /// </summary>
@@ -67,8 +70,21 @@ internal class MainAttackActionController : BaseAttackActionController
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
         ShouldPassTurn = !isFirstAttack;
 
-        // Это нельзя выносить в ProcessBeginAction,
-        // Так как индекс анимации рассчитывается в конструкторе MainAttackBattleAction.
+        var attackProcessorContext = _context.CreateAttackProcessorContext(TargetBattleUnit);
+        _mainAttackResult = _battleProcessor.ProcessMainAttack(attackProcessorContext);
+
+        // Если юнит имеют альтернативную атаку, то анимация атаки/звук относятся именно к ней.
+        // Основная атака в таком случае использует стандартную для данного типа атаки анимацию.
+        // Юниты с альтернативной атакой - "Доппельгангер" и "Повелитель волков",
+        // Своей основной атакой превращают себя в другого юнита.
+        _isAnimationAndSoundDisabled = CurrentBattleUnit.Unit.AlternativeAttack != null &&
+                                       !_mainAttackResult.IsAlternativeAttackUsed;
+        if (_isAnimationAndSoundDisabled)
+        {
+            ProcessAttack();
+            return;
+        }
+
         CurrentBattleUnit.UnitState = BattleUnitState.Attacking;
 
         var animationComponent = CurrentBattleUnit.AnimationComponent;
@@ -108,28 +124,32 @@ internal class MainAttackActionController : BaseAttackActionController
     /// </summary>
     private void ProcessAttack()
     {
-        var secondaryAttackUnits = new List<BattleUnit>();
-        var attackProcessorContext = _context.CreateAttackProcessorContext(TargetBattleUnit);
-        var processors = _battleProcessor.ProcessMainAttack(attackProcessorContext);
-        foreach (var unitActionProcessor in processors)
-        {
-            AddProcessorAction(unitActionProcessor);
-            secondaryAttackUnits.AddRange(unitActionProcessor.SecondaryAttackUnits.Select(_context.GetBattleUnit));
-        }
+        foreach (var attackProcessor in _mainAttackResult.AttackProcessors)
+            AddProcessorAction(attackProcessor);
 
         // Если у атакующего юнита есть вторая атака и есть хотя бы одно успешное попадание, добавляем обработки второй атаки.
         // Она начнёт выполняться позже, после завершения всех анимаций, связанных с первой.
-        if (secondaryAttackUnits.Count > 0)
-            _unitActionFactory.BeginSecondaryAttack(secondaryAttackUnits, ShouldPassTurn);
+        if (_mainAttackResult.SecondaryAttackUnits.Count > 0)
+        {
+            var secondaryAttackBattleUnits = _mainAttackResult
+                .SecondaryAttackUnits
+                .Select(_context.GetBattleUnit)
+                .ToArray();
+            _unitActionFactory.BeginSecondaryAttack(secondaryAttackBattleUnits, ShouldPassTurn);
+        }
 
-        // В любом случае дожидаемся завершения анимации атаки.
-        AddActionDelay(new BattleAnimationDelay(CurrentBattleUnit.AnimationComponent, OnAttackerAnimationCompleted));
+        // Дожидаемся завершения анимации атаки, если она была.
+        if (!_isAnimationAndSoundDisabled)
+            AddActionDelay(new BattleAnimationDelay(CurrentBattleUnit.AnimationComponent, OnAttackerAnimationCompleted));
     }
 
     /// <inheritdoc />
     protected override void AddSuccessAttackProcessorAction(UnitSuccessAttackProcessor unitSuccessAttackProcessor)
     {
         base.AddSuccessAttackProcessorAction(unitSuccessAttackProcessor);
+
+        if (_isAnimationAndSoundDisabled)
+            return;
 
         AddAttackAreaAnimationAction(CurrentBattleUnit, TargetBattleUnit);
         PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
@@ -139,6 +159,9 @@ internal class MainAttackActionController : BaseAttackActionController
     protected override void ProcessBeginSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
         base.ProcessBeginSuccessAttack(targetBattleUnit, attackResult);
+
+        if (_isAnimationAndSoundDisabled)
+            return;
 
         AddAttackTargetAnimationAction(CurrentBattleUnit, targetBattleUnit);
     }

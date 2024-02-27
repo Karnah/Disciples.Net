@@ -30,14 +30,14 @@ public class UnitAttack
     public int Initiative { get; init; }
 
     /// <summary>
-    /// Источник атаки.
-    /// </summary>
-    public UnitAttackSource AttackSource { get; init; }
-
-    /// <summary>
     /// Тип атаки.
     /// </summary>
     public UnitAttackType AttackType { get; init; }
+
+    /// <summary>
+    /// Источник атаки.
+    /// </summary>
+    public UnitAttackSource AttackSource { get; init; }
 
     /// <summary>
     /// Точность.

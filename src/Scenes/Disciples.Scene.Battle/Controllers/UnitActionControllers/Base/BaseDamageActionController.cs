@@ -140,6 +140,8 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
                     return true;
                 }
 
+                case UnitAttackType.Doppelganger when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
+                case UnitAttackType.TransformSelf when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.TransformEnemy when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 {
                     AddProcessorAction(attackEffectProcessor);
@@ -180,6 +182,8 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         {
             switch (attackEffectProcessor.EffectResult.Effect.AttackType)
             {
+                case UnitAttackType.Doppelganger:
+                case UnitAttackType.TransformSelf:
                 case UnitAttackType.TransformEnemy:
                 {
                     ProcessTransformUnitBack(targetBattleUnit);
@@ -195,17 +199,27 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// <summary>
     /// Обработать превращение юнита.
     /// </summary>
-    protected void ProcessTransformUnit(BattleUnit originalBattleUnit, TransformedEnemyUnit transformedUnit)
+    protected void ProcessTransformUnit(BattleUnit originalBattleUnit, ITransformedUnit transformedUnit)
     {
-        originalBattleUnit.IsHidden = true;
-        var transformedBattleUnit = _battleGameObjectContainer.AddBattleUnit(transformedUnit, originalBattleUnit.SquadPosition);
+        var transformedBattleUnit = _battleGameObjectContainer.AddBattleUnit(transformedUnit.Unit, originalBattleUnit.SquadPosition);
         var targetUnitBattleIndex = _context.BattleUnits.IndexOf(originalBattleUnit);
         _context.BattleUnits[targetUnitBattleIndex] = transformedBattleUnit;
-        _context.TransformedUnits.Add(originalBattleUnit);
+
+        // Если юнит уже был превращён ранее, то оригинальный юнит уже лежит в _context.TransformedUnits.
+        // Промежуточное превращение не запоминаем.
+        if (originalBattleUnit.Unit is ITransformedUnit)
+        {
+            originalBattleUnit.Destroy();
+        }
+        else
+        {
+            originalBattleUnit.IsHidden = true;
+            _context.TransformedUnits.Add(originalBattleUnit);
+        }
 
         var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
         if (targetUnitPortrait != null)
-            targetUnitPortrait.Unit = transformedUnit;
+            targetUnitPortrait.Unit = transformedUnit.Unit;
     }
 
     /// <summary>
@@ -213,7 +227,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// </summary>
     private void ProcessTransformUnitBack(BattleUnit transformedBattleUnit)
     {
-        var transformedUnit = (TransformedEnemyUnit)transformedBattleUnit.Unit;
+        var transformedUnit = (ITransformedUnit)transformedBattleUnit.Unit;
         var originalUnit = transformedUnit.OriginalUnit;
 
         var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(transformedBattleUnit);
@@ -222,6 +236,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
 
         var originalBattleUnit = _context.TransformedUnits.First(tu => tu.Unit == originalUnit);
         originalBattleUnit.IsHidden = false;
+        originalBattleUnit.UnitState = transformedBattleUnit.UnitState;
         _context.TransformedUnits.Remove(originalBattleUnit);
 
         var targetUnitBattleIndex = _context.BattleUnits.IndexOf(transformedBattleUnit);
@@ -250,6 +265,15 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         AddProcessorAction(unitDeathProcessor);
         AddUnitDeathAnimationAction(targetBattleUnit);
         PlayUnitDeathSound();
+
+        // Если юнит был превращён, то сразу возвращаем портрет оригинального юнита.
+        // При этом BattleUnit будет сброшен только в конце.
+        if (targetBattleUnit.Unit is ITransformedUnit transformedUnit)
+        {
+            var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
+            if (unitPortrait != null)
+                unitPortrait.Unit = transformedUnit.OriginalUnit;
+        }
     }
 
     /// <summary>
@@ -261,6 +285,10 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
 
         // Превращаем его в кучу костей.
         targetBattleUnit.UnitState = BattleUnitState.Dead;
+
+        // Если юнит был превращён, то возвращаем ему исходную форму.
+        if (targetBattleUnit.Unit is ITransformedUnit)
+            ProcessTransformUnitBack(targetBattleUnit);
 
         // Юнит умер в результате срабатывания эффекта.
         // Всё равно продолжаем обрабатывать очередь, так как в очереди могут быть эффекты на других юнитов.

@@ -17,15 +17,15 @@ internal class IncreaseDamageAttackProcessor : BaseEffectAttackProcessor
     /// <inheritdoc />
     protected override bool CanAttackFriends => true;
 
-    public override bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        return base.CanAttack(context, unitAttack, power) &&
+        return base.CanAttack(context, unitAttack) &&
                // Можно усиливать только юнитов с прямым уроном от первой атаки.
                context.TargetUnit.UnitType.MainAttack.AttackType.IsDirectDamage();
     }
 
     /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
     {
         return unitAttack.IsInfinitive
             ? EffectDuration.CreateInfinitive()

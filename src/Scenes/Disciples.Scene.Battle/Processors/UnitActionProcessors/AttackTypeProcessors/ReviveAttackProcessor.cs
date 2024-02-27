@@ -17,7 +17,7 @@ internal class ReviveAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => true;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         var attackingUnit = context.CurrentUnit;
         var targetUnit = context.TargetUnit;
@@ -29,14 +29,13 @@ internal class ReviveAttackProcessor : IAttackTypeProcessor
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack,
-        int? power, int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return new CalculatedAttackResult(
             context,
             unitAttack.AttackType,
             unitAttack.AttackSource,
-            power);
+            unitAttack.TotalPower);
     }
 
     /// <inheritdoc />

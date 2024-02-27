@@ -28,24 +28,18 @@ internal abstract class BaseDirectDamageAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => false;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        return CanAttackEnemy(context);
+        return CanAttackEnemy(context, unitAttack);
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context,
-        UnitAttack unitAttack, int? power, int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        if (power == null)
-            throw new ArgumentNullException(nameof(power));
-        if (basePower == null)
-            throw new ArgumentNullException(nameof(basePower));
-
         // todo Максимальное значение атаки - 250/300/400.
         var targetUnit = context.TargetUnit;
         var attackRandomBonus = RandomGenerator.Get(ATTACK_RANGE);
-        var attackPower = power.Value + attackRandomBonus;
+        var attackPower = unitAttack.TotalPower + attackRandomBonus;
 
         // Уменьшаем входящий урон в зависимости от защиты.
         attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
@@ -59,7 +53,7 @@ internal abstract class BaseDirectDamageAttackProcessor : IAttackTypeProcessor
         // Но с учётом случайного разброса.
         int? criticalDamage = null;
         if (unitAttack.IsCritical)
-            criticalDamage = Math.Min((int)((basePower + attackRandomBonus) * CRITICAL_DAMAGE_MODIFIER), targetUnit.HitPoints);
+            criticalDamage = Math.Min((int)((unitAttack.BasePower + attackRandomBonus) * CRITICAL_DAMAGE_MODIFIER), targetUnit.HitPoints);
 
         // Мы не можем нанести урон больше, чем осталось очков здоровья.
         attackPower = Math.Min(attackPower, targetUnit.HitPoints - (criticalDamage ?? 0));

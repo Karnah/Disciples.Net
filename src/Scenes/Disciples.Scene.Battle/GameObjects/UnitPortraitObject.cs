@@ -463,6 +463,8 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
+            UnitAttackType.Doppelganger => BattleColors.Transform,
+            UnitAttackType.TransformSelf => BattleColors.Transform,
             UnitAttackType.TransformEnemy => BattleColors.Transform,
             UnitAttackType.Blister => BattleColors.Blister,
             UnitAttackType.GiveProtection => BattleColors.Boost,

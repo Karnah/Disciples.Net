@@ -31,7 +31,7 @@ internal class CalculatedAttackResult
         EffectDuration effectDuration, Unit effectDurationControlUnit,
         IReadOnlyList<UnitAttackTypeProtection>? attackTypeProtections = null,
         IReadOnlyList<UnitAttackSourceProtection>? attackSourceProtections = null,
-        TransformedEnemyUnit? transformedUnit = null)
+        ITransformedUnit? transformedUnit = null)
     {
         Context = context;
         AttackType = attackType;
@@ -107,7 +107,7 @@ internal class CalculatedAttackResult
     /// <summary>
     /// Превращённый юнит.
     /// </summary>
-    public TransformedEnemyUnit? TransformedUnit { get; }
+    public ITransformedUnit? TransformedUnit { get; }
 
     /// <summary>
     /// Эффекты, которые были сняты.

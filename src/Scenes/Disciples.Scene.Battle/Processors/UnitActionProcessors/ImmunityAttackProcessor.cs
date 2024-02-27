@@ -23,9 +23,6 @@ internal class ImmunityAttackProcessor : IAttackUnitActionProcessor
     public Unit TargetUnit { get; }
 
     /// <inheritdoc />
-    public IReadOnlyList<Unit> SecondaryAttackUnits => Array.Empty<Unit>();
-
-    /// <inheritdoc />
     public void ProcessBeginAction()
     {
     }

@@ -9,7 +9,7 @@ namespace Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProce
 /// <summary>
 /// Процессор для атаки типа <see cref="UnitAttackType.TransformEnemy" />.
 /// </summary>
-internal class TransformEnemyAttackProcessor : BaseEffectAttackProcessor
+internal class TransformEnemyAttackProcessor : BaseTransformAttackProcessor
 {
     private const int MIN_TURN_DURATION = 2;
     private const int MAX_TURN_DURATION = 3;
@@ -21,65 +21,19 @@ internal class TransformEnemyAttackProcessor : BaseEffectAttackProcessor
     protected override bool CanAttackEnemies => true;
 
     /// <inheritdoc />
-    public override bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        if (!base.CanAttack(context, unitAttack, power))
+        if (!base.CanAttack(context, unitAttack))
             return false;
 
-        // Можно превратить только в юнита того же размера, и нельзя превращать в того же юнита.
-        var targetUnitType = context.TargetUnit.UnitType;
         return unitAttack
             .SummonTransformUnitTypes
-            .Any(ut => ut.IsSmall == targetUnitType.IsSmall && ut.Id != targetUnitType.Id);
+            .Any(ut => CanTransform(context.TargetUnit, ut));
     }
 
     /// <inheritdoc />
-    public override void ProcessAttack(CalculatedAttackResult attackResult)
-    {
-        base.ProcessAttack(attackResult);
-
-        // Заменяем в отряде оригинального юнита на трансформированного.
-        var targetUnit = attackResult.Context.TargetUnit;
-        var targetUnitSquad = attackResult.Context.TargetUnitSquad;
-        var transformedUnit = attackResult.TransformedUnit!;
-        var targetUnitSquadIndex = targetUnitSquad.Units.IndexOf(targetUnit);
-        targetUnitSquad.Units[targetUnitSquadIndex] = transformedUnit;
-
-        var unitTurnQueue = attackResult.Context.UnitTurnQueue;
-        unitTurnQueue.ReorderTransformedUnitTurn(targetUnit, transformedUnit, transformedUnit.Initiative);
-    }
-
-    /// <inheritdoc />
-    /// <remarks>
-    /// После завершения эффекта возвращаем оригинального юнита в отряд.
-    /// </remarks>
-    protected override void ProcessEffectCompleted(AttackProcessorContext context, UnitBattleEffect battleEffect)
-    {
-        base.ProcessEffectCompleted(context, battleEffect);
-
-        var targetUnit = context.TargetUnit;
-        var targetUnitSquad = context.TargetUnitSquad;
-        var originalUnit = ((TransformedEnemyUnit)targetUnit).OriginalUnit;
-        var targetUnitSquadIndex = targetUnitSquad.Units.IndexOf(targetUnit);
-        targetUnitSquad.Units[targetUnitSquadIndex] = originalUnit;
-
-        var unitTurnQueue = context.UnitTurnQueue;
-        unitTurnQueue.ReorderTransformedUnitTurn(targetUnit, originalUnit, originalUnit.Initiative);
-    }
-
-    /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
-    {
-        return unitAttack.IsInfinitive
-            ? isMaximum
-                ? EffectDuration.Create(MAX_TURN_DURATION)
-                : EffectDuration.CreateRandom(MIN_TURN_DURATION, MAX_TURN_DURATION)
-            : EffectDuration.Create(MIN_TURN_DURATION);
-    }
-
-    /// <inheritdoc />
-    protected override TransformedEnemyUnit GetTransformedUnit(Unit attackingUnit, UnitAttack unitAttack,
-        Unit targetUnit)
+    protected override ITransformedUnit? GetTransformedUnit(Unit attackingUnit,
+        Unit targetUnit, CalculatedUnitAttack unitAttack)
     {
         var transformUnits = unitAttack
             .SummonTransformUnitTypes
@@ -87,5 +41,15 @@ internal class TransformEnemyAttackProcessor : BaseEffectAttackProcessor
             .ToArray();
         var transformedUnitType = transformUnits[RandomGenerator.Get(transformUnits.Length)];
         return new TransformedEnemyUnit(targetUnit, transformedUnitType);
+    }
+
+    /// <inheritdoc />
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
+    {
+        return unitAttack.IsInfinitive
+            ? isMaximum
+                ? EffectDuration.Create(MAX_TURN_DURATION)
+                : EffectDuration.CreateRandom(MIN_TURN_DURATION, MAX_TURN_DURATION)
+            : EffectDuration.Create(MIN_TURN_DURATION);
     }
 }

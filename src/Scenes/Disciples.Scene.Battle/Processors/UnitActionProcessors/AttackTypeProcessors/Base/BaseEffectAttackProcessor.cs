@@ -38,11 +38,11 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     protected virtual bool IsSingleEffectOnly => true;
 
     /// <inheritdoc />
-    public virtual bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public virtual bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         // Если атака распространяется на врагов, то проверяем, что цель враг и до неё можно достать.
         // Если атаки распространяется на союзников, то проверяем что союзник.
-        var canAttackEnemy = CanAttackEnemies && CanAttackEnemy(context);
+        var canAttackEnemy = CanAttackEnemies && CanAttackEnemy(context, unitAttack);
         var canAttackFriend = CanAttackFriends && CanAttackFriend(context);
         if (!canAttackEnemy && !canAttackFriend)
             return false;
@@ -56,15 +56,14 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
                 .GetBattleEffects(unitAttack.AttackType)
                 .SingleOrDefault();
             if (existingEffect != null)
-                return CanReplaceEffect(existingEffect, power, GetEffectDuration(unitAttack, true));
+                return CanReplaceEffect(existingEffect, GetPower(context, unitAttack), GetEffectDuration(unitAttack, true));
         }
 
         return true;
     }
 
     /// <inheritdoc />
-    public virtual CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context,
-        UnitAttack unitAttack, int? power, int? basePower)
+    public virtual CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         var attackingUnit = context.CurrentUnit;
         var targetUnit = context.TargetUnit;
@@ -72,12 +71,12 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
             context,
             unitAttack.AttackType,
             unitAttack.AttackSource,
-            power,
+            GetPower(context, unitAttack),
             GetEffectDuration(unitAttack, false),
             GetEffectDurationControlUnit(attackingUnit, targetUnit),
             GetAttackTypeProtections(unitAttack, targetUnit),
             GetAttackSourceProtections(unitAttack, targetUnit),
-            GetTransformedUnit(attackingUnit, unitAttack, targetUnit));
+            GetTransformedUnit(attackingUnit, targetUnit, unitAttack));
     }
 
     /// <inheritdoc />
@@ -164,11 +163,19 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     }
 
     /// <summary>
+    /// Получить силу атаки.
+    /// </summary>
+    protected virtual int GetPower(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
+    {
+        return unitAttack.TotalPower;
+    }
+
+    /// <summary>
     /// Получить длительность эффекта.
     /// </summary>
     /// <param name="unitAttack">Данные атаки.</param>
     /// <param name="isMaximum">Признак, что нужно отдать максимальную длительность эффекта для данного типа атаки.</param>
-    protected abstract EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum);
+    protected abstract EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum);
 
     /// <summary>
     /// Получить силу срабатывания эффекта.
@@ -181,7 +188,8 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// <summary>
     /// Получить список защит от источников атак.
     /// </summary>
-    protected virtual IReadOnlyList<UnitAttackTypeProtection> GetAttackTypeProtections(UnitAttack unitAttack, Unit targetUnit)
+    protected virtual IReadOnlyList<UnitAttackTypeProtection> GetAttackTypeProtections(CalculatedUnitAttack unitAttack,
+        Unit targetUnit)
     {
         return Array.Empty<UnitAttackTypeProtection>();
     }
@@ -189,7 +197,8 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// <summary>
     /// Получить список защит от источников атак.
     /// </summary>
-    protected virtual IReadOnlyList<UnitAttackSourceProtection> GetAttackSourceProtections(UnitAttack unitAttack, Unit targetUnit)
+    protected virtual IReadOnlyList<UnitAttackSourceProtection> GetAttackSourceProtections(
+        CalculatedUnitAttack unitAttack, Unit targetUnit)
     {
         return Array.Empty<UnitAttackSourceProtection>();
     }
@@ -197,7 +206,8 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// <summary>
     /// Получить юнита после трансформации.
     /// </summary>
-    protected virtual TransformedEnemyUnit? GetTransformedUnit(Unit attackingUnit, UnitAttack unitAttack, Unit targetUnit)
+    protected virtual ITransformedUnit? GetTransformedUnit(Unit attackingUnit,
+        Unit targetUnit, CalculatedUnitAttack unitAttack)
     {
         return null;
     }
@@ -205,7 +215,7 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// <summary>
     /// Можно ли заменить эффект, который уже действует на юните.
     /// </summary>
-    protected virtual bool CanReplaceEffect(UnitBattleEffect existingBattleEffect, int? newEffectPower, EffectDuration newEffectDuration)
+    private static bool CanReplaceEffect(UnitBattleEffect existingBattleEffect, int? newEffectPower, EffectDuration newEffectDuration)
     {
         var isNewEffectLonger = !existingBattleEffect.Duration.IsInfinitive &&
                                 existingBattleEffect.Duration.Turns < newEffectDuration!.Turns;

@@ -14,7 +14,6 @@ internal class SkipAttackProcessor : IAttackUnitActionProcessor
     public SkipAttackProcessor(Unit targetUnit)
     {
         TargetUnit = targetUnit;
-        SecondaryAttackUnits = new[] { targetUnit };
     }
 
     /// <inheritdoc />
@@ -22,9 +21,6 @@ internal class SkipAttackProcessor : IAttackUnitActionProcessor
 
     /// <inheritdoc />
     public Unit TargetUnit { get; }
-
-    /// <inheritdoc />
-    public IReadOnlyList<Unit> SecondaryAttackUnits { get; }
 
     /// <inheritdoc />
     public void ProcessBeginAction()

@@ -4,6 +4,7 @@ using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 
 namespace Disciples.Scene.Battle.Processors;
 
@@ -33,8 +34,21 @@ internal class BattleAiProcessor
     /// <returns>Команда для юнита.</returns>
     public BattleAiCommand GetAiCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
     {
-        var hasAllyAbility = attackingUnit.HasAllyAbility();
-        var targetSquad = hasAllyAbility
+        var mainAttack = attackingUnit.MainAttack;
+        if (mainAttack.AttackType == UnitAttackType.Doppelganger)
+        {
+            var doppelgangerCommand = GetDoppelgangerCommand(attackingUnit, attackingSquad, defendingSquad, unitTurnQueue, roundNumber);
+            if (doppelgangerCommand != null)
+                return doppelgangerCommand;
+        }
+
+        // Альтернативные атаки имеет Доппельгангер и Повелитель Волков.
+        // Атака первого проверена выше, если там null, значит он не может ни в кого превратиться и должен атаковать врукопашную.
+        // Повелитель Волков основной атакой превращается в Духа Фенрира. И это бесполезное превращение, так как он теряет ход.
+        // Поэтому всегда используем альтернативную атаку, если такая имеется.
+        var targetMainAttack = attackingUnit.AlternativeAttack ?? mainAttack;
+        var isAllyAttack = targetMainAttack.AttackType.IsAllyAttack();
+        var targetSquad = isAllyAttack
             ? attackingSquad
             : defendingSquad;
         var targetUnits = GetTargetUnits(attackingUnit, attackingSquad, targetSquad, unitTurnQueue, roundNumber);
@@ -42,10 +56,10 @@ internal class BattleAiProcessor
             return new BattleAiCommand(BattleCommandType.Defend);
 
         // Если бьёт по площади, не важно какой юнит выбран целью.
-        if (attackingUnit.UnitType.MainAttack.Reach == UnitAttackReach.All)
+        if (targetMainAttack.Reach == UnitAttackReach.All)
             return new BattleAiCommand(targetUnits[0].Unit);
 
-        return hasAllyAbility
+        return isAllyAttack
             ? GetOwnSquadCommand(attackingUnit, targetUnits)
             : GetEnemySquadCommand(attackingUnit, targetUnits);
     }
@@ -57,8 +71,6 @@ internal class BattleAiProcessor
     /// TODO Просто оставляем всех атакующих юнитов с 1 ХП.
     /// Нужно использовать последовательные выводы GetAiCommand и обработки атак/результатов.
     /// Плюс получать очередность ходов в качестве параметра.
-    ///
-    /// TODO Также не очень хорошо, что меняется Unit напрямую. Хотя, может и норм.
     /// </remarks>
     /// <returns>Победивший отряд в битве.</returns>
     public Squad ProcessInstantBattle(Squad attackingSquad, Squad defendingSquad)
@@ -202,6 +214,27 @@ internal class BattleAiProcessor
     }
 
     /// <summary>
+    /// Получить команду для превращения Доппельгангера.
+    /// </summary>
+    private BattleAiCommand? GetDoppelgangerCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    {
+        var targetUnit = GetTargetUnits(attackingUnit, attackingSquad, defendingSquad, unitTurnQueue, roundNumber)
+            .Concat(GetTargetUnits(attackingUnit, attackingSquad, attackingSquad, unitTurnQueue, roundNumber))
+            .Where(tu => tu.MainAttackProcessor is UnitSuccessAttackProcessor unitSuccessAttackProcessor &&
+                         unitSuccessAttackProcessor.AttackTypeProcessor.AttackType == UnitAttackType.Doppelganger)
+            // TODO Если цель - самый сильный юнит, то нужно сортировать по базовой силе типа юнита
+            // (именно типа, а не юнита, т.к. Доппельгангер превращается в юнита того уровне, что задан в типе).
+            // Также приоритет превращения в лучника/мага/целителя должен быть меньше, если Доппельгангер в первой линии.
+            // И наоборот.
+            .OrderByPower()
+            .FirstOrDefault();
+        if (targetUnit != null)
+            return new BattleAiCommand(targetUnit.Unit);
+
+        return null;
+    }
+
+    /// <summary>
     /// Получить список юнитов для атаки.
     /// </summary>
     private IReadOnlyList<AiTargetUnit> GetTargetUnits(Unit attackingUnit, Squad attackingSquad, Squad targetSquad,
@@ -220,7 +253,7 @@ internal class BattleAiProcessor
                     ? _battleProcessor.ProcessSecondaryAttack(context)
                     : null;
 
-                return new AiTargetUnit(targetUnit, mainAttackResult?.ActionType, secondaryAttackResult?.ActionType);
+                return new AiTargetUnit(targetUnit, mainAttackResult, secondaryAttackResult);
             })
             .Where(target => target.MainAttackResult is not null and not UnitActionType.Immunity)
             .ToArray();

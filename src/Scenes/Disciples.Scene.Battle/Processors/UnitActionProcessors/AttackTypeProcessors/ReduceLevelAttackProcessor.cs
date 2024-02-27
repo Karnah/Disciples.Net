@@ -16,7 +16,7 @@ internal class ReduceLevelAttackProcessor : BaseEffectAttackProcessor
     public override UnitAttackType AttackType => UnitAttackType.ReduceLevel;
 
     /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
     {
         return unitAttack.IsInfinitive
             ? EffectDuration.CreateInfinitive()

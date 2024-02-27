@@ -8,10 +8,6 @@ namespace Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProce
 /// <summary>
 /// Процессор для атаки типа <see cref="UnitAttackType.ReduceArmor" />.
 /// </summary>
-/// <remarks>
-/// TODO В теории, можно обработчик переписать как множественный эффект,
-/// т.е. с IsSingleEffectOnly = false.
-/// </remarks>
 internal class ReduceArmorAttackProcessor : BaseEffectAttackProcessor
 {
     /// <inheritdoc />
@@ -21,35 +17,26 @@ internal class ReduceArmorAttackProcessor : BaseEffectAttackProcessor
     protected override bool CanAttackEnemies => true;
 
     /// <inheritdoc />
-    public override bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    protected override bool IsSingleEffectOnly => false;
+
+    /// <inheritdoc />
+    public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        power = GetTotalPower(power, context.TargetUnit);
-        return base.CanAttack(context, unitAttack, power);
+        return base.CanAttack(context, unitAttack) &&
+               context.TargetUnit.Armor > 0;
     }
 
     /// <inheritdoc />
-    public override CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context,
-        UnitAttack unitAttack, int? power, int? basePower)
+    protected override int GetPower(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        power = GetTotalPower(power, context.TargetUnit);
-        return base.CalculateAttackResult(context, unitAttack, power, basePower);
+        return Math.Min(context.TargetUnit.Armor, unitAttack.TotalPower);
     }
 
     /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
     {
         return unitAttack.IsInfinitive
             ? EffectDuration.CreateInfinitive()
             : EffectDuration.Create(1);
-    }
-
-    /// <summary>
-    /// Получить итоговую силу разрушения брони для юнита.
-    /// </summary>
-    private static int GetTotalPower(int? power, Unit targetUnit)
-    {
-        // Эффект разрушения брони складывается.
-        targetUnit.Effects.TryGetBattleEffect(UnitAttackType.ReduceArmor, out var reduceArmorBattleEffect);
-        return Math.Min(power!.Value, targetUnit.Armor) + (reduceArmorBattleEffect?.Power ?? 0);
     }
 }

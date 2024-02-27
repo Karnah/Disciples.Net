@@ -15,7 +15,7 @@ internal static class UnitAttackProcessorExtensions
     /// <summary>
     /// Проверить, можно ли нанести вред врагу.
     /// </summary>
-    public static bool CanAttackEnemy(AttackProcessorContext context)
+    public static bool CanAttackEnemy(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         if (context.CurrentUnit.Player.Id == context.TargetUnit.Player.Id)
             return false;
@@ -23,7 +23,7 @@ internal static class UnitAttackProcessorExtensions
         if (context.TargetUnit.IsDeadOrRetreated)
             return false;
 
-        if (!CanAttackPosition(context.CurrentUnit, context.TargetUnit, context.CurrentUnitSquad, context.TargetUnitSquad))
+        if (!CanAttackPosition(context.CurrentUnit, context.TargetUnit, context.CurrentUnitSquad, context.TargetUnitSquad, unitAttack))
             return false;
 
         return true;
@@ -50,9 +50,10 @@ internal static class UnitAttackProcessorExtensions
     /// <summary>
     /// Проверить можно ли провести атаку с учётом позиций юнита.
     /// </summary>
-    private static bool CanAttackPosition(Unit attackingUnit, Unit targetUnit, Squad attackingSquad, Squad targetSquad)
+    private static bool CanAttackPosition(Unit attackingUnit, Unit targetUnit, Squad attackingSquad, Squad targetSquad,
+        CalculatedUnitAttack unitAttack)
     {
-        if (attackingUnit.UnitType.MainAttack.Reach is UnitAttackReach.All or UnitAttackReach.Any)
+        if (unitAttack.Reach is UnitAttackReach.All or UnitAttackReach.Any)
             return true;
 
         // Атакующий юнит сзади, впереди мешает линия союзников.

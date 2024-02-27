@@ -21,22 +21,20 @@ internal class FearAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => false;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        return CanAttackEnemy(context) &&
+        return CanAttackEnemy(context, unitAttack) &&
                !context.TargetUnit.Effects.IsRetreating;
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack,
-        int? power,
-        int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return new CalculatedAttackResult(
             context,
             unitAttack.AttackType,
             unitAttack.AttackSource,
-            power);
+            unitAttack.TotalPower);
     }
 
     /// <inheritdoc />

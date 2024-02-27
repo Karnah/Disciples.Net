@@ -139,7 +139,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
         }
 
         ++_context.RoundNumber;
-        var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad);
+        var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad, _context.RoundNumber);
         var nextUnit = _context.UnitTurnQueue.NextRound(turnOrder);
         BeginUnitTurn(nextUnit);
     }

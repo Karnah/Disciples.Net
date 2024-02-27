@@ -126,6 +126,8 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
             }
 
             case UnitAttackType.Revive:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformEnemy:
             // В отличие от заморозки и яда, для вспышки выводится анимация при наложении эффекта.
             case UnitAttackType.Blister:
@@ -163,6 +165,8 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
                 break;
             }
 
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformEnemy:
             {
                 ProcessTransformUnit(targetBattleUnit, attackResult.TransformedUnit!);

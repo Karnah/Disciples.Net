@@ -28,12 +28,12 @@ internal interface IAttackTypeProcessor
     /// <summary>
     /// Проверить, можно ли выполнить атаку.
     /// </summary>
-    bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power);
+    bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack);
 
     /// <summary>
     /// Вычислить атаку юнита.
     /// </summary>
-    CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack, int? power, int? basePower);
+    CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack);
 
     /// <summary>
     /// Обработать результат атаки.

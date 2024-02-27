@@ -20,14 +20,13 @@ internal class SummonAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => false;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return false;
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack,
-        int? power, int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         throw new NotImplementedException();
     }

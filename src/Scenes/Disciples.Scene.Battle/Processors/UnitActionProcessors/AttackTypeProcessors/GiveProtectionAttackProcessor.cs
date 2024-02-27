@@ -20,9 +20,9 @@ internal class GiveProtectionAttackProcessor : BaseEffectAttackProcessor
     protected override bool IsSingleEffectOnly => false;
 
     /// <inheritdoc />
-    public override bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        if (!base.CanAttack(context, unitAttack, power))
+        if (!base.CanAttack(context, unitAttack))
             return false;
 
         var attackTypeProtections = GetAttackTypeProtections(unitAttack, context.TargetUnit);
@@ -31,7 +31,8 @@ internal class GiveProtectionAttackProcessor : BaseEffectAttackProcessor
     }
 
     /// <inheritdoc />
-    protected override IReadOnlyList<UnitAttackTypeProtection> GetAttackTypeProtections(UnitAttack unitAttack, Unit targetUnit)
+    protected override IReadOnlyList<UnitAttackTypeProtection> GetAttackTypeProtections(CalculatedUnitAttack unitAttack,
+        Unit targetUnit)
     {
         return unitAttack
             .AttackTypeProtections
@@ -42,7 +43,8 @@ internal class GiveProtectionAttackProcessor : BaseEffectAttackProcessor
     }
 
     /// <inheritdoc />
-    protected override IReadOnlyList<UnitAttackSourceProtection> GetAttackSourceProtections(UnitAttack unitAttack, Unit targetUnit)
+    protected override IReadOnlyList<UnitAttackSourceProtection> GetAttackSourceProtections(
+        CalculatedUnitAttack unitAttack, Unit targetUnit)
     {
         return unitAttack
             .AttackSourceProtections
@@ -53,7 +55,7 @@ internal class GiveProtectionAttackProcessor : BaseEffectAttackProcessor
     }
 
     /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
     {
         return unitAttack.IsInfinitive
             ? EffectDuration.CreateInfinitive()

@@ -267,12 +267,20 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Получить тип отряд, который должен отображаться на панели в режиме ожидания хода.
     /// </summary>
+    /// <remarks>
+    /// Если текущий юнит может атаковать хотя бы одного врага, то отображается вражеский отряд.
+    /// Иначе его собственный отряд.
+    /// </remarks>
     private BattleSquadPosition GetDefaultDisplayingSquad()
     {
-        var currentUnit = CurrentBattleUnit.Unit;
-        var showEnemies = currentUnit.HasEnemyAbility();
-
-        return showEnemies
+        var enemySquad = CurrentBattleUnit.IsAttacker
+            ? _context.DefendingSquad
+            : _context.AttackingSquad;
+        var isNeedShowEnemies = enemySquad
+            .Units
+            .Select(_context.GetBattleUnit)
+            .Any(CanAttack);
+        return isNeedShowEnemies
             ? CurrentBattleUnit.SquadPosition.GetOpposite()
             : CurrentBattleUnit.SquadPosition;
     }
@@ -406,15 +414,25 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         // Рамки для целей отображаем только в момент, когда нет действий.
         if (!_isActionProcessing)
         {
+            var mainAttack = currentUnit.MainAttack;
+            var alternativeAttack = currentUnit.AlternativeAttack;
+            var secondaryAttack = currentUnit.SecondaryAttack;
+
             // Если юнит бьёт по площади и цель юнита - отображаемый отряд, то добавляем одну большую рамку.
-            if (currentUnit.UnitType.MainAttack.Reach == UnitAttackReach.All &&
-                panel.BattleUnits.Any(CanAttack))
+            var canMainAttack = mainAttack.Reach == UnitAttackReach.All &&
+                                panel.BattleUnits.Any(bu => CanAttack(bu, mainAttack, secondaryAttack));
+            var canAlternativeAttack = alternativeAttack?.Reach == UnitAttackReach.All &&
+                                       panel.BattleUnits.Any(bu => CanAttack(bu, alternativeAttack, secondaryAttack));
+            if (canMainAttack || canAlternativeAttack)
             {
                 // Плейсхолдер 1 - это всегда левый верхний портрет.
+                var attack = canMainAttack
+                    ? mainAttack
+                    : alternativeAttack!;
                 var topLeftElement = panel.PortraitPlaceholders[1];
                 unitPanelAnimations.Add(
                     _battleGameObjectContainer.AddAnimation(
-                        currentUnit.HasAllyAbility()
+                        attack.AttackType.IsAllyAttack()
                             ? _interfaceProvider.GetFieldHealBorder()
                             : _interfaceProvider.GetFieldAttackBorder(),
                         topLeftElement.Position.X + PANEL_ANIMATION_OFFSET,
@@ -466,6 +484,15 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     {
         var attackContext = _context.CreateAttackProcessorContext(targetBattleUnit);
         return _battleProcessor.CanAttack(attackContext);
+    }
+
+    /// <summary>
+    /// Проверить, может ли текущий юнит атаковать цель.
+    /// </summary>
+    private bool CanAttack(BattleUnit targetBattleUnit, CalculatedUnitAttack mainAttack, CalculatedUnitAttack? secondaryAttack)
+    {
+        var attackContext = _context.CreateAttackProcessorContext(targetBattleUnit);
+        return _battleProcessor.CanAttack(attackContext, mainAttack, secondaryAttack);
     }
 
     /// <summary>

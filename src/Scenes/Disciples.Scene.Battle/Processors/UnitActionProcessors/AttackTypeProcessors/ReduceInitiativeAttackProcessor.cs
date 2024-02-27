@@ -32,7 +32,7 @@ internal class ReduceInitiativeAttackProcessor : BaseEffectAttackProcessor
     }
 
     /// <inheritdoc />
-    protected override EffectDuration GetEffectDuration(UnitAttack unitAttack, bool isMaximum)
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
     {
         return unitAttack.IsInfinitive
             ? EffectDuration.CreateInfinitive()

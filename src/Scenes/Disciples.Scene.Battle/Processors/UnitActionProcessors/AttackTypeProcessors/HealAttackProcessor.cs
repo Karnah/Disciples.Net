@@ -18,21 +18,17 @@ internal class HealAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => true;
 
     /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, UnitAttack unitAttack, int? power)
+    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return CanAttackFriend(context) &&
                context.TargetUnit.HitPoints < context.TargetUnit.MaxHitPoints;
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, UnitAttack unitAttack,
-        int? power, int? basePower)
+    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        if (power == null)
-            throw new ArgumentNullException(nameof(power));
-
         var targetUnit = context.TargetUnit;
-        var healPower = Math.Min(power.Value, targetUnit.MaxHitPoints - targetUnit.HitPoints);
+        var healPower = Math.Min(unitAttack.TotalPower, targetUnit.MaxHitPoints - targetUnit.HitPoints);
         return new CalculatedAttackResult(
             context,
             unitAttack.AttackType,

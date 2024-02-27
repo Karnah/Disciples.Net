@@ -142,6 +142,11 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// </summary>
     private TextContainer ReplacePlaceholders(TextContainer value, Unit unit)
     {
+        var mainAttack = unit.MainAttack;
+        var alternativeAttack = unit.AlternativeAttack;
+        var defaultMainAttack = alternativeAttack ?? mainAttack;
+        var secondaryAttack = unit.SecondaryAttack;
+
         return value
             .ReplacePlaceholders(new[]
             {
@@ -154,47 +159,62 @@ internal class UnitDetailInfoDialog : BaseDialog
                 ("%WARD%", GetProtectionInfo(unit, ProtectionCategory.Ward)),
 
                 ("%TWICE%", new TextContainer(unit.UnitType.IsAttackTwice ? "(2x) " : string.Empty)),
-                ("%ALTATTACK%", new TextContainer(string.Empty)), // todo Что это?
-                ("%ATTACK%", new TextContainer(unit.UnitType.MainAttack.Description)),
-                ("%SECOND%", new TextContainer(unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {unit.UnitType.SecondaryAttack.Description}")),
-                ("%HIT%", new TextContainer($"{GetValueWithModifier(unit.MainAttackBaseAccuracy.ToString(), unit.MainAttackAccuracyModifier)}%")),
-                ("%HIT2%", new TextContainer(unit.SecondaryAttackAccuracy == null ? string.Empty : $" / {unit.SecondaryAttackAccuracy}%")),
+                ("%ALTATTACK%", new TextContainer(string.Empty)), // Альтернативная атака заполняется в GetMainAttack. Непонятно, зачем нужен этот плейсхолдер.
+                ("%ATTACK%", GetMainAttack(mainAttack, alternativeAttack)),
+                ("%SECOND%", new TextContainer(secondaryAttack == null ? string.Empty : $" / {secondaryAttack.Description}")),
+                ("%HIT%", new TextContainer($"{GetValueWithModifier(defaultMainAttack.BaseAccuracy.ToString(), defaultMainAttack.AccuracyBonus)}%")),
+                ("%HIT2%", new TextContainer(secondaryAttack == null ? string.Empty : $" / {secondaryAttack.TotalAccuracy}%")),
 
-                ("%EFFECT%", GetUnitEffectTitle()),
-                ("%DAMAGE%", GetDamage(unit)),
-                ("%SOURCE%", GetAttackSourceTitle(unit.UnitType.MainAttack.AttackSource)),
-                ("%SOURCE2%", new TextContainer(unit.UnitType.SecondaryAttack == null ? string.Empty : $" / {GetAttackSourceTitle(unit.UnitType.MainAttack.AttackSource)}")),
+                ("%EFFECT%", GetUnitEffectTitle(defaultMainAttack)),
+                ("%DAMAGE%", GetDamage(defaultMainAttack, secondaryAttack)),
+                ("%SOURCE%", GetAttackSourceTitle(defaultMainAttack.AttackSource)),
+                ("%SOURCE2%", new TextContainer(secondaryAttack == null ? string.Empty : $" / {GetAttackSourceTitle(secondaryAttack.AttackSource)}")),
                 ("%INIT%", GetValueWithModifier(unit.BaseInitiative.ToString(), unit.InitiativeModifier)),
-                ("%REACH%", GetReachTitle(unit)),
-                ("%TARGETS%", GetReachCount(unit))
+                ("%REACH%", GetReachTitle(defaultMainAttack)),
+                ("%TARGETS%", GetReachCount(defaultMainAttack))
             })
             ;
     }
 
     /// <summary>
+    /// Получить описание основной атаки.
+    /// </summary>
+    private TextContainer GetMainAttack(CalculatedUnitAttack mainAttack, CalculatedUnitAttack? alternativeAttack)
+    {
+        if (alternativeAttack == null)
+            return new TextContainer(mainAttack.Description);
+
+        return new TextContainer(
+            new[] { new TextPiece(mainAttack.Description) }
+                .Concat(_textProvider.GetText("X005TA0459").TextPieces) // Строка вида " or " / " или ".
+                .Append(new TextPiece(alternativeAttack.Description))
+                .ToArray());
+    }
+
+    /// <summary>
     /// Получить урон юнита.
     /// </summary>
-    private static TextContainer GetDamage(Unit unit)
+    private static TextContainer GetDamage(CalculatedUnitAttack mainAttack, CalculatedUnitAttack? secondaryAttack)
     {
-        var mainAttack = GetValueWithModifier(
-            GetAttackPower(unit.MainAttackBasePower, unit.UnitType.MainAttack.AttackType),
-            unit.MainAttackPowerModifier);
+        var mainAttackPower = GetValueWithModifier(
+            GetAttackPower(mainAttack.BasePower, mainAttack.AttackType),
+            mainAttack.PowerBonus);
 
-        if (unit.SecondaryAttackPower > 0 &&
-            unit.UnitType.SecondaryAttack!.AttackType is not UnitAttackType.ReduceDamage
+        if (secondaryAttack != null &&
+            secondaryAttack.AttackType is not UnitAttackType.ReduceDamage
                 and not UnitAttackType.ReduceInitiative
                 and not UnitAttackType.ReduceArmor)
         {
             var secondaryAttackPower = GetValueWithModifier(
-                GetAttackPower(unit.SecondaryAttackPower.Value, unit.UnitType.SecondaryAttack!.AttackType),
+                GetAttackPower(secondaryAttack.BasePower, secondaryAttack.AttackType),
                 0);
-            return new TextContainer(mainAttack
+            return new TextContainer(mainAttackPower
                 .TextPieces
                 .Append(new TextPiece($" / {secondaryAttackPower}"))
                 .ToArray());
         }
 
-        return mainAttack;
+        return mainAttackPower;
     }
 
     /// <summary>
@@ -243,12 +263,12 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// <summary>
     /// Получить наименование класса атаки юнита.
     /// </summary>
-    private TextContainer GetUnitEffectTitle()
+    private TextContainer GetUnitEffectTitle(CalculatedUnitAttack unitAttack)
     {
-        if (_unit.UnitType.MainAttack.AttackType == UnitAttackType.Heal)
+        if (unitAttack.AttackType == UnitAttackType.Heal)
             return _textProvider.GetText("X005TA0504");
 
-        if (_unit.UnitType.MainAttack.AttackType == UnitAttackType.IncreaseDamage)
+        if (unitAttack.AttackType == UnitAttackType.IncreaseDamage)
             return _textProvider.GetText("X005TA0534");
 
         return _textProvider.GetText("X005TA0503");
@@ -341,9 +361,9 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// <summary>
     /// Получить наименование, каких юнитов относительного своего расположения можно атаковать.
     /// </summary>
-    private TextContainer GetReachTitle(Unit unit)
+    private TextContainer GetReachTitle(CalculatedUnitAttack unitAttack)
     {
-        if (unit.UnitType.MainAttack.Reach == UnitAttackReach.Adjacent)
+        if (unitAttack.Reach == UnitAttackReach.Adjacent)
             return _textProvider.GetText("X005TA0201");
 
         return _textProvider.GetText("X005TA0200");
@@ -352,9 +372,9 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// <summary>
     /// Получить количество целей для атаки.
     /// </summary>
-    private TextContainer GetReachCount(Unit unit)
+    private static TextContainer GetReachCount(CalculatedUnitAttack unitAttack)
     {
-        if (unit.UnitType.MainAttack.Reach == UnitAttackReach.All)
+        if (unitAttack.Reach == UnitAttackReach.All)
             return new TextContainer("6");
 
         return new TextContainer("1");

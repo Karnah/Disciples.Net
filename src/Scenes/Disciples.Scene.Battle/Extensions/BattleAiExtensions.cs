@@ -45,15 +45,17 @@ internal static class BattleAiExtensions
     /// </summary>
     private static int PowerPriority(AiTargetUnit targetUnit)
     {
+        var attack = targetUnit.Unit.AlternativeAttack ?? targetUnit.Unit.MainAttack;
+
         // BUG Здесь некорректно будет отрабатывать в случае эффектов усиления/ослабления.
-        var power = targetUnit.Unit.MainAttackPower + (targetUnit.Unit.SecondaryAttackPower ?? 0);
+        var power = attack.TotalPower + (targetUnit.Unit.SecondaryAttack?.TotalPower ?? 0);
 
         if (targetUnit.Unit.UnitType.IsAttackTwice)
             power *= 2;
 
         // BUG Вообще правильно считать по количеству целей.
         // Но для простоты умножаем в три раза.
-        if (targetUnit.Unit.UnitType.MainAttack.Reach == UnitAttackReach.All)
+        if (attack.Reach == UnitAttackReach.All)
             power *= 3;
 
         return power;

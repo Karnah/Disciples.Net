@@ -5,7 +5,6 @@ using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
@@ -252,8 +251,25 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         if (_isAnimating)
             return;
 
-        if (CanAttack(targetBattleUnit))
+        if (_battleProcessor.CanAttack(_context.CreateAttackProcessorContext(targetBattleUnit)))
+        {
             _unitActionFactory.BeginMainAttack(targetBattleUnit);
+            return;
+        }
+
+        // Проверяем, если текущий юнит имеет массовую атаку,
+        // И может атаковать других юнитов в том же отряде.
+        var currentUnit = CurrentBattleUnit.Unit;
+        var mainAttack = currentUnit.MainAttack;
+        var alternativeAttack = currentUnit.AlternativeAttack;
+        var secondaryAttack = currentUnit.SecondaryAttack;
+
+        var newTargetUnit = GetAttackBattleUnit(targetBattleUnit, mainAttack, secondaryAttack);
+        if (newTargetUnit == null && alternativeAttack != null)
+            newTargetUnit = GetAttackBattleUnit(targetBattleUnit, alternativeAttack, secondaryAttack);
+
+        if (newTargetUnit != null)
+            _unitActionFactory.BeginMainAttack(newTargetUnit);
     }
 
     /// <summary>
@@ -344,53 +360,27 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     /// </summary>
     private void SelectTargetUnits()
     {
-        if (_context.TargetBattleUnit == null)
+        var targetBattleUnit = _context.TargetBattleUnit;
+        if (targetBattleUnit == null)
             return;
 
-        var currentUnit = CurrentBattleUnit.Unit;
-        var targetUnit = _context.TargetBattleUnit.Unit;
-
-        if (targetUnit.IsDeadOrRetreated)
+        if (targetBattleUnit.Unit.IsDeadOrRetreated)
         {
-            _context.TargetBattleUnit.IsTarget = false;
+            targetBattleUnit.IsTarget = false;
             return;
         }
 
-        // Если текущий юнит может атаковать только одну цель,
-        // то всегда будет выделена только одна цель
-        if (currentUnit.UnitType.MainAttack.Reach != UnitAttackReach.All)
-        {
-            AttachTargetAnimations(_context.TargetBattleUnit);
-            return;
-        }
+        // Выбранному юниту всегда проставляем выделение,
+        // Даже если его нельзя атаковать.
+        targetBattleUnit.IsTarget = true;
 
-        BattleUnit[] targetUnits;
-
-        // Если юнит применяет способность на союзников (например, лекарь), то при наведении на союзника, будут выделяться все
-        // Также наоборот, если юнит применяет способность на врагов, то выделятся все враги
-        // Иначе, как например, лекарь при наведении на врага будет выделять только 1 врага
-        if (currentUnit.Player == targetUnit.Player && currentUnit.HasAllyAbility() ||
-            currentUnit.Player != targetUnit.Player && currentUnit.HasEnemyAbility())
-        {
-            targetUnits = BattleUnits
-                .Where(u => u.Unit.Player == targetUnit.Player && u.Unit.IsDeadOrRetreated == false)
-                .ToArray();
-        }
-        else
-        {
-            targetUnits = new[] { _context.TargetBattleUnit };
-        }
-
-        AttachTargetAnimations(targetUnits);
-    }
-
-    /// <summary>
-    /// Отобразить анимацию выделения цели на указанных юнитах.
-    /// </summary>
-    private void AttachTargetAnimations(params BattleUnit[] battleUnits)
-    {
-        foreach (var battleUnit in BattleUnits)
-            battleUnit.IsTarget = battleUnits.Contains(battleUnit);
+        var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
+        var targetBattleUnits = _battleProcessor
+            .GetMainAttackTargetUnits(attackProcessorContext)
+            .Where(u => u != targetBattleUnit.Unit)
+            .Select(_context.GetBattleUnit);
+        foreach (var battleUnit in targetBattleUnits)
+            battleUnit.IsTarget = true;
     }
 
     /// <summary>
@@ -403,29 +393,30 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     /// <summary>
-    /// Проверить, может ли текущий юнит атаковать цель.
+    /// Получить юнит-цель.
     /// </summary>
-    private bool CanAttack(BattleUnit targetBattleUnit)
+    /// <remarks>
+    /// Если текущий юнит имеет атаку "по всем", то можно нажать на юнита, которого он не может атаковать.
+    /// В этом случае, эффект будет применён ко все юнитам, которых можно атаковать.
+    /// </remarks>
+    private BattleUnit? GetAttackBattleUnit(BattleUnit targetBattleUnit, CalculatedUnitAttack mainAttack, CalculatedUnitAttack? secondaryAttack)
     {
-        // Если текущий юнит атакует одну цель, то проверяем может ли он её атаковать.
-        if (CurrentBattleUnit.Unit.UnitType.MainAttack.Reach != UnitAttackReach.All)
-        {
-            var context = _context.CreateAttackProcessorContext(targetBattleUnit);
-            return _battleProcessor.CanAttack(context);
-        }
+        if (mainAttack.Reach != UnitAttackReach.All)
+            return null;
 
-        // Если юнит атакует весь отряд целиком, то проверяем может ли он атаковать хотя бы одного юнита в отряде.
-        // При этом юнит-цель может быть недоступна для атаки.
-        var targetUnitSquad = targetBattleUnit.IsAttacker
-            ? _context.AttackingBattleSquad
-            : _context.DefendingBattleSquad;
-        return targetUnitSquad
-            .Squad
+        return _context
+            .GetBattleUnitSquad(targetBattleUnit)
             .Units
-            .Any(u =>
+            .Select(_context.GetBattleUnit)
+            .Where(u =>
             {
-                var context = _context.CreateAttackProcessorContext(_context.GetBattleUnit(u));
-                return _battleProcessor.CanAttack(context);
-            });
+                // targetBattleUnit уже проверили, его точно нельзя атаковать.
+                if (u == targetBattleUnit)
+                    return false;
+
+                var attackProcessorContext = _context.CreateAttackProcessorContext(u);
+                return _battleProcessor.CanAttack(attackProcessorContext, mainAttack, secondaryAttack);
+            })
+            .FirstOrDefault();
     }
 }

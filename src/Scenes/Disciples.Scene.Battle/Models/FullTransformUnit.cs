@@ -4,28 +4,25 @@ using Disciples.Engine.Common.Models;
 namespace Disciples.Scene.Battle.Models;
 
 /// <summary>
-/// Превращённый атакой <see cref="UnitAttackType.TransformEnemy" /> юнит.
+/// Юнит, который имеет все характеристики своего <see cref="UnitType" />.
 /// </summary>
-internal class TransformedEnemyUnit : Unit, ITransformedUnit
+/// <remarks>
+/// Используется при выполнении атак <see cref="UnitAttackType.Doppelganger" /> и <see cref="UnitAttackType.TransformSelf" />
+/// </remarks>
+internal class FullTransformUnit : Unit, ITransformedUnit
 {
     /// <summary>
-    /// Базовый юнит, от которого берётся количество хп.
+    /// Создать объект типа <see cref="FullTransformUnit" />.
     /// </summary>
-    private readonly Unit _baseUnit;
-
-    /// <summary>
-    /// Создать объект типа <see cref="TransformedEnemyUnit" />.
-    /// </summary>
-    public TransformedEnemyUnit(Unit originalUnit, UnitType transformedUnitType)
-        : base(originalUnit.Id, transformedUnitType, originalUnit.Player, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
+    public FullTransformUnit(Unit originalUnit, UnitType unitType)
+        : base(originalUnit.Id, unitType, originalUnit.Player, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
     {
-        _baseUnit = originalUnit;
-
         OriginalUnit = originalUnit is ITransformedUnit transformedUnit
             ? transformedUnit.OriginalUnit
             : originalUnit;
 
-        HitPoints = originalUnit.HitPoints;
+        // Соотношение здоровья сохраняется как у исходного юнита.
+        HitPoints = (int) (HitPoints * ((decimal)originalUnit.HitPoints / originalUnit.MaxHitPoints));
     }
 
     /// <inheritdoc />
@@ -47,9 +44,6 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
         get => OriginalUnit.IsRetreated;
         set => OriginalUnit.IsRetreated = value;
     }
-
-    /// <inheritdoc />
-    public override int MaxHitPoints => _baseUnit.MaxHitPoints;
 
     /// <inheritdoc />
     public override UnitEffects Effects => OriginalUnit.Effects;
