@@ -24,8 +24,6 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
         OriginalUnit = originalUnit is ITransformedUnit transformedUnit
             ? transformedUnit.OriginalUnit
             : originalUnit;
-
-        HitPoints = originalUnit.HitPoints;
     }
 
     /// <inheritdoc />

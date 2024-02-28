@@ -463,6 +463,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
+            UnitAttackType.ReduceLevel => BattleColors.ReduceLevel,
             UnitAttackType.Doppelganger => BattleColors.Transform,
             UnitAttackType.TransformSelf => BattleColors.Transform,
             UnitAttackType.TransformEnemy => BattleColors.Transform,
@@ -559,7 +560,8 @@ internal class UnitPortraitObject : GameObject
             return AddColorImage(color.Value, color == BattleColors.Damage
                                               || color == BattleColors.Heal
                                               || color == BattleColors.Boost
-                                              || color == BattleColors.ReduceArmor);
+                                              || color == BattleColors.ReduceArmor
+                                              || color == BattleColors.ReduceLevel);
         }
 
         return null;

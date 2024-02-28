@@ -80,31 +80,11 @@ internal class SaveProvider
         .ToArray();
 
     /// <summary>
-    /// Список типов атак, которые поддержаны.
+    /// Список типов атак, которые не поддержаны.
     /// </summary>
-    private static readonly UnitAttackType[] SupportedAttackTypes =
+    private static readonly UnitAttackType[] NotSupportedAttackTypes =
     {
-        UnitAttackType.Damage,
-        UnitAttackType.DrainLife,
-        UnitAttackType.Paralyze,
-        UnitAttackType.Heal,
-        UnitAttackType.Fear,
-        UnitAttackType.IncreaseDamage,
-        UnitAttackType.Petrify,
-        UnitAttackType.ReduceDamage,
-        UnitAttackType.ReduceInitiative,
-        UnitAttackType.Poison,
-        UnitAttackType.Frostbite,
-        UnitAttackType.Revive,
-        UnitAttackType.DrainLifeOverflow,
-        UnitAttackType.Cure,
-        UnitAttackType.GiveAdditionalAttack,
-        UnitAttackType.Doppelganger,
-        UnitAttackType.TransformSelf,
-        UnitAttackType.TransformEnemy,
-        UnitAttackType.Blister,
-        UnitAttackType.GiveProtection,
-        UnitAttackType.ReduceArmor,
+        UnitAttackType.Summon
     };
 
     /// <summary>
@@ -179,7 +159,7 @@ internal class SaveProvider
         var units = context
             .UnitTypes
             .Where(u => (RaceType)u.Race.RaceType == race && u.Level <= battleLevel)
-            .Where(u => SupportedAttackTypes.Contains((UnitAttackType)u.MainAttack.AttackType))
+            .Where(u => !NotSupportedAttackTypes.Contains((UnitAttackType)u.MainAttack.AttackType))
             .Select(u => new RandomSaveUnitType(u.Id, u.Level, u.UnitCategory, u.MainAttack.Reach, u.HitPoints, u.LowLevelUpgrade.HitPoints, u.HighLevelUpgrade.HitPoints, u.UpgradeChangeLevel, u.IsSmall))
             .ToArray();
         var frontLineUnits = units

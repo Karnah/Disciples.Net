@@ -7,7 +7,8 @@ namespace Disciples.Scene.Battle.Models;
 /// Юнит, который имеет все характеристики своего <see cref="UnitType" />.
 /// </summary>
 /// <remarks>
-/// Используется при выполнении атак <see cref="UnitAttackType.Doppelganger" /> и <see cref="UnitAttackType.TransformSelf" />
+/// Используется при выполнении атак <see cref="UnitAttackType.ReduceLevel" />, <see cref="UnitAttackType.Doppelganger" />
+/// И <see cref="UnitAttackType.TransformSelf" />
 /// </remarks>
 internal class FullTransformUnit : Unit, ITransformedUnit
 {
@@ -20,9 +21,6 @@ internal class FullTransformUnit : Unit, ITransformedUnit
         OriginalUnit = originalUnit is ITransformedUnit transformedUnit
             ? transformedUnit.OriginalUnit
             : originalUnit;
-
-        // Соотношение здоровья сохраняется как у исходного юнита.
-        HitPoints = (int) (HitPoints * ((decimal)originalUnit.HitPoints / originalUnit.MaxHitPoints));
     }
 
     /// <inheritdoc />

@@ -66,25 +66,25 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     public IBitmap GetUnitFace(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitFace(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
+        return _unitInfoProvider.GetUnitFace(unitType.LeaderBaseUnitType?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public IBitmap GetUnitBattleFace(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitBattleFace(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
+        return _unitInfoProvider.GetUnitBattleFace(unitType.LeaderBaseUnitType?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public IBitmap GetUnitPortrait(UnitType unitType)
     {
-        return _unitInfoProvider.GetUnitPortrait(unitType.LeaderBaseUnit?.Id ?? unitType.Id);
+        return _unitInfoProvider.GetUnitPortrait(unitType.LeaderBaseUnitType?.Id ?? unitType.Id);
     }
 
     /// <inheritdoc />
     public BattleUnitAnimation GetBattleUnitAnimation(UnitType unitType, BattleDirection direction)
     {
-        var unitTypeId = unitType.LeaderBaseUnit?.Id ?? unitType.Id;
+        var unitTypeId = unitType.LeaderBaseUnitType?.Id ?? unitType.Id;
         var animationKey = (unitTypeId, direction);
         if (!_unitsAnimations.ContainsKey(animationKey))
             _unitsAnimations[animationKey] = ExtractUnitAnimation(unitTypeId, direction);
@@ -108,7 +108,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     public BattleUnitSounds GetBattleUnitSounds(UnitType unitType)
     {
-        var unitTypeId = unitType.LeaderBaseUnit?.Id ?? unitType.Id;
+        var unitTypeId = unitType.LeaderBaseUnitType?.Id ?? unitType.Id;
         if (!_unitSounds.TryGetValue(unitTypeId, out var battleUnitSounds))
         {
             battleUnitSounds = ExtractUnitSounds(unitTypeId);

@@ -7,6 +7,10 @@ namespace Disciples.Engine.Common.Models;
 /// <summary>
 /// Тип юнита.
 /// </summary>
+/// <remarks>
+/// TODO Здесь и в <see cref="UnitAttack" /> часть свойств сделана с публичным set,
+/// Так как маппинг выполняется вручную. Подумать над тем, чтобы везде был init.
+/// </remarks>
 public class UnitType
 {
     /// <summary>
@@ -27,7 +31,7 @@ public class UnitType
     /// <summary>
     /// Предыдущий тип юнита в иерархии.
     /// </summary>
-    public UnitType? PreviousUnitType { get; init; }
+    public UnitType? PreviousUnitType { get; set; }
 
     /// <summary>
     /// Раса юнита.
@@ -108,7 +112,7 @@ public class UnitType
     /// <summary>
     /// Базовый тип юнита для юнита-героя.
     /// </summary>
-    public UnitType? LeaderBaseUnit { get; init; }
+    public UnitType? LeaderBaseUnitType { get; set; }
 
     /// <summary>
     /// Базовая защита юнита.

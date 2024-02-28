@@ -58,6 +58,11 @@ internal static class BattleColors
     public static Color Transform { get; } = Color.FromArgb(255, 0, 0, 0);
 
     /// <summary>
+    /// Цвет понижения уровня.
+    /// </summary>
+    public static Color ReduceLevel { get; } = Color.FromArgb(128, 255, 0, 255);
+
+    /// <summary>
     /// Прозрачный цвет.
     /// </summary>
     public static Color Transparent { get; } = Color.FromArgb(0, 0, 0, 0);

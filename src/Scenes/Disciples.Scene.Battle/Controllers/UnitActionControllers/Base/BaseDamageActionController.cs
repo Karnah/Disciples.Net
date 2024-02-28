@@ -140,6 +140,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
                     return true;
                 }
 
+                case UnitAttackType.ReduceLevel when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.Doppelganger when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.TransformSelf when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.TransformEnemy when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
@@ -182,6 +183,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         {
             switch (attackEffectProcessor.EffectResult.Effect.AttackType)
             {
+                case UnitAttackType.ReduceLevel:
                 case UnitAttackType.Doppelganger:
                 case UnitAttackType.TransformSelf:
                 case UnitAttackType.TransformEnemy:

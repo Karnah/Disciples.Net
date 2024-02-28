@@ -128,7 +128,7 @@ public class UnitType : IEntity
     /// Базовый тип юнита для юнита-героя.
     /// </summary>
     [Column("BASE_UNIT")]
-    public string? LeaderBaseUnitId { get; init; }
+    public string? LeaderBaseUnitTypeId { get; init; }
 
     /// <summary>
     /// Базовая защита юнита.

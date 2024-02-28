@@ -24,6 +24,11 @@ public class UnitType : IEntity
     public int Level { get; init; }
 
     /// <summary>
+    /// Идентификатор предыдущего типа юнита в иерархии.
+    /// </summary>
+    public string? PreviousUnitTypeId { get; init; }
+
+    /// <summary>
     /// Предыдущий тип юнита в иерархии.
     /// </summary>
     public UnitType? PreviousUnitType { get; init; }
@@ -105,9 +110,14 @@ public class UnitType : IEntity
     public int HitPoints { get; init; }
 
     /// <summary>
+    /// Идентификатор базового типа юнита для юнита-героя.
+    /// </summary>
+    public string? LeaderBaseUnitTypeId { get; init; }
+
+    /// <summary>
     /// Базовый тип юнита для юнита-героя.
     /// </summary>
-    public UnitType? LeaderBaseUnit { get; init; }
+    public UnitType? LeaderBaseUnitType { get; init; }
 
     /// <summary>
     /// Базовая защита юнита.

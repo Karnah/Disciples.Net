@@ -10,6 +10,16 @@ namespace Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProce
 internal abstract class BaseTransformAttackProcessor : BaseEffectAttackProcessor
 {
     /// <inheritdoc />
+    /// <remarks>
+    /// Для всех превращений возможно превращение по цепочке несколько раз.
+    /// Поэтому эффект всегда можно заменить.
+    /// </remarks>
+    protected override bool CanReplaceEffect(UnitBattleEffect existingBattleEffect, int? newEffectPower, EffectDuration newEffectDuration)
+    {
+        return true;
+    }
+
+    /// <inheritdoc />
     public override void ProcessAttack(CalculatedAttackResult attackResult)
     {
         var targetUnit = attackResult.Context.TargetUnit;
@@ -21,7 +31,8 @@ internal abstract class BaseTransformAttackProcessor : BaseEffectAttackProcessor
             .GetBattleEffects()
             .SingleOrDefault(be =>
                 be.AttackType
-                    is UnitAttackType.Doppelganger
+                    is UnitAttackType.ReduceLevel
+                    or UnitAttackType.Doppelganger
                     or UnitAttackType.TransformSelf
                     or UnitAttackType.TransformEnemy);
         if (transformEffect != null)
@@ -34,6 +45,8 @@ internal abstract class BaseTransformAttackProcessor : BaseEffectAttackProcessor
         var transformedUnit = attackResult.TransformedUnit!.Unit;
         var targetUnitSquadIndex = targetUnitSquad.Units.IndexOf(targetUnit);
         targetUnitSquad.Units[targetUnitSquadIndex] = transformedUnit;
+
+        transformedUnit.HitPoints = GetTransformHitPoints(targetUnit, transformedUnit);
 
         var unitTurnQueue = attackResult.Context.UnitTurnQueue;
         unitTurnQueue.ReorderTransformedUnitTurn(targetUnit, transformedUnit, transformedUnit.Initiative);
@@ -49,24 +62,15 @@ internal abstract class BaseTransformAttackProcessor : BaseEffectAttackProcessor
 
         var targetUnit = context.TargetUnit;
         var targetUnitSquad = context.TargetUnitSquad;
+        var transformedUnit = ((ITransformedUnit)targetUnit).Unit;
         var originalUnit = ((ITransformedUnit)targetUnit).OriginalUnit;
         var targetUnitSquadIndex = targetUnitSquad.Units.IndexOf(targetUnit);
         targetUnitSquad.Units[targetUnitSquadIndex] = originalUnit;
 
+        originalUnit.HitPoints = GetTransformHitPoints(transformedUnit, originalUnit);
+
         var unitTurnQueue = context.UnitTurnQueue;
         unitTurnQueue.ReorderTransformedUnitTurn(targetUnit, originalUnit, originalUnit.Initiative);
-
-        // Пересчитываем здоровье юнита после превращения.
-        var transformedUnit = ((ITransformedUnit)targetUnit).Unit;
-        if (originalUnit.MaxHitPoints == transformedUnit.MaxHitPoints)
-        {
-            originalUnit.HitPoints = transformedUnit.HitPoints;
-        }
-        else
-        {
-            var hitPointsModifier = (decimal)transformedUnit.HitPoints / transformedUnit.MaxHitPoints;
-            originalUnit.HitPoints = (int) (originalUnit.MaxHitPoints * hitPointsModifier);
-        }
     }
 
     /// <summary>
@@ -79,5 +83,17 @@ internal abstract class BaseTransformAttackProcessor : BaseEffectAttackProcessor
     {
         return targetUnit.UnitType.IsSmall == transformUnitType.IsSmall &&
                targetUnit.UnitType.Id != transformUnitType.Id;
+    }
+
+    /// <summary>
+    /// Получить количество жизней после трансформации юнита.
+    /// </summary>
+    private static int GetTransformHitPoints(Unit fromUnit, Unit toUnit)
+    {
+        if (fromUnit.MaxHitPoints == toUnit.MaxHitPoints)
+            return fromUnit.HitPoints;
+
+        var hitPointsModifier = (decimal)fromUnit.HitPoints / fromUnit.MaxHitPoints;
+        return (int) (toUnit.MaxHitPoints * hitPointsModifier);
     }
 }

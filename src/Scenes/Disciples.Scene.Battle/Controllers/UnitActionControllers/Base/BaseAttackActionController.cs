@@ -126,6 +126,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
             }
 
             case UnitAttackType.Revive:
+            case UnitAttackType.ReduceLevel:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformEnemy:
@@ -165,6 +166,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
                 break;
             }
 
+            case UnitAttackType.ReduceLevel:
             case UnitAttackType.Doppelganger:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.TransformEnemy:

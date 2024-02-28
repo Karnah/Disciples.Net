@@ -215,7 +215,7 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// <summary>
     /// Можно ли заменить эффект, который уже действует на юните.
     /// </summary>
-    private static bool CanReplaceEffect(UnitBattleEffect existingBattleEffect, int? newEffectPower, EffectDuration newEffectDuration)
+    protected virtual bool CanReplaceEffect(UnitBattleEffect existingBattleEffect, int? newEffectPower, EffectDuration newEffectDuration)
     {
         var isNewEffectLonger = !existingBattleEffect.Duration.IsInfinitive &&
                                 existingBattleEffect.Duration.Turns < newEffectDuration!.Turns;

@@ -109,6 +109,7 @@ internal static class ImageResourceKeyExtensions
             UnitAttackType.Poison => true,
             UnitAttackType.Frostbite => true,
             UnitAttackType.Revive => true,
+            UnitAttackType.ReduceLevel => true,
             UnitAttackType.Doppelganger => true,
             UnitAttackType.TransformSelf => true,
             UnitAttackType.TransformEnemy => true,
@@ -127,6 +128,8 @@ internal static class ImageResourceKeyExtensions
             UnitAttackType.Poison => "POISONANIM",
             UnitAttackType.Frostbite => "FROSTBITEANIM",
             UnitAttackType.Revive => "REVIVEANIM",
+            // TODO Для возвращения в прежним облик есть UNDRAINLVL.
+            UnitAttackType.ReduceLevel => "DRAINLVL",
             UnitAttackType.Doppelganger => "DOPPEL",
             UnitAttackType.TransformSelf => "TRANSF",
             UnitAttackType.TransformEnemy => "TRANSF",

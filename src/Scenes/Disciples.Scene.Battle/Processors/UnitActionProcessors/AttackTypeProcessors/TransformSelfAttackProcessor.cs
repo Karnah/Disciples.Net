@@ -37,17 +37,4 @@ internal class TransformSelfAttackProcessor : BaseTransformAttackProcessor
             ? EffectDuration.CreateInfinitive()
             : EffectDuration.Create(1);
     }
-
-    /// <inheritdoc />
-    protected override void ProcessEffectCompleted(AttackProcessorContext context, UnitBattleEffect battleEffect)
-    {
-        base.ProcessEffectCompleted(context, battleEffect);
-
-        var targetUnit = (ITransformedUnit)context.TargetUnit;
-        var transformedUnit = targetUnit.Unit;
-        var originalUnit = targetUnit.OriginalUnit;
-
-        var hitPointsModifier = (decimal)transformedUnit.HitPoints / transformedUnit.MaxHitPoints;
-        originalUnit.HitPoints = (int) (originalUnit.MaxHitPoints * hitPointsModifier);
-    }
 }

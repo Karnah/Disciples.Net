@@ -115,8 +115,6 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
             var dbUnitType = context
                 .UnitTypes
                 .AsNoTracking()
-                .Include(ut => ut.LeaderBaseUnit)
-                .Include(ut => ut.PreviousUnitType)
                 .Include(ut => ut.Name)
                 .Include(ut => ut.Description)
                 .Include(ut => ut.AbilityDescription)
@@ -157,6 +155,11 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
             unitType.MainAttack.SummonTransformUnitTypes = GetSummonTransformUnitTypes(context, dbUnitType.MainAttack);
             if (unitType.SecondaryAttack != null)
                 unitType.SecondaryAttack.SummonTransformUnitTypes = GetSummonTransformUnitTypes(context, dbUnitType.SecondaryAttack!);
+
+            if (dbUnitType.PreviousUnitTypeId != null)
+                unitType.PreviousUnitType = GetUnitType(dbUnitType.PreviousUnitTypeId);
+            if (dbUnitType.LeaderBaseUnitTypeId != null)
+                unitType.LeaderBaseUnitType = GetUnitType(dbUnitType.LeaderBaseUnitTypeId);
 
             return unitType;
         }

@@ -139,7 +139,7 @@ public class InitialMigration : Migration
             .WithColumn("SecondaryUnitAttackId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Дополнительная атака").ForeignKey("UnitAttack", "Id")
             .WithColumn("IsAttackTwice").AsBoolean().NotNullable().WithColumnDescription("Атакует ли юнит дважды")
             .WithColumn("HitPoints").AsInt32().NotNullable().WithColumnDescription("Количество жизней")
-            .WithColumn("LeaderBaseUnitId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Базовый тип юнита для юнита-героя").ForeignKey("UnitType", "Id")
+            .WithColumn("LeaderBaseUnitTypeId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Базовый тип юнита для юнита-героя").ForeignKey("UnitType", "Id")
             .WithColumn("Armor").AsInt32().NotNullable().WithColumnDescription("Базовая защита юнита")
             .WithColumn("HitPointsRegeneration").AsInt32().NotNullable().WithColumnDescription("Базовое восстановления % жизней за ход")
             .WithResourceSet("ReviveCost", "Стоимость воскрешения юнита")

@@ -15,6 +15,7 @@ internal static class SoundResourceKeyExtensions
         return unitAttackType is UnitAttackType.Heal or
             UnitAttackType.Poison or
             UnitAttackType.Frostbite or
+            UnitAttackType.ReduceLevel or
             UnitAttackType.Doppelganger or
             UnitAttackType.TransformSelf or
             UnitAttackType.TransformEnemy or
@@ -32,6 +33,7 @@ internal static class SoundResourceKeyExtensions
             UnitAttackType.Heal => "HEAL",
             UnitAttackType.Poison => "POISON",
             UnitAttackType.Frostbite => "FRSTBITE",
+            UnitAttackType.ReduceLevel => "UNTRANSF",
             UnitAttackType.Doppelganger => "UNTRANSF",
             UnitAttackType.TransformSelf => "UNTRANSF",
             UnitAttackType.TransformEnemy => "UNTRANSF",

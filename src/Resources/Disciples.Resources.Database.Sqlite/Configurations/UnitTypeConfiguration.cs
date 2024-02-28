@@ -21,9 +21,13 @@ internal class UnitTypeConfiguration : IEntityTypeConfiguration<UnitType>
             ut => ut.RecruitCost,
             navigationBuilder => navigationBuilder.BuildResourceSet(nameof(UnitType.RecruitCost)));
 
-        builder.HasOne(ut => ut.PreviousUnitType);
+        builder.HasOne(ut => ut.PreviousUnitType)
+            .WithOne()
+            .HasForeignKey<UnitType>(ut => ut.PreviousUnitTypeId);
         builder.HasOne(ut => ut.Race);
-        builder.HasOne(ut => ut.LeaderBaseUnit);
+        builder.HasOne(ut => ut.LeaderBaseUnitType)
+            .WithOne()
+            .HasForeignKey<UnitType>(ut => ut.LeaderBaseUnitTypeId);
 
         builder
             .HasOne(r => r.Name)
