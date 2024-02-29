@@ -14,6 +14,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleContext _context;
     private readonly BattleAiProcessor _battleAiProcessor;
+    private readonly BattleInstantProcessor _battleInstantProcessor;
     private readonly BattleUnitActionFactory _unitActionFactory;
 
     /// <summary>
@@ -24,12 +25,14 @@ internal class BattleController : BaseSupportLoading, IBattleController
         BattleProcessor battleProcessor,
         BattleContext context,
         BattleAiProcessor battleAiProcessor,
+        BattleInstantProcessor battleInstantProcessor,
         BattleUnitActionFactory unitActionFactory)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _context = context;
         _battleAiProcessor = battleAiProcessor;
+        _battleInstantProcessor = battleInstantProcessor;
         _unitActionFactory = unitActionFactory;
     }
 
@@ -222,12 +225,14 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// </summary>
     private void ProcessInstantBattle()
     {
-        var battleWinner = _battleAiProcessor.ProcessInstantBattle(_context.AttackingSquad, _context.DefendingSquad);
+        var battleWinner = _battleInstantProcessor.Process(CurrentBattleUnit.Unit, _context.AttackingSquad, _context.DefendingSquad, _context.UnitTurnQueue, _context.RoundNumber);
 
         foreach (var battleUnit in _context.BattleUnits)
         {
             if (battleUnit.Unit.IsDead && battleUnit.UnitState != BattleUnitState.Dead)
                 battleUnit.UnitState = BattleUnitState.Dead;
+            else if (battleUnit.Unit.IsRetreated)
+                battleUnit.UnitState = BattleUnitState.Retreated;
         }
 
         CompletedBattle(battleWinner);

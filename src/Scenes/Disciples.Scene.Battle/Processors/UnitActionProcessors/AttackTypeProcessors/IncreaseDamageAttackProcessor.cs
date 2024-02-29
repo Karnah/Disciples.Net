@@ -19,9 +19,11 @@ internal class IncreaseDamageAttackProcessor : BaseEffectAttackProcessor
 
     public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
+        var targetUnitMainAttack = context.TargetUnit.UnitType.MainAttack;
         return base.CanAttack(context, unitAttack) &&
                // Можно усиливать только юнитов с прямым уроном от первой атаки.
-               context.TargetUnit.UnitType.MainAttack.AttackType.IsDirectDamage();
+               (targetUnitMainAttack.AttackType.IsDirectDamage() ||
+                targetUnitMainAttack.AlternativeAttack?.AttackType.IsDirectDamage() == true);
     }
 
     /// <inheritdoc />

@@ -38,6 +38,7 @@ public class BattleSceneModule : IGameModule
 
         containerRegistrator.Register<BattleProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleAiProcessor>(sceneScopeReuse);
+        containerRegistrator.Register<BattleInstantProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleUnitPortraitPanelController>(sceneScopeReuse);
         containerRegistrator.Register<BattleBottomPanelController>(sceneScopeReuse);
         containerRegistrator.Register<BattleUnitActionFactory>(sceneScopeReuse);
