@@ -16,10 +16,17 @@ namespace Disciples.Engine.Common.GameObjects;
 /// </remarks>
 public class TextListBoxObject : GameObject
 {
+    /// <summary>
+    /// Высота строки.
+    /// </summary>
+    private const int ROW_HEIGHT = 18;
+
     private readonly IGameObjectContainer _gameObjectContainer;
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly TextListBoxSceneElement _textListBox;
     private readonly int _layer;
+
+    private readonly int _pageSize;
 
     private ButtonObject? _scrollUpButton;
     private ButtonObject? _scrollDownButton;
@@ -30,6 +37,7 @@ public class TextListBoxObject : GameObject
     private ButtonObject? _doubleClickButton;
 
     private int? _selectedItemIndex;
+    private int _firstDisplayElement;
     private IReadOnlyList<TextListBoxItem> _items = Array.Empty<TextListBoxItem>();
     private List<TextListBoxItemObject> _itemObjects = new();
 
@@ -47,6 +55,10 @@ public class TextListBoxObject : GameObject
         _sceneObjectContainer = sceneObjectContainer;
         _textListBox = textListBox;
         _layer = layer;
+
+        // TODO Вычисление страницы было осуществлено подбором формулы.
+        // Возможно, она неправильная.
+        _pageSize = (int) textListBox.Position.Height/ (textListBox.VerticalSpacing + ROW_HEIGHT);
     }
 
     /// <summary>
@@ -75,7 +87,21 @@ public class TextListBoxObject : GameObject
             _selectedItemIndex = value;
 
             if (_selectedItemIndex != null)
+            {
                 _itemObjects[_selectedItemIndex.Value].IsSelected = true;
+
+                // Обрабатываем ситуацию, когда вышли за пределы страницы.
+                if (_selectedItemIndex < _firstDisplayElement)
+                {
+                    _firstDisplayElement = _selectedItemIndex.Value;
+                    UpdateItemsVisibility();
+                }
+                else if (_selectedItemIndex >= _firstDisplayElement + _pageSize)
+                {
+                    _firstDisplayElement = _selectedItemIndex.Value - _pageSize + 1;
+                    UpdateItemsVisibility();
+                }
+            }
 
             ItemSelected?.Invoke(SelectedItem);
             UpdateButtonStates();
@@ -91,8 +117,8 @@ public class TextListBoxObject : GameObject
         _scrollDownButton = GetButton(_textListBox.ScrollDownButtonName, ExecuteItemScrollDown);
         _scrollLeftButton = GetButton(_textListBox.ScrollLeftButtonName);
         _scrollRightButton = GetButton(_textListBox.ScrollRightButtonName);
-        _pageUpButton = GetButton(_textListBox.PageUpButtonName);
-        _pageDownButton = GetButton(_textListBox.PageDownButtonName);
+        _pageUpButton = GetButton(_textListBox.PageUpButtonName, ExecutePageUp);
+        _pageDownButton = GetButton(_textListBox.PageDownButtonName, ExecutePageDown);
         _doubleClickButton = GetButton(_textListBox.DoubleClickButtonName);
     }
 
@@ -124,8 +150,9 @@ public class TextListBoxObject : GameObject
                     items[itemIndex],
                     ExecuteItemSelected,
                     ExecuteItemLeftMouseButtonDoubleClicked,
-                    new RectangleD(X, Y + itemIndex * (18 + _textListBox.VerticalSpacing), Width, 18),
+                    new RectangleD(X, Y + itemIndex * (ROW_HEIGHT + _textListBox.VerticalSpacing), Width, ROW_HEIGHT),
                     _layer + 1));
+            itemObject.IsHidden = itemIndex >= _pageSize;
             itemsObjects.Add(itemObject);
         }
 
@@ -166,6 +193,32 @@ public class TextListBoxObject : GameObject
     }
 
     /// <summary>
+    /// Переместиться на страницу выше.
+    /// </summary>
+    private void ExecutePageUp()
+    {
+        if (SelectedItemIndex == null)
+            return;
+
+        SelectedItemIndex = SelectedItemIndex > _pageSize
+            ? SelectedItemIndex - _pageSize
+            : 0;
+    }
+
+    /// <summary>
+    /// Переместиться на страницу ниже.
+    /// </summary>
+    private void ExecutePageDown()
+    {
+        if (SelectedItemIndex == null)
+            return;
+
+        SelectedItemIndex = SelectedItemIndex + _pageSize >= _itemObjects.Count
+            ? _itemObjects.Count - 1
+            : SelectedItemIndex + _pageSize;
+    }
+
+    /// <summary>
     /// Обработать выбор элемента.
     /// </summary>
     private void ExecuteItemSelected(TextListBoxItemObject itemObject)
@@ -202,14 +255,26 @@ public class TextListBoxObject : GameObject
         _doubleClickButton?.SetActive();
 
         if (SelectedItemIndex > 0)
+        {
             _scrollUpButton?.SetActive();
+            _pageUpButton?.SetActive();
+        }
         else
+        {
             _scrollUpButton?.SetDisabled();
+            _pageUpButton?.SetDisabled();
+        }
 
         if (SelectedItemIndex < _items.Count - 1)
+        {
             _scrollDownButton?.SetActive();
+            _pageDownButton?.SetActive();
+        }
         else
+        {
             _scrollDownButton?.SetDisabled();
+            _pageDownButton?.SetDisabled();
+        }
     }
 
     /// <summary>
@@ -220,6 +285,27 @@ public class TextListBoxObject : GameObject
         foreach (var button in buttons)
         {
             button?.SetDisabled();
+        }
+    }
+
+    /// <summary>
+    /// Обновить расположение элементов и их видимость.
+    /// </summary>
+    private void UpdateItemsVisibility()
+    {
+        for (int i = 0; i < _itemObjects.Count; i++)
+        {
+            var isHidden = i < _firstDisplayElement || i >= _firstDisplayElement + _pageSize;
+            var item = _itemObjects[i];
+            item.IsHidden = isHidden;
+
+            if (!isHidden)
+            {
+                var resultIndex = i - _firstDisplayElement;
+                item.SetPosition(new PointD(
+                    X,
+                    Y + resultIndex * (ROW_HEIGHT + _textListBox.VerticalSpacing)));
+            }
         }
     }
 }

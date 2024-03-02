@@ -40,10 +40,11 @@ public class SelectionComponent : BaseComponent
     public void Unhovered()
     {
         IsHover = false;
-        _onUnhoveredAction?.Invoke();
 
         // Если убрали выделение с объекта, сбрасываем нажатие.
         var clickComponent = GameObject.TryGetComponent<MouseLeftButtonClickComponent>();
         clickComponent?.Unpressed();
+
+        _onUnhoveredAction?.Invoke();
     }
 }

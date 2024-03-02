@@ -28,7 +28,8 @@ public class AvaloniaInputManager : IInputManager
         InputElement.PointerPressedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
         InputElement.PointerReleasedEvent.AddClassHandler(typeof(Window), OnMouseUpDown);
         InputElement.PointerMovedEvent.AddClassHandler(typeof(Window), OnMouseMove);
-        InputElement.KeyUpEvent.AddClassHandler(typeof(Window), OnKeyDown);
+        InputElement.PointerWheelChangedEvent.AddClassHandler(typeof(Window), OnMouseWheelMove);
+        InputElement.KeyDownEvent.AddClassHandler(typeof(Window), OnKeyDown);
     }
 
     /// <inheritdoc />
@@ -81,6 +82,21 @@ public class AvaloniaInputManager : IInputManager
     }
 
     /// <summary>
+    /// Обработать событие изменения колёсика мыши.
+    /// </summary>
+    private void OnMouseWheelMove(object? sender, RoutedEventArgs args)
+    {
+        var pointerWheelEventArgs = args as PointerWheelEventArgs;
+        if (pointerWheelEventArgs == null)
+            return;
+
+        var keyboardButton = pointerWheelEventArgs.Delta.Y > 0
+            ? KeyboardButton.Up
+            : KeyboardButton.Down;
+        KeyButtonEvent?.Invoke(this, new KeyButtonEventArgs(keyboardButton, ButtonState.Pressed));
+    }
+
+    /// <summary>
     /// Обработать событие нажатия на клавишу клавиатуры.
     /// </summary>
     private void OnKeyDown(object? sender, RoutedEventArgs args)
@@ -108,6 +124,8 @@ public class AvaloniaInputManager : IInputManager
             Key.Tab => KeyboardButton.Tab,
             Key.Enter => KeyboardButton.Enter,
             Key.Escape => KeyboardButton.Escape,
+            Key.PageUp => KeyboardButton.PageUp,
+            Key.PageDown => KeyboardButton.PageDown,
             Key.Up => KeyboardButton.Up,
             Key.Down => KeyboardButton.Down,
             Key.A => KeyboardButton.A,

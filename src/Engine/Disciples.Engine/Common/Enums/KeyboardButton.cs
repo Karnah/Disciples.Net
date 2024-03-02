@@ -63,5 +63,15 @@ public enum KeyboardButton
     /// <summary>
     /// Клавиша "Down".
     /// </summary>
-    Down = 40
+    Down = 40,
+
+    /// <summary>
+    /// Кнопка "Page up".
+    /// </summary>
+    PageUp = 33,
+
+    /// <summary>
+    /// Кнопка "Page down".
+    /// </summary>
+    PageDown = 34
 }

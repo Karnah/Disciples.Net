@@ -29,6 +29,7 @@ public class WpfInputManager : IInputManager
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseDownEvent, new MouseButtonEventHandler(OnMouseUpDown));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseUpEvent, new MouseButtonEventHandler(OnMouseUpDown));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseMoveEvent, new MouseEventHandler(OnMouseMove));
+        EventManager.RegisterClassHandler(typeof(Window), UIElement.MouseWheelEvent, new MouseWheelEventHandler(OnMouseWheelMove));
         EventManager.RegisterClassHandler(typeof(Window), UIElement.KeyDownEvent, new KeyEventHandler(OnKeyDown));
     }
 
@@ -79,6 +80,17 @@ public class WpfInputManager : IInputManager
     }
 
     /// <summary>
+    /// Обработать событие изменения колёсика мыши.
+    /// </summary>
+    private void OnMouseWheelMove(object? sender, MouseWheelEventArgs args)
+    {
+        var keyboardButton = args.Delta > 0
+            ? KeyboardButton.Up
+            : KeyboardButton.Down;
+        KeyButtonEvent?.Invoke(this, new KeyButtonEventArgs(keyboardButton, ButtonState.Pressed));
+    }
+
+    /// <summary>
     /// Обработать событие нажатия на клавишу клавиатуры.
     /// </summary>
     private void OnKeyDown(object? sender, KeyEventArgs args)
@@ -105,6 +117,8 @@ public class WpfInputManager : IInputManager
             Key.Tab => KeyboardButton.Tab,
             Key.Enter => KeyboardButton.Enter,
             Key.Escape => KeyboardButton.Escape,
+            Key.PageUp => KeyboardButton.PageUp,
+            Key.PageDown => KeyboardButton.PageDown,
             Key.Up => KeyboardButton.Up,
             Key.Down => KeyboardButton.Down,
             Key.A => KeyboardButton.A,

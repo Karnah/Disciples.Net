@@ -42,11 +42,11 @@ public class ToggleButtonObject : BaseButtonObject
     }
 
     /// <inheritdoc />
-    protected override SceneButtonState ProcessClickInternal()
+    protected override void ProcessClickInternal()
     {
         IsChecked = !IsChecked;
 
-        return base.ProcessClickInternal();
+        base.ProcessClickInternal();
     }
 
     /// <summary>

@@ -79,7 +79,7 @@ public abstract class BaseButtonObject : GameObject
     /// <summary>
     /// Сделать кнопку доступной для нажатия.
     /// </summary>
-    public virtual void SetActive()
+    public void SetActive()
     {
         SetState(SceneButtonState.Active);
     }
@@ -109,7 +109,7 @@ public abstract class BaseButtonObject : GameObject
     /// <summary>
     /// Обработка события наведения курсора на кнопку.
     /// </summary>
-    protected virtual void OnHovered()
+    private void OnHovered()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
@@ -120,7 +120,7 @@ public abstract class BaseButtonObject : GameObject
     /// <summary>
     /// Обработка события перемещения курсора с кнопки.
     /// </summary>
-    protected virtual void OnUnhovered()
+    private void OnUnhovered()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
@@ -142,38 +142,41 @@ public abstract class BaseButtonObject : GameObject
     /// <summary>
     /// Обработка события клика на кнопку (мышь отпустили).
     /// </summary>
-    protected virtual void OnClicked()
+    private void OnClicked()
     {
         if (ButtonState == SceneButtonState.Disabled)
             return;
 
-        var newButtonState = ProcessClickInternal();
+        ProcessClickInternal();
+
+        // Во время клика могли изменить состояние кнопки.
+        var newButtonState = ButtonState == SceneButtonState.Disabled
+            ? SceneButtonState.Disabled
+            : SceneButtonState.Active;
         SetState(newButtonState);
     }
 
     /// <summary>
     /// Обработать событие нажатия на кнопку.
     /// </summary>
-    protected virtual SceneButtonState ProcessClickInternal()
+    protected virtual void ProcessClickInternal()
     {
         ClickedAction?.Invoke();
-
-        // Во время клика могли изменить состояние кнопки.
-        if (ButtonState == SceneButtonState.Disabled)
-            return SceneButtonState.Disabled;
-
-        return SelectionComponent!.IsHover
-            ? SceneButtonState.Hover
-            : SceneButtonState.Active;
     }
 
     /// <summary>
     /// Установить состояние кнопки.
     /// </summary>
-    protected virtual void SetState(SceneButtonState buttonState)
+    private void SetState(SceneButtonState buttonState)
     {
-        if (buttonState == SceneButtonState.Active && SelectionComponent!.IsHover)
-            buttonState = SceneButtonState.Hover;
+        // Для удобства определение состояние Pressed / Hover задаём в одном месте.
+        if (buttonState == SceneButtonState.Active)
+        {
+            if (MouseLeftButtonClickComponent!.IsPressed)
+                buttonState = SceneButtonState.Pressed;
+            else if (SelectionComponent!.IsHover)
+                buttonState = SceneButtonState.Hover;
+        }
 
         if (ButtonState == buttonState)
             return;

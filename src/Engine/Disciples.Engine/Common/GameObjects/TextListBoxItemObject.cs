@@ -75,6 +75,20 @@ internal class TextListBoxItemObject : GameObject
         }
     }
 
+    /// <summary>
+    /// Установить объект в указанном месте.
+    /// </summary>
+    /// <remarks>
+    /// TODO Подобный метод должен быть для <see cref="GameObject" />.
+    /// </remarks>
+    public void SetPosition(PointD point)
+    {
+        X = point.X;
+        Y = point.Y;
+
+        _textSceneObject.Bounds = Bounds;
+    }
+
     /// <inheritdoc />
     public override void Initialize()
     {
@@ -89,5 +103,13 @@ internal class TextListBoxItemObject : GameObject
         base.Destroy();
 
         _sceneObjectContainer.RemoveSceneObject(_textSceneObject);
+    }
+
+    /// <inheritdoc />
+    protected override void OnHiddenChanged(bool isHidden)
+    {
+        base.OnHiddenChanged(isHidden);
+
+        _textSceneObject.IsHidden = isHidden;
     }
 }
