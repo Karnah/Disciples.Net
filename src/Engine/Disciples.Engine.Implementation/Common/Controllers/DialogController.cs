@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using DryIoc;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Implementation.Dialogs;
 using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Implementation.Common.Controllers;
@@ -9,6 +11,7 @@ namespace Disciples.Engine.Implementation.Common.Controllers;
 /// <inheritdoc />
 internal class DialogController : IDialogController
 {
+    private readonly IResolver _resolver;
     private readonly ILogger _logger;
 
     private IDialog? _showingDialog;
@@ -16,9 +19,10 @@ internal class DialogController : IDialogController
     /// <summary>
     /// Создать объект типа <see cref="DialogController" />.
     /// </summary>
-    public DialogController(ILogger logger)
+    public DialogController(IResolver resolver, ILogger logger)
     {
         _logger = logger;
+        _resolver = resolver;
     }
 
     /// <inheritdoc />
@@ -47,5 +51,19 @@ internal class DialogController : IDialogController
 
         dialog.Open();
         _showingDialog = dialog;
+    }
+
+    /// <inheritdoc />
+    public void ShowMessage(TextContainer message)
+    {
+        var messageDialog = _resolver.Resolve<MessageDialog>(new object[] { message });
+        OpenDialog(messageDialog);
+    }
+
+    /// <inheritdoc />
+    public void ShowConfirm(TextContainer message, Action onConfirm)
+    {
+        var confirmDialog = _resolver.Resolve<ConfirmDialog>(new object[] { message, onConfirm });
+        OpenDialog(confirmDialog);
     }
 }

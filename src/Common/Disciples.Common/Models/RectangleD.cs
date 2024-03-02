@@ -192,7 +192,7 @@ public struct RectangleD : IEquatable<RectangleD>
     /// Determines if the specified point is contained within the rectangular region defined by this
     /// <see cref='System.Drawing.Rectangle'/> .
     /// </summary>
-    public readonly bool Contains(PointF pt) => Contains(pt.X, pt.Y);
+    public readonly bool Contains(PointD pt) => Contains(pt.X, pt.Y);
 
     /// <summary>
     /// Determines if the rectangular region represented by <paramref name="rect"/> is entirely contained within

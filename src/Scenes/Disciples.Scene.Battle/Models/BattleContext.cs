@@ -105,7 +105,7 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Признак, что битву необходимо завершить в автоматическом режиме.
     /// </summary>
-    public bool IsInstantBattle { get; set; }
+    public bool IsInstantBattleRequested { get; set; }
 
     /// <summary>
     /// Отряд, который победил в битве.

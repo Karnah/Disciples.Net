@@ -317,7 +317,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     private void ProcessBattleCompleted()
     {
         _context.IsAutoBattle = false;
-        _context.IsInstantBattle = false;
+        _context.IsInstantBattleRequested = false;
 
         _isAnimating = false;
 

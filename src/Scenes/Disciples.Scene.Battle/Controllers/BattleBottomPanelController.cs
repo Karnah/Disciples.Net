@@ -23,6 +23,8 @@ internal class BattleBottomPanelController : BaseSupportLoading
     private readonly BattleContext _context;
     private readonly IGameController _gameController;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
+    private readonly BattleDialogController _dialogController;
+    private readonly ITextProvider _textProvider;
 
     private ButtonObject _defendButton = null!;
     private ButtonObject _retreatButton = null!;
@@ -44,13 +46,17 @@ internal class BattleBottomPanelController : BaseSupportLoading
         BattleUnitActionFactory unitActionFactory,
         BattleContext context,
         IGameController gameController,
-        IBattleInterfaceProvider battleInterfaceProvider)
+        IBattleInterfaceProvider battleInterfaceProvider,
+        BattleDialogController dialogController,
+        ITextProvider textProvider)
     {
         _gameObjectContainer = gameObjectContainer;
         _unitActionFactory = unitActionFactory;
         _context = context;
         _gameController = gameController;
         _battleInterfaceProvider = battleInterfaceProvider;
+        _dialogController = dialogController;
+        _textProvider = textProvider;
     }
 
     /// <summary>
@@ -184,11 +190,13 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteInstantBattle()
     {
-        if (_context.IsInstantBattle)
+        if (_context.IsInstantBattleRequested)
             return;
 
-        // TODO Диалог с тем, действительно ли хочет игрок быстро завершить битву.
-        _context.IsInstantBattle = true;
+        _dialogController.ShowConfirm(_textProvider.GetText("X005TA0922"), () =>
+        {
+            _context.IsInstantBattleRequested = true;
+        });
     }
 
     /// <summary>

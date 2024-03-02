@@ -46,7 +46,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     private void LoadBitmaps()
     {
         BattleInterface = _interfaceProvider.GetSceneInterface("DLG_BATTLE_A");
-        UnitDetailInfoInterface = _interfaceProvider.GetSceneInterface("DLG_R_C_UNIT");
 
         Battleground = _battleResourceProvider.GetRandomBattleground();
 
@@ -84,9 +83,6 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
 
     /// <inheritdoc />
     public SceneInterface BattleInterface { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public SceneInterface UnitDetailInfoInterface { get; private set; } = null!;
 
     /// <inheritdoc />
     public IReadOnlyList<IBitmap> Battleground { get; private set; } = null!;

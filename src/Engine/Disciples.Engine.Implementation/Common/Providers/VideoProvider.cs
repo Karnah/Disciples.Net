@@ -10,9 +10,15 @@ internal class VideoProvider : IVideoProvider
     private const string VIDEO_PATH = "Resources\\Video";
 
     /// <inheritdoc />
-    public IReadOnlyList<string> IntroVideoPaths { get; } = new[]
+    public IReadOnlyList<string> StartGameVideoPaths { get; } = new[]
     {
         GetPath("sf.bik"),
+        GetPath("intro.bik"),
+    };
+
+    /// <inheritdoc />
+    public IReadOnlyList<string> IntroVideoPaths { get; } = new[]
+    {
         GetPath("intro.bik"),
     };
 

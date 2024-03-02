@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Disciples.Engine.Common.GameObjects;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Extensions;
 
@@ -72,5 +73,19 @@ public static class GameObjectExtensions
         var button = gameObjects.Get<ToggleButtonObject>(buttonObjectName, isHidden);
         button.ClickedAction = clickedAction;
         return button;
+    }
+
+    /// <summary>
+    /// Получить текстовый блок по имени и инициализировать текст в нём.
+    /// </summary>
+    /// <param name="gameObjects">Список всех объектов.</param>
+    /// <param name="textBlockObjectName">Имя объекта.</param>
+    /// <param name="textContainer">Текст для размещения.</param>
+    /// <returns>Текстовый блок.</returns>
+    public static TextBlockObject GetTextBlock(this IReadOnlyCollection<GameObject> gameObjects, string textBlockObjectName, TextContainer textContainer)
+    {
+        var textBlock = gameObjects.Get<TextBlockObject>(textBlockObjectName);
+        textBlock.Text = textContainer;
+        return textBlock;
     }
 }

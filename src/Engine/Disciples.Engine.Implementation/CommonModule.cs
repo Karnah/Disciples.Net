@@ -7,6 +7,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Implementation.Common.Providers;
+using Disciples.Engine.Implementation.Dialogs;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Settings;
@@ -54,6 +55,9 @@ public class CommonModule : IGameModule
 
         containerRegistrator.Register<ISceneObjectContainer, SceneObjectContainer>(Reuse.Scoped);
         containerRegistrator.Register<IGameObjectContainer, GameObjectContainer>(Reuse.Scoped);
+
+        containerRegistrator.Register<ConfirmDialog>(Reuse.Transient);
+        containerRegistrator.Register<MessageDialog>(Reuse.Transient);
         containerRegistrator.Register<IDialogController, DialogController>(Reuse.Scoped);
 
         var mapperConfiguration = new MapperConfiguration(cnf =>

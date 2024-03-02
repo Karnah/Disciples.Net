@@ -56,7 +56,7 @@ public class SceneInterfaceController : ISceneInterfaceController
     /// <summary>
     /// Получить фон сцены.
     /// </summary>
-    protected virtual IReadOnlyList<GameObject> GetBackground(SceneInterface sceneInterface, Layers layers)
+    private IReadOnlyList<GameObject> GetBackground(SceneInterface sceneInterface, Layers layers)
     {
         var background = sceneInterface.Background;
         if (background == null)
@@ -65,7 +65,9 @@ public class SceneInterfaceController : ISceneInterfaceController
         var backgroundObject = _gameObjectContainer.AddImage(new ImageSceneElement
         {
             Name = "BACKGROUND",
-            Position = new RectangleD(0, 0, background.OriginalSize.Width, background.OriginalSize.Height),
+            Position = new RectangleD(
+                sceneInterface.Bounds.X, sceneInterface.Bounds.Y,
+                background.OriginalSize.Width, background.OriginalSize.Height),
             ImageBitmap = background
         }, layers.BackgroundLayer);
 

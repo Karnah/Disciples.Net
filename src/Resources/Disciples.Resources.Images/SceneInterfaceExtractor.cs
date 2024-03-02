@@ -79,10 +79,14 @@ public class SceneInterfaceExtractor : BaseResourceExtractor
         // Координаты объектов при этом будут рассчитываться от нового границы сцены.
         // Пересчитываем их глобальные.
         // TODO Использовать константы из GameInfo.
+        const int screenWidth = 800;
+        const int screenHeight = 600;
         var headerData = dialogHeader.Split(',');
         var bounds = headerData.ParseBounds(1);
-        var offsetX = (800 - bounds.Width) / 2;
-        var offsetY = (600 - bounds.Height) / 2;
+        var offsetX = (screenWidth - bounds.Width) / 2;
+        var offsetY = (screenHeight - bounds.Height) / 2;
+        bounds.X += offsetX;
+        bounds.Y += offsetY;
 
         var elements = new List<SceneElement>();
         while (stream.ReadLine() is { } line)

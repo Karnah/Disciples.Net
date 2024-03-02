@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Controllers;
@@ -23,4 +24,14 @@ public interface IDialogController
     /// Открыть диалог.
     /// </summary>
     void OpenDialog(IDialog dialog);
+
+    /// <summary>
+    /// Отобразить сообщение.
+    /// </summary>
+    void ShowMessage(TextContainer message);
+
+    /// <summary>
+    /// Отобразить диалог с предложением подтвердить действие.
+    /// </summary>
+    void ShowConfirm(TextContainer message, Action onConfirm);
 }

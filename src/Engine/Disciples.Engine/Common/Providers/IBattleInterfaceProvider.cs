@@ -16,11 +16,6 @@ public interface IBattleInterfaceProvider : ISupportLoading
     SceneInterface BattleInterface { get; }
 
     /// <summary>
-    /// Интерфейс диалога с детальной информацией о юните.
-    /// </summary>
-    SceneInterface UnitDetailInfoInterface { get; }
-
-    /// <summary>
     /// Фон поля боя.
     /// </summary>
     /// <remarks>Фон может состоять из нескольких изображений, поэтому возвращается список.</remarks>

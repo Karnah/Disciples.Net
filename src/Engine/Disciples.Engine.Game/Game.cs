@@ -50,7 +50,7 @@ public class Game
         _gameController.Start();
         _gameController.ChangeScene<IVideoScene, VideoSceneParameters>(new VideoSceneParameters
         {
-            VideoPaths = Container.Resolve<IVideoProvider>().IntroVideoPaths,
+            VideoPaths = Container.Resolve<IVideoProvider>().StartGameVideoPaths,
             OnCompleted = gc => gc.ChangeScene<ILoadingGameScene, SceneParameters>(SceneParameters.Empty)
         });
     }

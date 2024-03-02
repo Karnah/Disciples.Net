@@ -1,12 +1,13 @@
 ﻿using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
-using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation;
 using Disciples.Engine.Implementation.Base;
+using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.MainMenu.Constants;
 
 namespace Disciples.Scene.MainMenu.Controllers;
@@ -19,16 +20,8 @@ internal class MainMenuInterfaceController : BaseSupportLoading
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
     private readonly GameController _gameController;
-
-    private ButtonObject _singlePlayerGameButton = null!;
-    private ButtonObject _multiPlayerGameButton = null!;
-    private ButtonObject _tutorialButton = null!;
-    private ButtonObject _settingsButton = null!;
-    private ButtonObject _introButton = null!;
-    private ButtonObject _creditsButton = null!;
-    private ButtonObject _quitButton = null!;
-
-    private TextBlockObject _versionTextBlock = null!;
+    private readonly IVideoProvider _videoProvider;
+    private readonly MenuSoundController _menuSoundController;
 
     /// <summary>
     /// Создать объект типа <see cref="MainMenuInterfaceController" />.
@@ -36,11 +29,15 @@ internal class MainMenuInterfaceController : BaseSupportLoading
     public MainMenuInterfaceController(
         IInterfaceProvider interfaceProvider,
         ISceneInterfaceController sceneInterfaceController,
-        GameController gameController)
+        GameController gameController,
+        IVideoProvider videoProvider,
+        MenuSoundController menuSoundController)
     {
         _interfaceProvider = interfaceProvider;
         _sceneInterfaceController = sceneInterfaceController;
         _gameController = gameController;
+        _videoProvider = videoProvider;
+        _menuSoundController = menuSoundController;
     }
 
     /// <inheritdoc />
@@ -49,16 +46,16 @@ internal class MainMenuInterfaceController : BaseSupportLoading
         var sceneInterface = _interfaceProvider.GetSceneInterface("DLG_MAIN_MENU");
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
-        _singlePlayerGameButton = gameObjects.GetButton(MainMenuElementNames.SINGLE_PLAYER_GAME_BUTTON, ExecuteSinglePlayerGame);
-        _multiPlayerGameButton = gameObjects.GetButton(MainMenuElementNames.MULTI_PLAYER_GAME_BUTTON, ExecuteMultiPlayerGame);
-        _tutorialButton = gameObjects.GetButton(MainMenuElementNames.TUTORIAL_BUTTON, ExecuteTutorial);
-        _settingsButton = gameObjects.GetButton(MainMenuElementNames.SETTINGS_BUTTON, ExecuteSettings);
-        _introButton = gameObjects.GetButton(MainMenuElementNames.INTRO_BUTTON, ExecuteIntro);
-        _creditsButton = gameObjects.GetButton(MainMenuElementNames.CREDITS_BUTTON, ExecuteCredits);
-        _quitButton = gameObjects.GetButton(MainMenuElementNames.QUIT_BUTTON, ExecuteQuit);
+        gameObjects.GetButton(MainMenuElementNames.SINGLE_PLAYER_GAME_BUTTON, ExecuteSinglePlayerGame);
+        gameObjects.GetButton(MainMenuElementNames.MULTI_PLAYER_GAME_BUTTON, ExecuteMultiPlayerGame, true);
+        gameObjects.GetButton(MainMenuElementNames.TUTORIAL_BUTTON, ExecuteTutorial, true);
+        gameObjects.GetButton(MainMenuElementNames.SETTINGS_BUTTON, ExecuteSettings, true);
+        gameObjects.GetButton(MainMenuElementNames.INTRO_BUTTON, ExecuteIntro);
+        gameObjects.GetButton(MainMenuElementNames.CREDITS_BUTTON, ExecuteCredits, true);
+        gameObjects.GetButton(MainMenuElementNames.QUIT_BUTTON, ExecuteQuit);
 
-        _versionTextBlock = gameObjects.Get<TextBlockObject>(MainMenuElementNames.VERSION_TEXT_BLOCK);
-        _versionTextBlock.Text = new TextContainer(_gameController.Version ?? string.Empty);
+        gameObjects.GetTextBlock(MainMenuElementNames.VERSION_TEXT_BLOCK,
+            new TextContainer(_gameController.Version ?? string.Empty));
     }
 
     /// <inheritdoc />
@@ -79,7 +76,6 @@ internal class MainMenuInterfaceController : BaseSupportLoading
     /// </summary>
     private void ExecuteMultiPlayerGame()
     {
-
     }
 
     /// <summary>
@@ -103,7 +99,14 @@ internal class MainMenuInterfaceController : BaseSupportLoading
     /// </summary>
     private void ExecuteIntro()
     {
+        _menuSoundController.Stop();
 
+        var videoSceneParameters = new VideoSceneParameters
+        {
+            VideoPaths = _videoProvider.IntroVideoPaths,
+            OnCompleted = gc => gc.ChangeScene<IMainMenuScene, SceneParameters>(SceneParameters.Empty)
+        };
+        _gameController.ChangeScene<IVideoScene, VideoSceneParameters>(videoSceneParameters);
     }
 
     /// <summary>

@@ -1,25 +1,24 @@
 ﻿using System.Text;
-using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Enums;
-using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Providers;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Controllers;
+using Disciples.Engine.Implementation.Dialogs.Base;
 
 namespace Disciples.Scene.Battle.Dialogs;
 
 /// <summary>
 /// Диалог отображения информации о юните.
 /// </summary>
-internal class UnitDetailInfoDialog : BaseDialog
+internal class UnitDetailInfoDialog : BaseReleaseButtonCloseDialog
 {
     /// <summary>
     /// Идентификатор в ресурсах с текстом основной информации о юните.
@@ -34,60 +33,50 @@ internal class UnitDetailInfoDialog : BaseDialog
     /// </summary>
     private const string UNIT_ATTACK_INFO_SECOND_PART_ID = "X005TA0788";
 
-    private readonly IBattleGameObjectContainer _gameObjectContainer;
-    private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly ITextProvider _textProvider;
-    private readonly ISceneInterfaceController _sceneInterfaceController;
 
     private readonly Unit _unit;
-
-    private IReadOnlyList<GameObject> _gameObjects = null!;
-    private GameObject? _beforeOpenSelectedGameObject;
-    private GameObject? _lastSelectedGameObject;
 
     /// <summary>
     /// Создать объект типа <see cref="UnitDetailInfoDialog" />.
     /// </summary>
-    public UnitDetailInfoDialog(IBattleGameObjectContainer gameObjectContainer,
-        IBattleInterfaceProvider battleInterfaceProvider,
+    public UnitDetailInfoDialog(
+        IBattleGameObjectContainer gameObjectContainer,
+        ISceneInterfaceController sceneInterfaceController,
+        IInterfaceProvider interfaceProvider,
         IBattleUnitResourceProvider battleUnitResourceProvider,
         ITextProvider textProvider,
-        ISceneInterfaceController sceneInterfaceController,
-        Unit unit)
+        Unit unit
+        ) : base(gameObjectContainer, sceneInterfaceController, interfaceProvider)
     {
-        _gameObjectContainer = gameObjectContainer;
         _unit = unit;
-        _battleInterfaceProvider = battleInterfaceProvider;
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _textProvider = textProvider;
-        _sceneInterfaceController = sceneInterfaceController;
     }
 
     /// <inheritdoc />
-    public override void Open()
-    {
-        _beforeOpenSelectedGameObject = _gameObjectContainer
-            .GameObjects
-            .FirstOrDefault(go => go.SelectionComponent?.IsHover == true);
-        _lastSelectedGameObject = _beforeOpenSelectedGameObject;
-        _gameObjects = _sceneInterfaceController.AddSceneGameObjects(_battleInterfaceProvider.UnitDetailInfoInterface, Layers.DialogLayers);
+    protected override string DialogName => "DLG_R_C_UNIT";
 
-        var unitPortrait = _gameObjects.Get<ImageObject>(UnitDetailInfoElementNames.PORTRAIT_IMAGE);
+    protected override void OpenInternal(IReadOnlyList<GameObject> dialogGameObjects)
+    {
+        base.OpenInternal(dialogGameObjects);
+
+        var unitPortrait = dialogGameObjects.Get<ImageObject>(UnitDetailInfoElementNames.PORTRAIT_IMAGE);
         unitPortrait.Bitmap = _battleUnitResourceProvider.GetUnitPortrait(_unit.UnitType);
         unitPortrait.HorizontalAlignment = HorizontalAlignment.Center;
         unitPortrait.VerticalAlignment = VerticalAlignment.Center;
 
-        var unitName = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.NAME_TEXT_BLOCK);
+        var unitName = dialogGameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.NAME_TEXT_BLOCK);
         unitName.Text = new TextContainer(new[] { new TextPiece(new TextStyle { FontWeight = FontWeight.Bold }, _unit.UnitType.Name) });
 
-        var unitDescription = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.DESCRIPTION_TEXT_BLOCK);
+        var unitDescription = dialogGameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.DESCRIPTION_TEXT_BLOCK);
         unitDescription.Text = new TextContainer(_unit.UnitType.Description);
 
-        var unitStats = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.STATS_TEXT_BLOCK);
+        var unitStats = dialogGameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.STATS_TEXT_BLOCK);
         unitStats.Text = ReplacePlaceholders(_textProvider.GetText(UNIT_BASE_INFO_ID), _unit);
 
-        var unitAttack = _gameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.ATTACK_INFO_TEXT_BLOCK);
+        var unitAttack = dialogGameObjects.Get<TextBlockObject>(UnitDetailInfoElementNames.ATTACK_INFO_TEXT_BLOCK);
         var firstPartAttack = ReplacePlaceholders(_textProvider.GetText(UNIT_ATTACK_INFO_FIRST_PART_ID), _unit);
         var secondPartAttack = ReplacePlaceholders(_textProvider.GetText(UNIT_ATTACK_INFO_SECOND_PART_ID), _unit);
         unitAttack.Text = new TextContainer(
@@ -95,46 +84,6 @@ internal class UnitDetailInfoDialog : BaseDialog
                 .TextPieces
                 .Concat(secondPartAttack.TextPieces)
                 .ToArray());
-    }
-
-    /// <inheritdoc />
-    public override void ProcessInputDeviceEvents(IReadOnlyList<InputDeviceEvent> inputDeviceEvents)
-    {
-        // Запоминаем последний выбранный объект.
-        var selectionEvent = inputDeviceEvents
-            .LastOrDefault(e => e.ActionType == InputDeviceActionType.Hover);
-        if (selectionEvent != null)
-        {
-            _lastSelectedGameObject = selectionEvent.ActionState == InputDeviceActionState.Activated
-                ? selectionEvent.GameObject
-                : null;
-        }
-
-        // Диалог закрывается по отжатой ПКМ.
-        var releasedRightMouseButtonEvent = inputDeviceEvents
-            .FirstOrDefault(e => e.ActionType == InputDeviceActionType.MouseRight && e.ActionState == InputDeviceActionState.Deactivated);
-        if (releasedRightMouseButtonEvent == null)
-            return;
-
-        IsClosed = true;
-
-        foreach (var gameObject in _gameObjects)
-        {
-            gameObject.Destroy();
-        }
-
-        // Обрабатываем событие изменения выбранного объекта.
-        if (_beforeOpenSelectedGameObject != _lastSelectedGameObject)
-        {
-            _beforeOpenSelectedGameObject?.SelectionComponent!.Unhovered();
-            _lastSelectedGameObject?.SelectionComponent!.Hovered();
-        }
-
-        // Прокидываем событие отжатой кнопки до объекта, на котором она была нажата.
-        var pressedGameObject = _gameObjectContainer
-            .GameObjects
-            .FirstOrDefault(go => go.MouseRightButtonClickComponent?.IsPressed == true);
-        pressedGameObject?.MouseRightButtonClickComponent!.Released();
     }
 
     /// <summary>

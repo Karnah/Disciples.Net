@@ -117,6 +117,15 @@ public abstract class GameObject
     /// </summary>
     public bool IsDestroyed { get; private set; }
 
+    /// <summary>
+    /// Признак, что объект временно не реагирует ни на какие события мыши/клавиатуры.
+    /// </summary>
+    /// <remarks>
+    /// Необходимо для работы с диалогами.
+    /// При открытии диалога, все объекты основной сцены деактивируются до тех пор, пока диалог не будет закрыт.
+    /// </remarks>
+    public bool IsDeactivated { get; set; }
+
     #region Components
 
     /// <summary>

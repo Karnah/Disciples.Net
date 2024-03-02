@@ -10,6 +10,7 @@ using Disciples.Scene.Battle.Providers;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
 using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+using Disciples.Scene.Battle.Dialogs;
 
 namespace Disciples.Scene.Battle;
 
@@ -43,6 +44,7 @@ public class BattleSceneModule : IGameModule
         containerRegistrator.Register<BattleBottomPanelController>(sceneScopeReuse);
         containerRegistrator.Register<BattleUnitActionFactory>(sceneScopeReuse);
         containerRegistrator.Register<BattleSoundController>(sceneScopeReuse);
+        containerRegistrator.Register<UnitDetailInfoDialog>(Reuse.Transient);
         containerRegistrator.Register<BattleDialogController>(sceneScopeReuse);
         containerRegistrator.Register<IBattleResourceProvider, BattleResourceProvider>(sceneScopeReuse);
         containerRegistrator.Register<ISceneInterfaceController, BattleSceneInterfaceController>(sceneScopeReuse);

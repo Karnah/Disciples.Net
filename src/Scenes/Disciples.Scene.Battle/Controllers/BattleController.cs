@@ -53,14 +53,14 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <summary>
     /// Признак, что битву необходимо завершить в автоматическом режиме.
     /// </summary>
-    private bool IsInstantBattle => _context.IsInstantBattle;
+    private bool IsInstantBattleRequested => _context.IsInstantBattleRequested;
 
     /// <inheritdoc />
     public void BeforeSceneUpdate()
     {
         if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
         {
-            if (IsInstantBattle)
+            if (IsInstantBattleRequested)
             {
                 ProcessInstantBattle();
             }
@@ -81,7 +81,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             {
                 CompletedBattle(battleWinner);
             }
-            else if (_context.IsInstantBattle)
+            else if (_context.IsInstantBattleRequested)
             {
                 ProcessInstantBattle();
             }
