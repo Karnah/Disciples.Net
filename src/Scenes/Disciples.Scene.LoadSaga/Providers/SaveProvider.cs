@@ -176,32 +176,32 @@ internal class SaveProvider
             .Where(IsLeader)
             .ToArray();
         var leader = leaders[RandomGenerator.Get(leaders.Length)];
-        squadUnits.Add(CreateSquadUnit(1, leader, battleLevel, UnitSquadFlankPosition.Center));
+        squadUnits.Add(CreateSquadUnit(leader, battleLevel, UnitSquadFlankPosition.Center));
         if (leader.IsSmall)
         {
             var leaderSecondUnits = IsFromLineUnit(leader)
                 ? backLineUnits
                 : frontLineUnits.Where(u => u.IsSmall).ToArray();
             var leaderSecondUnit = leaderSecondUnits[RandomGenerator.Get(leaderSecondUnits.Length)];
-            squadUnits.Add(CreateSquadUnit(2, leaderSecondUnit, battleLevel, UnitSquadFlankPosition.Center));
+            squadUnits.Add(CreateSquadUnit(leaderSecondUnit, battleLevel, UnitSquadFlankPosition.Center));
         }
 
         // Верхняя линия.
         var topFrontUnit = frontLineUnits[RandomGenerator.Get(frontLineUnits.Length)];
-        squadUnits.Add(CreateSquadUnit(3, topFrontUnit, battleLevel, UnitSquadFlankPosition.Top));
+        squadUnits.Add(CreateSquadUnit(topFrontUnit, battleLevel, UnitSquadFlankPosition.Top));
         if (topFrontUnit.IsSmall)
         {
             var topBackUnit = backLineUnits[RandomGenerator.Get(backLineUnits.Length)];
-            squadUnits.Add(CreateSquadUnit(4, topBackUnit, battleLevel, UnitSquadFlankPosition.Top));
+            squadUnits.Add(CreateSquadUnit(topBackUnit, battleLevel, UnitSquadFlankPosition.Top));
         }
 
         // Нижняя линия.
         var bottomFrontUnit = frontLineUnits[RandomGenerator.Get(frontLineUnits.Length)];
-        squadUnits.Add(CreateSquadUnit(5, bottomFrontUnit, battleLevel, UnitSquadFlankPosition.Bottom));
+        squadUnits.Add(CreateSquadUnit(bottomFrontUnit, battleLevel, UnitSquadFlankPosition.Bottom));
         if (bottomFrontUnit.IsSmall)
         {
             var bottomBackUnit = backLineUnits[RandomGenerator.Get(backLineUnits.Length)];
-            squadUnits.Add(CreateSquadUnit(6, bottomBackUnit, battleLevel, UnitSquadFlankPosition.Bottom));
+            squadUnits.Add(CreateSquadUnit(bottomBackUnit, battleLevel, UnitSquadFlankPosition.Bottom));
         }
 
         return new PlayerSquad
@@ -213,7 +213,7 @@ internal class SaveProvider
     /// <summary>
     /// Создать юнита в отряде.
     /// </summary>
-    private static SquadUnit CreateSquadUnit(int id, RandomSaveUnitType unitType, int battleLevel, UnitSquadFlankPosition flankPosition)
+    private static SquadUnit CreateSquadUnit(RandomSaveUnitType unitType, int battleLevel, UnitSquadFlankPosition flankPosition)
     {
         // Юнит 2-ого уровня примерно в два раза сильнее юнита 1-ого уровня.
         // Чтобы уровнять немного разницу, низкоуровневые юниты усиляются сильнее.
@@ -229,7 +229,7 @@ internal class SaveProvider
 
         return new SquadUnit
         {
-            Id = id,
+            Id = RandomGenerator.GetUnitId(),
             UnitTypeId = unitType.Id,
             SquadLinePosition = IsFromLineUnit(unitType)
                 ? UnitSquadLinePosition.Front

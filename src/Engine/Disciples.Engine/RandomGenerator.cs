@@ -32,4 +32,12 @@ public static class RandomGenerator
     {
         return Random.Next(min, max);
     }
+
+    /// <summary>
+    /// Получить уникальный идентификатор юнита.
+    /// </summary>
+    public static string GetUnitId()
+    {
+        return Guid.NewGuid().ToString("N");
+    }
 }

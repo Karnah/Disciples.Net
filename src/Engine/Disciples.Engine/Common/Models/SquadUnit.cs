@@ -10,7 +10,7 @@ public class SquadUnit
     /// <summary>
     /// Идентификатор юнита.
     /// </summary>
-    public int Id { get; init; }
+    public string Id { get; init; } = null!;
 
     /// <summary>
     /// Имя юнита.
