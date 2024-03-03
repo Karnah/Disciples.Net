@@ -1,4 +1,5 @@
 ﻿using Disciples.Common.Models;
+using Disciples.Engine.Common;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
@@ -50,6 +51,11 @@ internal class BattleContext : BaseSupportLoading
     /// Если ИИ атаковал игрока, то <see cref="BattleSquadPosition.Defender" />.
     /// </remarks>
     public BattleSquadPosition PlayerSquadPosition => BattleSquadPosition.Attacker;
+
+    /// <summary>
+    /// Контекст игры.
+    /// </summary>
+    public GameContext GameContext { get; set; } = null!;
 
     /// <summary>
     /// Атакующий отряд

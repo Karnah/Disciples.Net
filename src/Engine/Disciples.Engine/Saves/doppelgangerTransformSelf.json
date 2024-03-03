@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Doppelganger and transform self",
+  "SagaDescription": "Debug units with attack type: doppelganger, transform self",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [

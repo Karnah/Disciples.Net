@@ -23,4 +23,9 @@ public class GameSettings
     /// Из-за этого такие переходы выглядят очень дёрганными.
     /// </remarks>
     public bool IsBrokenTransitionAnimationsDisabled { get; init; }
+
+    /// <summary>
+    /// Скрыть кнопки, обработчики которых еще не реализованы.
+    /// </summary>
+    public bool IsUselessButtonsHidden { get; init; }
 }

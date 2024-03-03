@@ -17,6 +17,7 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly IGameController _gameController;
     private readonly InterfaceImagesExtractor _interfaceImagesExtractor;
+    private readonly IRaceProvider _raceProvider;
 
     /// <summary>
     /// Наименование картинки, которая содержит фон загрузки.
@@ -34,13 +35,15 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
         IDialogController dialogController,
         IInterfaceProvider interfaceProvider,
         IGameController gameController,
-        InterfaceImagesExtractor interfaceImagesExtractor
+        InterfaceImagesExtractor interfaceImagesExtractor,
+        IRaceProvider raceProvider
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
         _sceneObjectContainer = sceneObjectContainer;
         _interfaceProvider = interfaceProvider;
         _gameController = gameController;
         _interfaceImagesExtractor = interfaceImagesExtractor;
+        _raceProvider = raceProvider;
     }
 
     /// <inheritdoc />
@@ -92,5 +95,6 @@ internal class LoadingGameScene : BaseScene, ILoadingGameScene
     private void LoadResources()
     {
         _interfaceProvider.Load();
+        _raceProvider.Load();
     }
 }

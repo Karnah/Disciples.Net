@@ -1,5 +1,6 @@
 ﻿{
   "DatabaseConnection": "Data Source=Resources/gamedata.db",
   "SavesFolder": "Saves",
-  "IsBrokenTransitionAnimationsDisabled": true
+  "IsBrokenTransitionAnimationsDisabled": true,
+  "IsUselessButtonsHidden": true
 }

@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Give protection",
+  "SagaDescription": "Debug units with attack type: give protection",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [
@@ -16,34 +16,34 @@
             {
               "Id": 1,
               "Name": null,
-              "UnitTypeId": "G000UU0178", // тварь.
+              "UnitTypeId": "G000UU8033", // дева рощи.
               "SquadLinePosition": 0,
               "SquadFlankPosition": 0,
-              "Level": 4,
+              "Level": 3,
               "Experience": 0,
-              "HitPoints": 105,
+              "HitPoints": 85,
               "IsDead": false
             },
             {
               "Id": 2,
               "Name": null,
-              "UnitTypeId": "G000UU0178", // тварь.
+              "UnitTypeId": "G000UU8035", // силфида.
               "SquadLinePosition": 0,
               "SquadFlankPosition": 1,
               "Level": 4,
               "Experience": 0,
-              "HitPoints": 105,
+              "HitPoints": 95,
               "IsDead": false
             },
             {
-              "Id": 3,
+              "Id": 5,
               "Name": null,
-              "UnitTypeId": "G000UU0178", // тварь.
-              "SquadLinePosition": 0,
-              "SquadFlankPosition": 2,
-              "Level": 4,
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 20,
               "Experience": 0,
-              "HitPoints": 105,
+              "HitPoints": 409,
               "IsDead": false
             }
           ]
@@ -58,14 +58,14 @@
         {
           "Units": [
             {
-              "Id": 8,
+              "Id": 10,
               "Name": null,
-              "UnitTypeId": "G000UU0162", // страж горна.
-              "SquadLinePosition": 0,
-              "SquadFlankPosition": 0,
-              "Level": 3,
+              "UnitTypeId": "G000UU6103", // элементаль воздуха.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 1,
               "Experience": 0,
-              "HitPoints": 155,
+              "HitPoints": 100,
               "IsDead": false
             },
             {
@@ -77,17 +77,6 @@
               "Level": 1,
               "Experience": 0,
               "HitPoints": 210,
-              "IsDead": false
-            },
-            {
-              "Id": 10,
-              "Name": null,
-              "UnitTypeId": "G000UU0165", // мастер рун.
-              "SquadLinePosition": 1,
-              "SquadFlankPosition": 1,
-              "Level": 7,
-              "Experience": 0,
-              "HitPoints": 360,
               "IsDead": false
             }
           ]

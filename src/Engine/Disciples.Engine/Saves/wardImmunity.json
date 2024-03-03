@@ -1,10 +1,10 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Units with immunities and wards",
+  "SagaDescription": "Debug ward and immunites attack results",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
-  "DifficultyLevel": 2,
+  "DifficultyLevel": 3,
   "Players": [
     {
       "Id": 1,
@@ -16,34 +16,23 @@
             {
               "Id": 2,
               "Name": null,
-              "UnitTypeId": "G000UU0033", // травница.
+              "UnitTypeId": "G000UU0178", // тварь.
               "SquadLinePosition": 0,
               "SquadFlankPosition": 1,
-              "Level": 1,
+              "Level": 4,
               "Experience": 0,
-              "HitPoints": 60,
+              "HitPoints": 105,
               "IsDead": false
             },
             {
               "Id": 3,
               "Name": null,
-              "UnitTypeId": "G000UU0160", // архидруид.
+              "UnitTypeId": "G000UU8024", // часовой.
               "SquadLinePosition": 0,
-              "SquadFlankPosition": 2,
-              "Level": 4,
-              "Experience": 0,
-              "HitPoints": 150,
-              "IsDead": false
-            },
-            {
-              "Id": 4,
-              "Name": null,
-              "UnitTypeId": "G000UU0092", // оборотень.
-              "SquadLinePosition": 1,
               "SquadFlankPosition": 0,
-              "Level": 1,
+              "Level": 3,
               "Experience": 0,
-              "HitPoints": 100,
+              "HitPoints": 120,
               "IsDead": false
             },
             {
@@ -56,17 +45,6 @@
               "Experience": 0,
               "HitPoints": 100,
               "IsDead": false
-            },
-            {
-              "Id": 6,
-              "Name": null,
-              "UnitTypeId": "G000UU0092", // оборотень.
-              "SquadLinePosition": 1,
-              "SquadFlankPosition": 2,
-              "Level": 1,
-              "Experience": 0,
-              "HitPoints": 100,
-              "IsDead": false
             }
           ]
         }
@@ -75,19 +53,41 @@
     {
       "Id": 2,
       "IsComputer": true,
-      "Race": 3,
+      "Race": 1,
       "Squads": [
         {
           "Units": [
             {
+              "Id": 7,
+              "Name": null,
+              "UnitTypeId": "G000UU0027", // арбалетчик.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 2,
+              "Experience": 0,
+              "HitPoints": 110,
+              "IsDead": false
+            },
+            {
+              "Id": 9,
+              "Name": null,
+              "UnitTypeId": "G000UU0029", // холмовой великан.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 210,
+              "IsDead": false
+            },
+            {
               "Id": 10,
               "Name": null,
-              "UnitTypeId": "G000UU0165", // мастер рун.
+              "UnitTypeId": "G000UU0092", // оборотень.
               "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
-              "Level": 5,
+              "Level": 1,
               "Experience": 0,
-              "HitPoints": 300,
+              "HitPoints": 100,
               "IsDead": false
             },
             {
@@ -104,6 +104,18 @@
           ]
         }
       ]
+    },
+    {
+      "Id": 3,
+      "IsComputer": true,
+      "Race": 2,
+      "Squads": []
+    },
+    {
+      "Id": 4,
+      "IsComputer": true,
+      "Race": 3,
+      "Squads": []
     }
   ]
 }

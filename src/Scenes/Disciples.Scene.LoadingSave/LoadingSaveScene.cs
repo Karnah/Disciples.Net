@@ -99,6 +99,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
 
         // Следующая сцена будет сцена битвы.
         _gameController.ChangeScene<IBattleScene, BattleSceneParameters>(new BattleSceneParameters(
+            _save,
             CreateSquad(_save.Players[0], _save.Players[0].Squads[0]),
             CreateSquad(_save.Players[1], _save.Players[1].Squads[0])));
     }

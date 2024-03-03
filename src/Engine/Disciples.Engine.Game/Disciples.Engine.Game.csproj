@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Scenes\Disciples.Scene.LoadQuest\Disciples.Scene.LoadQuest.csproj" />
     <ProjectReference Include="..\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\Disciples.Engine\Disciples.Engine.csproj" />
     <ProjectReference Include="..\..\Scenes\Disciples.Scene.Battle\Disciples.Scene.Battle.csproj" />

@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Drain life and drain life overflow",
+  "SagaDescription": "Debug units with attack type: drain life, drain life overflow",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [

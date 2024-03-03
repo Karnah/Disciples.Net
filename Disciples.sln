@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{3C0689
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{E73388CF-4FAF-40E7-BDA1-6747DA979AE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disciples.Scene.LoadQuest", "src\Scenes\Disciples.Scene.LoadQuest\Disciples.Scene.LoadQuest.csproj", "{39190F92-8CDF-4077-AC9C-9263F6D0C2CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,10 @@ Global
 		{78BD330B-ACED-438C-AB89-77FDF7F72742}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78BD330B-ACED-438C-AB89-77FDF7F72742}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78BD330B-ACED-438C-AB89-77FDF7F72742}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39190F92-8CDF-4077-AC9C-9263F6D0C2CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39190F92-8CDF-4077-AC9C-9263F6D0C2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39190F92-8CDF-4077-AC9C-9263F6D0C2CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39190F92-8CDF-4077-AC9C-9263F6D0C2CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -160,6 +166,7 @@ Global
 		{55991733-4817-484C-B109-E76B665100D0} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{F1814564-B7B0-4480-993C-698C364EBC04} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 		{78BD330B-ACED-438C-AB89-77FDF7F72742} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
+		{39190F92-8CDF-4077-AC9C-9263F6D0C2CE} = {EAEEE9BB-F500-4270-A2D9-23BFBB391D45}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0E186CCB-6441-4721-BA47-1C0F06A46447}

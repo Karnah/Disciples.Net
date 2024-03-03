@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Reduce initiative and damage",
+  "SagaDescription": "Debug units with attack type: reduce initiative, reduce damage",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [

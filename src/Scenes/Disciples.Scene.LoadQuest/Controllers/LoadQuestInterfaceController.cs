@@ -4,17 +4,17 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Common.Controllers;
 
-namespace Disciples.Scene.LoadSaga.Controllers;
+namespace Disciples.Scene.LoadQuest.Controllers;
 
 /// <summary>
-/// Контроллер сцены загрузки сейва сценария.
+/// Контроллер сцены загрузки сейва одиночного квеста.
 /// </summary>
-internal class LoadSagaInterfaceController : BaseLoadSaveSceneInterfaceController
+internal class LoadQuestInterfaceController : BaseLoadSaveSceneInterfaceController
 {
     /// <summary>
-    /// Создать объект типа <see cref="LoadSagaInterfaceController" />.
+    /// Создать объект типа <see cref="LoadQuestInterfaceController" />.
     /// </summary>
-    public LoadSagaInterfaceController(
+    public LoadQuestInterfaceController(
         ISaveProvider saveProvider,
         IGameController gameController,
         ITextProvider textProvider,
@@ -26,8 +26,8 @@ internal class LoadSagaInterfaceController : BaseLoadSaveSceneInterfaceControlle
     }
 
     /// <inheritdoc />
-    protected override string SceneInterfaceName => "DLG_LOAD";
+    protected override string SceneInterfaceName => "DLG_LOAD_TOURNEMENT";
 
     /// <inheritdoc />
-    protected override MissionType MissionType => MissionType.Saga;
+    protected override MissionType MissionType => MissionType.Quest;
 }

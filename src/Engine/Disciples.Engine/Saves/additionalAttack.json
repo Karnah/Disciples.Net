@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Additional attack",
+  "SagaDescription": "Debug units with attack type: additional attack",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [
@@ -16,34 +16,45 @@
             {
               "Id": 2,
               "Name": null,
-              "UnitTypeId": "G000UU8028", // теург.
+              "UnitTypeId": "G000UU0161", // алхимик.
               "SquadLinePosition": 0,
-              "SquadFlankPosition": 0,
+              "SquadFlankPosition": 1,
               "Level": 3,
               "Experience": 0,
-              "HitPoints": 95,
+              "HitPoints": 120,
+              "IsDead": false
+            },
+            {
+              "Id": 3,
+              "Name": null,
+              "UnitTypeId": "G000UU0161", // алхимик.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 2,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 120,
               "IsDead": false
             },
             {
               "Id": 5,
               "Name": null,
-              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "UnitTypeId": "G000UU0092", // оборотень.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 0,
-              "Level": 20,
+              "SquadFlankPosition": 1,
+              "Level": 1,
               "Experience": 0,
-              "HitPoints": 409,
+              "HitPoints": 100,
               "IsDead": false
             },
             {
               "Id": 6,
               "Name": null,
-              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "UnitTypeId": "G000UU0040", // почтенный воин.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 2,
-              "Level": 20,
+              "SquadFlankPosition": 0,
+              "Level": 4,
               "Experience": 0,
-              "HitPoints": 409,
+              "HitPoints": 275,
               "IsDead": false
             }
           ]
@@ -60,34 +71,23 @@
             {
               "Id": 10,
               "Name": null,
-              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "UnitTypeId": "G000UU0165", // мастер рун.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 0,
-              "Level": 2,
+              "SquadFlankPosition": 1,
+              "Level": 5,
               "Experience": 0,
-              "HitPoints": 175,
+              "HitPoints": 300,
               "IsDead": false
             },
             {
               "Id": 11,
               "Name": null,
-              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "UnitTypeId": "G000UU0039", // король гномов.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 1,
-              "Level": 2,
+              "SquadFlankPosition": 0,
+              "Level": 5,
               "Experience": 0,
-              "HitPoints": 175,
-              "IsDead": false
-            },
-            {
-              "Id": 12,
-              "Name": null,
-              "UnitTypeId": "G000UU8015", // кентавр-латник.
-              "SquadLinePosition": 1,
-              "SquadFlankPosition": 2,
-              "Level": 2,
-              "Experience": 0,
-              "HitPoints": 175,
+              "HitPoints": 250,
               "IsDead": false
             }
           ]

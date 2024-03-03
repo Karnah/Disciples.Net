@@ -1,8 +1,8 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Reduce armor",
+  "SagaDescription": "Debug units with attack type: reduce armor",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
   "DifficultyLevel": 2,
   "Players": [
@@ -14,11 +14,22 @@
         {
           "Units": [
             {
+              "Id": 2,
+              "Name": null,
+              "UnitTypeId": "G000UU8028", // теург.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 0,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 95,
+              "IsDead": false
+            },
+            {
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU8015", // кентавр-латник.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 1,
+              "SquadFlankPosition": 0,
               "Level": 20,
               "Experience": 0,
               "HitPoints": 409,
@@ -27,23 +38,12 @@
             {
               "Id": 6,
               "Name": null,
-              "UnitTypeId": "G000UU0173", // суккуб.
-              "SquadLinePosition": 0,
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 2,
-              "Level": 4,
+              "Level": 20,
               "Experience": 0,
-              "HitPoints": 145,
-              "IsDead": false
-            },
-            {
-              "Id": 6,
-              "Name": null,
-              "UnitTypeId": "G000UU0068", // колдунья.
-              "SquadLinePosition": 0,
-              "SquadFlankPosition": 1,
-              "Level": 3,
-              "Experience": 0,
-              "HitPoints": 115,
+              "HitPoints": 409,
               "IsDead": false
             }
           ]
@@ -58,47 +58,36 @@
         {
           "Units": [
             {
-              "Id": 9,
-              "Name": null,
-              "UnitTypeId": "G000UU6104", // жирный бес.
-              "SquadLinePosition": 1,
-              "SquadFlankPosition": 0,
-              "Level": 1,
-              "Experience": 0,
-              "HitPoints": 100,
-              "IsDead": false
-            },
-            {
               "Id": 10,
               "Name": null,
-              "UnitTypeId": "G000UU0001", // сквайр.
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 1,
-              "Level": 1,
+              "SquadFlankPosition": 0,
+              "Level": 2,
               "Experience": 0,
-              "HitPoints": 100,
+              "HitPoints": 175,
               "IsDead": false
             },
             {
               "Id": 11,
               "Name": null,
-              "UnitTypeId": "G000UU0029", // холмовой великан.
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
               "SquadLinePosition": 1,
-              "SquadFlankPosition": 2,
-              "Level": 1,
+              "SquadFlankPosition": 1,
+              "Level": 2,
               "Experience": 0,
-              "HitPoints": 210,
+              "HitPoints": 175,
               "IsDead": false
             },
             {
               "Id": 12,
               "Name": null,
-              "UnitTypeId": "G000UU5034", // бес.
-              "SquadLinePosition": 0,
-              "SquadFlankPosition": 1,
-              "Level": 1,
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 2,
               "Experience": 0,
-              "HitPoints": 50,
+              "HitPoints": 175,
               "IsDead": false
             }
           ]

@@ -1,12 +1,9 @@
-﻿using Disciples.Engine.Common;
-using Disciples.Engine.Common.Models;
-
-namespace Disciples.Scene.LoadSaga.Models;
+﻿namespace Disciples.Engine.Common.Models;
 
 /// <summary>
 /// Сохранённая игра пользователя.
 /// </summary>
-internal class Save : TextListBoxItem
+public class Save : TextListBoxItem
 {
     /// <summary>
     /// Имя сейва.

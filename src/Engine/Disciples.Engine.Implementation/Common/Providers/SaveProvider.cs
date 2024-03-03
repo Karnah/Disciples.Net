@@ -1,22 +1,24 @@
-﻿using Disciples.Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
-using Disciples.Engine.Implementation;
+using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Settings;
 using Disciples.Resources.Database.Sqlite;
-using Disciples.Scene.LoadSaga.Models;
 using UnitAttackReach = Disciples.Resources.Database.Sqlite.Enums.UnitAttackReach;
 using UnitCategory = Disciples.Resources.Database.Sqlite.Enums.UnitCategory;
 
-namespace Disciples.Scene.LoadSaga.Providers;
+namespace Disciples.Engine.Implementation.Common.Providers;
 
 /// <summary>
 /// Класс для работы с сохранёнными играми пользователя.
 /// </summary>
-internal class SaveProvider
+internal class SaveProvider : ISaveProvider
 {
     /// <summary>
     /// Фильтр для поиска файлов сейвов.
@@ -37,12 +39,10 @@ internal class SaveProvider
         _savesPath = Path.Combine(Directory.GetCurrentDirectory(), settings.SavesFolder);
     }
 
-    /// <summary>
-    /// Получить список сейвов.
-    /// </summary>
-    public IReadOnlyList<Save> GetSaves()
+    /// <inheritdoc />
+    public IReadOnlyList<Save> GetSaves(MissionType? missionType = null)
     {
-        return Directory
+        var query = Directory
             .GetFiles(_savesPath, SAVE_EXTENSION_FILTER)
             .Where(f => !string.IsNullOrEmpty(f))
             .Select(f => new Save
@@ -51,9 +51,15 @@ internal class SaveProvider
                 Name = Path.GetFileNameWithoutExtension(f),
                 Path = Path.Combine(_savesPath, f),
                 GameContext = _gameController.LoadGame(Path.Combine(_savesPath, f))
-            })
-            .Concat(CreateRandomSaves())
-            .ToArray();
+            });
+
+        if (missionType != null)
+            query = query.Where(s => s.GameContext.MissionType == missionType);
+
+        if (missionType is null or MissionType.Saga)
+            query = query.Concat(CreateRandomSaves());
+
+        return query.ToArray();
     }
 
     #region Создание сейва с случайными армиями

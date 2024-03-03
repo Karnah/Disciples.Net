@@ -8,6 +8,7 @@ using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.Battle;
 using Disciples.Scene.LoadingGame;
 using Disciples.Scene.LoadingSave;
+using Disciples.Scene.LoadQuest;
 using Disciples.Scene.LoadSaga;
 using Disciples.Scene.MainMenu;
 using Disciples.Scene.SinglePlayerGameMenu;
@@ -77,6 +78,7 @@ public class Game
             new MainMenuSceneModule(),
             new SinglePlayerGameMenuSceneModule(),
             new LoadSagaSceneModule(),
+            new LoadQuestSceneModule(),
             new LoadingSaveSceneModule(),
             new BattleSceneModule(),
             platformGameModule

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Disciples.Common\Disciples.Common.csproj" />
     <ProjectReference Include="..\..\Engine\Disciples.Engine.Implementation\Disciples.Engine.Implementation.csproj" />
     <ProjectReference Include="..\..\Engine\Disciples.Engine\Disciples.Engine.csproj" />
   </ItemGroup>

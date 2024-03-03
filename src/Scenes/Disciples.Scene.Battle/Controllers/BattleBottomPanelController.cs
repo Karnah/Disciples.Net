@@ -1,10 +1,12 @@
 ﻿using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Settings;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Controllers.UnitActionControllers;
 using Disciples.Scene.Battle.Enums;
@@ -18,6 +20,7 @@ namespace Disciples.Scene.Battle.Controllers;
 /// </summary>
 internal class BattleBottomPanelController : BaseSupportLoading
 {
+    private readonly GameSettings _gameSettings;
     private readonly IBattleGameObjectContainer _gameObjectContainer;
     private readonly BattleUnitActionFactory _unitActionFactory;
     private readonly BattleContext _context;
@@ -42,6 +45,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// Создать объект типа <see cref="BattleBottomPanelController" />.
     /// </summary>
     public BattleBottomPanelController(
+        GameSettings gameSettings,
         IBattleGameObjectContainer gameObjectContainer,
         BattleUnitActionFactory unitActionFactory,
         BattleContext context,
@@ -50,6 +54,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
         BattleDialogController dialogController,
         ITextProvider textProvider)
     {
+        _gameSettings = gameSettings;
         _gameObjectContainer = gameObjectContainer;
         _unitActionFactory = unitActionFactory;
         _context = context;
@@ -119,7 +124,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
         // Возможность открыть инвентарь будет только, если победил игрок при атаке.
         if (_context.BattleWinnerSquad == BattleSquadPosition.Attacker && !_context.AttackingSquad.Player.IsComputer)
         {
-            _openSquadInventoryButton.IsHidden = false;
+            _openSquadInventoryButton.IsHidden = _gameSettings.IsUselessButtonsHidden;
         }
 
         _exitButton.IsHidden = false;
@@ -212,7 +217,6 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteOpenSquadInventory()
     {
-        // TODO
     }
 
     /// <summary>
@@ -220,7 +224,10 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteExit()
     {
-        _gameController.ChangeScene<ILoadSagaScene, SceneParameters>(SceneParameters.Empty);
+        if (_context.GameContext.MissionType == MissionType.Saga)
+            _gameController.ChangeScene<ILoadSagaScene, SceneParameters>(SceneParameters.Empty);
+        else
+            _gameController.ChangeScene<ILoadQuestScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>

@@ -59,6 +59,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleContext = battleContext;
         _battleSoundController = battleSoundController;
 
+        _battleContext.GameContext = parameters.GameContext;
         _battleContext.AttackingBattleSquad.Squad = parameters.AttackingSquad;
         _battleContext.DefendingBattleSquad.Squad = parameters.DefendingSquad;
     }

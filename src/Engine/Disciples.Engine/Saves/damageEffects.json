@@ -1,22 +1,33 @@
 {
-  "SagaName": "Common battle",
-  "SagaDescription": null,
+  "SagaName": "Periodical damage effects",
+  "SagaDescription": "Debug units with attack type: poison, frostbite, blister",
   "GameType": 0,
-  "MissionType": 0,
+  "MissionType": 1,
   "TurnNumber": 1,
-  "DifficultyLevel": 2,
+  "DifficultyLevel": 0,
   "Players": [
     {
       "Id": 1,
       "IsComputer": false,
-      "Race": 0,
+      "Race": 5,
       "Squads": [
         {
           "Units": [
             {
+              "Id": 1,
+              "Name": null,
+              "UnitTypeId": "G000UU8020", // шершень.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 2,
+              "Level": 3,
+              "Experience": 0,
+              "HitPoints": 125,
+              "IsDead": false
+            },
+            {
               "Id": 2,
               "Name": null,
-              "UnitTypeId": "G000UU0161", // алхимик.
+              "UnitTypeId": "G000UU8024", // часовой.
               "SquadLinePosition": 0,
               "SquadFlankPosition": 1,
               "Level": 3,
@@ -27,9 +38,9 @@
             {
               "Id": 3,
               "Name": null,
-              "UnitTypeId": "G000UU0161", // алхимик.
+              "UnitTypeId": "G000UU8023", // смотритель.
               "SquadLinePosition": 0,
-              "SquadFlankPosition": 2,
+              "SquadFlankPosition": 0,
               "Level": 3,
               "Experience": 0,
               "HitPoints": 120,
@@ -38,23 +49,12 @@
             {
               "Id": 5,
               "Name": null,
-              "UnitTypeId": "G000UU0092", // оборотень.
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
               "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
-              "Level": 1,
+              "Level": 20,
               "Experience": 0,
-              "HitPoints": 100,
-              "IsDead": false
-            },
-            {
-              "Id": 6,
-              "Name": null,
-              "UnitTypeId": "G000UU0040", // почтенный воин.
-              "SquadLinePosition": 1,
-              "SquadFlankPosition": 0,
-              "Level": 4,
-              "Experience": 0,
-              "HitPoints": 275,
+              "HitPoints": 409,
               "IsDead": false
             }
           ]
@@ -64,30 +64,41 @@
     {
       "Id": 2,
       "IsComputer": true,
-      "Race": 3,
+      "Race": 4,
       "Squads": [
         {
           "Units": [
             {
+              "Id": 9,
+              "Name": null,
+              "UnitTypeId": "G000UU6104", // жирный бес.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 100,
+              "IsDead": false
+            },
+            {
               "Id": 10,
               "Name": null,
-              "UnitTypeId": "G000UU0165", // мастер рун.
+              "UnitTypeId": "G000UU6104", // жирный бес.
               "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
-              "Level": 5,
+              "Level": 10,
               "Experience": 0,
-              "HitPoints": 300,
+              "HitPoints": 190,
               "IsDead": false
             },
             {
               "Id": 11,
               "Name": null,
-              "UnitTypeId": "G000UU0039", // король гномов.
+              "UnitTypeId": "G000UU6104", // жирный бес.
               "SquadLinePosition": 1,
               "SquadFlankPosition": 0,
-              "Level": 5,
+              "Level": 1,
               "Experience": 0,
-              "HitPoints": 250,
+              "HitPoints": 100,
               "IsDead": false
             }
           ]

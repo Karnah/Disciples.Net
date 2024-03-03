@@ -1,11 +1,13 @@
 ﻿using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
+using Disciples.Engine.Settings;
 using Disciples.Scene.SinglePlayerGameMenu.Constants;
 
 namespace Disciples.Scene.SinglePlayerGameMenu.Controllers;
@@ -15,6 +17,7 @@ namespace Disciples.Scene.SinglePlayerGameMenu.Controllers;
 /// </summary>
 internal class SinglePlayerGameMenuInterfaceController : BaseSupportLoading
 {
+    private readonly GameSettings _gameSettings;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
     private readonly IGameController _gameController;
@@ -23,10 +26,12 @@ internal class SinglePlayerGameMenuInterfaceController : BaseSupportLoading
     /// Создать объект типа <see cref="SinglePlayerGameMenuInterfaceController" />.
     /// </summary>
     public SinglePlayerGameMenuInterfaceController(
+        GameSettings gameSettings,
         IInterfaceProvider interfaceProvider,
         ISceneInterfaceController sceneInterfaceController,
         IGameController gameController)
     {
+        _gameSettings = gameSettings;
         _interfaceProvider = interfaceProvider;
         _sceneInterfaceController = sceneInterfaceController;
         _gameController = gameController;
@@ -38,13 +43,21 @@ internal class SinglePlayerGameMenuInterfaceController : BaseSupportLoading
         var sceneInterface = _interfaceProvider.GetSceneInterface("DLG_SINGLE_PLAYER");
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
-        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_SAGA_BUTTON, ExecuteNewSaga, true);
+        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_SAGA_BUTTON, ExecuteNewSaga, _gameSettings.IsUselessButtonsHidden);
         gameObjects.GetButton(SinglePlayerGameMenuElementNames.LOAD_SAGA_BUTTON, ExecuteLoadSaga);
-        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_QUEST_BUTTON, ExecuteNewQuest, true);
-        gameObjects.GetButton(SinglePlayerGameMenuElementNames.LOAD_QUEST_BUTTON, ExecuteLoadQuest, true);
-        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_CUSTOM_SAGA_BUTTON, ExecuteNewCustomSaga, true);
-        gameObjects.GetButton(SinglePlayerGameMenuElementNames.LOAD_CUSTOM_SAGA_BUTTON, ExecuteLoadCustomSaga, true);
+        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_QUEST_BUTTON, ExecuteNewQuest, _gameSettings.IsUselessButtonsHidden);
+        gameObjects.GetButton(SinglePlayerGameMenuElementNames.LOAD_QUEST_BUTTON, ExecuteLoadQuest);
+        gameObjects.GetButton(SinglePlayerGameMenuElementNames.NEW_CUSTOM_SAGA_BUTTON, ExecuteNewCustomSaga, _gameSettings.IsUselessButtonsHidden);
+        gameObjects.GetButton(SinglePlayerGameMenuElementNames.LOAD_CUSTOM_SAGA_BUTTON, ExecuteLoadCustomSaga, _gameSettings.IsUselessButtonsHidden);
         gameObjects.GetButton(SinglePlayerGameMenuElementNames.BACK_BUTTON, ExecuteBack);
+
+        if (_gameSettings.IsUselessButtonsHidden)
+        {
+            gameObjects.Get<TextBlockObject>("TXT_CUSTOMCAMP", true);
+            gameObjects.Get<TextBlockObject>("TXT_LOADCUSTOM", true);
+            gameObjects.Get<TextBlockObject>("TXT_NEWQUEST", true);
+            gameObjects.Get<TextBlockObject>("TXT_NEWSAGA", true);
+        }
     }
 
     /// <inheritdoc />
@@ -81,7 +94,7 @@ internal class SinglePlayerGameMenuInterfaceController : BaseSupportLoading
     /// </summary>
     private void ExecuteLoadQuest()
     {
-
+        _gameController.ChangeScene<ILoadQuestScene, SceneParameters>(SceneParameters.Empty);
     }
 
     /// <summary>

@@ -6,26 +6,26 @@ using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Settings;
-using Disciples.Scene.LoadSaga.Controllers;
+using Disciples.Scene.LoadQuest.Controllers;
 
-namespace Disciples.Scene.LoadSaga;
+namespace Disciples.Scene.LoadQuest;
 
-/// <inheritdoc cref="ILoadSagaScene" />
-internal class LoadSagaScene : BaseMenuScene, ILoadSagaScene
+/// <inheritdoc cref="ILoadQuestScene" />
+internal class LoadQuestScene : BaseMenuScene, ILoadQuestScene
 {
-    private readonly LoadSagaInterfaceController _interfaceController;
+    private readonly LoadQuestInterfaceController _interfaceController;
     private readonly MenuSoundController _soundController;
     private readonly GameSettings _settings;
 
     /// <summary>
-    /// Создать объект типа <see cref="LoadSagaScene" />.
+    /// Создать объект типа <see cref="LoadQuestScene" />.
     /// </summary>
-    public LoadSagaScene(
+    public LoadQuestScene(
         IGameObjectContainer gameObjectContainer,
         ISceneObjectContainer sceneObjectContainer,
         IDialogController dialogController,
         IInterfaceProvider interfaceProvider,
-        LoadSagaInterfaceController interfaceController,
+        LoadQuestInterfaceController interfaceController,
         MenuSoundController soundController,
         GameSettings settings
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController, interfaceProvider)

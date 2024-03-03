@@ -48,6 +48,8 @@ public class CommonModule : IGameModule
         containerRegistrator.Register<ITextProvider, TextProvider>(Reuse.Singleton);
         containerRegistrator.Register<IInterfaceProvider, InterfaceProvider>(Reuse.Singleton);
         containerRegistrator.Register<IUnitInfoProvider, UnitInfoProvider>(Reuse.Singleton);
+        containerRegistrator.Register<IRaceProvider, RaceProvider>(Reuse.Singleton);
+        containerRegistrator.Register<ISaveProvider, SaveProvider>(Reuse.Singleton);
 
         containerRegistrator.RegisterDelegate(
             context => new GameDataContextFactory(context.Resolve<GameSettings>().DatabaseConnection),

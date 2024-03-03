@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation;
@@ -8,6 +9,7 @@ using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
+using Disciples.Engine.Settings;
 using Disciples.Scene.MainMenu.Constants;
 
 namespace Disciples.Scene.MainMenu.Controllers;
@@ -17,6 +19,7 @@ namespace Disciples.Scene.MainMenu.Controllers;
 /// </summary>
 internal class MainMenuInterfaceController : BaseSupportLoading
 {
+    private readonly GameSettings _gameSettings;
     private readonly IInterfaceProvider _interfaceProvider;
     private readonly ISceneInterfaceController _sceneInterfaceController;
     private readonly GameController _gameController;
@@ -27,12 +30,14 @@ internal class MainMenuInterfaceController : BaseSupportLoading
     /// Создать объект типа <see cref="MainMenuInterfaceController" />.
     /// </summary>
     public MainMenuInterfaceController(
+        GameSettings gameSettings,
         IInterfaceProvider interfaceProvider,
         ISceneInterfaceController sceneInterfaceController,
         GameController gameController,
         IVideoProvider videoProvider,
         MenuSoundController menuSoundController)
     {
+        _gameSettings = gameSettings;
         _interfaceProvider = interfaceProvider;
         _sceneInterfaceController = sceneInterfaceController;
         _gameController = gameController;
@@ -47,15 +52,23 @@ internal class MainMenuInterfaceController : BaseSupportLoading
         var gameObjects = _sceneInterfaceController.AddSceneGameObjects(sceneInterface, Layers.SceneLayers);
 
         gameObjects.GetButton(MainMenuElementNames.SINGLE_PLAYER_GAME_BUTTON, ExecuteSinglePlayerGame);
-        gameObjects.GetButton(MainMenuElementNames.MULTI_PLAYER_GAME_BUTTON, ExecuteMultiPlayerGame, true);
-        gameObjects.GetButton(MainMenuElementNames.TUTORIAL_BUTTON, ExecuteTutorial, true);
-        gameObjects.GetButton(MainMenuElementNames.SETTINGS_BUTTON, ExecuteSettings, true);
+        gameObjects.GetButton(MainMenuElementNames.MULTI_PLAYER_GAME_BUTTON, ExecuteMultiPlayerGame, _gameSettings.IsUselessButtonsHidden);
+        gameObjects.GetButton(MainMenuElementNames.TUTORIAL_BUTTON, ExecuteTutorial, _gameSettings.IsUselessButtonsHidden);
+        gameObjects.GetButton(MainMenuElementNames.SETTINGS_BUTTON, ExecuteSettings, _gameSettings.IsUselessButtonsHidden);
         gameObjects.GetButton(MainMenuElementNames.INTRO_BUTTON, ExecuteIntro);
-        gameObjects.GetButton(MainMenuElementNames.CREDITS_BUTTON, ExecuteCredits, true);
+        gameObjects.GetButton(MainMenuElementNames.CREDITS_BUTTON, ExecuteCredits, _gameSettings.IsUselessButtonsHidden);
         gameObjects.GetButton(MainMenuElementNames.QUIT_BUTTON, ExecuteQuit);
 
         gameObjects.GetTextBlock(MainMenuElementNames.VERSION_TEXT_BLOCK,
             new TextContainer(_gameController.Version ?? string.Empty));
+
+        if (_gameSettings.IsUselessButtonsHidden)
+        {
+            gameObjects.Get<TextBlockObject>("TXT_CREDITS", true);
+            gameObjects.Get<TextBlockObject>("TXT_MULTI", true);
+            gameObjects.Get<TextBlockObject>("TXT_OPTIONS", true);
+            gameObjects.Get<TextBlockObject>("TXT_TUTORIAL", true);
+        }
     }
 
     /// <inheritdoc />
