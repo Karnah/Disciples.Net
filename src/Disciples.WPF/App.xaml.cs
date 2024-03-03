@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows;
-using Disciples.Engine.Base;
-using Disciples.Engine.Game;
 using DryIoc;
+using Microsoft.Extensions.Logging;
+using Disciples.Engine.Game;
 
 namespace Disciples.WPF;
 
@@ -31,7 +31,7 @@ public partial class App : Application
         }
         catch (Exception exception)
         {
-            logger?.LogError("Ошибка при запуске приложения", exception);
+            logger?.LogError(exception, "Cannot start game");
             MessageBox.Show(exception.Message);
             Shutdown();
         }

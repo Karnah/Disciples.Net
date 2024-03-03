@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DryIoc;
+using Microsoft.Extensions.Logging;
 using Disciples.Common.Models;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common;
@@ -16,7 +18,6 @@ using Disciples.Engine.Models;
 using Disciples.Engine.Platform.Enums;
 using Disciples.Engine.Platform.Events;
 using Disciples.Engine.Platform.Managers;
-using DryIoc;
 
 namespace Disciples.Engine.Implementation;
 
@@ -25,7 +26,7 @@ public class GameController : IGameController
 {
     private readonly IContainer _container;
     private readonly IGameTimer _gameTimer;
-    private readonly ILogger _logger;
+    private readonly ILogger<GameController> _logger;
     private readonly IInputManager _inputManager;
     private readonly ICursorController _cursorController;
 
@@ -50,7 +51,7 @@ public class GameController : IGameController
     /// <summary>
     /// Создать объект типа <see cref="GameController" />.
     /// </summary>
-    public GameController(IContainer container, IGameTimer gameTimer, ILogger logger, IInputManager inputManager, ICursorController cursorController)
+    public GameController(IContainer container, IGameTimer gameTimer, ILogger<GameController> logger, IInputManager inputManager, ICursorController cursorController)
     {
         _container = container;
         _gameTimer = gameTimer;
@@ -125,7 +126,7 @@ public class GameController : IGameController
         }
         catch (Exception e)
         {
-            throw new Exception($"Не удалось загрузить сейв-файл {savePath}", e);
+            throw new Exception($"Cannot load save file: {savePath}", e);
         }
     }
 
@@ -134,6 +135,8 @@ public class GameController : IGameController
         where TScene : IScene<TSceneParameters>
         where TSceneParameters : SceneParameters
     {
+        _logger.LogInformation("Change scene started, new scene: {sceneName}", typeof(TScene).Name);
+
         // Старая сцена должна прекращать обработку всех событий на время загрузки новой.
         _currentScene?.Unload();
         _sceneResolverContext?.Dispose();
@@ -160,6 +163,8 @@ public class GameController : IGameController
         SceneChanged?.Invoke(this, EventArgs.Empty);
 
         scene.AfterSceneLoaded();
+
+        _logger.LogInformation("New scene loaded");
     }
 
     /// <summary>
@@ -185,7 +190,8 @@ public class GameController : IGameController
             }
             catch (Exception e)
             {
-                _logger.LogError("Ошибка в цикле обновления сцены", e);
+                _logger.LogError(e, "Error in update scene cycle");
+                throw;
             }
             finally
             {

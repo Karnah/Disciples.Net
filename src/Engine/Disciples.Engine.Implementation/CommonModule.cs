@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using AutoMapper;
+using DryIoc;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
@@ -12,7 +15,6 @@ using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Settings;
 using Disciples.Resources.Database.Sqlite;
-using DryIoc;
 
 namespace Disciples.Engine.Implementation;
 
@@ -24,7 +26,9 @@ public class CommonModule : IGameModule
     /// <inheritdoc />
     public void Initialize(IRegistrator containerRegistrator)
     {
-        containerRegistrator.Register<ILogger, Logger>(Reuse.Singleton);
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddNLog());
+        containerRegistrator.RegisterInstance(loggerFactory);
+        containerRegistrator.Register(typeof(ILogger<>), typeof(Logger<>));
 
         containerRegistrator.RegisterMany<GameController>(Reuse.Singleton);
 

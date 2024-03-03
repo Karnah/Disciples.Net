@@ -6,7 +6,7 @@ namespace Disciples.Engine.Implementation.Extensions;
 /// <summary>
 /// Методы для работы с сериализацией и десериализацией json.
 /// </summary>
-internal static class JsonExtensions
+public static class JsonExtensions
 {
     /// <summary>
     /// Сериализовать объект в json.

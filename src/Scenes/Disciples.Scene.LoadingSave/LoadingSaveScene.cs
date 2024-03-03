@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using Microsoft.Extensions.Logging;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
@@ -8,6 +9,7 @@ using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Common.Controllers;
+using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
@@ -25,6 +27,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private readonly ISceneInterfaceController _sceneInterfaceController;
     private readonly MenuSoundController _menuSoundController;
     private readonly IReadOnlyList<BaseMqdbResourceExtractor> _resourceExtractors;
+    private readonly ILogger<LoadingSaveScene> _logger;
 
     private readonly GameContext _save;
 
@@ -42,6 +45,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         ISceneInterfaceController sceneInterfaceController,
         MenuSoundController menuSoundController,
         IReadOnlyList<BaseMqdbResourceExtractor> resourceExtractors,
+        ILogger<LoadingSaveScene> logger,
         LoadingSaveSceneParameters parameters
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
@@ -52,6 +56,7 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
         _sceneInterfaceController = sceneInterfaceController;
         _menuSoundController = menuSoundController;
         _resourceExtractors = resourceExtractors;
+        _logger = logger;
         _save = parameters.Save;
     }
 
@@ -96,6 +101,9 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     private void LoadSave()
     {
         LoadResources();
+
+        _logger.LogDebug("Attacking squad: {attackingSquad}", _save.Players[0].Squads[0].SerializeToJson());
+        _logger.LogDebug("Defending squad: {defendingSquad}", _save.Players[1].Squads[0].SerializeToJson());
 
         // Следующая сцена будет сцена битвы.
         _gameController.ChangeScene<IBattleScene, BattleSceneParameters>(new BattleSceneParameters(

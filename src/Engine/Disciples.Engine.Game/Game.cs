@@ -1,4 +1,5 @@
 ﻿using DryIoc;
+using Microsoft.Extensions.Logging;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation;
@@ -29,13 +30,13 @@ public class Game
     public Game(IGameModule platformGameModule)
     {
         Container = CreateContainer(platformGameModule);
-        Logger = Container.Resolve<ILogger>();
+        Logger = Container.Resolve<ILogger<Game>>();
     }
 
     /// <summary>
     /// Логгер приложения.
     /// </summary>
-    public ILogger Logger { get; }
+    public ILogger<Game> Logger { get; }
 
     /// <summary>
     /// IoC контейнер.
@@ -47,6 +48,8 @@ public class Game
     /// </summary>
     public void Start()
     {
+        Logger.LogInformation("Game started");
+
         _gameController = Container.Resolve<GameController>();
         _gameController.Start();
         _gameController.ChangeScene<IVideoScene, VideoSceneParameters>(new VideoSceneParameters

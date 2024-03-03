@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DryIoc;
-using Disciples.Engine.Base;
+using Microsoft.Extensions.Logging;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Implementation.Dialogs;
 using Disciples.Engine.Models;
@@ -12,14 +12,14 @@ namespace Disciples.Engine.Implementation.Common.Controllers;
 internal class DialogController : IDialogController
 {
     private readonly IResolver _resolver;
-    private readonly ILogger _logger;
+    private readonly ILogger<DialogController> _logger;
 
     private IDialog? _showingDialog;
 
     /// <summary>
     /// Создать объект типа <see cref="DialogController" />.
     /// </summary>
-    public DialogController(IResolver resolver, ILogger logger)
+    public DialogController(IResolver resolver, ILogger<DialogController> logger)
     {
         _logger = logger;
         _resolver = resolver;
@@ -43,9 +43,11 @@ internal class DialogController : IDialogController
     /// <inheritdoc />
     public void OpenDialog(IDialog dialog)
     {
+        _logger.LogInformation("Open dialog: {dialog}", dialog.GetType().Name);
+
         if (_showingDialog != null)
         {
-            _logger.LogError("Невозможно открыть новый диалог, пока отображается старый", new ArgumentException());
+            _logger.LogError("Impossible to open new dialog while the old one is not closed");
             return;
         }
 

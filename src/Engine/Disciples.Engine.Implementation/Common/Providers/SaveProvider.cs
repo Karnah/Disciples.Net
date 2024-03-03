@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
@@ -25,14 +26,14 @@ internal class SaveProvider : ISaveProvider
     /// </summary>
     private const string SAVE_EXTENSION_FILTER = "*.json";
 
-    private readonly GameController _gameController;
+    private readonly IGameController _gameController;
     private readonly GameDataContextFactory _gameDataContextFactory;
     private readonly string _savesPath;
 
     /// <summary>
     /// Создать объект типа <see cref="SaveProvider" />.
     /// </summary>
-    public SaveProvider(GameController gameController, GameDataContextFactory gameDataContextFactory, GameSettings settings)
+    public SaveProvider(IGameController gameController, GameDataContextFactory gameDataContextFactory, GameSettings settings)
     {
         _gameController = gameController;
         _gameDataContextFactory = gameDataContextFactory;
