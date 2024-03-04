@@ -8,11 +8,10 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Engine.Settings;
 using Disciples.Resources.Database.Sqlite;
-using UnitAttackReach = Disciples.Resources.Database.Sqlite.Enums.UnitAttackReach;
-using UnitCategory = Disciples.Resources.Database.Sqlite.Enums.UnitCategory;
 
 namespace Disciples.Engine.Implementation.Common.Providers;
 
@@ -68,64 +67,50 @@ internal class SaveProvider : ISaveProvider
     record RandomSaveUnitType(
         string Id,
         int Level,
+        int CalculatedLevel,
         UnitCategory UnitCategory,
+        RaceType RaceType,
         UnitAttackReach MainAttackReach,
         int HitPoints,
         int LowLevelUpgradeHitPoints,
         int HighLevelUpgradeHitPoints,
         int UpgradeChangeLevel,
-        bool IsSmall);
-
-    /// <summary>
-    /// Исключаем нейтралов, так как они слишком непредсказуемые для создания отряда.
-    /// Дракон и гоблин-лучника оба 1ого уровня.
-    /// </summary>
-    private static readonly RaceType[] SupportedRaces = Enum
-        .GetValues(typeof(RaceType))
-        .Cast<RaceType>()
-        .Where(r => r != RaceType.Neutral)
-        .ToArray();
-
-    /// <summary>
-    /// Список типов атак, которые не поддержаны.
-    /// </summary>
-    private static readonly UnitAttackType[] NotSupportedAttackTypes =
-    {
-        UnitAttackType.Summon
-    };
+        bool IsSmall,
+        bool CanUpgrade);
 
     /// <summary>
     /// Создать данные случайных битв.
     /// </summary>
     private IEnumerable<Save> CreateRandomSaves()
     {
+        var allUnits = GetAllUnits();
+        var raceTypes = Enum.GetValues<RaceType>();
+
         // Юниты могут быть максимально 5 уровня развития через строения.
         for (int battleLevel = 1; battleLevel <= 5; ++battleLevel)
         {
-            yield return CreateRandomSave(battleLevel);
+            yield return CreateRandomSave(allUnits, raceTypes, battleLevel);
         }
     }
 
     /// <summary>
     /// Создать данные случайной битвы.
     /// </summary>
-    private Save CreateRandomSave(int battleLevel)
+    private static Save CreateRandomSave(IReadOnlyList<RandomSaveUnitType> allUnits, IReadOnlyList<RaceType> raceTypes, int battleLevel)
     {
-        string randomBattle = $"Random battle {battleLevel} lvl";
+        var randomBattleName = $"Random battle {battleLevel} lvl";
 
-        var firstPlayerRace = GetRandomRaceType();
-        var secondPlayerRace = GetRandomRaceType();
-
-        using var context = _gameDataContextFactory.Create();
+        var firstPlayerRace = raceTypes.GetRandomElement();
+        var secondPlayerRace = raceTypes.GetRandomElement();
 
         return new Save
         {
-            Text = new TextContainer(randomBattle),
-            Name = randomBattle,
+            Text = new TextContainer(randomBattleName),
+            Name = randomBattleName,
             Path = string.Empty,
             GameContext = new GameContext
             {
-                SagaName = randomBattle,
+                SagaName = randomBattleName,
                 SagaDescription = $"Create battle with random units {battleLevel} lvl",
                 TurnNumber = 1,
                 DifficultyLevel = DifficultyLevel.Average,
@@ -136,14 +121,14 @@ internal class SaveProvider : ISaveProvider
                         Id = 1,
                         IsComputer = false,
                         Race = firstPlayerRace,
-                        Squads = new List<PlayerSquad> { GetRandomSquad(context, firstPlayerRace, battleLevel) }
+                        Squads = new List<PlayerSquad> { GetRandomSquad(allUnits, firstPlayerRace, battleLevel) }
                     },
                     new Player
                     {
                         Id = 2,
                         IsComputer = true,
                         Race = secondPlayerRace,
-                        Squads = new List<PlayerSquad> { GetRandomSquad(context, secondPlayerRace, battleLevel) }
+                        Squads = new List<PlayerSquad> { GetRandomSquad(allUnits, secondPlayerRace, battleLevel) }
                     }
                 }
             }
@@ -151,23 +136,79 @@ internal class SaveProvider : ISaveProvider
     }
 
     /// <summary>
-    /// Получить случайную расу игрока.
+    /// Получить список всех юнитов.
     /// </summary>
-    private static RaceType GetRandomRaceType()
+    private IReadOnlyList<RandomSaveUnitType> GetAllUnits()
     {
-        return SupportedRaces[RandomGenerator.Get(SupportedRaces.Length)];
+        using var context = _gameDataContextFactory.Create();
+        var units = context
+            .UnitTypes
+            // При создании случайного отряда, занимаются все свободные места.
+            // Поэтому исключаем юнитов с призывом, они будут практически бесполезны.
+            .Where(u => u.MainAttack.AttackType != Disciples.Resources.Database.Sqlite.Enums.UnitAttackType.Summon)
+            .Select(u => new
+            {
+                u.Id,
+                u.Level,
+                u.UnitCategory,
+                u.Race.RaceType,
+                u.MainAttack.Reach,
+                u.HitPoints,
+                LowLevelUpgradeHitPoints = u.LowLevelUpgrade.HitPoints,
+                HighLevelUpgradeHitPoints = u.HighLevelUpgrade.HitPoints,
+                u.UpgradeChangeLevel,
+                u.IsSmall,
+                RecruitCostGold = u.RecruitCost.Gold,
+                u.PreviousUnitTypeId,
+                u.LeaderBaseUnitTypeId
+            })
+            .ToDictionary(u => u.Id, u => u);
+
+        var upgradeUnits = units
+            .Values
+            .Where(u => u.PreviousUnitTypeId != null)
+            .Select(u => u.PreviousUnitTypeId!)
+            .ToHashSet();
+
+        return units
+            .Values
+            .Select(u =>
+            {
+                var leaderBaseUnitType = u.LeaderBaseUnitTypeId != null
+                    ? units[u.LeaderBaseUnitTypeId]
+                    : null;
+                var calculatedLevel = IsLeader((UnitCategory)u.UnitCategory)
+                    ? leaderBaseUnitType != null
+                        ? GetCalculatedUnitTypeLevel(leaderBaseUnitType.Level, leaderBaseUnitType.RecruitCostGold)
+                        : u.Level
+                    : GetCalculatedUnitTypeLevel(u.Level, u.RecruitCostGold);
+
+                return new RandomSaveUnitType(
+                    u.Id,
+                    u.Level,
+                    calculatedLevel,
+                    (UnitCategory)u.UnitCategory,
+                    (RaceType) u.RaceType,
+                    (UnitAttackReach)u.Reach,
+                    u.HitPoints,
+                    u.LowLevelUpgradeHitPoints,
+                    u.HighLevelUpgradeHitPoints,
+                    u.UpgradeChangeLevel,
+                    u.IsSmall,
+                    upgradeUnits.Contains(u.Id));
+            })
+            .ToArray();
     }
 
     /// <summary>
     /// Получить случайный отряд.
     /// </summary>
-    private static PlayerSquad GetRandomSquad(GameDataContext context, RaceType race, int battleLevel)
+    private static PlayerSquad GetRandomSquad(IReadOnlyList<RandomSaveUnitType> allUnits, RaceType raceType, int battleLevel)
     {
-        var units = context
-            .UnitTypes
-            .Where(u => (RaceType)u.Race.RaceType == race && u.Level <= battleLevel)
-            .Where(u => !NotSupportedAttackTypes.Contains((UnitAttackType)u.MainAttack.AttackType))
-            .Select(u => new RandomSaveUnitType(u.Id, u.Level, u.UnitCategory, u.MainAttack.Reach, u.HitPoints, u.LowLevelUpgrade.HitPoints, u.HighLevelUpgrade.HitPoints, u.UpgradeChangeLevel, u.IsSmall))
+        var units = allUnits
+            .Where(u => u.RaceType == raceType &&
+                        // Также берём и юнитов меньшего уровня, при условии что это их финальная форма.
+                        (u.CalculatedLevel == battleLevel || (u.CalculatedLevel < battleLevel && !u.CanUpgrade)))
             .ToArray();
         var frontLineUnits = units
             .Where(u => IsFromLineUnit(u) && IsSoldier(u))
@@ -222,9 +263,7 @@ internal class SaveProvider : ISaveProvider
     /// </summary>
     private static SquadUnit CreateSquadUnit(RandomSaveUnitType unitType, int battleLevel, UnitSquadFlankPosition flankPosition)
     {
-        // Юнит 2-ого уровня примерно в два раза сильнее юнита 1-ого уровня.
-        // Чтобы уровнять немного разницу, низкоуровневые юниты усиляются сильнее.
-        var levelDiff = (battleLevel - unitType.Level) * 4;
+        var levelDiff = GetUnitLevelDiff(unitType.CalculatedLevel, battleLevel);
         var unitLevel = unitType.Level + levelDiff;
 
         // Вычисляем максимальное количество здоровья в зависимости от уровня.
@@ -249,6 +288,57 @@ internal class SaveProvider : ISaveProvider
     }
 
     /// <summary>
+    /// Получить настоящий уровень юнита.
+    /// </summary>
+    /// <remarks>
+    /// Если рассматривать юниты фракции нейтралов, то они все имеют 1 уровень.
+    /// При этом по силе они могут быть как юнит 5-ого уровня (например, драконы).
+    /// Поэтому пересчитываем уровень. Самый простой способ это сделать - ориентироваться на стоимость найма.
+    /// </remarks>
+    private static int GetCalculatedUnitTypeLevel(int unitLevel, int recruitCostGold)
+    {
+        if (unitLevel != 1)
+            return unitLevel;
+
+        return recruitCostGold switch
+        {
+            > 5000 => 6, // Это боссы, для случайных битв нет смысла их расставлять.
+            > 2500 => 5,
+            > 1500 => 4,
+            > 750 => 3,
+            > 200 => 2,
+            _ => 1
+        };
+    }
+
+    /// <summary>
+    /// Получить значение усиления юнита из-за увеличенной сложности битвы.
+    /// </summary>
+    /// <remarks>
+    /// Юнит 2-ого уровня примерно в два раза сильнее юнита 1-ого уровня.
+    /// Чтобы уровнять немного разницу, низкоуровневые юниты усиляются сильнее.
+    /// </remarks>
+    private static int GetUnitLevelDiff(int unitLevel, int battleLevel)
+    {
+        var resultLevelDiff = 0;
+        for (int i = unitLevel; i < battleLevel; i++)
+        {
+            // Если битва второго уровня, а юнит первого, то по итогу он получит 5-ый уровень.
+            // На битве третьего уровня он получит 8ой. И так далее.
+            resultLevelDiff += i switch
+            {
+                1 => 4,
+                2 => 3,
+                3 => 3,
+                4 => 2,
+                _ => 0
+            };
+        }
+
+        return resultLevelDiff;
+    }
+
+    /// <summary>
     /// Проверить, что юнита необходимо располагать в первой линии.
     /// </summary>
     /// <returns>
@@ -264,7 +354,15 @@ internal class SaveProvider : ISaveProvider
     /// </summary>
     private static bool IsLeader(RandomSaveUnitType unitType)
     {
-        return unitType.UnitCategory is UnitCategory.Leader or UnitCategory.NeutralLeader;
+        return IsLeader(unitType.UnitCategory);
+    }
+
+    /// <summary>
+    /// Признак, что юнит - лидер.
+    /// </summary>
+    private static bool IsLeader(UnitCategory unitCategory)
+    {
+        return unitCategory is UnitCategory.Leader or UnitCategory.NeutralLeader;
     }
 
     /// <summary>

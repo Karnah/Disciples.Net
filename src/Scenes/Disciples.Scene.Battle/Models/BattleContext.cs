@@ -188,7 +188,7 @@ internal class BattleContext : BaseSupportLoading
     /// </summary>
     public BattleUnit GetBattleUnit(Unit unit)
     {
-        return BattleUnits.First(u => u.Unit == unit);
+        return BattleUnits.First(u => u.Unit.Id == unit.Id);
     }
 
     /// <summary>
