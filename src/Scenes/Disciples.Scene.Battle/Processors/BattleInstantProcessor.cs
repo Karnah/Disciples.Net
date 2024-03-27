@@ -1,7 +1,6 @@
 ﻿using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 
 namespace Disciples.Scene.Battle.Processors;
 
@@ -26,45 +25,36 @@ internal class BattleInstantProcessor
     /// Быстрое завершение битвы
     /// </summary>
     /// <returns>Победивший отряд в битве.</returns>
-    public Squad Process(Unit currentUnit, Squad attackingSquad, Squad defendingSquad,
-        UnitTurnQueue unitTurnQueue, int roundNumber)
+    public void Process()
     {
-        var instantBattleBeginRoundNumber = roundNumber;
+        var instantBattleBeginRoundNumber = _battleProcessor.RoundNumber;
+        var currentUnit = _battleProcessor.CurrentUnit;
 
-        while (true)
+        while (currentUnit != null)
         {
-            var winnerSquad = _battleProcessor.GetBattleWinnerSquad(attackingSquad, defendingSquad);
-            if (winnerSquad != null)
-                return winnerSquad;
-
             // Обрабатываем ход юнита.
-            var isCurrentUnitAttacker = currentUnit.Player.Id == attackingSquad.Player.Id;
-            var unitSquad = isCurrentUnitAttacker
-                ? attackingSquad
-                : defendingSquad;
-            var unitEnemySquad = isCurrentUnitAttacker
-                ? defendingSquad
-                : attackingSquad;
-            var command = GetCompleteBattleAiCommand(isCurrentUnitAttacker, roundNumber, instantBattleBeginRoundNumber) ??
-                          _battleAiProcessor.GetAiCommand(currentUnit, unitSquad, unitEnemySquad, unitTurnQueue, roundNumber);
-            ProcessAiCommand(command, currentUnit, unitSquad, unitEnemySquad, unitTurnQueue, roundNumber);
-
-            winnerSquad = _battleProcessor.GetBattleWinnerSquad(attackingSquad, defendingSquad);
-            if (winnerSquad != null)
-                return winnerSquad;
+            var isCurrentUnitAttacker = _battleProcessor.CurrentUnit.Player == _battleProcessor.AttackingSquad.Player;
+            var command = GetCompleteBattleAiCommand(isCurrentUnitAttacker, _battleProcessor.RoundNumber, instantBattleBeginRoundNumber) ??
+                          _battleAiProcessor.GetAiCommand();
+            ProcessAiCommand(command);
+            CheckAndProcessIfBattleHasWinner();
 
             // Обрабатываем вторую атакую юнита, если он бьёт дважды.
             if (currentUnit.UnitType.IsAttackTwice && command.CommandType == BattleCommandType.Attack)
             {
-                var secondAttackCommand = _battleAiProcessor.GetAiCommand(currentUnit, unitSquad, unitEnemySquad, unitTurnQueue, roundNumber);
-                ProcessAiCommand(secondAttackCommand, currentUnit, unitSquad, unitEnemySquad, unitTurnQueue, roundNumber);
-
-                winnerSquad = _battleProcessor.GetBattleWinnerSquad(attackingSquad, defendingSquad);
-                if (winnerSquad != null)
-                    return winnerSquad;
+                var secondAttackCommand = _battleAiProcessor.GetAiCommand();
+                ProcessAiCommand(secondAttackCommand);
+                CheckAndProcessIfBattleHasWinner();
             }
 
-            currentUnit = GetNextUnit(attackingSquad, defendingSquad, unitTurnQueue, ref roundNumber);
+            currentUnit = GetNextUnit();
+        }
+
+        var completeBattleProcessors = _battleProcessor.CompleteBattle();
+        foreach (var completeBattleProcessor in completeBattleProcessors)
+        {
+            completeBattleProcessor.ProcessBeginAction();
+            completeBattleProcessor.ProcessCompletedAction();
         }
     }
 
@@ -98,36 +88,28 @@ internal class BattleInstantProcessor
     /// <summary>
     /// Обработать команду компьютера.
     /// </summary>
-    private void ProcessAiCommand(BattleAiCommand command, Unit currentUnit,
-        Squad currentUnitSquad, Squad enemySquad,
-        UnitTurnQueue unitTurnQueue, int roundNumber)
+    private void ProcessAiCommand(BattleAiCommand command)
     {
         switch (command.CommandType)
         {
             case BattleCommandType.Attack:
-                var targetUnitSquad = command.Target!.Player.Id == currentUnitSquad.Player.Id
-                    ? currentUnitSquad
-                    : enemySquad;
-                var attackProcessorContext = new AttackProcessorContext(currentUnit, command.Target!,
-                    currentUnitSquad, targetUnitSquad,
-                    unitTurnQueue, roundNumber);
-                ProcessAttack(attackProcessorContext);
+                ProcessAttack(command.Target!);
                 break;
 
             case BattleCommandType.Defend:
-                var defendProcessor = new DefendProcessor(currentUnit);
+                var defendProcessor = _battleProcessor.ProcessDefend();
                 defendProcessor.ProcessBeginAction();
                 defendProcessor.ProcessCompletedAction();
                 break;
 
             case BattleCommandType.Wait:
-                var waitProcessor = new UnitWaitingProcessor(currentUnit, unitTurnQueue);
+                var waitProcessor = _battleProcessor.ProcessWait();
                 waitProcessor.ProcessBeginAction();
                 waitProcessor.ProcessCompletedAction();
                 break;
 
             case BattleCommandType.Retreat:
-                var retreatProcessor = new UnitRetreatingProcessor(currentUnit);
+                var retreatProcessor = _battleProcessor.ProcessRetreat();
                 retreatProcessor.ProcessBeginAction();
                 retreatProcessor.ProcessCompletedAction();
                 break;
@@ -140,28 +122,23 @@ internal class BattleInstantProcessor
     /// <summary>
     /// Обработать атаку.
     /// </summary>
-    private void ProcessAttack(AttackProcessorContext attackProcessorContext)
+    private void ProcessAttack(Unit targetUnit)
     {
         // Обрабатываем основную атаку.
-        var attackResult = _battleProcessor.ProcessMainAttack(attackProcessorContext);
+        var attackResult = _battleProcessor.ProcessMainAttack(targetUnit);
         foreach (var attackProcessor in attackResult.AttackProcessors)
         {
             attackProcessor.ProcessBeginAction();
             attackProcessor.ProcessCompletedAction();
         }
 
-        ProcessDeaths(attackProcessorContext.TargetUnitSquad, attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
+        var targetUnitSquad = _battleProcessor.GetUnitSquad(targetUnit);
+        ProcessDeaths(targetUnitSquad);
 
         // Обрабатываем вторую атаку.
         var secondAttackProcessors = attackResult
             .SecondaryAttackUnits
-            .Select(sau =>
-            {
-                var secondaryAttackContext = new AttackProcessorContext(attackProcessorContext.CurrentUnit, sau,
-                    attackProcessorContext.CurrentUnitSquad, attackProcessorContext.TargetUnitSquad,
-                    attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
-                return _battleProcessor.ProcessSecondaryAttack(secondaryAttackContext);
-            })
+            .Select(_battleProcessor.ProcessSecondaryAttack)
             .Where(p => p != null)
             .Select(p => p!)
             .ToArray();
@@ -171,41 +148,26 @@ internal class BattleInstantProcessor
             attackProcessor.ProcessCompletedAction();
         }
 
-        ProcessDeaths(attackProcessorContext.TargetUnitSquad, attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
+        ProcessDeaths(targetUnitSquad);
     }
 
     /// <summary>
     /// Получить юнита, который будет ходить следующим.
     /// </summary>
-    private Unit GetNextUnit(Squad attackingSquad, Squad defendingSquad,
-        UnitTurnQueue unitTurnQueue, ref int roundNumber)
+    private Unit? GetNextUnit()
     {
         while (true)
         {
-            var currentUnit = unitTurnQueue.GetNextUnit();
+            var currentUnit = _battleProcessor.GetNextUnit();
             if (currentUnit == null)
-            {
-                ++roundNumber;
-                currentUnit = unitTurnQueue.NextRound(_battleProcessor.GetTurnOrder(attackingSquad, defendingSquad, roundNumber));
-            }
+                return null;
 
             // Этот флаг запоминаем до обработки эффектов, так как после они могут быть сняты.
             // Если паралич снимается на ходу юнита, то он всё равно не совершает действия.
             var isCurrentUnitDisabled = currentUnit.Effects.IsDisabled;
 
-            var currentUnitSquad = currentUnit.Player.Id == attackingSquad.Player.Id
-                ? attackingSquad
-                : defendingSquad;
-            var otherUnitSquad = currentUnit.Player.Id == attackingSquad.Player.Id
-                ? defendingSquad
-                : attackingSquad;
-            ProcessUnitTurn(currentUnit, currentUnitSquad, otherUnitSquad, unitTurnQueue, roundNumber);
-
-            // Если ход текущего юнита завершает битву (он умер или сбежал), то сразу выходим.
-            // Не передаём ход следующему юниту, чтобы на нём не сработали эффекты.
-            var winnerSquad = _battleProcessor.GetBattleWinnerSquad(attackingSquad, defendingSquad);
-            if (winnerSquad != null)
-                return currentUnit;
+            ProcessUnitTurn();
+            CheckAndProcessIfBattleHasWinner();
 
             if (isCurrentUnitDisabled || currentUnit.IsDead)
                 continue;
@@ -217,45 +179,67 @@ internal class BattleInstantProcessor
     /// <summary>
     /// Обработать наступление хода юнита.
     /// </summary>
-    private void ProcessUnitTurn(Unit currentUnit, Squad currentUnitSquad, Squad otherUnitSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    private void ProcessUnitTurn()
     {
-        var effectProcessors = _battleProcessor.GetEffectProcessors(currentUnit, currentUnitSquad, otherUnitSquad, unitTurnQueue, roundNumber);
+        var effectProcessors = _battleProcessor.GetCurrentUnitEffectProcessors();
         foreach (var effectProcessor in effectProcessors)
         {
             effectProcessor.ProcessBeginAction();
             effectProcessor.ProcessCompletedAction();
 
             var targetUnit = effectProcessor.TargetUnit;
-            var targetUnitSquad = targetUnit.Player.Id == currentUnitSquad.Player.Id
-                ? currentUnitSquad
-                : otherUnitSquad;
             if (targetUnit.HitPoints == 0 && !targetUnit.IsDead)
-                ProcessUnitDeath(targetUnit, targetUnitSquad, unitTurnQueue, roundNumber);
+                ProcessUnitDeath(targetUnit);
         }
     }
 
     /// <summary>
-    /// Обработать смерти в отряде.
+    /// Проверить и обработать ситуацию, когда есть победитель битвы.
     /// </summary>
-    private void ProcessDeaths(Squad squad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    private void CheckAndProcessIfBattleHasWinner()
+    {
+        // Победитель уже был обработан ранее.
+        if (_battleProcessor.WinnerSquad != null)
+            return;
+
+        var winnerSquad = _battleProcessor.CheckAndSetBattleWinnerSquad();
+        if (winnerSquad == null)
+            return;
+
+        // Сбрасываем все эффекты с отряда-победителя.
+        // Отряд проигравшего проверять не нужно. Там либо все погибли, либо сбежали.
+        foreach (var unit in winnerSquad.Units)
+        {
+            var effectProcessors = _battleProcessor.GetForceCompleteEffectProcessors(unit);
+            foreach (var effectProcessor in effectProcessors)
+            {
+                effectProcessor.ProcessBeginAction();
+                effectProcessor.ProcessCompletedAction();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Обработать смерти в отряде, если они есть.
+    /// </summary>
+    private void ProcessDeaths(Squad squad)
     {
         // Создаём защитную копию, так как обработка смерти может менять состав юнитов в отряде.
         // Например, это происходит когда юнит был превращён.
-        foreach (var unit in squad.Units.ToArray())
-        {
-            if (unit.HitPoints == 0 && !unit.IsDead)
-                ProcessUnitDeath(unit, squad, unitTurnQueue, roundNumber);
-        }
+        var deadUnits = squad
+            .Units
+            .Where(unit => unit.HitPoints == 0 && !unit.IsDead)
+            .ToArray();
+        foreach (var deadUnit in deadUnits)
+            ProcessUnitDeath(deadUnit);
     }
 
     /// <summary>
     /// Обработать смерть юнита.
     /// </summary>
-    private void ProcessUnitDeath(Unit unit, Squad unitSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    private void ProcessUnitDeath(Unit targetUnit)
     {
-        var context = new AttackProcessorContext(unit, unit, unitSquad, unitSquad, unitTurnQueue, roundNumber);
-        var effectProcessors = _battleProcessor.GetForceCompleteEffectProcessors(context);
-        var deathProcessor = new UnitDeathProcessor(unit, effectProcessors);
+        var deathProcessor = _battleProcessor.ProcessDeath(targetUnit);
         deathProcessor.ProcessBeginAction();
         deathProcessor.ProcessCompletedAction();
     }

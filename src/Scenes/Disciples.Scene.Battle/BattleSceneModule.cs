@@ -5,11 +5,11 @@ using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Scenes;
 using Disciples.Scene.Battle.Controllers;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
 using Disciples.Scene.Battle.Processors;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
 using Disciples.Scene.Battle.Dialogs;
 
 namespace Disciples.Scene.Battle;
@@ -35,14 +35,14 @@ public class BattleSceneModule : IGameModule
             }, sceneScopeReuse);
 
         // На каждое действие создаётся новый контроллер.
-        RegisterImplementationTypes<IBattleUnitActionController>(containerRegistrator, Reuse.Transient);
+        RegisterImplementationTypes<IBattleActionController>(containerRegistrator, Reuse.Transient);
 
         containerRegistrator.Register<BattleProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleAiProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleInstantProcessor>(sceneScopeReuse);
         containerRegistrator.Register<BattleUnitPortraitPanelController>(sceneScopeReuse);
         containerRegistrator.Register<BattleBottomPanelController>(sceneScopeReuse);
-        containerRegistrator.Register<BattleUnitActionFactory>(sceneScopeReuse);
+        containerRegistrator.Register<BattleActionFactory>(sceneScopeReuse);
         containerRegistrator.Register<BattleSoundController>(sceneScopeReuse);
         containerRegistrator.Register<UnitDetailInfoDialog>(Reuse.Transient);
         containerRegistrator.Register<BattleDialogController>(sceneScopeReuse);

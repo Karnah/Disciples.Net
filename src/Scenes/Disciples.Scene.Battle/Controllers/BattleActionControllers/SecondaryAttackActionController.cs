@@ -1,4 +1,4 @@
-﻿using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+﻿using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -6,7 +6,7 @@ using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
 /// <summary>
 /// Контроллер второй атаки.
@@ -40,7 +40,7 @@ internal sealed class SecondaryAttackActionController : BaseAttackActionControll
     }
 
     /// <inheritdoc />
-    protected override BattleSquadPosition GetTargetSquadPosition()
+    protected override BattleSquadPosition? GetTargetSquadPosition()
     {
         return _targetBattleUnits[0].SquadPosition;
     }
@@ -50,8 +50,7 @@ internal sealed class SecondaryAttackActionController : BaseAttackActionControll
     {
         foreach (var targetBattleUnit in _targetBattleUnits)
         {
-            var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
-            var attackProcessor = _battleProcessor.ProcessSecondaryAttack(attackProcessorContext);
+            var attackProcessor = _battleProcessor.ProcessSecondaryAttack(targetBattleUnit.Unit);
 
             // Промахи для второй атаки никак не отображаются.
             if (attackProcessor is null or MissAttackProcessor)

@@ -28,7 +28,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
     private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
-    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), AnimationFrames> _effectsAnimation = new();
+    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), AnimationFrames> _effectsAnimations = new();
+    private readonly Dictionary<(RaceType RaceType, bool isSmall), AnimationFrames> _unitLevelUpAnimations = new();
     private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
@@ -99,10 +100,20 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
             return null;
 
         var animationKey = (effectAttackType, isSmall: isSmallUnit);
-        if (!_effectsAnimation.ContainsKey(animationKey))
-            _effectsAnimation[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
+        if (!_effectsAnimations.ContainsKey(animationKey))
+            _effectsAnimations[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
 
-        return _effectsAnimation[animationKey];
+        return _effectsAnimations[animationKey];
+    }
+
+    /// <inheritdoc />
+    public AnimationFrames GetUnitLevelUpAnimation(UnitType unitType)
+    {
+        var animationKey = (unitType.RaceType, isSmall: unitType.IsSmall);
+        if (!_unitLevelUpAnimations.ContainsKey(animationKey))
+            _unitLevelUpAnimations[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitLevelUpAnimationResourceKey(unitType.RaceType, unitType.IsSmall).Key);
+
+        return _unitLevelUpAnimations[animationKey];
     }
 
     /// <inheritdoc />

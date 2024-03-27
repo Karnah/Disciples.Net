@@ -14,8 +14,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleContext _context;
     private readonly BattleAiProcessor _battleAiProcessor;
-    private readonly BattleInstantProcessor _battleInstantProcessor;
-    private readonly BattleUnitActionFactory _unitActionFactory;
+    private readonly BattleActionFactory _actionFactory;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleController" />.
@@ -25,15 +24,13 @@ internal class BattleController : BaseSupportLoading, IBattleController
         BattleProcessor battleProcessor,
         BattleContext context,
         BattleAiProcessor battleAiProcessor,
-        BattleInstantProcessor battleInstantProcessor,
-        BattleUnitActionFactory unitActionFactory)
+        BattleActionFactory actionFactory)
     {
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _context = context;
         _battleAiProcessor = battleAiProcessor;
-        _battleInstantProcessor = battleInstantProcessor;
-        _unitActionFactory = unitActionFactory;
+        _actionFactory = actionFactory;
     }
 
     /// <summary>
@@ -58,7 +55,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <inheritdoc />
     public void BeforeSceneUpdate()
     {
-        if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
+        if (_context.BattleState is BattleState.Idle)
         {
             if (IsInstantBattleRequested)
             {
@@ -74,25 +71,44 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <inheritdoc />
     public void AfterSceneUpdate()
     {
-        if (_context.BattleState == BattleState.CompletedUnitAction)
+        if (_context.BattleActionEvent != BattleActionEvent.ActionCompleted)
+            return;
+
+        if (_battleProcessor.WinnerSquad == null)
         {
-            var battleWinner = _battleProcessor.GetBattleWinnerSquad(_context.AttackingSquad, _context.DefendingSquad);
+            // Если один из отрядов победил, то запускаем процесс завершения битвы.
+            // Первый шаг - снять все эффекты.
+            // Вторым шагом будет последний ход для всех юнитов-целителей, если есть повреждённые бойцы.
+            // Третий шаг - распределить опыт.
+            var battleWinner = _battleProcessor.CheckAndSetBattleWinnerSquad();
             if (battleWinner != null)
             {
-                CompletedBattle(battleWinner);
+                var battleWinnerSquad = _battleProcessor.AttackingSquad == battleWinner
+                    ? BattleSquadPosition.Attacker
+                    : BattleSquadPosition.Defender;
+                _context.WinnerSquadPosition = battleWinnerSquad;
+
+                _actionFactory.BeforeCompleteBattle();
+
+                // Если нет действий снятия эффектов, то всегда пропускаем ход текущего юнита, так как он точно не целитель/воскрешатель.
+                if (_context.BattleState == BattleState.Idle)
+                    NextTurn();
+
+                return;
             }
-            else if (_context.IsInstantBattleRequested)
-            {
-                ProcessInstantBattle();
-            }
-            else if (_context.CompletedUnitAction!.ShouldPassTurn)
-            {
-                NextTurn();
-            }
-            else
-            {
-                CheckAndProcessIfAiTurn();
-            }
+        }
+
+        if (_context.IsInstantBattleRequested)
+        {
+            ProcessInstantBattle();
+        }
+        else if (_context.CompletedAction!.ShouldPassTurn)
+        {
+            NextTurn();
+        }
+        else
+        {
+            CheckAndProcessIfAiTurn();
         }
     }
 
@@ -100,7 +116,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
     protected override void LoadInternal()
     {
         ArrangeUnits();
-        StartNewRound();
+        NextTurn();
     }
 
     /// <inheritdoc />
@@ -113,51 +129,57 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// </summary>
     private void ArrangeUnits()
     {
-        var units = new List<BattleUnit>();
+        var battleUnits = new List<BattleUnit>();
 
-        foreach (var attackSquadUnit in _context.AttackingSquad.Units)
-            units.Add(_battleGameObjectContainer.AddBattleUnit(attackSquadUnit, BattleSquadPosition.Attacker));
+        foreach (var attackSquadUnit in _battleProcessor.AttackingSquad.Units)
+            battleUnits.Add(_battleGameObjectContainer.AddBattleUnit(attackSquadUnit, BattleSquadPosition.Attacker));
 
-        foreach (var defendSquadUnit in _context.DefendingSquad.Units)
-            units.Add(_battleGameObjectContainer.AddBattleUnit(defendSquadUnit, BattleSquadPosition.Defender));
+        foreach (var defendSquadUnit in _battleProcessor.DefendingSquad.Units)
+            battleUnits.Add(_battleGameObjectContainer.AddBattleUnit(defendSquadUnit, BattleSquadPosition.Defender));
 
-        _context.BattleUnits = units;
+        _context.BattleUnits = battleUnits;
     }
 
-    // Начать новый раунд.
-    private void StartNewRound()
+    /// <summary>
+    /// Передать ход следующему юниту.
+    /// </summary>
+    private void NextTurn()
     {
+        var roundNumber = _battleProcessor.RoundNumber;
+
+        // Если следующего юнита нет, то битва закончена.
+        var nextUnit = _battleProcessor.GetNextUnit();
+        if (nextUnit == null)
+        {
+            _actionFactory.CompleteBattle();
+            return;
+        }
+
         // BUG Сейчас есть проблемы с эффектами, которые привязаны в ходу юнита, который наложил его.
         // Например, усиление урона или даровать защиту.
         // Если юнит умирает, то игра не сбрасывает такие эффекты.
         // По-хорошему, таких юнитов нужно сохранять в очереди и вызывать для них обработку.
         // Но пока просто сделал, что эффекты мёртвых юнитов сбрасываются между раундами.
-        foreach (var battleUnit in _context.BattleUnits)
+        if (roundNumber != _battleProcessor.RoundNumber)
         {
-            foreach (var unitBattleEffect in battleUnit.Unit.Effects.GetBattleEffects())
+            foreach (var battleUnit in _context.BattleUnits)
             {
-                if (!unitBattleEffect.Duration.IsInfinitive && unitBattleEffect.DurationControlUnit.IsDead)
-                    battleUnit.Unit.Effects.Remove(unitBattleEffect);
+                foreach (var unitBattleEffect in battleUnit.Unit.Effects.GetBattleEffects())
+                {
+                    if (!unitBattleEffect.Duration.IsInfinitive && unitBattleEffect.DurationControlUnit.IsDead)
+                        battleUnit.Unit.Effects.Remove(unitBattleEffect);
+                }
             }
         }
 
-        ++_context.RoundNumber;
-        var turnOrder = _battleProcessor.GetTurnOrder(_context.AttackingSquad, _context.DefendingSquad, _context.RoundNumber);
-        var nextUnit = _context.UnitTurnQueue.NextRound(turnOrder);
-        BeginUnitTurn(nextUnit);
-    }
+        CurrentBattleUnit = _context.GetBattleUnit(nextUnit);
 
-    // Передать ход следующему юниту.
-    private void NextTurn()
-    {
-        var nextUnit = _context.UnitTurnQueue.GetNextUnit();
-        if (nextUnit != null)
-        {
-            BeginUnitTurn(nextUnit);
-            return;
-        }
+        // Запускаем обработку эффектов юнита.
+        _actionFactory.UnitTurn();
 
-        StartNewRound();
+        // Если после этого не появилось нового действия, значит нет эффектов для обработки.
+        if (_context.BattleState is BattleState.Idle)
+            CheckAndProcessIfAiTurn();
     }
 
     /// <summary>
@@ -169,35 +191,23 @@ internal class BattleController : BaseSupportLoading, IBattleController
         if (!CurrentBattleUnit.Unit.Player.IsComputer && !IsAutoBattle)
             return;
 
-        var attackingSquad = CurrentBattleUnit.IsAttacker
-            ? _context.AttackingSquad
-            : _context.DefendingSquad;
-        var defendingSquad = CurrentBattleUnit.IsAttacker
-            ? _context.DefendingSquad
-            : _context.AttackingSquad;
-        var command = _battleAiProcessor.GetAiCommand(
-            CurrentBattleUnit.Unit,
-            attackingSquad,
-            defendingSquad,
-            _context.UnitTurnQueue,
-            _context.RoundNumber);
-
+        var command = _battleAiProcessor.GetAiCommand();
         switch (command.CommandType)
         {
             case BattleCommandType.Attack:
-                _unitActionFactory.BeginMainAttack(_context.GetBattleUnit(command.Target!));
+                _actionFactory.BeginMainAttack(_context.GetBattleUnit(command.Target!));
                 break;
 
             case BattleCommandType.Defend:
-                _unitActionFactory.Defend();
+                _actionFactory.Defend();
                 break;
 
             case BattleCommandType.Wait:
-                _unitActionFactory.Wait();
+                _actionFactory.Wait();
                 break;
 
             case BattleCommandType.Retreat:
-                _unitActionFactory.Retreat();
+                _actionFactory.Retreat();
                 break;
 
             default:
@@ -206,47 +216,10 @@ internal class BattleController : BaseSupportLoading, IBattleController
     }
 
     /// <summary>
-    /// Начать ход юнита.
-    /// </summary>
-    private void BeginUnitTurn(Unit unit)
-    {
-        CurrentBattleUnit = _context.GetBattleUnit(unit);
-
-        // Запускаем обработку эффектов юнита.
-        _unitActionFactory.UnitTurn();
-
-        // Если после этого не появилось нового действия, значит нет эффектов для обработки.
-        if (_context.BattleState is BattleState.WaitPlayerTurn or BattleState.CompletedUnitAction)
-            CheckAndProcessIfAiTurn();
-    }
-
-    /// <summary>
     /// Обработать быстрое завершение битвы.
     /// </summary>
     private void ProcessInstantBattle()
     {
-        var battleWinner = _battleInstantProcessor.Process(CurrentBattleUnit.Unit, _context.AttackingSquad, _context.DefendingSquad, _context.UnitTurnQueue, _context.RoundNumber);
-
-        foreach (var battleUnit in _context.BattleUnits)
-        {
-            if (battleUnit.Unit.IsDead && battleUnit.UnitState != BattleUnitState.Dead)
-                battleUnit.UnitState = BattleUnitState.Dead;
-            else if (battleUnit.Unit.IsRetreated)
-                battleUnit.UnitState = BattleUnitState.Retreated;
-        }
-
-        CompletedBattle(battleWinner);
-    }
-
-    /// <summary>
-    /// Обработать завершение битвы.
-    /// </summary>
-    private void CompletedBattle(Squad battleWinner)
-    {
-        // TODO Снять все эффекты.
-        var battleWinnerSquad = _context.AttackingSquad == battleWinner
-            ? BattleSquadPosition.Attacker
-            : BattleSquadPosition.Defender;
-        _context.SetBattleCompleted(battleWinnerSquad);
+        _actionFactory.InstantCompleteBattle();
     }
 }

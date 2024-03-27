@@ -1,12 +1,12 @@
-﻿namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+﻿namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 
 /// <summary>
-/// Контроллер для действия юнита на поле боя.
+/// Контроллер для действия на поле боя.
 /// </summary>
-internal interface IBattleUnitActionController
+internal interface IBattleActionController
 {
     /// <summary>
-    /// Признак, что юнит завершил действие.
+    /// Признак, что действие завершено.
     /// </summary>
     bool IsCompleted { get; }
 
@@ -19,17 +19,17 @@ internal interface IBattleUnitActionController
     bool ShouldPassTurn { get; }
 
     /// <summary>
-    /// Инициализировать действие юнита.
+    /// Инициализировать действие.
     /// </summary>
     void Initialize();
 
     /// <summary>
-    /// Обновить состояние объектов на сцене.
+    /// Обновить состояние объектов на сцене перед обновлением.
     /// </summary>
     void BeforeSceneUpdate();
 
     /// <summary>
-    /// Обновить состояние объектов на сцене.
+    /// Обновить состояние объектов на сцене после обновления.
     /// </summary>
     void AfterSceneUpdate();
 }

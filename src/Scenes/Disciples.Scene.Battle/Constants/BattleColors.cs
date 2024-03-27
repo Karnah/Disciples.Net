@@ -66,4 +66,9 @@ internal static class BattleColors
     /// Прозрачный цвет.
     /// </summary>
     public static Color Transparent { get; } = Color.FromArgb(0, 0, 0, 0);
+
+    /// <summary>
+    /// Цвет начисления опыта.
+    /// </summary>
+    public static Color Experience { get; } = Color.FromArgb(128, 255, 255, 0);
 }

@@ -19,6 +19,9 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// </remarks>
     public bool CanMainAttackBeSkipped => CanAttackFriends && !CanAttackEnemies;
 
+    /// <inheritdoc />
+    public bool CanAttackAfterBattle => false;
+
     /// <summary>
     /// Можно ли атаковать данным типом атаки врагов.
     /// </summary>

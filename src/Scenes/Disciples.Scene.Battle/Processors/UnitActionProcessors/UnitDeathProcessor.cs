@@ -8,14 +8,16 @@ namespace Disciples.Scene.Battle.Processors.UnitActionProcessors;
 /// </summary>
 internal class UnitDeathProcessor : IUnitActionProcessor
 {
+    private readonly Squad _enemySquad;
     private readonly IReadOnlyList<IUnitEffectProcessor> _unitEffectProcessors;
 
     /// <summary>
     /// Создать объект типа <see cref="UnitDeathProcessor" />.
     /// </summary>
-    public UnitDeathProcessor(Unit targetUnit, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors)
+    public UnitDeathProcessor(Unit targetUnit, Squad enemySquad, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors)
     {
         TargetUnit = targetUnit;
+        _enemySquad = enemySquad;
         _unitEffectProcessors = unitEffectProcessors;
     }
 
@@ -29,6 +31,18 @@ internal class UnitDeathProcessor : IUnitActionProcessor
     public void ProcessBeginAction()
     {
         TargetUnit.IsDead = true;
+
+        // Начисляем опыт вражеском отряду.
+        var experienceEnemies = _enemySquad
+            .Units
+            .Where(x => !x.IsDeadOrRetreated)
+            .ToArray();
+        if (experienceEnemies.Length > 0)
+        {
+            var experience = TargetUnit.DeathExperience / experienceEnemies.Length;
+            foreach (var enemy in experienceEnemies)
+                enemy.BattleExperience += experience;
+        }
 
         foreach (var unitEffectProcessor in _unitEffectProcessors)
         {

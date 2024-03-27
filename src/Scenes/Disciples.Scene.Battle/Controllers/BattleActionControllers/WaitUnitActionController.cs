@@ -1,16 +1,16 @@
-﻿using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+﻿using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Processors.UnitActionProcessors;
+using Disciples.Scene.Battle.Processors;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
 /// <summary>
 /// Контроллер ожидания юнита.
 /// </summary>
-internal class WaitUnitActionController : BaseUnitActionController
+internal class WaitUnitActionController : BaseBattleActionController
 {
-    private readonly BattleContext _context;
+    private readonly BattleProcessor _battleProcessor;
 
     /// <summary>
     /// Создать объект типа <see cref="DefendUnitActionController" />.
@@ -18,17 +18,19 @@ internal class WaitUnitActionController : BaseUnitActionController
     public WaitUnitActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        BattleSoundController soundController
-    ) : base(context, unitPortraitPanelController, soundController)
+        BattleSoundController soundController,
+        IBattleGameObjectContainer battleGameObjectContainer,
+        BattleProcessor battleProcessor
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
     {
-        _context = context;
+        _battleProcessor = battleProcessor;
     }
 
     /// <inheritdoc />
     public override bool ShouldPassTurn { get; protected set; } = true;
 
     /// <inheritdoc />
-    protected override BattleSquadPosition GetTargetSquadPosition()
+    protected override BattleSquadPosition? GetTargetSquadPosition()
     {
         return CurrentBattleUnit.SquadPosition;
     }
@@ -36,7 +38,7 @@ internal class WaitUnitActionController : BaseUnitActionController
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
-        var unitWaitingProcessor = new UnitWaitingProcessor(CurrentBattleUnit.Unit, _context.UnitTurnQueue);
+        var unitWaitingProcessor = _battleProcessor.ProcessWait();
         AddProcessorAction(unitWaitingProcessor);
     }
 }

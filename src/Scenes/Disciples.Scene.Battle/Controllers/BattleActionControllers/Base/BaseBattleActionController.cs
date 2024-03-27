@@ -1,40 +1,44 @@
-﻿using Disciples.Engine.Extensions;
+﻿using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 
 /// <summary>
-/// Класс для базовых действий юнита.
+/// Класс для базовых действий на поле боя.
 /// </summary>
-internal abstract class BaseUnitActionController : IBattleUnitActionController
+internal abstract class BaseBattleActionController : IBattleActionController
 {
     protected const long COMMON_ACTION_DELAY = 1000;
-    private const long AFTER_ACTION_DELAY = 250;
+    protected const long SMALL_ACTION_DELAY = 250;
 
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly BattleSoundController _soundController;
+    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
 
     private readonly BattleActionDelayContainer _delays = new();
     private readonly List<IPlayingSound> _playingSounds = new();
 
     /// <summary>
-    /// Создать объект типа <see cref="BaseUnitActionController" />.
+    /// Создать объект типа <see cref="BaseBattleActionController" />.
     /// </summary>
-    protected BaseUnitActionController(
+    protected BaseBattleActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
-        BattleSoundController soundController)
+        BattleSoundController soundController,
+        IBattleGameObjectContainer battleGameObjectContainer)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
         _soundController = soundController;
+        _battleGameObjectContainer = battleGameObjectContainer;
     }
 
     /// <inheritdoc />
@@ -52,14 +56,21 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     public void Initialize()
     {
         var targetSquadPosition = GetTargetSquadPosition();
-        _unitPortraitPanelController.ProcessActionsBegin(targetSquadPosition);
+        if (targetSquadPosition != null)
+            _unitPortraitPanelController.SetDisplayingSquad(targetSquadPosition.Value);
 
         InitializeInternal();
 
         // Если после инициализации ничего ожидать не нужно,
         // То действие сразу завершается.
         if (IsCompleted)
+        {
             OnCompleted();
+            return;
+        }
+
+        _context.BattleState = BattleState.ProcessingAction;
+        _context.BattleActionEvent = BattleActionEvent.ActionBegin;
     }
 
     /// <inheritdoc />
@@ -91,7 +102,7 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     /// <summary>
     /// Получить отряд, который должен отображаться на панели.
     /// </summary>
-    protected abstract BattleSquadPosition GetTargetSquadPosition();
+    protected virtual BattleSquadPosition? GetTargetSquadPosition() => null;
 
     /// <summary>
     /// Инициализировать действие.
@@ -103,6 +114,10 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     /// </summary>
     protected virtual void OnCompleted()
     {
+        _context.BattleState = _context.NextAction == null
+            ? BattleState.Idle
+            : BattleState.ProcessingAction;
+        _context.BattleActionEvent = BattleActionEvent.ActionCompleted;
     }
 
     /// <summary>
@@ -121,9 +136,8 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
         unitActionProcessor.ProcessBeginAction();
 
         var targetBattleUnit = _context.GetBattleUnit(unitActionProcessor.TargetUnit);
-        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        var portraitEventData = GetProcessorPortraitEventData(unitActionProcessor);
-        targetUnitPortraitObject?.ProcessBeginUnitPortraitEvent(portraitEventData);
+        var portraitMessage = GetProcessorPortraitEventData(unitActionProcessor);
+        _unitPortraitPanelController.DisplayMessage(targetBattleUnit, portraitMessage);
 
         AddActionDelay(new BattleTimerDelay(COMMON_ACTION_DELAY,
             () => OnProcessorActionCompleted(unitActionProcessor, targetBattleUnit)));
@@ -136,11 +150,10 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     {
         unitActionProcessor.ProcessCompletedAction();
 
-        var targetUnitPortraitObject = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        targetUnitPortraitObject?.ProcessCompletedUnitPortraitEvent();
+        _unitPortraitPanelController.CloseMessage(targetBattleUnit);
 
         // После отображения действия на портрете, всегда есть задержка в 250 мс.
-        AddActionDelay(new BattleTimerDelay(AFTER_ACTION_DELAY));
+        AddActionDelay(new BattleTimerDelay(SMALL_ACTION_DELAY));
     }
 
     /// <summary>
@@ -149,6 +162,27 @@ internal abstract class BaseUnitActionController : IBattleUnitActionController
     protected virtual BattleUnitPortraitEventData GetProcessorPortraitEventData(IUnitActionProcessor unitActionProcessor)
     {
         return new BattleUnitPortraitEventData(unitActionProcessor.ActionType);
+    }
+
+    /// <summary>
+    /// Заменить юнита на поле боя.
+    /// </summary>
+    protected void ReplaceUnit(BattleUnit originalBattleUnit, Unit newUnit)
+    {
+        originalBattleUnit.Destroy();
+
+        var newBattleUnit = _battleGameObjectContainer.AddBattleUnit(newUnit, originalBattleUnit.SquadPosition);
+        newBattleUnit.UnitState = originalBattleUnit.UnitState;
+        var unitBattleIndex = _context.BattleUnits.IndexOf(originalBattleUnit);
+        _context.BattleUnits[unitBattleIndex] = newBattleUnit;
+
+        // BUG: Опасная штука, так как эффекты для юнита рассчитываются заранее.
+        // Но у всех трансформированных юнитов общий список эффектов.
+        if (_context.CurrentBattleUnit == originalBattleUnit)
+            _context.CurrentBattleUnit = newBattleUnit;
+
+        var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
+        targetUnitPortrait?.ChangeUnit(newUnit);
     }
 
     /// <summary>

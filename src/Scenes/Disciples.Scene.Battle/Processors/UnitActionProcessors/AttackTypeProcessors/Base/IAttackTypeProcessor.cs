@@ -26,6 +26,16 @@ internal interface IAttackTypeProcessor
     bool CanMainAttackBeSkipped { get; }
 
     /// <summary>
+    /// Признак, что можно сделать ход после того, как битва была завершена.
+    /// </summary>
+    /// <remarks>
+    /// После окончания битвы (но в рамках раунда):
+    /// Целитель может вылечить раненых юнитов.
+    /// Воскрешатель может воскресить юнита.
+    /// </remarks>>
+    bool CanAttackAfterBattle { get; }
+
+    /// <summary>
     /// Проверить, можно ли выполнить атаку.
     /// </summary>
     bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack);

@@ -13,9 +13,26 @@ namespace Disciples.Engine.Common.Models;
 public class Unit
 {
     /// <summary>
+    /// Создать юнита, который на уровень выше, чем предыдущий.
+    /// </summary>
+    public static Unit CreateNextLevelUnit(Unit oldUnit)
+    {
+        var newUnit = new Unit(oldUnit.Id, oldUnit.UnitType, oldUnit.Player, oldUnit.SquadLinePosition, oldUnit.SquadFlankPosition);
+        newUnit.Level = oldUnit.Level + 1;
+        newUnit.HitPoints = newUnit.MaxHitPoints;
+
+        return newUnit;
+    }
+
+    /// <summary>
     /// Создать объект типа <see cref="Unit" />.
     /// </summary>
-    public Unit(string id, UnitType unitType, Player player, UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition)
+    public Unit(
+        string id,
+        UnitType unitType,
+        Player player,
+        UnitSquadLinePosition squadLinePosition,
+        UnitSquadFlankPosition squadFlankPosition)
     {
         Id = id;
         IsLeader = unitType.UnitCategory is UnitCategory.Leader or UnitCategory.NeutralLeader or UnitCategory.LeaderThief;
@@ -81,6 +98,21 @@ public class Unit
     /// Накопленный за уровень опыт.
     /// </summary>
     public int Experience { get; set; }
+
+    /// <summary>
+    /// Необходимый опыт для того, чтобы перейти на следующий уровень.
+    /// </summary>
+    public int NextLevelExperience => UnitType.XpNext + CalculateLevelUpgrade(ulu => ulu.XpNext);
+
+    /// <summary>
+    /// Количество опыта, которое получит вражеский отряд после смерти юнита.
+    /// </summary>
+    public virtual int DeathExperience => UnitType.XpKilled + CalculateLevelUpgrade(ulu => ulu.XpKilled);
+
+    /// <summary>
+    /// Накопленный опыт во время битвы.
+    /// </summary>
+    public virtual int BattleExperience { get; set; }
 
     /// <summary>
     /// Количество оставшихся очков здоровья.

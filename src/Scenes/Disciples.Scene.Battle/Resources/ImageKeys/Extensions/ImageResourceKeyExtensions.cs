@@ -100,6 +100,23 @@ internal static class ImageResourceKeyExtensions
     }
 
     /// <summary>
+    /// Получить ключ в ресурсах, который соответствует определённой расе.
+    /// </summary>
+    public static string GetResourceKey(this RaceType raceType)
+    {
+        return raceType switch
+        {
+            RaceType.Human => "HU",
+            RaceType.Undead => "UN",
+            RaceType.Heretic => "HE",
+            RaceType.Dwarf => "DW",
+            RaceType.Neutral => "NE",
+            RaceType.Elf => "EL",
+            _ => throw new ArgumentOutOfRangeException(nameof(raceType), raceType, null)
+        };
+    }
+
+    /// <summary>
     /// Проверить, есть ли в ресурсах определённая анимации атаки.
     /// </summary>
     public static bool HasResourceKey(this UnitAttackType attackType)

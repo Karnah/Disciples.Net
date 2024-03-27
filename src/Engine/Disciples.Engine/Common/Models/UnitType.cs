@@ -39,6 +39,11 @@ public class UnitType
     public string RaceId { get; init; } = null!;
 
     /// <summary>
+    /// Раса юнита.
+    /// </summary>
+    public RaceType RaceType { get; init; }
+
+    /// <summary>
     /// Подраса юнита.
     /// </summary>
     public Subrace Subrace { get; init; }

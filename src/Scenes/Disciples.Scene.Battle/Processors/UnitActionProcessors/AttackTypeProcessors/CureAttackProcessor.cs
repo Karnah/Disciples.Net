@@ -32,6 +32,9 @@ internal class CureAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => true;
 
     /// <inheritdoc />
+    public bool CanAttackAfterBattle => false;
+
+    /// <inheritdoc />
     public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return CanAttackFriend(context) &&

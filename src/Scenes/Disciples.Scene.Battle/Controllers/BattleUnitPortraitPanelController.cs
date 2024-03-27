@@ -13,6 +13,7 @@ using Disciples.Scene.Battle.Extensions;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors;
+using Microsoft.Extensions.Logging;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -26,10 +27,13 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private const int PANEL_ANIMATION_OFFSET = -2;
 
+    private readonly ILogger<BattleUnitPortraitPanelController> _logger;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleInterfaceProvider _interfaceProvider;
     private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
+
+    private readonly Dictionary<string, BattleUnitPortraitEventData> _unitMessages = new();
 
     private BattleUnitPortraitPanelData _rightPanel = null!;
     private BattleUnitPortraitPanelData _leftPanel = null!;
@@ -38,6 +42,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     private BattleUnitPortraitPanelData _additionalPanel = null!;
 
     private bool _isActionProcessing;
+    private bool _isBorderAnimationsDisabled;
 
     /// <summary>
     /// Отряд, который отображается на основной панели.
@@ -50,11 +55,13 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// Создать объект типа <see cref="BattleUnitPortraitPanelController" />.
     /// </summary>
     public BattleUnitPortraitPanelController(
+        ILogger<BattleUnitPortraitPanelController> logger,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleInterfaceProvider interfaceProvider,
         BattleContext context,
         BattleProcessor battleProcessor)
     {
+        _logger = logger;
         _battleGameObjectContainer = battleGameObjectContainer;
         _interfaceProvider = interfaceProvider;
         _context = context;
@@ -85,8 +92,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// Обработать положение курсора.
     /// </summary>
     /// <remarks>
-    /// Сейчас нет обработки выхода курсора за пределы сцены.
-    /// Поэтому выход за пределы сцены также обрабатывается как необходимо отображать дополнительную панель.
+    /// Курсор может выходить за пределы сцены,
+    /// Если это происходит, то отображаем дополнительную панель.
     /// </remarks>
     public void ProcessMousePosition(PointD mousePosition)
     {
@@ -124,35 +131,27 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Обработать начало действий на сцене.
+    /// Обработать начало действия на сцене.
     /// </summary>
-    public void ProcessActionsBegin(BattleSquadPosition displayingSquad)
+    public void ProcessActionBegin()
     {
         _isActionProcessing = true;
         _reflectPanelButton.SetDisabled();
-
-        _displayingSquad = displayingSquad;
 
         // На время действий, дополнительная панель всегда скрыта.
         if (IsDisplayingBothPanels)
         {
             IsDisplayingBothPanels = false;
-
-            UpdatePanel(_mainPanel, _displayingSquad.Value);
             RemovePanel(_additionalPanel);
         }
-        else
-        {
-            // Здесь нельзя использовать UpdatePanel, так как требуется обязательный вызов UpdateBorders.
-            ArrangePortraits(_mainPanel, _displayingSquad.Value);
-            UpdateBorders(_mainPanel);
-        }
+
+        UpdateBorders(_mainPanel);
     }
 
     /// <summary>
     /// Обработать завершение всех действий на сцене.
     /// </summary>
-    public void ProcessActionsCompleted()
+    public void ProcessActionCompleted()
     {
         _isActionProcessing = false;
         _reflectPanelButton.SetActive();
@@ -166,14 +165,73 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     public void ProcessBattleCompleted()
     {
-        if (_displayingSquad != _context.BattleWinnerSquad!.Value)
-            SetDisplayingSquad(_context.BattleWinnerSquad.Value);
-
         _isActionProcessing = false;
         _reflectPanelButton.SetActive();
+    }
 
+    /// <summary>
+    /// Убрать все анимации на панели юнитов (текущий юнит, допустимые цели).
+    /// </summary>
+    /// <remarks>
+    /// Используется при завершении битвы, флаг сбрасывать не нужно.
+    /// </remarks>
+    public void DisableBorderAnimations()
+    {
+        _isBorderAnimationsDisabled = true;
         RemoveBorders(_mainPanel);
-        RemoveBorders(_additionalPanel);
+    }
+
+    /// <summary>
+    /// Отобразить указанный отряд.
+    /// </summary>
+    public void SetDisplayingSquad(BattleSquadPosition displayingSquad)
+    {
+        if (_displayingSquad == displayingSquad)
+            return;
+
+        _displayingSquad = displayingSquad;
+
+        // Если отображаются обе панели, то запоминаем новый отряд, который отображается на основной панели.
+        // При этом само отображение не меняем.
+        if (IsDisplayingBothPanels)
+            return;
+
+        UpdatePanel(_mainPanel, displayingSquad);
+
+        // Кнопка "зажата", если отображается атакующий отряд.
+        _reflectPanelButton.SetState(displayingSquad == BattleSquadPosition.Attacker);
+    }
+
+    /// <summary>
+    /// Отобразить сообщение на портрете юнита.
+    /// </summary>
+    public void DisplayMessage(BattleUnit battleUnit, BattleUnitPortraitEventData portraitEventData)
+    {
+        var unitId = battleUnit.Unit.Id;
+
+        _logger.LogDebug($"Display message: unit {unitId}, message {portraitEventData.UnitActionType}");
+
+        if (_unitMessages.ContainsKey(unitId))
+        {
+            _logger.LogCritical($"Unit {unitId} already has a message");
+            CloseMessage(battleUnit);
+        }
+
+        _unitMessages.Add(unitId, portraitEventData);
+
+        var unitPortrait = GetUnitPortrait(battleUnit);
+        unitPortrait?.ShowMessage(portraitEventData);
+    }
+
+    /// <summary>
+    /// Закрыть сообщение на портрете юнита.
+    /// </summary>
+    public void CloseMessage(BattleUnit battleUnit)
+    {
+        _unitMessages.Remove(battleUnit.Unit.Id);
+
+        var unitPortrait = GetUnitPortrait(battleUnit);
+        unitPortrait?.CloseMessage();
     }
 
     /// <summary>
@@ -181,8 +239,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     public UnitPortraitObject? GetUnitPortrait(BattleUnit battleUnit)
     {
-        return _mainPanel.UnitPortraits.FirstOrDefault(up => up.Unit == battleUnit.Unit)
-               ?? _additionalPanel.UnitPortraits.FirstOrDefault(up => up.Unit == battleUnit.Unit);
+        return _mainPanel.UnitPortraits.FirstOrDefault(up => up.Unit.Id == battleUnit.Unit.Id)
+               ?? _additionalPanel.UnitPortraits.FirstOrDefault(up => up.Unit.Id == battleUnit.Unit.Id);
     }
 
     /// <inheritdoc />
@@ -244,27 +302,6 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     }
 
     /// <summary>
-    /// Установить отображаемый отряд.
-    /// </summary>
-    private void SetDisplayingSquad(BattleSquadPosition displayingSquad)
-    {
-        if (_displayingSquad == displayingSquad)
-            return;
-
-        _displayingSquad = displayingSquad;
-
-        // Если отображаются обе панели, то запоминаем новый отряд, который отображается на основной панели.
-        // При этом само отображение не меняем.
-        if (IsDisplayingBothPanels)
-            return;
-
-        UpdatePanel(_mainPanel, displayingSquad);
-
-        // Кнопка "зажата", если отображается атакующий отряд.
-        _reflectPanelButton.SetState(displayingSquad == BattleSquadPosition.Attacker);
-    }
-
-    /// <summary>
     /// Получить тип отряд, который должен отображаться на панели в режиме ожидания хода.
     /// </summary>
     /// <remarks>
@@ -273,9 +310,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </remarks>
     private BattleSquadPosition GetDefaultDisplayingSquad()
     {
-        var enemySquad = CurrentBattleUnit.IsAttacker
-            ? _context.DefendingSquad
-            : _context.AttackingSquad;
+        var enemySquad = _battleProcessor.GetUnitEnemySquad(CurrentBattleUnit.Unit);
         var isNeedShowEnemies = enemySquad
             .Units
             .Select(_context.GetBattleUnit)
@@ -325,6 +360,9 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             var hitPointsBounds = GetBounds(battleUnit.Unit, squadPosition, panel.HitPointsPlaceholders);
             var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit, squadPosition, portraitBounds, hitPointsBounds);
             portraits.Add(portrait);
+
+            if (_unitMessages.TryGetValue(battleUnit.Unit.Id, out var message))
+                portrait.ShowMessage(message);
         }
 
         panel.BattleUnits = battleUnits;
@@ -393,7 +431,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             return;
 
         // Если битва закончена, никаких дополнительных рамок не нужно.
-        if (_context.BattleState == BattleState.WaitExit)
+        if (_isBorderAnimationsDisabled)
             return;
 
         var currentUnit = CurrentBattleUnit.Unit;
@@ -482,8 +520,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private bool CanAttack(BattleUnit targetBattleUnit)
     {
-        var attackContext = _context.CreateAttackProcessorContext(targetBattleUnit);
-        return _battleProcessor.CanAttack(attackContext);
+        return _battleProcessor.CanAttack(targetBattleUnit.Unit);
     }
 
     /// <summary>
@@ -491,8 +528,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private bool CanAttack(BattleUnit targetBattleUnit, CalculatedUnitAttack mainAttack, CalculatedUnitAttack? secondaryAttack)
     {
-        var attackContext = _context.CreateAttackProcessorContext(targetBattleUnit);
-        return _battleProcessor.CanAttack(attackContext, mainAttack, secondaryAttack);
+        return _battleProcessor.CanAttack(targetBattleUnit.Unit, mainAttack, secondaryAttack);
     }
 
     /// <summary>
@@ -500,6 +536,6 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private static UnitPortraitObject GetUnitPortrait(BattleUnitPortraitPanelData panelData, BattleUnit battleUnit)
     {
-        return panelData.UnitPortraits.First(up => up.Unit == battleUnit.Unit);
+        return panelData.UnitPortraits.First(up => up.Unit.Id == battleUnit.Unit.Id);
     }
 }

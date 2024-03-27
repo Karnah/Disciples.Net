@@ -7,7 +7,7 @@ namespace Disciples.Scene.Battle.Models;
 /// <summary>
 /// Данные для события, которое должно отображаться на портрете юнита.
 /// </summary>
-internal readonly ref struct BattleUnitPortraitEventData
+internal class BattleUnitPortraitEventData
 {
     /// <summary>
     /// Создать объект типа <see cref="BattleUnitPortraitEventData" />.

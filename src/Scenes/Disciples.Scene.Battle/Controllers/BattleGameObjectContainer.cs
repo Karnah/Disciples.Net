@@ -5,17 +5,22 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Common.Controllers;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
+using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
 /// <inheritdoc cref="IBattleGameObjectContainer" />
+/// <remarks>
+/// TODO переписать на DI.
+/// </remarks>
 internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattleGameObjectContainer
 {
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly ITextProvider _textProvider;
+    private readonly BattleContext _battleContext;
     private readonly Lazy<IBattleInterfaceController> _battleInterfaceController;
 
     public BattleGameObjectContainer(
@@ -24,6 +29,7 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         IBattleUnitResourceProvider battleUnitResourceProvider,
         IBattleInterfaceProvider battleInterfaceProvider,
         ITextProvider textProvider,
+        BattleContext battleContext,
         Lazy<IBattleInterfaceController> battleInterfaceController
         ) : base(gameObjectContainer)
     {
@@ -31,6 +37,7 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _battleInterfaceProvider = battleInterfaceProvider;
         _textProvider = textProvider;
+        _battleContext = battleContext;
         _battleInterfaceController = battleInterfaceController;
     }
 
@@ -65,8 +72,8 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         SceneElement leaderPanelSceneElement,
         SceneElement unitInfoSceneElement)
     {
-        var bottomUnitPortrait = new BottomUnitPortraitObject(_sceneObjectContainer, _textProvider, _battleUnitResourceProvider, isLeft,
-            portraitSceneElement, leaderPanelSceneElement, unitInfoSceneElement,
+        var bottomUnitPortrait = new BottomUnitPortraitObject(_sceneObjectContainer, _textProvider, _battleUnitResourceProvider, _battleContext,
+            isLeft, portraitSceneElement, leaderPanelSceneElement, unitInfoSceneElement,
             _battleInterfaceController.Value.BottomUnitPortraitRightMouseButtonPressed);
         return AddObject(bottomUnitPortrait);
     }

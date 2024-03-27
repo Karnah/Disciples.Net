@@ -1,4 +1,4 @@
-﻿namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+﻿namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 
 /// <summary>
 /// Ожидание определённого промежутка времени.

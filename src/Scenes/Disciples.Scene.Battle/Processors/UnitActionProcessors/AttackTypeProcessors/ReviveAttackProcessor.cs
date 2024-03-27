@@ -17,6 +17,9 @@ internal class ReviveAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => true;
 
     /// <inheritdoc />
+    public bool CanAttackAfterBattle => true;
+
+    /// <inheritdoc />
     public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         var attackingUnit = context.CurrentUnit;

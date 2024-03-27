@@ -1,0 +1,98 @@
+{
+  "SagaName": "Level up",
+  "SagaDescription": "Debug units with level up",
+  "GameType": 0,
+  "MissionType": 1,
+  "TurnNumber": 1,
+  "DifficultyLevel": 2,
+  "Players": [
+    {
+      "Id": 1,
+      "IsComputer": false,
+      "Race": 0,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 2,
+              "Name": null,
+              "UnitTypeId": "G000UU0007", // стрелок.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 2,
+              "Experience": 499,
+              "HitPoints": 45,
+              "IsDead": false
+            },
+            {
+              "Id": 3,
+              "Name": null,
+              "UnitTypeId": "G000UU8023", // смотритель.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 0,
+              "Level": 3,
+              "Experience": 1454,
+              "HitPoints": 120,
+              "IsDead": false
+            },
+            {
+              "Id": 4,
+              "Name": null,
+              "UnitTypeId": "G000UU0092", // оборотень.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 0,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 100,
+              "IsDead": false
+            },
+            {
+              "Id": 5,
+              "Name": null,
+              "UnitTypeId": "G000UU0092", // оборотень.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 1,
+              "Experience": 599,
+              "HitPoints": 100,
+              "IsDead": false
+            },
+            {
+              "Id": 6,
+              "Name": null,
+              "UnitTypeId": "G000UU0030", // горный гигант.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 2,
+              "Level": 2,
+              "Experience": 1099,
+              "HitPoints": 310,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "IsComputer": true,
+      "Race": 3,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 10,
+              "Name": null,
+              "UnitTypeId": "G000UU0165", // мастер рун.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 5,
+              "Experience": 0,
+              "HitPoints": 1,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

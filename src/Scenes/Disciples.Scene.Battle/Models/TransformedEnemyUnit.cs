@@ -50,5 +50,15 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
     public override int MaxHitPoints => _baseUnit.MaxHitPoints;
 
     /// <inheritdoc />
+    public override int DeathExperience => OriginalUnit.DeathExperience;
+
+    /// <inheritdoc />
+    public override int BattleExperience
+    {
+        get => OriginalUnit.BattleExperience;
+        set => OriginalUnit.BattleExperience = value;
+    }
+
+    /// <inheritdoc />
     public override UnitEffects Effects => OriginalUnit.Effects;
 }

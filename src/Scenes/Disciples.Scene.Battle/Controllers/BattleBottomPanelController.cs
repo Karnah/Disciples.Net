@@ -8,10 +8,11 @@ using Disciples.Engine.Models;
 using Disciples.Engine.Scenes;
 using Disciples.Engine.Settings;
 using Disciples.Scene.Battle.Constants;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -22,12 +23,13 @@ internal class BattleBottomPanelController : BaseSupportLoading
 {
     private readonly GameSettings _gameSettings;
     private readonly IBattleGameObjectContainer _gameObjectContainer;
-    private readonly BattleUnitActionFactory _unitActionFactory;
+    private readonly BattleActionFactory _actionFactory;
     private readonly BattleContext _context;
     private readonly IGameController _gameController;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly BattleDialogController _dialogController;
     private readonly ITextProvider _textProvider;
+    private readonly BattleProcessor _battleProcessor;
 
     private ButtonObject _defendButton = null!;
     private ButtonObject _retreatButton = null!;
@@ -47,21 +49,23 @@ internal class BattleBottomPanelController : BaseSupportLoading
     public BattleBottomPanelController(
         GameSettings gameSettings,
         IBattleGameObjectContainer gameObjectContainer,
-        BattleUnitActionFactory unitActionFactory,
+        BattleActionFactory actionFactory,
         BattleContext context,
         IGameController gameController,
         IBattleInterfaceProvider battleInterfaceProvider,
         BattleDialogController dialogController,
-        ITextProvider textProvider)
+        ITextProvider textProvider,
+        BattleProcessor battleProcessor)
     {
         _gameSettings = gameSettings;
         _gameObjectContainer = gameObjectContainer;
-        _unitActionFactory = unitActionFactory;
+        _actionFactory = actionFactory;
         _context = context;
         _gameController = gameController;
         _battleInterfaceProvider = battleInterfaceProvider;
         _dialogController = dialogController;
         _textProvider = textProvider;
+        _battleProcessor = battleProcessor;
     }
 
     /// <summary>
@@ -75,27 +79,27 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// <summary>
     /// Обработать начало действий на сцене.
     /// </summary>
-    public void ProcessActionsBegin()
+    public void ProcessActionBegin()
     {
         DisableButtons(_defendButton, _retreatButton, _waitButton);
-        ProcessBeginNextUnitAction();
+        ProcessBeginNextAction();
     }
 
     /// <summary>
     /// Обработать начало нового действия на сцене.
     /// </summary>
-    public void ProcessBeginNextUnitAction()
+    public void ProcessBeginNextAction()
     {
         UpdateCurrentUnitPortrait();
 
-        if (_context.UnitAction is MainAttackActionController mainAttackUnitAction)
+        if (_context.Action is MainAttackActionController mainAttackUnitAction)
             UpdateTargetUnitPortrait(mainAttackUnitAction.TargetBattleUnit);
     }
 
     /// <summary>
     /// Обработать завершение всех действий на сцене.
     /// </summary>
-    public void ProcessActionsCompleted()
+    public void ProcessActionCompleted()
     {
         // Если юнит наносит второй удар, то указанные кнопки активировать не нужно.
         if (!_context.IsSecondAttack)
@@ -103,7 +107,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
             ActivateButtons(_defendButton, _retreatButton);
 
             // Если юнит уже ждал на этом ходу, то больше ждать не может.
-            if (!_context.IsWaitingUnitTurn)
+            if (!_battleProcessor.UnitTurnQueue.IsWaitingUnitTurn)
                 ActivateButtons(_waitButton);
         }
 
@@ -122,7 +126,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
         _autoBattleButton.IsHidden = true;
 
         // Возможность открыть инвентарь будет только, если победил игрок при атаке.
-        if (_context.BattleWinnerSquad == BattleSquadPosition.Attacker && !_context.AttackingSquad.Player.IsComputer)
+        if (_battleProcessor.AttackingSquad == _battleProcessor.WinnerSquad && !_battleProcessor.AttackingSquad.Player.IsComputer)
         {
             _openSquadInventoryButton.IsHidden = _gameSettings.IsUselessButtonsHidden;
         }
@@ -145,7 +149,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
         _openSquadInventoryButton = gameObjects.GetButton(BattleBottomPanelElementNames.SQUAD_INVENTORY_BUTTON, ExecuteOpenSquadInventory, true);
 
         // Эти кнопки недоступны, если первый ход - компьютера.
-        if (_context.BattleState != BattleState.WaitPlayerTurn)
+        if (_context.BattleState != BattleState.Idle)
             DisableButtons(_defendButton, _retreatButton, _waitButton);
 
         var battleInterfaceElements = _battleInterfaceProvider.BattleInterface.Elements;
@@ -171,7 +175,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteDefend()
     {
-        _unitActionFactory.Defend();
+        _actionFactory.Defend();
     }
 
     /// <summary>
@@ -179,7 +183,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteRetreat()
     {
-        _unitActionFactory.Retreat();
+        _actionFactory.Retreat();
     }
 
     /// <summary>
@@ -187,7 +191,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
     /// </summary>
     private void ExecuteWait()
     {
-        _unitActionFactory.Wait();
+        _actionFactory.Wait();
     }
 
     /// <summary>

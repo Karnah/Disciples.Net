@@ -57,11 +57,24 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     }
 
     /// <inheritdoc />
+    public IReadOnlyList<UnitType> GetUpgradeUnitsTypes(string unitTypeId)
+    {
+        using var context = _gameDataContextFactory.Create();
+        return context
+            .UnitTypes
+            .Where(ut => ut.PreviousUnitTypeId == unitTypeId)
+            .Select(ut => ut.Id)
+            .ToArray()
+            .Select(GetUnitType)
+            .ToArray();
+    }
+
+    /// <inheritdoc />
     public IBitmap GetUnitFace(string unitTypeId)
     {
         if (!_unitFaces.TryGetValue(unitTypeId, out var unitFace))
         {
-            // BUG: MagickImage не может распарсить png, поэтому загружаем целиком файл.
+            // BUG: MagickImage не может распарсить некоторые png, поэтому загружаем целиком файл.
             unitFace = _bitmapFactory.FromByteArray(_unitFaceExtractor.GetFileContent($"{unitTypeId}FACE.PNG"));
             _unitFaces.Add(unitTypeId, unitFace);
         }
@@ -118,6 +131,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
                 .Include(ut => ut.Name)
                 .Include(ut => ut.Description)
                 .Include(ut => ut.AbilityDescription)
+                .Include(ut => ut.Race)
                 .Include(ut => ut.MainAttack.Name)
                 .Include(ut => ut.MainAttack.Description)
                 .Include(ut => ut.MainAttack.AlternativeAttack!.Name)

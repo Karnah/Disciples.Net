@@ -557,7 +557,8 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 
         if (safeName.StartsWith("POISONANIM") ||
             safeName.StartsWith("FROSTBITEANIM") ||
-            safeName.StartsWith("BLISTERANIM"))
+            safeName.StartsWith("BLISTERANIM") ||
+            safeName.StartsWith("UPGRADE"))
         {
             return ImageType.Aura;
         }

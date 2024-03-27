@@ -47,4 +47,9 @@ internal enum UnitActionType
     /// Иммунитет от атаки.
     /// </summary>
     Immunity,
+
+    /// <summary>
+    /// Получение опыта.
+    /// </summary>
+    Experience
 }

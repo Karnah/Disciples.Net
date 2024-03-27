@@ -26,18 +26,14 @@ internal class BattleAiProcessor
     /// <summary>
     /// Получить команду следующего хода от компьютера.
     /// </summary>
-    /// <param name="attackingUnit">Атакующий юнит.</param>
-    /// <param name="attackingSquad">Отряд атакующего юнита.</param>
-    /// <param name="defendingSquad">Защищающийся отряд.</param>
-    /// <param name="unitTurnQueue">Очерёдность хода юнита.</param>
-    /// <param name="roundNumber">Номер раунда.</param>
     /// <returns>Команда для юнита.</returns>
-    public BattleAiCommand GetAiCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    public BattleAiCommand GetAiCommand()
     {
+        var attackingUnit = _battleProcessor.CurrentUnit;
         var mainAttack = attackingUnit.MainAttack;
         if (mainAttack.AttackType == UnitAttackType.Doppelganger)
         {
-            var doppelgangerCommand = GetDoppelgangerCommand(attackingUnit, attackingSquad, defendingSquad, unitTurnQueue, roundNumber);
+            var doppelgangerCommand = GetDoppelgangerCommand(attackingUnit);
             if (doppelgangerCommand != null)
                 return doppelgangerCommand;
         }
@@ -49,9 +45,9 @@ internal class BattleAiProcessor
         var targetMainAttack = attackingUnit.AlternativeAttack ?? mainAttack;
         var isAllyAttack = targetMainAttack.AttackType.IsAllyAttack();
         var targetSquad = isAllyAttack
-            ? attackingSquad
-            : defendingSquad;
-        var targetUnits = GetTargetUnits(attackingUnit, attackingSquad, targetSquad, unitTurnQueue, roundNumber);
+            ? _battleProcessor.GetUnitSquad(attackingUnit)
+            : _battleProcessor.GetUnitEnemySquad(attackingUnit);
+        var targetUnits = GetTargetUnits(attackingUnit, targetSquad);
         if (targetUnits.Count == 0)
             return new BattleAiCommand(BattleCommandType.Defend);
 
@@ -179,10 +175,10 @@ internal class BattleAiProcessor
     /// <summary>
     /// Получить команду для превращения Доппельгангера.
     /// </summary>
-    private BattleAiCommand? GetDoppelgangerCommand(Unit attackingUnit, Squad attackingSquad, Squad defendingSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    private BattleAiCommand? GetDoppelgangerCommand(Unit attackingUnit)
     {
-        var targetUnit = GetTargetUnits(attackingUnit, attackingSquad, defendingSquad, unitTurnQueue, roundNumber)
-            .Concat(GetTargetUnits(attackingUnit, attackingSquad, attackingSquad, unitTurnQueue, roundNumber))
+        var targetUnit = GetTargetUnits(attackingUnit, _battleProcessor.AttackingSquad)
+            .Concat(GetTargetUnits(attackingUnit, _battleProcessor.DefendingSquad))
             .Where(tu => tu.MainAttackProcessor is UnitSuccessAttackProcessor unitSuccessAttackProcessor &&
                          unitSuccessAttackProcessor.AttackTypeProcessor.AttackType == UnitAttackType.Doppelganger)
             // TODO Если цель - самый сильный юнит, то нужно сортировать по базовой силе типа юнита
@@ -200,20 +196,18 @@ internal class BattleAiProcessor
     /// <summary>
     /// Получить список юнитов для атаки.
     /// </summary>
-    private IReadOnlyList<AiTargetUnit> GetTargetUnits(Unit attackingUnit, Squad attackingSquad, Squad targetSquad,
-        UnitTurnQueue unitTurnQueue, int roundNumber)
+    private IReadOnlyList<AiTargetUnit> GetTargetUnits(Unit attackingUnit, Squad targetSquad)
     {
         return targetSquad
             .Units
             .Select(targetUnit =>
             {
-                var context = new AttackProcessorContext(attackingUnit, targetUnit, attackingSquad, targetSquad, unitTurnQueue, roundNumber);
-                var canAttack = _battleProcessor.CanAttack(context);
+                var canAttack = _battleProcessor.CanAttack(targetUnit);
                 var mainAttackResult = canAttack
-                    ? _battleProcessor.ProcessSingleMainAttack(context)
+                    ? _battleProcessor.ProcessSingleMainAttack(targetUnit)
                     : null;
                 var secondaryAttackResult = canAttack && attackingUnit.UnitType.SecondaryAttack != null
-                    ? _battleProcessor.ProcessSecondaryAttack(context)
+                    ? _battleProcessor.ProcessSecondaryAttack(targetUnit)
                     : null;
 
                 return new AiTargetUnit(targetUnit, mainAttackResult, secondaryAttackResult);

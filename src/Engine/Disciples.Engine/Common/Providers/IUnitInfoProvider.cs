@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Base;
+﻿using System.Collections.Generic;
+using Disciples.Engine.Base;
 using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Common.Providers;
@@ -13,6 +14,11 @@ public interface IUnitInfoProvider : ISupportLoading
     /// </summary>
     /// <param name="unitTypeId">Идентификатор типа юнита.</param>
     UnitType GetUnitType(string unitTypeId);
+
+    /// <summary>
+    /// Получить типы юнитов для повышения из текущего.
+    /// </summary>
+    IReadOnlyList<UnitType> GetUpgradeUnitsTypes(string unitTypeId);
 
     /// <summary>
     /// Получить изображение юнита.

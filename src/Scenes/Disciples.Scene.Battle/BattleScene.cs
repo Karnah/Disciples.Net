@@ -7,6 +7,7 @@ using Disciples.Engine.Scenes;
 using Disciples.Engine.Scenes.Parameters;
 using Disciples.Scene.Battle.Controllers;
 using Disciples.Scene.Battle.Models;
+using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle;
@@ -45,6 +46,7 @@ internal class BattleScene : BaseScene, IBattleScene
         IBattleInterfaceController battleInterfaceController,
         BattleContext battleContext,
         BattleSoundController battleSoundController,
+        BattleProcessor battleProcessor,
         BattleSceneParameters parameters
         ) : base(gameObjectContainer, sceneObjectContainer, dialogController)
     {
@@ -60,8 +62,7 @@ internal class BattleScene : BaseScene, IBattleScene
         _battleSoundController = battleSoundController;
 
         _battleContext.GameContext = parameters.GameContext;
-        _battleContext.AttackingBattleSquad.Squad = parameters.AttackingSquad;
-        _battleContext.DefendingBattleSquad.Squad = parameters.DefendingSquad;
+        battleProcessor.Initialize(parameters.AttackingSquad, parameters.DefendingSquad);
     }
 
     /// <inheritdoc />

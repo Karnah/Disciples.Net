@@ -1,8 +1,8 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Scene.Battle.Constants;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -10,7 +10,7 @@ using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
 /// <summary>
 /// Контроллер для основной атаки юнита.
@@ -20,7 +20,7 @@ internal class MainAttackActionController : BaseAttackActionController
     private readonly BattleContext _context;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
-    private readonly BattleUnitActionFactory _unitActionFactory;
+    private readonly BattleActionFactory _actionFactory;
 
     private MainAttackResult _mainAttackResult = null!;
     private bool _isAnimationAndSoundDisabled;
@@ -36,14 +36,14 @@ internal class MainAttackActionController : BaseAttackActionController
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
-        BattleUnitActionFactory unitActionFactory,
+        BattleActionFactory actionFactory,
         BattleUnit targetBattleUnit
         ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
     {
         _context = context;
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
-        _unitActionFactory = unitActionFactory;
+        _actionFactory = actionFactory;
 
         TargetBattleUnit = targetBattleUnit;
     }
@@ -57,7 +57,7 @@ internal class MainAttackActionController : BaseAttackActionController
     public override bool ShouldPassTurn { get; protected set; }
 
     /// <inheritdoc />
-    protected override BattleSquadPosition GetTargetSquadPosition()
+    protected override BattleSquadPosition? GetTargetSquadPosition()
     {
         return TargetBattleUnit.SquadPosition;
     }
@@ -70,8 +70,7 @@ internal class MainAttackActionController : BaseAttackActionController
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
         ShouldPassTurn = !isFirstAttack;
 
-        var attackProcessorContext = _context.CreateAttackProcessorContext(TargetBattleUnit);
-        _mainAttackResult = _battleProcessor.ProcessMainAttack(attackProcessorContext);
+        _mainAttackResult = _battleProcessor.ProcessMainAttack(TargetBattleUnit.Unit);
 
         // Если юнит имеют альтернативную атаку, то анимация атаки/звук относятся именно к ней.
         // Основная атака в таком случае использует стандартную для данного типа атаки анимацию.
@@ -135,7 +134,7 @@ internal class MainAttackActionController : BaseAttackActionController
                 .SecondaryAttackUnits
                 .Select(_context.GetBattleUnit)
                 .ToArray();
-            _unitActionFactory.BeginSecondaryAttack(secondaryAttackBattleUnits, ShouldPassTurn);
+            _actionFactory.BeginSecondaryAttack(secondaryAttackBattleUnits, ShouldPassTurn);
         }
 
         // Дожидаемся завершения анимации атаки, если она была.

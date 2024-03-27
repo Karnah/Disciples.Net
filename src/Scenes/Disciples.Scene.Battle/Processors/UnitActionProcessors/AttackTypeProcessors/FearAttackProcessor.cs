@@ -21,6 +21,9 @@ internal class FearAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => false;
 
     /// <inheritdoc />
+    public bool CanAttackAfterBattle => false;
+
+    /// <inheritdoc />
     public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return CanAttackEnemy(context, unitAttack) &&

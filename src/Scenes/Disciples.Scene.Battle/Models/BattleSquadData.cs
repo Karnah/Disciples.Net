@@ -10,11 +10,6 @@ namespace Disciples.Scene.Battle.Models;
 internal class BattleSquadData
 {
     /// <summary>
-    /// Отряд.
-    /// </summary>
-    public Squad Squad { get; set; } = null!;
-
-    /// <summary>
     /// Плейсхолдеры для расположения юнита.
     /// </summary>
     public IReadOnlyDictionary<int, SceneElement> UnitPlaceholders { get; set; } = null!;

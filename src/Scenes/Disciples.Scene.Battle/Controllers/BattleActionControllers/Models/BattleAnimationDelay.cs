@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine.Common.Components;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 
 /// <summary>
 /// Ожидание определённого кадра анимации.

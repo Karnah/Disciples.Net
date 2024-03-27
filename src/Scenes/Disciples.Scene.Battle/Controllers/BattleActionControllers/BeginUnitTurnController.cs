@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -8,14 +8,13 @@ using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
 /// <summary>
 /// Контроллер срабатывания эффектов при наступлении хода юнита.
 /// </summary>
-internal class BeginUnitTurnController : BaseDamageActionController
+internal class BeginUnitTurnController : BaseUnitEffectActionController
 {
-    private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
 
     /// <summary>
@@ -31,12 +30,11 @@ internal class BeginUnitTurnController : BaseDamageActionController
         BattleProcessor battleProcessor
         ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
     {
-        _context = context;
         _battleProcessor = battleProcessor;
     }
 
     /// <inheritdoc />
-    protected override BattleSquadPosition GetTargetSquadPosition()
+    protected override BattleSquadPosition? GetTargetSquadPosition()
     {
         return CurrentBattleUnit.SquadPosition;
     }
@@ -47,13 +45,7 @@ internal class BeginUnitTurnController : BaseDamageActionController
         ShouldPassTurn = CurrentBattleUnit.Unit.Effects.IsParalyzed ||
                          CurrentBattleUnit.Unit.Effects.IsRetreating;
 
-        var unitEffectProcessors = _battleProcessor.GetEffectProcessors(CurrentBattleUnit.Unit,
-            _context.GetBattleUnitSquad(CurrentBattleUnit),
-            CurrentBattleUnit.IsAttacker
-                ? _context.DefendingSquad
-                : _context.AttackingSquad,
-            _context.UnitTurnQueue,
-            _context.RoundNumber);
+        var unitEffectProcessors = _battleProcessor.GetCurrentUnitEffectProcessors();
         EnqueueEffectProcessors(unitEffectProcessors);
     }
 

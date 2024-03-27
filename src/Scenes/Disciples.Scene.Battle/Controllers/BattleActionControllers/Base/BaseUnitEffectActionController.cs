@@ -1,6 +1,6 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
 using Disciples.Resources.Sounds.Models;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -8,12 +8,12 @@ using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 
 /// <summary>
-/// Базовый контроллер для действий, которые могут наносить урон.
+/// Базовый контроллер для действий, которые могут накладывать/снимать эффекты или наносить урон.
 /// </summary>
-internal abstract class BaseDamageActionController : BaseUnitActionController
+internal abstract class BaseUnitEffectActionController : BaseBattleActionController
 {
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
@@ -36,9 +36,10 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// Очередь из обработчиков эффектов.
     /// </summary>
     /// <remarks>
-    /// Используется в двух случаях:
+    /// Используется в трёх случаях:
     /// 1. Для <see cref="BeginUnitTurnController" />, чтобы обработать срабатывание эффекта в начале хода юнита.
     /// 2. При обработке типа атаки <see cref="UnitAttackType.Cure" />, чтобы снимать эффекты с юнитов.
+    /// 3. При завершении битвы <see cref="BeforeCompleteBattleActionController" />, чтобы снять все оставшиеся эффекты.
     /// </remarks>
     private readonly Queue<IUnitEffectProcessor> _unitEffectProcessors = new();
 
@@ -48,9 +49,9 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     private bool _isUnitEffectProcessing;
 
     /// <summary>
-    /// Создать объект типа <see cref="BaseDamageActionController" />.
+    /// Создать объект типа <see cref="BaseUnitEffectActionController" />.
     /// </summary>
-    protected BaseDamageActionController(
+    protected BaseUnitEffectActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleSoundController soundController,
@@ -58,7 +59,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
@@ -203,25 +204,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// </summary>
     protected void ProcessTransformUnit(BattleUnit originalBattleUnit, ITransformedUnit transformedUnit)
     {
-        var transformedBattleUnit = _battleGameObjectContainer.AddBattleUnit(transformedUnit.Unit, originalBattleUnit.SquadPosition);
-        var targetUnitBattleIndex = _context.BattleUnits.IndexOf(originalBattleUnit);
-        _context.BattleUnits[targetUnitBattleIndex] = transformedBattleUnit;
-
-        // Если юнит уже был превращён ранее, то оригинальный юнит уже лежит в _context.TransformedUnits.
-        // Промежуточное превращение не запоминаем.
-        if (originalBattleUnit.Unit is ITransformedUnit)
-        {
-            originalBattleUnit.Destroy();
-        }
-        else
-        {
-            originalBattleUnit.IsHidden = true;
-            _context.TransformedUnits.Add(originalBattleUnit);
-        }
-
-        var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
-        if (targetUnitPortrait != null)
-            targetUnitPortrait.Unit = transformedUnit.Unit;
+        ReplaceUnit(originalBattleUnit, transformedUnit.Unit);
     }
 
     /// <summary>
@@ -230,25 +213,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     private void ProcessTransformUnitBack(BattleUnit transformedBattleUnit)
     {
         var transformedUnit = (ITransformedUnit)transformedBattleUnit.Unit;
-        var originalUnit = transformedUnit.OriginalUnit;
-
-        var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(transformedBattleUnit);
-        if (unitPortrait != null)
-            unitPortrait.Unit = originalUnit;
-
-        var originalBattleUnit = _context.TransformedUnits.First(tu => tu.Unit == originalUnit);
-        originalBattleUnit.IsHidden = false;
-        originalBattleUnit.UnitState = transformedBattleUnit.UnitState;
-        _context.TransformedUnits.Remove(originalBattleUnit);
-
-        var targetUnitBattleIndex = _context.BattleUnits.IndexOf(transformedBattleUnit);
-        _context.BattleUnits[targetUnitBattleIndex] = originalBattleUnit;
-        transformedBattleUnit.Destroy();
-
-        // BUG: Опасная штука, так как эффекты для юнита рассчитываются заранее.
-        // Но у всех трансформированных юнитов общий список эффектов.
-        if (_context.CurrentBattleUnit == transformedBattleUnit)
-            _context.CurrentBattleUnit = originalBattleUnit;
+        ReplaceUnit(transformedBattleUnit, transformedUnit.OriginalUnit);
     }
 
     #endregion
@@ -260,9 +225,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
     /// </summary>
     protected void ProcessUnitDeath(BattleUnit targetBattleUnit)
     {
-        var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
-        var effectsProcessor = _battleProcessor.GetForceCompleteEffectProcessors(attackProcessorContext);
-        var unitDeathProcessor = new UnitDeathProcessor(targetBattleUnit.Unit, effectsProcessor);
+        var unitDeathProcessor = _battleProcessor.ProcessDeath(targetBattleUnit.Unit);
 
         AddProcessorAction(unitDeathProcessor);
         AddUnitDeathAnimationAction(targetBattleUnit);
@@ -273,8 +236,7 @@ internal abstract class BaseDamageActionController : BaseUnitActionController
         if (targetBattleUnit.Unit is ITransformedUnit transformedUnit)
         {
             var unitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-            if (unitPortrait != null)
-                unitPortrait.Unit = transformedUnit.OriginalUnit;
+            unitPortrait?.ChangeUnit(transformedUnit.OriginalUnit);
         }
     }
 

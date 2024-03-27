@@ -100,7 +100,7 @@ internal class UnitDetailInfoDialog : BaseReleaseButtonCloseDialog
             .ReplacePlaceholders(new[]
             {
                 ("%LEVEL%", new TextContainer(unit.Level.ToString())),
-                ("%XP%", new TextContainer($"{unit.Experience} / {unit.UnitType.XpNext}")),
+                ("%XP%", new TextContainer($"{unit.Experience} / {unit.NextLevelExperience}")),
                 ("%HP1%", new TextContainer(unit.HitPoints.ToString())),
                 ("%HP2%", new TextContainer(unit.MaxHitPoints.ToString())),
                 ("%ARMOR%", GetValueWithModifier(unit.BaseArmor.ToString(), unit.ArmorModifier)),

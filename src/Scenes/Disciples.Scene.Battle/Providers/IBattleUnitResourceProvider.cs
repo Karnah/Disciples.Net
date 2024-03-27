@@ -67,6 +67,10 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// </summary>
     AnimationFrames? GetAttackTypeAnimation(UnitAttackType effectAttackType, bool isSmallUnit);
 
+    /// <summary>
+    /// Получить анимацию для повышения уровня юнитом.
+    /// </summary>
+    AnimationFrames GetUnitLevelUpAnimation(UnitType unitType);
 
     /// <summary>
     /// Получить звуки юнита в битве.

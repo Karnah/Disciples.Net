@@ -15,7 +15,7 @@ internal class UnitTypeProfile : Profile
     {
         CreateMap<Resources.Database.Sqlite.Models.UnitType, UnitType>()
             .ForMember(dst => dst.PreviousUnitType, opt => opt.Ignore())
-            .ForMember(dst => dst.RaceId, opt => opt.Ignore())
+            .ForMember(dst => dst.RaceType, opt => opt.MapFrom(src => src.Race.RaceType))
             .ForMember(dst => dst.RecruitBuildingId, opt => opt.Ignore())
             .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Name.Text))
             .ForMember(dst => dst.Description, opt => opt.MapFrom(src => src.Description.Text))

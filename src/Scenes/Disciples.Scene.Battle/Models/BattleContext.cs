@@ -3,7 +3,7 @@ using Disciples.Engine.Common;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -19,7 +19,6 @@ internal class BattleContext : BaseSupportLoading
     /// </summary>
     public BattleContext()
     {
-        UnitTurnQueue = new UnitTurnQueue();
         InputDeviceEvents = Array.Empty<InputDeviceEvent>();
     }
 
@@ -37,11 +36,6 @@ internal class BattleContext : BaseSupportLoading
     /// События от устройства ввода.
     /// </summary>
     public IReadOnlyList<InputDeviceEvent> InputDeviceEvents { get; private set; }
-
-    /// <summary>
-    /// Номер раунда битвы.
-    /// </summary>
-    public int RoundNumber { get; set; }
 
     /// <summary>
     /// Позиция отряда игрока.
@@ -68,16 +62,6 @@ internal class BattleContext : BaseSupportLoading
     public BattleSquadData DefendingBattleSquad { get; } = new();
 
     /// <summary>
-    /// Атакующий отряд
-    /// </summary>
-    public Squad AttackingSquad => AttackingBattleSquad.Squad;
-
-    /// <summary>
-    /// Отряд, который защищается.
-    /// </summary>
-    public Squad DefendingSquad => DefendingBattleSquad.Squad;
-
-    /// <summary>
     /// Юнит, который выполняет свой ход.
     /// </summary>
     public BattleUnit CurrentBattleUnit { get; set; } = null!;
@@ -90,18 +74,18 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Состояние битвы.
     /// </summary>
-    public BattleState BattleState { get; private set; }
+    public BattleState BattleState { get; set; }
+
+    /// <summary>
+    /// Событие, которое произошло в битве.
+    /// </summary>
+    public BattleActionEvent BattleActionEvent { get; set; }
 
     /// <summary>
     /// Признак того, что юнит атакует второй раз за текущий ход.
     /// </summary>
     /// <remarks>Актуально только для юнитов, которые бьют дважды за ход.</remarks>
     public bool IsSecondAttack { get; set; }
-
-    /// <summary>
-    /// Признак, что ходит юнит, который "ждал" в этом раунде.
-    /// </summary>
-    public bool IsWaitingUnitTurn => UnitTurnQueue.IsWaitingUnitTurn;
 
     /// <summary>
     /// Признак, что битва проходит в автоматическом режиме.
@@ -116,7 +100,7 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Отряд, который победил в битве.
     /// </summary>
-    public BattleSquadPosition? BattleWinnerSquad { get; private set; }
+    public BattleSquadPosition? WinnerSquadPosition { get; set; }
 
     /// <summary>
     /// Все юниты.
@@ -124,29 +108,19 @@ internal class BattleContext : BaseSupportLoading
     public List<BattleUnit> BattleUnits { get; set; } = null!;
 
     /// <summary>
-    /// Юниты, которые были превращены.
+    /// Действие, которое выполняется в данный момент.
     /// </summary>
-    public List<BattleUnit> TransformedUnits { get; } = new();
+    public IBattleActionController? Action { get; private set; }
 
     /// <summary>
-    /// Очередность хода юнитов.
+    /// Действие, которое будет выполняться следующим.
     /// </summary>
-    public UnitTurnQueue UnitTurnQueue { get; }
+    public IBattleActionController? NextAction { get; private set; }
 
     /// <summary>
-    /// Действие, которое выполняется юнитом в данный момент.
+    /// Завершившееся действие.
     /// </summary>
-    public IBattleUnitActionController? UnitAction { get; private set; }
-
-    /// <summary>
-    /// Действие юнита, которое будет выполняться следующим.
-    /// </summary>
-    public IBattleUnitActionController? NextUnitAction { get; private set; }
-
-    /// <summary>
-    /// Завершившееся действие юнита.
-    /// </summary>
-    public IBattleUnitActionController? CompletedUnitAction { get; private set; }
+    public IBattleActionController? CompletedAction { get; private set; }
 
     /// <summary>
     /// Обновить данные контекста на основе данных об обновлении сцены.
@@ -157,10 +131,10 @@ internal class BattleContext : BaseSupportLoading
         MousePosition = updateSceneData.MousePosition;
         InputDeviceEvents = updateSceneData.InputDeviceEvents;
 
-        BattleState = GetNewBattleState(BattleState);
-        CompletedUnitAction = null;
+        BattleActionEvent = BattleActionEvent.None;
+        CompletedAction = null;
 
-        UnitAction?.BeforeSceneUpdate();
+        Action?.BeforeSceneUpdate();
     }
 
     /// <summary>
@@ -168,18 +142,18 @@ internal class BattleContext : BaseSupportLoading
     /// </summary>
     public void AfterSceneUpdate()
     {
-        if (UnitAction != null)
-        {
-            UnitAction.AfterSceneUpdate();
+        if (Action == null)
+            return;
 
-            if (UnitAction.IsCompleted)
-            {
-                CompletedUnitAction = UnitAction;
-                UnitAction = GetNextUnitAction();
-                BattleState = UnitAction == null
-                    ? BattleState.CompletedUnitAction
-                    : BattleState.BeginNextUnitAction;
-            }
+        Action.AfterSceneUpdate();
+
+        if (Action.IsCompleted)
+        {
+            CompletedAction = Action;
+            Action = NextAction == null
+                ? null
+                : InitializeAction(NextAction);
+            NextAction = null;
         }
     }
 
@@ -192,78 +166,28 @@ internal class BattleContext : BaseSupportLoading
     }
 
     /// <summary>
-    /// Получить отряд указанного юнита.
-    /// </summary>
-    public Squad GetBattleUnitSquad(BattleUnit unit)
-    {
-        return unit.IsAttacker
-            ? AttackingSquad
-            : DefendingSquad;
-    }
-
-    /// <summary>
     /// Установить действие.
     /// </summary>
-    public void AddUnitAction(IBattleUnitActionController unitAction)
+    public void AddAction(IBattleActionController battleAction)
     {
-        if (UnitAction == null)
+        if (Action == null)
         {
-            // Если только идёт загрузка битвы, действие не будет инициализировано.
-            if (IsLoaded)
-            {
-                unitAction.Initialize();
-                if (unitAction.IsCompleted)
-                    return;
-            }
-
-            BattleState = CompletedUnitAction == null
-                ? BattleState.BeginUnitAction
-                : BattleState.BeginNextUnitAction;
-            UnitAction = unitAction;
+            Action = InitializeAction(battleAction);
         }
-        else if (NextUnitAction == null)
+        else if (NextAction == null)
         {
-            BattleState = BattleState.ProcessingUnitAction;
-            NextUnitAction = unitAction;
+            NextAction = battleAction;
         }
         else
         {
-            throw new Exception("Очередь действий заполнена");
+            throw new InvalidOperationException("Очередь действий заполнена");
         }
-    }
-
-    /// <summary>
-    /// Установить, что битва завершена.
-    /// </summary>
-    public void SetBattleCompleted(BattleSquadPosition battleWinnerSquad)
-    {
-        BattleState = BattleState.CompletedBattle;
-        BattleWinnerSquad = battleWinnerSquad;
-    }
-
-    /// <summary>
-    /// Создать контекст атаки текущего юнита на другого.
-    /// </summary>
-    public AttackProcessorContext CreateAttackProcessorContext(BattleUnit targetBattleUnit)
-    {
-        var attackingSquad = CurrentBattleUnit.IsAttacker
-            ? AttackingSquad
-            : DefendingSquad;
-        var targetSquad = targetBattleUnit.IsAttacker
-            ? AttackingSquad
-            : DefendingSquad;
-        return new AttackProcessorContext(CurrentBattleUnit.Unit,
-            targetBattleUnit.Unit,
-            attackingSquad,
-            targetSquad,
-            UnitTurnQueue,
-            RoundNumber);
     }
 
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        UnitAction?.Initialize();
+        Action?.Initialize();
     }
 
     /// <inheritdoc />
@@ -276,41 +200,20 @@ internal class BattleContext : BaseSupportLoading
     }
 
     /// <summary>
-    /// Получить новое состояние битвы.
+    /// Инициализировать действие.
     /// </summary>
-    private static BattleState GetNewBattleState(BattleState currentBattleState)
+    private IBattleActionController? InitializeAction(IBattleActionController action)
     {
-        return currentBattleState switch
-        {
-            BattleState.WaitPlayerTurn => BattleState.WaitPlayerTurn,
-            BattleState.BeginUnitAction => BattleState.ProcessingUnitAction,
-            BattleState.BeginNextUnitAction => BattleState.ProcessingUnitAction,
-            BattleState.ProcessingUnitAction => BattleState.ProcessingUnitAction,
-            BattleState.CompletedUnitAction => BattleState.WaitPlayerTurn,
-            BattleState.CompletedBattle => BattleState.WaitExit,
-            BattleState.WaitExit => BattleState.WaitExit,
-            _ => throw new ArgumentOutOfRangeException(nameof(currentBattleState), currentBattleState, null)
-        };
-    }
+        // Нельзя инициализировать действие, если только идёт загрузка битвы.
+        // В этот момент могли еще не все контроллеры инициализированы.
+        if (!IsLoaded)
+            return action;
 
-    /// <summary>
-    /// Получить следующее действие юнита.
-    /// </summary>
-    private IBattleUnitActionController? GetNextUnitAction()
-    {
-        if (NextUnitAction == null)
-            return null;
+        action.Initialize();
 
-        var nextUnitAction = NextUnitAction;
-        NextUnitAction = null;
-
-        nextUnitAction.Initialize();
-
-        // Некоторые действия заканчиваются мгновенно (например, промах при второй атаке).
-        // В этом случае их никак фиксировать не нужно.
-        if (nextUnitAction.IsCompleted)
-            return null;
-
-        return nextUnitAction;
+        // Если действие совершается мгновенно, то его дальше обрабатывать никак не нужно.
+        return action.IsCompleted
+            ? null
+            : action;
     }
 }

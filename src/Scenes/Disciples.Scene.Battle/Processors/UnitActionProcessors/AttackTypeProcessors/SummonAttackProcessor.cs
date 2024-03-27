@@ -20,6 +20,9 @@ internal class SummonAttackProcessor : IAttackTypeProcessor
     public bool CanMainAttackBeSkipped => false;
 
     /// <inheritdoc />
+    public bool CanAttackAfterBattle => false;
+
+    /// <inheritdoc />
     public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
         return false;

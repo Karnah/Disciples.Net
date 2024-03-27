@@ -39,6 +39,10 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private const string DAMAGE_TEXT_ID = "X008TA0004";
     /// <summary>
+    /// Идентификатор в ресурсах для начисления опыта.
+    /// </summary>
+    private const string EXPERIENCE_TEXT_ID = "X008TA0005";
+    /// <summary>
     /// Идентификатор в ресурсах для урона с критическим уроном.
     /// </summary>
     private const string CRITICAL_DAMAGE_TEXT_ID = "X160TA0021";
@@ -85,14 +89,6 @@ internal class UnitPortraitObject : GameObject
     /// </summary>
     private IImageSceneObject? _deathIcon;
     /// <summary>
-    /// Изображение, отображающий моментальный эффект.
-    /// </summary>
-    private IImageSceneObject? _instantaneousEffectImage;
-    /// <summary>
-    /// Изображение с текстом моментального эффекта.
-    /// </summary>
-    private ITextSceneObject? _instantaneousEffectText;
-    /// <summary>
     /// Текст, отображающий текущее количество здоровья и максимальное.
     /// </summary>
     private ITextSceneObject _unitHitpoints = null!;
@@ -132,6 +128,15 @@ internal class UnitPortraitObject : GameObject
     /// Количество уровней, которые было при предыдущей проверке.
     /// </summary>
     private int _lastLevelDiff;
+
+    /// <summary>
+    /// Фон сообщения.
+    /// </summary>
+    private IImageSceneObject? _messageBackground;
+    /// <summary>
+    /// Тексто сообщения.
+    /// </summary>
+    private ITextSceneObject? _messageText;
 
     /// <summary>
     /// Создать объект класса <see cref="UnitPortraitObject" />.
@@ -175,7 +180,7 @@ internal class UnitPortraitObject : GameObject
     /// <summary>
     /// Юнит.
     /// </summary>
-    public Unit Unit { get; set; }
+    public Unit Unit { get; private set; }
 
     /// <summary>
     /// Расположение портрета.
@@ -223,8 +228,8 @@ internal class UnitPortraitObject : GameObject
         _sceneObjectContainer.RemoveSceneObject(_unitHitpoints);
 
         RemoveSceneObject(ref _deathIcon);
-        RemoveSceneObject(ref _instantaneousEffectImage);
-        RemoveSceneObject(ref _instantaneousEffectText);
+        RemoveSceneObject(ref _messageBackground);
+        RemoveSceneObject(ref _messageText);
         RemoveSceneObject(ref _unitDamageForeground);
         RemoveSceneObject(ref _unitPanelSeparator);
         RemoveSceneObject(ref _highLevelUnitIcon);
@@ -242,22 +247,18 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Обработать событие, произошедшее с юнитом.
+    /// Отобразить сообщение.
     /// </summary>
-    public void ProcessBeginUnitPortraitEvent(BattleUnitPortraitEventData eventData)
+    public void ShowMessage(BattleUnitPortraitEventData eventData)
     {
-        if (_instantaneousEffectText != null || _instantaneousEffectImage != null)
-        {
-            // TODO Fatal в лог.
-            RemoveSceneObject(ref _instantaneousEffectImage);
-            RemoveSceneObject(ref _instantaneousEffectText);
-        }
+        if (_messageText != null || _messageBackground != null)
+            throw new InvalidOperationException($"Портрет юнита {Unit.Id} уже отображает сообщение");
 
         // Сразу добавляем иконки новых эффектов.
         ProcessBattleEffects();
 
-        _instantaneousEffectImage = AddColorImage(eventData.UnitActionType, eventData.AttackType, eventData.EffectDuration);
-        _instantaneousEffectText = AddText(eventData);
+        _messageBackground = AddColorImage(eventData.UnitActionType, eventData.AttackType, eventData.EffectDuration);
+        _messageText = AddText(eventData);
         _unitHitpoints.Text = GetUnitHitPoints();
 
         // При воскрешении юнита, сразу убираем значок смерти.
@@ -266,16 +267,25 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Обработать завершение действия юнита.
+    /// Закрыть сообщение.
     /// </summary>
-    public void ProcessCompletedUnitPortraitEvent()
+    public void CloseMessage()
     {
-        RemoveSceneObject(ref _instantaneousEffectImage);
-        RemoveSceneObject(ref _instantaneousEffectText);
+        RemoveSceneObject(ref _messageBackground);
+        RemoveSceneObject(ref _messageText);
 
         // Сбрасываем количество ХП, чтобы обновить рамку.
         _lastUnitHitPoints = int.MaxValue;
         UpdateUnitEffects();
+    }
+
+    /// <summary>
+    /// Заменить юнита на портерте.
+    /// </summary>
+    public void ChangeUnit(Unit newUnit)
+    {
+        Unit = newUnit;
+        ProcessUnitState();
     }
 
     /// <summary>
@@ -303,44 +313,12 @@ internal class UnitPortraitObject : GameObject
             _unitTypeId = Unit.UnitType.Id;
         }
 
-        // Если сейчас обрабатывается моментальный эффект, то рамку размещать не нужно.
-        if (_instantaneousEffectImage != null || _instantaneousEffectText != null)
+        // Если сейчас выводятся сообщение, то рамку размещать не нужно.
+        if (_messageText != null || _messageBackground != null)
             return;
 
         ProcessBattleEffects();
-
-        if (Unit.IsDead)
-        {
-            if (_deathIcon == null)
-            {
-                var deathScull = Unit.UnitType.IsSmall
-                    ? _battleInterfaceProvider.DeathSkullSmall
-                    : _battleInterfaceProvider.DeathSkullBig;
-                _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
-                _unitHitpoints.Text = GetUnitHitPoints();
-
-                RemoveSceneObject(ref _unitDamageForeground);
-                RemoveBattleEffectsForegrounds();
-            }
-        }
-        else if (_lastUnitHitPoints != Unit.HitPoints)
-        {
-            _lastUnitHitPoints = Unit.HitPoints;
-            _unitHitpoints.Text = GetUnitHitPoints();
-
-            RemoveSceneObject(ref _unitDamageForeground);
-
-            var height = (1 - ((double)_lastUnitHitPoints / Unit.MaxHitPoints)) * PortraitBounds.Height;
-            if (height > 0)
-            {
-                var width = PortraitBounds.Width;
-                var x = PortraitBounds.X;
-                var y = PortraitBounds.Y + (PortraitBounds.Height - height);
-                var bounds = new RectangleD(x, y, width, height);
-
-                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, bounds, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
-            }
-        }
+        ProcessUnitState();
     }
 
     /// <summary>
@@ -444,6 +422,45 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
+    /// Обработать состояние юнита.
+    /// </summary>
+    private void ProcessUnitState()
+    {
+        if (Unit.IsDead)
+        {
+            if (_deathIcon == null)
+            {
+                var deathScull = Unit.UnitType.IsSmall
+                    ? _battleInterfaceProvider.DeathSkullSmall
+                    : _battleInterfaceProvider.DeathSkullBig;
+                _deathIcon = _sceneObjectContainer.AddImage(deathScull, X, Y, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
+                _unitHitpoints.Text = GetUnitHitPoints();
+
+                RemoveSceneObject(ref _unitDamageForeground);
+                RemoveBattleEffectsForegrounds();
+            }
+        }
+        else if (_lastUnitHitPoints != Unit.HitPoints)
+        {
+            _lastUnitHitPoints = Unit.HitPoints;
+            _unitHitpoints.Text = GetUnitHitPoints();
+
+            RemoveSceneObject(ref _unitDamageForeground);
+
+            var height = (1 - ((double)_lastUnitHitPoints / Unit.MaxHitPoints)) * PortraitBounds.Height;
+            if (height > 0)
+            {
+                var width = PortraitBounds.Width;
+                var x = PortraitBounds.X;
+                var y = PortraitBounds.Y + (PortraitBounds.Height - height);
+                var bounds = new RectangleD(x, y, width, height);
+
+                _unitDamageForeground = _sceneObjectContainer.AddColorImage(BattleColors.Damage, bounds, BattleLayers.INTERFACE_LAYER + FOREGROUND_LAYER_SHIFT);
+            }
+        }
+    }
+
+    /// <summary>
     /// Получить цвет фона для типа атаки.
     /// </summary>
     private static Color? GetUnitAttackTypeColor(UnitAttackType? unitAttackType, bool isCompleted)
@@ -543,6 +560,9 @@ internal class UnitPortraitObject : GameObject
             case UnitActionType.Miss:
                 return AddColorImage(BattleColors.Miss);
 
+            case UnitActionType.Experience:
+                return AddColorImage(BattleColors.Experience);
+
             case UnitActionType.Defend:
             case UnitActionType.Waiting:
             case UnitActionType.Dying:
@@ -621,6 +641,20 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
+    /// Добавить текст с начислением опыта.
+    /// </summary>
+    private ITextSceneObject? AddExperienceText(int experience)
+    {
+        if (experience == 0)
+            return null;
+
+        var text = _textProvider
+            .GetText(EXPERIENCE_TEXT_ID)
+            .ReplacePlaceholders(new []{ ("%GAIN%", new TextContainer(experience.ToString())) });
+        return AddText(text);
+    }
+
+    /// <summary>
     /// Добавить на портрет указанный текст.
     /// </summary>
     private ITextSceneObject? AddText(BattleUnitPortraitEventData eventData)
@@ -693,6 +727,9 @@ internal class UnitPortraitObject : GameObject
 
             case UnitActionType.Immunity:
                 return AddText(IMMUNITY_TEXT_ID);
+
+            case UnitActionType.Experience:
+                return AddExperienceText(Unit.BattleExperience);
         }
 
         return null;

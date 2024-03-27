@@ -1,6 +1,6 @@
 ﻿using DryIoc;
 using Microsoft.Extensions.Logging;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 
@@ -9,16 +9,16 @@ namespace Disciples.Scene.Battle.Controllers;
 /// <summary>
 /// Фабрика для запуска действий юнитов.
 /// </summary>
-internal class BattleUnitActionFactory
+internal class BattleActionFactory
 {
     private readonly BattleContext _battleContext;
     private readonly IResolver _resolver;
-    private readonly ILogger<BattleUnitActionFactory> _logger;
+    private readonly ILogger<BattleActionFactory> _logger;
 
     /// <summary>
-    /// Создать объект типа <see cref="BattleUnitActionFactory" />.
+    /// Создать объект типа <see cref="BattleActionFactory" />.
     /// </summary>
-    public BattleUnitActionFactory(BattleContext battleContext, IResolver resolver, ILogger<BattleUnitActionFactory> logger)
+    public BattleActionFactory(BattleContext battleContext, IResolver resolver, ILogger<BattleActionFactory> logger)
     {
         _battleContext = battleContext;
         _resolver = resolver;
@@ -33,7 +33,7 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Begin main attack, target unit: {targetUnit}", targetBattleUnit.Unit.Id);
 
         var mainAttackController = _resolver.Resolve<MainAttackActionController>(new object[] { targetBattleUnit });
-        _battleContext.AddUnitAction(mainAttackController);
+        _battleContext.AddAction(mainAttackController);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Begin secondary attack, target units: {targetUnits}", string.Join(',', targetBattleUnits.Select(bu => bu.Unit.Id)));
 
         var secondaryAttackController = _resolver.Resolve<SecondaryAttackActionController>(new object[] { targetBattleUnits, shouldPassTurn });
-        _battleContext.AddUnitAction(secondaryAttackController);
+        _battleContext.AddAction(secondaryAttackController);
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Defend");
 
         var defendController = _resolver.Resolve<DefendUnitActionController>();
-        _battleContext.AddUnitAction(defendController);
+        _battleContext.AddAction(defendController);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Wait");
 
         var waitController = _resolver.Resolve<WaitUnitActionController>();
-        _battleContext.AddUnitAction(waitController);
+        _battleContext.AddAction(waitController);
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Retreat");
 
         var retreatingController = _resolver.Resolve<RetreatingActionController>();
-        _battleContext.AddUnitAction(retreatingController);
+        _battleContext.AddAction(retreatingController);
     }
 
     /// <summary>
@@ -88,6 +88,39 @@ internal class BattleUnitActionFactory
         _logger.LogDebug("Begin unit turn {currentUnit}", _battleContext.CurrentBattleUnit.Unit.Id);
 
         var beginUnitTurnController = _resolver.Resolve<BeginUnitTurnController>();
-        _battleContext.AddUnitAction(beginUnitTurnController);
+        _battleContext.AddAction(beginUnitTurnController);
+    }
+
+    /// <summary>
+    /// Снять все эффекты с оставшихся в живых юнитов.
+    /// </summary>
+    public void BeforeCompleteBattle()
+    {
+        _logger.LogDebug("Pre complete battle, winner squad: {winnerSquad}", _battleContext.WinnerSquadPosition);
+
+        var beforeCompleteBattleActionController = _resolver.Resolve<BeforeCompleteBattleActionController>();
+        _battleContext.AddAction(beforeCompleteBattleActionController);
+    }
+
+    /// <summary>
+    /// Мгновенно завершить битву.
+    /// </summary>
+    public void InstantCompleteBattle()
+    {
+        _logger.LogDebug("Instant complete battle");
+
+        var instantCompleteBattleActionController = _resolver.Resolve<InstantCompleteBattleActionController>();
+        _battleContext.AddAction(instantCompleteBattleActionController);
+    }
+
+    /// <summary>
+    /// Завершить битву и распределить опыт.
+    /// </summary>
+    public void CompleteBattle()
+    {
+        _logger.LogDebug("Complete battle");
+
+        var completeBattleActionController = _resolver.Resolve<CompleteBattleActionController>();
+        _battleContext.AddAction(completeBattleActionController);
     }
 }

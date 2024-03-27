@@ -6,6 +6,7 @@ using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.Resources.Common.Exceptions;
 using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -104,6 +105,9 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     public RawSound UnitDeathSound { get; private set; } = null!;
 
     /// <inheritdoc />
+    public RawSound UnitLevelUpSound { get; private set; } = null!;
+
+    /// <inheritdoc />
     public RawSound? GetSound(string soundName)
     {
         if (!_rawSounds.TryGetValue(soundName, out var rawSound))
@@ -130,9 +134,13 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        var soundName = new UnitDeathSoundResourceKey().Key;
-        UnitDeathSound = GetSound(soundName)
-                         ?? throw new Exception($"Не найден ключ {soundName} в ресурсах звука");
+        var unitDeathSoundKey = new UnitDeathSoundResourceKey().Key;
+        UnitDeathSound = GetSound(unitDeathSoundKey)
+                         ?? throw new ResourceException($"Не найден ключ {unitDeathSoundKey} в ресурсах звука");
+
+        var unitLevelUpSoundKey = new UnitLevelUpSoundResourceKey().Key;
+        UnitLevelUpSound = GetSound(unitLevelUpSoundKey)
+                         ?? throw new ResourceException($"Не найден ключ {unitLevelUpSoundKey} в ресурсах звука");
     }
 
     /// <inheritdoc />

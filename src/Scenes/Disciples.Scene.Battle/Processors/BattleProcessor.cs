@@ -2,6 +2,8 @@
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine;
+using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
@@ -18,28 +20,170 @@ internal class BattleProcessor
     /// </summary>
     private const int INITIATIVE_RANGE = 5;
 
+    private readonly IUnitInfoProvider _unitInfoProvider;
     private readonly IReadOnlyDictionary<UnitAttackType, IAttackTypeProcessor> _attackTypeProcessors;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleProcessor" />.
     /// </summary>
-    public BattleProcessor(IReadOnlyDictionary<UnitAttackType, IAttackTypeProcessor> attackTypeProcessors)
+    public BattleProcessor(IUnitInfoProvider unitInfoProvider,
+        IReadOnlyDictionary<UnitAttackType, IAttackTypeProcessor> attackTypeProcessors)
     {
+        _unitInfoProvider = unitInfoProvider;
         _attackTypeProcessors = attackTypeProcessors;
+
+        UnitTurnQueue = new UnitTurnQueue();
     }
 
-    #region Очерёдность ходов
+    /// <summary>
+    /// Юнит, чей ход сейчас.
+    /// </summary>
+    public Unit CurrentUnit { get; private set; } = null!;
 
     /// <summary>
-    /// Получить очередность ходов юнитов.
+    /// Атакующий отряд.
     /// </summary>
-    /// <param name="attackingSquad">Атакующий отряд.</param>
-    /// <param name="defendingSquad">Защищающийся отряд.</param>
-    /// <param name="roundNumber">Номер раунда.</param>
-    public LinkedList<UnitTurnOrder> GetTurnOrder(Squad attackingSquad, Squad defendingSquad, int roundNumber)
+    public Squad AttackingSquad { get; private set; } = null!;
+
+    /// <summary>
+    /// Защищающийся отряд.
+    /// </summary>
+    public Squad DefendingSquad { get; private set; } = null!;
+
+    /// <summary>
+    /// Очередность хода юнитов.
+    /// </summary>
+    public UnitTurnQueue UnitTurnQueue { get; }
+
+    /// <summary>
+    /// Номер раунда.
+    /// </summary>
+    public int RoundNumber { get; private set; }
+
+    /// <summary>
+    /// Отряд, который победил в битве.
+    /// </summary>
+    public Squad? WinnerSquad { get; private set; }
+
+    /// <summary>
+    /// Инициализировать обработчик битвы.
+    /// </summary>
+    /// <remarks>
+    /// TODO Пробовал передавать BattleSceneParameters в параметрах конструктора, но есть проблема в DryIoc.
+    /// BattleUnitActionFactory не может отрезолвить контроллеры с BattleProcessor, так как не находит зарегистрированного BattleSceneParameters,
+    /// Хотя в рамках скоупа этот объект уже создан.
+    /// Попытка зарегистрировать параметры в GameController также не помогла.
+    /// </remarks>
+    public void Initialize(Squad attackingSquad, Squad defendingSquad)
     {
-        var allAvailableUnits = attackingSquad.Units
-            .Concat(defendingSquad.Units)
+        AttackingSquad = attackingSquad;
+        DefendingSquad = defendingSquad;
+    }
+
+    #region Очерёдность ходов и проверка на завершение битвы
+
+    /// <summary>
+    /// Получить следующего юнита, кто будет выполнять ход.
+    /// </summary>
+    /// <returns>
+    /// Юнит, который будет выполнять ход.
+    /// <see langword="null" />, если битва закончена.
+    /// </returns>
+    public Unit? GetNextUnit()
+    {
+        var nextUnit = UnitTurnQueue.GetNextUnit();
+        if (WinnerSquad == null)
+        {
+            CurrentUnit = nextUnit ?? NextRound();
+            return CurrentUnit;
+        }
+
+        // Если уже определён победитель, то его юниты еще могут иметь право на ход в рамках текущего раунда.
+        // Лекари, если есть юниты для лечения.
+        // Воскрешатели, если есть кого воскрешать.
+        while (nextUnit != null)
+        {
+            CurrentUnit = nextUnit;
+
+            if (WinnerSquad.Units.Any(CanAttack))
+                return nextUnit;
+
+            nextUnit = UnitTurnQueue.GetNextUnit();
+        }
+
+        // Все юниты в раунде ходили, битва завершена окончательно.
+        return null;
+    }
+
+    /// <summary>
+    /// Проверить, закончена ли битва и получить победителя.
+    /// </summary>
+    public Squad? CheckAndSetBattleWinnerSquad()
+    {
+        if (AttackingSquad.Units.All(u => u.IsDeadOrRetreated))
+        {
+            WinnerSquad = DefendingSquad;
+            return WinnerSquad;
+        }
+
+        if (DefendingSquad.Units.All(u => u.IsDeadOrRetreated))
+        {
+            WinnerSquad = AttackingSquad;
+            return WinnerSquad;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Завершить битву.
+    /// </summary>
+    public IReadOnlyList<UnitCompleteBattleProcessor> CompleteBattle()
+    {
+        var processors = new List<UnitCompleteBattleProcessor>();
+
+        var winnerSquad = WinnerSquad ?? throw new InvalidOperationException("Битва еще не закончена");
+        foreach (var unit in winnerSquad.Units)
+        {
+            // TODO Убежавшим тоже юнитам начисляется опыт.
+            // Интересно, они могут повысить уровень?
+            if (unit.IsDeadOrRetreated)
+                continue;
+
+            var completeEffectProcessors = GetForceCompleteEffectProcessors(unit);
+
+            var nextLevelExperience = unit.NextLevelExperience - unit.Experience;
+            if (unit.BattleExperience < nextLevelExperience)
+            {
+                processors.Add(new UnitCompleteBattleProcessor(unit, null, winnerSquad, completeEffectProcessors));
+                continue;
+            }
+
+            // Обрабатываем ситуацию, когда юниту достаточно опыта, чтобы перейти на следующий уровень.
+            var upgradeUnitsTypes = _unitInfoProvider.GetUpgradeUnitsTypes(unit.UnitType.Id);
+
+            // TODO Вообще повышать нужно исходя из того, какое строение построено.
+            // TODO Если есть юнит для повышения, но не построено здание, то по умолчанию юнит остаётся с NextLevelExperience - 1.
+            var upgradeUnit = upgradeUnitsTypes.Count > 0
+                ? new Unit(unit.Id, upgradeUnitsTypes.GetRandomElement(), unit.Player, unit.SquadLinePosition, unit.SquadFlankPosition)
+                : Unit.CreateNextLevelUnit(unit);
+            processors.Add(new UnitCompleteBattleProcessor(unit, upgradeUnit, winnerSquad, completeEffectProcessors));
+            unit.BattleExperience = 0;
+        }
+
+        return processors;
+    }
+
+    /// <summary>
+    /// Обработать наступление следующего раунда.
+    /// </summary>
+    /// <returns>
+    /// Юнит, который будет ходить первым в раунде.
+    /// </returns>
+    private Unit NextRound()
+    {
+        var allAvailableUnits = AttackingSquad.Units
+            .Concat(DefendingSquad.Units)
             .Where(u => !u.IsDeadOrRetreated)
             .ToArray();
         var turnOrders = allAvailableUnits
@@ -48,14 +192,15 @@ internal class BattleProcessor
         // На первом ходу доппельгангер получает дополнительный ход, раньше всех других юнитов.
         // TODO В этот ход доппельгангер не может отступить и ждать, т.е. должен рассматриваться именно как дополнительный ход,
         // А не просто добавление в очередь второй раз.
-        if (roundNumber == 1)
+        if (RoundNumber == 0)
         {
             turnOrders = turnOrders.Concat(allAvailableUnits
                 .Where(u => u.UnitType.MainAttack.AttackType == UnitAttackType.Doppelganger)
                 .Select(u => new UnitTurnOrder(u, int.MaxValue)));
         }
 
-        return new LinkedList<UnitTurnOrder>(turnOrders);
+        RoundNumber++;
+        return UnitTurnQueue.NextRound(new LinkedList<UnitTurnOrder>(turnOrders));
     }
 
     #endregion
@@ -65,29 +210,33 @@ internal class BattleProcessor
     /// <summary>
     /// Проверить, может ли атаковать один юнит другого.
     /// </summary>
-    public bool CanAttack(AttackProcessorContext attackProcessorContext)
+    public bool CanAttack(Unit targetUnit)
     {
-        return CanAttack(attackProcessorContext, out _, out _);
+        return CanAttack(targetUnit, out _, out _);
     }
 
     /// <summary>
     /// Проверить, можно ли атаковать указанного юнита.
     /// </summary>
-    /// <param name="attackProcessorContext">Контекст атаки.</param>
+    /// <param name="targetUnit">Цель атаки.</param>
     /// <param name="mainAttack">Информация о первой атаке.</param>
     /// <param name="secondaryAttack">Информация о второй атаке.</param>
-    public bool CanAttack(AttackProcessorContext attackProcessorContext,
+    public bool CanAttack(Unit targetUnit,
         CalculatedUnitAttack mainAttack,
         CalculatedUnitAttack? secondaryAttack)
     {
+        var isBattleCompleted = WinnerSquad != null;
+        var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         var mainAttackTypeProcessor = _attackTypeProcessors[mainAttack.AttackType];
-        if (mainAttackTypeProcessor.CanAttack(attackProcessorContext, mainAttack))
+        var isMainAttackAllowed = !isBattleCompleted || mainAttackTypeProcessor.CanAttackAfterBattle;
+        if (isMainAttackAllowed && mainAttackTypeProcessor.CanAttack(attackProcessorContext, mainAttack))
             return true;
 
         if (secondaryAttack != null && mainAttackTypeProcessor.CanMainAttackBeSkipped)
         {
             var secondaryAttackTypeProcessor = _attackTypeProcessors[secondaryAttack.AttackType];
-            if (secondaryAttackTypeProcessor.CanAttack(attackProcessorContext, secondaryAttack))
+            var isSecondaryAttackAllowed = !isBattleCompleted || secondaryAttackTypeProcessor.CanAttackAfterBattle;
+            if (isSecondaryAttackAllowed && secondaryAttackTypeProcessor.CanAttack(attackProcessorContext, secondaryAttack))
                 return true;
         }
 
@@ -97,56 +246,47 @@ internal class BattleProcessor
     /// <summary>
     /// Получить юнитов, которые будут являться целями атаки.
     /// </summary>
-    public IReadOnlyList<Unit> GetMainAttackTargetUnits(AttackProcessorContext attackProcessorContext)
+    /// <param name="targetUnit">Юнит, который выбран первоначальной целью.</param>
+    public IReadOnlyList<Unit> GetMainAttackTargetUnits(Unit targetUnit)
     {
-        return GetMainAttackTargetUnits(attackProcessorContext, out _, out _);
+        return GetMainAttackTargetUnits(targetUnit, out _, out _);
     }
 
     /// <summary>
     /// Получить юнитов, которые будут являться целями атаки.
     /// </summary>
     private IReadOnlyList<Unit> GetMainAttackTargetUnits(
-        AttackProcessorContext attackProcessorContext,
+        Unit targetUnit,
         out CalculatedUnitAttack? unitAttack,
         out bool isAlternativeAttackUsed)
     {
-        if (!CanAttack(attackProcessorContext, out unitAttack, out isAlternativeAttackUsed))
+        if (!CanAttack(targetUnit, out unitAttack, out isAlternativeAttackUsed))
             return Array.Empty<Unit>();
 
         if (unitAttack.Reach != UnitAttackReach.All)
-            return new[] { attackProcessorContext.TargetUnit };
+            return new[] { targetUnit };
 
         var mainAttack = unitAttack;
-        var secondaryAttack = attackProcessorContext.CurrentUnit.SecondaryAttack;
-        return attackProcessorContext
-            .TargetUnitSquad
+        var secondaryAttack = CurrentUnit.SecondaryAttack;
+        return GetUnitSquad(targetUnit)
             .Units
-            .Where(u =>
-                {
-                    if (u == attackProcessorContext.TargetUnit)
-                        return true;
-
-                    var innerContext = new AttackProcessorContext(attackProcessorContext.CurrentUnit, u,
-                        attackProcessorContext.CurrentUnitSquad, attackProcessorContext.TargetUnitSquad,
-                        attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
-                    return CanAttack(innerContext, mainAttack, secondaryAttack);
-                })
+            .Where(u => u == targetUnit || CanAttack(u, mainAttack, secondaryAttack))
             .ToArray();
     }
 
     /// <summary>
     /// Проверить, можно ли атаковать указанного юнита.
     /// </summary>
-    private bool CanAttack(AttackProcessorContext attackProcessorContext,
+    private bool CanAttack(Unit targetUnit,
         [NotNullWhen(true)] out CalculatedUnitAttack? unitAttack,
         out bool isAlternativeAttackUsed)
     {
-        var attackingUnit = attackProcessorContext.CurrentUnit;
+        var attackingUnit = CurrentUnit;
         var mainAttack = attackingUnit.MainAttack;
         var secondaryAttack = attackingUnit.SecondaryAttack;
         isAlternativeAttackUsed = false;
 
-        if (CanAttack(attackProcessorContext, mainAttack, secondaryAttack))
+        if (CanAttack(targetUnit, mainAttack, secondaryAttack))
         {
             unitAttack = mainAttack;
             return true;
@@ -155,7 +295,7 @@ internal class BattleProcessor
         // BUG Доппельгангер может атаковать альтернативной атакой только в том случае,
         // Если не может ни в кого превратиться на поле боя.
         var alternativeAttack = attackingUnit.AlternativeAttack;
-        if (alternativeAttack != null && CanAttack(attackProcessorContext, alternativeAttack, secondaryAttack))
+        if (alternativeAttack != null && CanAttack(targetUnit, alternativeAttack, secondaryAttack))
         {
             unitAttack = alternativeAttack;
             isAlternativeAttackUsed = true;
@@ -174,36 +314,34 @@ internal class BattleProcessor
     /// Выполнить атаку юнита с помощью основной атаки.
     /// Атака выполняется на весь отряд, если атака по площади.
     /// </summary>
-    public MainAttackResult ProcessMainAttack(AttackProcessorContext attackProcessorContext)
+    public MainAttackResult ProcessMainAttack(Unit targetUnit)
     {
-        var targetUnits = GetMainAttackTargetUnits(attackProcessorContext,
+        var squadTargetUnits = GetMainAttackTargetUnits(targetUnit,
             out var attack,
             out var isAlternativeAttackUsed);
         if (attack == null)
             throw new InvalidOperationException("Невозможно атаковать указанного юнита");
 
-        var attackingUnit = attackProcessorContext.CurrentUnit;
+        var attackingUnit = CurrentUnit;
         var attackProcessor = _attackTypeProcessors[attack.AttackType];
         var calculatedAttacks = new List<CalculatedAttackResult>();
         var resultProcessors = new List<IAttackUnitActionProcessor>();
         var canUseSecondAttack = attackingUnit.UnitType.SecondaryAttack != null;
         var secondaryUnits = new List<Unit>();
-        foreach (var targetUnit in targetUnits)
+        foreach (var squadTargetUnit in squadTargetUnits)
         {
-            var targetContext = new AttackProcessorContext(attackingUnit, targetUnit,
-                attackProcessorContext.CurrentUnitSquad, attackProcessorContext.TargetUnitSquad,
-                attackProcessorContext.UnitTurnQueue, attackProcessorContext.RoundNumber);
+            var targetContext = GetAttackProcessorContext(squadTargetUnit);
 
             // Проверяем, можно ли атаковать основной атакой.
             // Если нет, то точно можно атаковать второй, это особенность метода GetMainAttackTargetUnits.
             if (!attackProcessor.CanAttack(targetContext, attack))
             {
-                resultProcessors.Add(new SkipAttackProcessor(targetUnit));
-                secondaryUnits.Add(targetUnit);
+                resultProcessors.Add(new SkipAttackProcessor(squadTargetUnit));
+                secondaryUnits.Add(squadTargetUnit);
                 continue;
             }
 
-            var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attackingUnit, targetUnit, attack);
+            var accuracyOrProtectionProcessor = ProcessAccuracyAndProtections(attackingUnit, squadTargetUnit, attack);
             if (accuracyOrProtectionProcessor != null)
             {
                 resultProcessors.Add(accuracyOrProtectionProcessor);
@@ -214,7 +352,7 @@ internal class BattleProcessor
             calculatedAttacks.Add(calculatedAttack);
 
             if (canUseSecondAttack)
-                secondaryUnits.Add(targetUnit);
+                secondaryUnits.Add(squadTargetUnit);
         }
 
         if (calculatedAttacks.Count > 0)
@@ -226,11 +364,12 @@ internal class BattleProcessor
     /// <summary>
     /// Выполнить одну атаку юнита на другого с помощью второстепенной атаки.
     /// </summary>
-    public IAttackUnitActionProcessor? ProcessSecondaryAttack(AttackProcessorContext attackProcessorContext)
+    public IAttackUnitActionProcessor? ProcessSecondaryAttack(Unit targetUnit)
     {
-        var attackingUnit = attackProcessorContext.CurrentUnit;
+        var attackingUnit = CurrentUnit;
         var attack = attackingUnit.SecondaryAttack!;
 
+        var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         var attackProcessor = _attackTypeProcessors[attack.AttackType];
         if (!attackProcessor.CanAttack(attackProcessorContext, attack))
             return null;
@@ -246,13 +385,14 @@ internal class BattleProcessor
     /// <summary>
     /// Выполнить одну атаку юнита на другого с помощью основной атаки.
     /// </summary>
-    public IAttackUnitActionProcessor? ProcessSingleMainAttack(AttackProcessorContext attackProcessorContext)
+    public IAttackUnitActionProcessor? ProcessSingleMainAttack(Unit targetUnit)
     {
-        if (!CanAttack(attackProcessorContext, out var attack, out var isAlternativeAttackUsed))
+        if (!CanAttack(targetUnit, out var attack, out var isAlternativeAttackUsed))
             return null;
 
         // Если можно атаковать юнита, но нельзя атаковать первой,
         // Значит точно можно атаковать второй атакой.
+        var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         var attackProcessor = _attackTypeProcessors[attack.AttackType];
         if (!attackProcessor.CanAttack(attackProcessorContext, attack))
             return new SkipAttackProcessor(attackProcessorContext.TargetUnit);
@@ -281,7 +421,6 @@ internal class BattleProcessor
         {
             return null;
         }
-
 
         var attackTypeProtection = targetUnit
             .AttackTypeProtections
@@ -315,42 +454,29 @@ internal class BattleProcessor
     /// <summary>
     /// Получить все обработчики эффектов, возможные для текущего юнита.
     /// </summary>
-    /// <remarks>
-    /// Длительность эффекта может быть привязана как к ходу юнита-цели, так и к юниту, который наложил цель.
-    /// Поэтому в этом методе проверяются все юниты, которые есть на поле боя.
-    /// </remarks>
-    public IReadOnlyList<IUnitEffectProcessor> GetEffectProcessors(Unit currentUnit, Squad currentUnitSquad, Squad otherUnitSquad, UnitTurnQueue unitTurnQueue, int roundNumber)
+    public IReadOnlyList<IUnitEffectProcessor> GetCurrentUnitEffectProcessors()
     {
         var processors = new List<IUnitEffectProcessor>();
 
-        foreach (var targetUnit in currentUnitSquad.Units)
+        // Длительность эффекта может быть привязана как к ходу юнита-цели, так и к юниту, который наложил цель.
+        // Поэтому проверяем всех юнитов, которые есть на поле боя.
+        var allUnits = AttackingSquad
+            .Units
+            .Concat(DefendingSquad.Units);
+        foreach (var targetUnit in allUnits)
         {
-            var context = new AttackProcessorContext(currentUnit, targetUnit,
-                currentUnitSquad, currentUnitSquad,
-                unitTurnQueue, roundNumber);
+            var context = GetAttackProcessorContext(targetUnit);
             var targetUnitBattleEffects = context.TargetUnit.Effects.GetBattleEffects();
             processors.AddRange(GetAttackEffectProcessors(context, targetUnitBattleEffects, false));
         }
 
-        foreach (var targetUnit in otherUnitSquad.Units)
-        {
-            var context = new AttackProcessorContext(currentUnit, targetUnit,
-                currentUnitSquad, otherUnitSquad,
-                unitTurnQueue, roundNumber);
-            var targetUnitBattleEffects = context.TargetUnit.Effects.GetBattleEffects();
-            processors.AddRange(GetAttackEffectProcessors(context, targetUnitBattleEffects, false));
-        }
-
-        if (currentUnit.Effects.IsDefended)
-            processors.Add(new DefendCompletedProcessor(currentUnit));
+        if (CurrentUnit.Effects.IsDefended)
+            processors.Add(new DefendCompletedProcessor(CurrentUnit));
 
         // Отступление возможно только в том случае, если юнит можешь совершить ход.
-        if (currentUnit.Effects.IsRetreating && !currentUnit.Effects.IsParalyzed)
+        if (CurrentUnit.Effects.IsRetreating && !CurrentUnit.Effects.IsParalyzed)
         {
-            var context = new AttackProcessorContext(currentUnit, currentUnit,
-                currentUnitSquad, currentUnitSquad,
-                unitTurnQueue, roundNumber);
-            processors.Add(new UnitRetreatedProcessor(currentUnit, GetForceCompleteEffectProcessors(context)));
+            processors.Add(new UnitRetreatedProcessor(CurrentUnit, GetForceCompleteEffectProcessors(CurrentUnit)));
         }
 
         return processors;
@@ -359,11 +485,11 @@ internal class BattleProcessor
     /// <summary>
     /// Получить обработчики для принудительного завершения всех эффектов юнита.
     /// </summary>
-    public IReadOnlyList<IUnitEffectProcessor> GetForceCompleteEffectProcessors(AttackProcessorContext attackProcessorContext)
+    public IReadOnlyList<IUnitEffectProcessor> GetForceCompleteEffectProcessors(Unit targetUnit)
     {
         var processors = new List<IUnitEffectProcessor>();
 
-        var targetUnit = attackProcessorContext.TargetUnit;
+        var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         var targetUnitBattleEffects = targetUnit.Effects.GetBattleEffects();
         processors.AddRange(GetAttackEffectProcessors(attackProcessorContext, targetUnitBattleEffects, true));
 
@@ -379,8 +505,9 @@ internal class BattleProcessor
     /// <summary>
     /// Получить обработчики для принудительного завершения эффектов.
     /// </summary>
-    public IReadOnlyList<IUnitEffectProcessor> GetForceCompleteEffectProcessors(AttackProcessorContext attackProcessorContext, IReadOnlyList<UnitBattleEffect> battleEffects)
+    public IReadOnlyList<IUnitEffectProcessor> GetForceCompleteEffectProcessors(Unit targetUnit, IReadOnlyList<UnitBattleEffect> battleEffects)
     {
+        var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         return GetAttackEffectProcessors(attackProcessorContext, battleEffects, true).ToArray();
     }
 
@@ -408,26 +535,83 @@ internal class BattleProcessor
 
     #endregion
 
-
-    #region Проверка окончания битвы
-
-    // TODO Если в отряде есть целитель, то перед завершением битвы ему даётся ход.
+    #region Отдельные обработчики
 
     /// <summary>
-    /// Получить победителя битвы.
-    /// <see langword="null" />, если битва еще не завершена.
+    /// Получить обработчик защиты юнита.
     /// </summary>
-    /// <param name="attackingSquad">Атакующий отряд.</param>
-    /// <param name="defendingSquad">Защищающийся отряд.</param>
-    public Squad? GetBattleWinnerSquad(Squad attackingSquad, Squad defendingSquad)
+    public DefendProcessor ProcessDefend()
     {
-        if (attackingSquad.Units.All(u => u.IsDeadOrRetreated))
-            return defendingSquad;
+        return new DefendProcessor(CurrentUnit);
+    }
 
-        if (defendingSquad.Units.All(u => u.IsDeadOrRetreated))
-            return attackingSquad;
+    /// <summary>
+    /// Получить обработчик побега юнита.
+    /// </summary>
+    public UnitRetreatingProcessor ProcessRetreat()
+    {
+        return new UnitRetreatingProcessor(CurrentUnit);
+    }
 
-        return null;
+    /// <summary>
+    /// Получить обработчик ожидания юнита.
+    /// </summary>
+    public UnitWaitingProcessor ProcessWait()
+    {
+        return new UnitWaitingProcessor(CurrentUnit, UnitTurnQueue);
+    }
+
+    /// <summary>
+    /// Получить обработчик смерти юнита.
+    /// </summary>
+    public UnitDeathProcessor ProcessDeath(Unit targetUnit)
+    {
+        if (targetUnit.HitPoints > 0)
+            throw new ArgumentException($"{targetUnit.Id} еще живой", nameof(targetUnit));
+
+        return new UnitDeathProcessor(targetUnit,
+            GetUnitEnemySquad(targetUnit),
+            GetForceCompleteEffectProcessors(targetUnit));
+    }
+
+    #endregion
+
+    #region Окончание битвы
+
+
+    #endregion
+
+    #region Контексты и вспомогательные методы.
+
+    /// <summary>
+    /// Получить контекст атаки на указанного юнита.
+    /// </summary>
+    public AttackProcessorContext GetAttackProcessorContext(Unit targetUnit)
+    {
+        return new AttackProcessorContext(
+            CurrentUnit, targetUnit,
+            AttackingSquad, DefendingSquad,
+            UnitTurnQueue, RoundNumber);
+    }
+
+    /// <summary>
+    /// Получить отряд указанного юнита.
+    /// </summary>
+    public Squad GetUnitSquad(Unit targetUnit)
+    {
+        return targetUnit.Player == AttackingSquad.Player
+            ? AttackingSquad
+            : DefendingSquad;
+    }
+
+    /// <summary>
+    /// Получить вражеский отряд для указанного юнита.
+    /// </summary>
+    public Squad GetUnitEnemySquad(Unit targetUnit)
+    {
+        return targetUnit.Player == AttackingSquad.Player
+            ? DefendingSquad
+            : AttackingSquad;
     }
 
     #endregion

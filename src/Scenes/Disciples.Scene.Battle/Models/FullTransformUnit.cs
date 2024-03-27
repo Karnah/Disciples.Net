@@ -44,5 +44,15 @@ internal class FullTransformUnit : Unit, ITransformedUnit
     }
 
     /// <inheritdoc />
+    public override int DeathExperience => OriginalUnit.DeathExperience;
+
+    /// <inheritdoc />
+    public override int BattleExperience
+    {
+        get => OriginalUnit.BattleExperience;
+        set => OriginalUnit.BattleExperience = value;
+    }
+
+    /// <inheritdoc />
     public override UnitEffects Effects => OriginalUnit.Effects;
 }

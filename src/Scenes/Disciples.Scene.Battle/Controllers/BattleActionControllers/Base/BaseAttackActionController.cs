@@ -1,5 +1,5 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
-using Disciples.Scene.Battle.Controllers.UnitActionControllers.Models;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -7,12 +7,12 @@ using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
 using Disciples.Scene.Battle.Providers;
 
-namespace Disciples.Scene.Battle.Controllers.UnitActionControllers.Base;
+namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 
 /// <summary>
 /// Базовый контроллер для атаки.
 /// </summary>
-internal abstract class BaseAttackActionController : BaseDamageActionController
+internal abstract class BaseAttackActionController : BaseUnitEffectActionController
 {
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
@@ -63,7 +63,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
     protected virtual void AddSuccessAttackProcessorAction(UnitSuccessAttackProcessor unitSuccessAttackProcessor)
     {
         // Обработчик исцеления сразу снимает все эффекты.
-        // Но для UI так не подойдёт, так как необходимо обрабатывать действиями отдельные эффекты (например, превращение).
+        // Но для UI так не подойдёт, так как необходимо обрабатывать с задержками отдельные эффекты (например, превращение).
         // Поэтому пропускаем его использование.
         if (unitSuccessAttackProcessor.AttackTypeProcessor.AttackType != UnitAttackType.Cure)
             unitSuccessAttackProcessor.ProcessBeginAction();
@@ -101,8 +101,8 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
     /// </summary>
     protected virtual void ProcessBeginSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
-        var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        targetUnitPortrait?.ProcessBeginUnitPortraitEvent(new BattleUnitPortraitEventData(attackResult));
+        _unitPortraitPanelController.DisplayMessage(targetBattleUnit,
+            new BattleUnitPortraitEventData(attackResult));
 
         var attackType = attackResult.AttackType;
         switch (attackType)
@@ -146,8 +146,7 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
     /// </summary>
     private void ProcessCompleteSuccessAttack(BattleUnit targetBattleUnit, CalculatedAttackResult attackResult)
     {
-        var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(targetBattleUnit);
-        targetUnitPortrait?.ProcessCompletedUnitPortraitEvent();
+        _unitPortraitPanelController.CloseMessage(targetBattleUnit);
 
         switch (attackResult.AttackType)
         {
@@ -159,9 +158,8 @@ internal abstract class BaseAttackActionController : BaseDamageActionController
 
             case UnitAttackType.Cure:
             {
-                var attackProcessorContext = _context.CreateAttackProcessorContext(targetBattleUnit);
                 var effectProcessors =
-                    _battleProcessor.GetForceCompleteEffectProcessors(attackProcessorContext, attackResult.CuredEffects);
+                    _battleProcessor.GetForceCompleteEffectProcessors(targetBattleUnit.Unit, attackResult.CuredEffects);
                 EnqueueEffectProcessors(effectProcessors);
                 break;
             }
