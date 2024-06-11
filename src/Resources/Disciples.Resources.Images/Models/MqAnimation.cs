@@ -1,7 +1,13 @@
 ﻿namespace Disciples.Resources.Images.Models;
 
+/// <summary>
+/// Анимация.
+/// </summary>
 internal class MqAnimation
 {
+    /// <summary>
+    /// Создать объект типа <see cref="MqAnimation" />.
+    /// </summary>
     public MqAnimation(int index, string name, IReadOnlyCollection<MqImage> frames)
     {
         Index = index;
@@ -17,10 +23,10 @@ internal class MqAnimation
     /// <summary>
     /// Название анимации.
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; }
 
     /// <summary>
-    /// Фреймы из которых состоит анимация.
+    /// Кадры анимации.
     /// </summary>
     public IReadOnlyCollection<MqImage> Frames { get; }
 }

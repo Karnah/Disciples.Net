@@ -128,7 +128,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
     private IBitmap ExtractAndCacheImage(string imageName)
     {
         // Если искомое изображение является частью базового, то достаем все изображения от этого базового.
-        var baseImageName = _interfaceImagesExtractor.GetBaseImageName(imageName);
+        var baseImageName = _interfaceImagesExtractor.TryGetBaseImageName(imageName);
         if (baseImageName != null)
         {
             var imageParts = _interfaceImagesExtractor.GetImageParts(baseImageName);
@@ -238,7 +238,7 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         // Если изображение является анимацией, то обрабатываем как анимацию.
         var animationFrames = image.ImageName == null
             ? null
-            : _interfaceImagesExtractor.GetAnimationFrames(image.ImageName);
+            : _interfaceImagesExtractor.TryGetAnimationFrames(image.ImageName);
         if (animationFrames != null)
         {
             return new AnimationSceneElement

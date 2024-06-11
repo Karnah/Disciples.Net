@@ -2,26 +2,34 @@
 
 internal class MqIndex
 {
-    public MqIndex(int id, string name, int unknownValue1, int unknownValue2)
+    /// <summary>
+    /// Создать объект типа <see cref="MqIndex" />.
+    /// </summary>
+    public MqIndex(int id, string name, int relatedOffset, int size)
     {
         Id = id;
         Name = name;
-        UnknownValue1 = unknownValue1;
-        UnknownValue2 = unknownValue2;
+        RelatedOffset = relatedOffset;
+        Size = size;
     }
 
-
     /// <summary>
-    /// Идентификатор файла
+    /// Идентификатор файла.
     /// </summary>
     public int Id { get; }
 
     /// <summary>
-    /// Наименование изображения, которое содержится в файле
+    /// Наименование изображения, которое содержится в файле.
     /// </summary>
     public string Name { get; }
 
-    public int UnknownValue1 { get; }
+    /// <summary>
+    /// Относительное расположение файла в файле ресурсов.
+    /// </summary>
+    public int RelatedOffset { get; }
 
-    public int UnknownValue2 { get; }
+    /// <summary>
+    /// Размер файла.
+    /// </summary>
+    public int Size { get; }
 }

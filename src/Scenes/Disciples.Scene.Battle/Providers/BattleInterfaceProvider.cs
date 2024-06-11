@@ -6,6 +6,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
+using Disciples.Resources.Images.Enums;
 
 namespace Disciples.Scene.Battle.Providers;
 
@@ -50,8 +51,8 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
         Battleground = _battleResourceProvider.GetRandomBattleground();
 
         PanelSeparator = _interfaceProvider.GetImage("DLG_BATTLE_A_SPLITLRG");
-        DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS"));
-        DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL"));
+        DeathSkullSmall = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADS", ImageProcessingAlgorithm.Shadow));
+        DeathSkullBig = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage("MASKDEADL", ImageProcessingAlgorithm.Shadow));
 
         BlueLevelIcon = _battleResourceProvider.GetBattleBitmap("FIHIGHLEVEL1");
         OrangeLevelIcon = _battleResourceProvider.GetBattleBitmap("FIHIGHLEVEL2");

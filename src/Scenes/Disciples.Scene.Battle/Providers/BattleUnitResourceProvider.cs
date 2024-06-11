@@ -230,7 +230,7 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </summary>
     private AnimationFrames? TryGetAnimationFrames(BaseResourceKey key)
     {
-        var images = _imagesExtractor.GetAnimationFrames(key.Key);
+        var images = _imagesExtractor.TryGetAnimationFrames(key.Key);
         if (images == null)
             return null;
 

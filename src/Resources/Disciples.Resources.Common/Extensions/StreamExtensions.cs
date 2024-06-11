@@ -17,6 +17,21 @@ public static class StreamExtensions
     }
 
     /// <summary>
+    /// Считать из потока целое 16-битное число.
+    /// </summary>
+    public static int ReadShort(this Stream stream)
+    {
+        const int shortSize = sizeof(short);
+        using var owner = MemoryPool<byte>.Shared.Rent(shortSize);
+        var buffer = owner.Memory[..shortSize].Span;
+        var readLength = stream.Read(buffer);
+        if (readLength != shortSize)
+            throw new ArgumentException($"Прочитано только {readLength} байт из потока. Ожидалось {shortSize}");
+
+        return BitConverter.ToInt16(buffer);
+    }
+
+    /// <summary>
     /// Считать из потока целое 32-битное число.
     /// </summary>
     public static int ReadInt(this Stream stream)

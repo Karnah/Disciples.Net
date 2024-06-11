@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Buffers;
+using System.Drawing;
 using Disciples.Resources.Common;
 using Disciples.Resources.Common.Exceptions;
 using Disciples.Resources.Common.Extensions;
@@ -14,9 +15,6 @@ namespace Disciples.Resources.Images;
 /// <summary>
 /// Класс для извлечения изображений из ресурсов (.ff).
 /// </summary>
-/// <remarks>
-/// TODO Разобраться с null.
-/// </remarks>
 public class ImagesExtractor : BaseMqdbResourceExtractor
 {
     /// <summary>
@@ -42,7 +40,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Получить кадры анимации по её имени.
     /// </summary>
-    public IReadOnlyCollection<RawBitmap>? GetAnimationFrames(string name)
+    public IReadOnlyCollection<RawBitmap>? TryGetAnimationFrames(string name)
     {
         if (_mqAnimations?.ContainsKey(name) != true)
             return null;
@@ -51,9 +49,9 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     }
 
     /// <summary>
-    /// Признак, что изображение является частью базового.
+    /// Получить имя базового изображения для указанного.
     /// </summary>
-    public string? GetBaseImageName(string name)
+    public string? TryGetBaseImageName(string name)
     {
         if (_mqImages?.TryGetValue(name, out var image) == true)
             return GetFile(image.FileId).Name;
@@ -82,7 +80,9 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         if (!_baseMqImages.TryGetValue(file.Id, out var images))
             throw new ResourceException($"Изображение {name} не состоит из частей");
 
-        var baseImage = PrepareImage(file);
+        // Метаданные берём из первого изображения, так как они должны быть одинаковы в рамках базового.
+        var metadata = images[0].Metadata;
+        var baseImage = PrepareImage(file, metadata);
         return images.ToDictionary(
             image => image.Name,
             image => BuildImage(baseImage, image));
@@ -91,23 +91,21 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Получить изображение по его имени.
     /// </summary>
-    public RawBitmap GetImage(string name)
+    public RawBitmap GetImage(string name, ImageProcessingAlgorithm imageProcessingAlgorithm = ImageProcessingAlgorithm.Default)
     {
         // Если информация об изображении есть в -IMAGES.OPT, значит необходимо будет собирать по частям.
-        if (_mqImages?.ContainsKey(name) == true)
+        if (_mqImages?.TryGetValue(name, out var mqImage) == true)
         {
-            var mqImage = _mqImages[name];
-            var baseImage = PrepareImage(GetFile(mqImage.FileId));
-
+            var baseImage = PrepareImage(GetFile(mqImage.FileId), mqImage.Metadata);
             return BuildImage(baseImage, mqImage);
         }
 
         // Иначе мы ищем файл с таким именем. Его можно просто отдать целиком, предварительно избавившись от прозрачности.
         var imageFile = TryGetFile($"{name.ToUpper()}.PNG");
         if (imageFile == null)
-            return null;
+            throw new ResourceNotFoundException($"Не найдено изображение с именем {name}");
 
-        return PrepareImage(imageFile);
+        return PrepareImage(imageFile, null, imageProcessingAlgorithm);
     }
 
     /// <summary>
@@ -154,17 +152,20 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         if (mqIndexes == null)
             return;
 
-        // Конвертируем в другой словарь, чтобы после выкинуть все картинки, которые являются частями анимации.
-        // Это позволит не хранить огромный словарь изображений.
-        var mqImages = LoadMqImages(stream, mqIndexes)
-            ?.ToDictionary(mi => mi.Key, mi => new MqImageInfo(mi.Value));
+        var mqImages = LoadMqImages(stream, mqIndexes);
         if (mqImages == null)
             return;
 
-        _mqAnimations = LoadMqAnimations(stream, mqIndexes, mqImages);
-        _mqImages = mqImages
-            .Where(mi => mi.Value.IsAnimationFrame == false)
-            .ToDictionary(mi => mi.Key, mi => mi.Value.MqImage);
+        _mqAnimations = LoadMqAnimations(stream, mqIndexes, mqImages, out var animationFrameNames);
+
+        // Все изображения делятся на две категории: обычные изображения и кадры анимации.
+        // Ко вторым нужен доступ только через _mqAnimations, поэтому удаляем их из итогово словаря для оптимизации.
+        _mqImages = animationFrameNames?.Count > 0
+            ? mqImages
+                .Values
+                .Where(im => !animationFrameNames.Contains(im.Name))
+                .ToDictionary(im => im.Name, im => im)
+            : mqImages;
         _baseMqImages = _mqImages
             .Values
             .GroupBy(i => i.FileId)
@@ -174,7 +175,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// <summary>
     /// Загрузить индексы. Индекс позволяет определить в каком файле (идентификатор) находится изображение (по имени).
     /// </summary>
-    private IDictionary<string, MqIndex>? LoadMqIndexes(Stream stream)
+    private IReadOnlyDictionary<string, MqIndex>? LoadMqIndexes(Stream stream)
     {
         var indexFile = TryGetFile("-INDEX.OPT");
         if (indexFile == null)
@@ -188,10 +189,10 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         {
             var id = stream.ReadInt();
             var name = stream.ReadString();
-            var unknownValue1 = stream.ReadInt();
-            var unknownValue2 = stream.ReadInt();
+            var relatedOffset = stream.ReadInt();
+            var size = stream.ReadInt();
 
-            var mqIndex = new MqIndex(id, name, unknownValue1, unknownValue2);
+            var mqIndex = new MqIndex(id, name, relatedOffset, size);
             // todo Возможно дублирование. WTF?
             mqIndices.TryAdd(mqIndex.Name, mqIndex);
         }
@@ -200,31 +201,50 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     }
 
     /// <summary>
-    /// Загрузить изображения. Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую.
+    /// Загрузить изображения.
+    /// Изображения содержат информацию о том, как нужно разрезать базовую картинку, чтобы получить требуемую.
     /// </summary>
-    private IDictionary<string, MqImage>? LoadMqImages(Stream stream, IDictionary<string, MqIndex> mqIndexes)
+    private IReadOnlyDictionary<string, MqImage>? LoadMqImages(Stream stream, IReadOnlyDictionary<string, MqIndex> mqIndexes)
     {
         var imagesFile = TryGetFile("-IMAGES.OPT");
         if (imagesFile == null)
             return null;
 
-        var mqImages = new Dictionary<string, MqImage>();
         stream.Seek(imagesFile.Offset, SeekOrigin.Begin);
 
+        const int paletteLength = 1024;
+        using var memoryOwner = MemoryPool<byte>.Shared.Rent(paletteLength);
+        var paletteBuffer = memoryOwner.Memory[..paletteLength].Span;
+
+        var mqImages = new Dictionary<string, MqImage>();
         var endOfFile = imagesFile.Offset + imagesFile.Size - 1;
         while (stream.Position < endOfFile)
         {
-            stream.Seek(11 + 1024, SeekOrigin.Current);
+            // Читаем метаданные изображения.
+            var transparentColorIndex = stream.ReadByte();
+            var opacityAlgorithm = stream.ReadShort();
+            var sizeX = stream.ReadInt();
+            var sizeY = stream.ReadInt();
 
-            var fileFramesNumber = stream.ReadInt();
-            for (int frameIndex = 0; frameIndex < fileFramesNumber; ++frameIndex)
+            // Палитра изображения.
+            stream.Read(paletteBuffer);
+            var palette = new List<Color>(paletteBuffer.Length / 4);
+            for (int i = 0; i < paletteBuffer.Length; i += 4)
+                palette.Add(Color.FromArgb(paletteBuffer[i + 3], paletteBuffer[i], paletteBuffer[i + 1], paletteBuffer[i + 2]));
+
+            var metadata = new MqImageMetadata(transparentColorIndex, opacityAlgorithm, sizeX, sizeY, palette);
+
+            // Читаем изображения.
+            var framesCount = stream.ReadInt();
+            for (int frameIndex = 0; frameIndex < framesCount; ++frameIndex)
             {
                 var frameName = stream.ReadString();
                 var piecesCount = stream.ReadInt();
                 int width = stream.ReadInt(),
                     height = stream.ReadInt();
 
-                var pieces = new List<MqImagePiece>();
+                // Кадр собирается из отдельных кусочков базового изображения.
+                var pieces = new List<MqImagePart>();
                 for (int pieceIndex = 0; pieceIndex < piecesCount; ++pieceIndex)
                 {
                     int sourceX = stream.ReadInt(),
@@ -234,13 +254,14 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
                         pieceWidth = stream.ReadInt(),
                         pieceHeight = stream.ReadInt();
 
-                    var piece = new MqImagePiece(sourceX, sourceY, destX, destY, pieceWidth, pieceHeight);
+                    var piece = new MqImagePart(sourceX, sourceY, destX, destY, pieceWidth, pieceHeight);
                     pieces.Add(piece);
                 }
 
                 var fileId = mqIndexes[frameName].Id;
-                var mqImage = new MqImage(frameName, fileId, width, height, pieces);
-                // todo Возможно дублирование. WTF?
+                var mqImage = new MqImage(frameName, fileId, width, height, metadata, pieces);
+
+                // Изображения могут встречаться несколько раз, но метаданные у них должны быть одинаковые.
                 mqImages.TryAdd(mqImage.Name, mqImage);
             }
         }
@@ -249,30 +270,37 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     }
 
     /// <summary>
-    /// Загрузить анимации. Анимации хранят информацию о изображениях из которых состоят.
+    /// Загрузить анимации. Анимации хранят информацию об изображениях из которых состоят.
     /// </summary>
-    private IReadOnlyDictionary<string, MqAnimation>? LoadMqAnimations(Stream stream, IDictionary<string, MqIndex> mqIndexes, IDictionary<string, MqImageInfo> mqImages)
+    private IReadOnlyDictionary<string, MqAnimation>? LoadMqAnimations(
+        Stream stream,
+        IReadOnlyDictionary<string, MqIndex> mqIndexes,
+        IReadOnlyDictionary<string, MqImage> mqImages,
+        out HashSet<string>? animationFrameNames)
     {
-        var animsFile = TryGetFile("-ANIMS.OPT");
-        if (animsFile == null)
+        var animationsFile = TryGetFile("-ANIMS.OPT");
+        if (animationsFile == null)
+        {
+            animationFrameNames = null;
             return null;
+        }
 
+        animationFrameNames = new HashSet<string>();
         var animationsInfo = new List<(int AnimationIndex, IReadOnlyCollection<MqImage> Frames)>();
-        stream.Seek(animsFile.Offset, SeekOrigin.Begin);
+        stream.Seek(animationsFile.Offset, SeekOrigin.Begin);
 
         int animNumber = 0;
-        var endOfFile = animsFile.Offset + animsFile.Size - 1;
+        var endOfFile = animationsFile.Offset + animationsFile.Size - 1;
         while (stream.Position < endOfFile)
         {
-            var fileAnimNumber = stream.ReadInt();
-            var frames = new List<MqImage>(fileAnimNumber);
-            for (int animIndex = 0; animIndex < fileAnimNumber; ++animIndex)
+            var framesCount = stream.ReadInt();
+            var frames = new List<MqImage>(framesCount);
+            for (int animIndex = 0; animIndex < framesCount; ++animIndex)
             {
-                var animName = stream.ReadString();
-                var mqImageInfo = mqImages[animName];
-
-                mqImageInfo.IsAnimationFrame = true;
-                frames.Add(mqImageInfo.MqImage);
+                var frameName = stream.ReadString();
+                var mqImage = mqImages[frameName];
+                frames.Add(mqImage);
+                animationFrameNames.Add(frameName);
             }
 
             animationsInfo.Add((animNumber, frames));
@@ -322,7 +350,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         {
             var fileId = frame.FileId;
             if (!baseImages.ContainsKey(frame.FileId))
-                baseImages.Add(fileId, PrepareImage(GetFile(fileId)));
+                baseImages.Add(fileId, PrepareImage(GetFile(fileId), frame.Metadata));
 
             result.Add(BuildImage(baseImages[fileId], frame, animationBounds));
         }
@@ -363,7 +391,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// </summary>
     private static Rectangle GetImageBounds(MqImage mqImage)
     {
-        var imagePieces = mqImage.ImagePieces;
+        var imagePieces = mqImage.ImageParts;
         if (imagePieces.Count == 0)
             return Rectangle.Empty;
 
@@ -388,7 +416,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
         var imageWidth = bounds.Width;
         var imageData = new byte[imageHeight * imageWidth * 4];
 
-        foreach (var framePart in mqImage.ImagePieces)
+        foreach (var framePart in mqImage.ImageParts)
         {
             // Баг ресурсов Disciples.
             // В некоторых случаях фрейм может иметь размеры больше, чем его базовое изображение (пример, G000UU0049HMOVA1A00).
@@ -421,86 +449,37 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     /// Извлечь изображение из файла и обработать его (заменить прозрачность и т.д.).
     /// </summary>
     /// <param name="file">Файл с изображением.</param>
+    /// <param name="imageMetadata">Метаданные изображения.</param>
+    /// <param name="imageProcessingAlgorithm">Алгоритм обработки изображения.</param>
     /// <returns>Сырые данные, которые содержат картинку в массиве BGRA.</returns>
-    private RawBitmap PrepareImage(File file)
+    private RawBitmap PrepareImage(File file, MqImageMetadata? imageMetadata, ImageProcessingAlgorithm imageProcessingAlgorithm = ImageProcessingAlgorithm.Default)
     {
-        MagickImage magickImage;
-        try
-        {
-            using (var fileStream = new FileStream(ResourceFilePath, FileMode.Open, FileAccess.Read))
-            using (var streamReader = new Substream(fileStream, file.Offset, file.Size))
-            {
-                magickImage = new MagickImage(streamReader, MagickFormat.Png);
-            }
-        }
-        catch (MagickCoderErrorException)
-        {
-            // bug Какой-то странный баг. MagickImage не может сконвертить некоторые портреты.
-            // Нужно получить решение.
-            Console.WriteLine($"Corrupted image: {ResourceFilePath}\\{file.Name}");
-            return null;
-        }
-
-        var colorMap = new Dictionary<int, byte>();
-        var safeName = Path.GetFileNameWithoutExtension(file.Name);
-        var imageType = GetImageType(safeName);
-        if (imageType == ImageType.Aura)
-        {
-            // Если файл содержит ауру, то создаём полупрозрачное изображение.
-            // Пока берём прозрачность равную индексу цвета в палитре,
-            // Но такое чувство, что есть более четкая зависимость.
-            for (int i = 0; i < 256; ++i)
-            {
-                unchecked
-                {
-                    var color = magickImage.GetColormapColor(i)!;
-                    var index = GetColor(color.B, color.G, color.R);
-
-                    colorMap[index] = (byte)i;
-                }
-            }
-        }
-
+        using var fileStream = new FileStream(ResourceFilePath, FileMode.Open, FileAccess.Read);
+        using var streamReader = new Substream(fileStream, file.Offset, file.Size);
+        var magickImage = new MagickImage(streamReader, MagickFormat.Png);
         var pixels = magickImage.GetPixels().ToByteArray("BGRA")!;
-        var zeroColor = magickImage.GetColormapColor(0);
-        var mainTransparentColor = zeroColor == null
-            ? GetColor(255, 0, 255)
-            : GetColor(zeroColor.B, zeroColor.G, zeroColor.R);
+        var alphaColors = imageMetadata == null
+                          ? GetDefaultAlphaColors()
+                          : GetAlphaColors(imageMetadata.TransparentColorIndex, imageMetadata.OpacityAlgorithm, imageMetadata.Palette);
 
         unchecked
         {
             for (int i = 0; i < pixels.Length; i += 4)
             {
                 var color = GetColor(pixels[i], pixels[i + 1], pixels[i + 2]);
+                var opacity = alphaColors.GetValueOrDefault(color, byte.MaxValue);
+                pixels[i + 3] = opacity;
 
-                // Проверяем прозрачную область.
-                // Вторая проверка нужна потому, что по какой-то причине есть еще несколько дополнительных прозрачных цветов.
-                if (color == mainTransparentColor || (pixels[i] > 248 && pixels[i + 1] < 4 && pixels[i + 2] > 251))
+                // BUG в Avalonia: если не выставить пиксели в 0, то у изображения появляется фиолетовая рамка.
+                if (opacity == 0)
                 {
                     pixels[i] = 0;
                     pixels[i + 1] = 0;
                     pixels[i + 2] = 0;
-                    pixels[i + 3] = 0;
-
-                    continue;
                 }
-
-                // Если файл - аура, то определяем прозрачность по словарю.
-                if (imageType == ImageType.Aura)
+                else if (imageProcessingAlgorithm == ImageProcessingAlgorithm.Shadow)
                 {
-                    if (colorMap.TryGetValue(color, out var alphaChannel))
-                        pixels[i + 3] = alphaChannel;
-
-                    continue;
-                }
-
-                // Если файл тень, то делаем его полупрозрачным.
-                if (imageType == ImageType.Shadow)
-                {
-                    if (pixels[i + 3] != 0)
-                        pixels[i + 3] = 128;
-
-                    continue;
+                    pixels[i + 3] = 127;
                 }
             }
         }
@@ -512,6 +491,59 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
             Bounds = new Rectangle(0, 0, magickImage.Width, magickImage.Height),
             Data = pixels
         };
+    }
+
+    /// <summary>
+    /// Получить альфа-каналы для всех цветов.
+    /// </summary>
+    private static IReadOnlyDictionary<int, byte> GetAlphaColors(int transparentColorIndex, int opacityAlgorithm, IReadOnlyList<Color> palette)
+    {
+        var alphaColors = new Dictionary<int, byte>();
+
+        switch (opacityAlgorithm)
+        {
+            // Если значение 255 и меньше, то это и есть значение прозрачности.
+            case <= byte.MaxValue:
+                foreach (var color in palette)
+                    alphaColors[GetColor(color.B, color.G, color.R)] = (byte)opacityAlgorithm;
+                break;
+
+            // Значение для различных аур. Уровень прозрачности - это номер цвета в палитре.
+            case 300:
+                for (int colorIndex = 0; colorIndex < palette.Count; colorIndex++)
+                {
+                    var color = palette[colorIndex];
+                    alphaColors[GetColor(color.B, color.G, color.R)] = (byte)colorIndex;
+                }
+                break;
+        }
+
+        var transparentColor = palette[transparentColorIndex];
+        alphaColors[GetColor(transparentColor.B, transparentColor.G, transparentColor.R)] = 0;
+
+        var defaultAlphaColors = GetDefaultAlphaColors();
+        foreach (var defaultAlphaColor in defaultAlphaColors)
+            alphaColors[defaultAlphaColor.Key] = defaultAlphaColor.Value;
+
+        return alphaColors;
+    }
+
+    /// <summary>
+    /// Получить альфа-канал для цветов по умолчанию.
+    /// </summary>
+    private static IReadOnlyDictionary<int, byte> GetDefaultAlphaColors()
+    {
+        var alphaColors = new Dictionary<int, byte>();
+
+        // Особенность изображений Disciples. Прозрачной является не только кисть 255/0/255, но и цвета близкие к ней.
+        // TODO. Выбор цветов может быть сложнее.
+        // См. https://bitbucket.org/NevendaarTools/toolsqt/src/55b89969c79f74dbbac90a63854256f90d52f0e1/ResourceModel/GameResource.cpp#lines-178:191
+        for (int blue = 249; blue <= byte.MaxValue; blue++)
+        for (int green = 0; green <= 3 ; green++)
+        for (int red = 252; red <= byte.MaxValue; red++)
+            alphaColors[GetColor((byte)blue, (byte)green, (byte)red)] = 0;
+
+        return alphaColors;
     }
 
     /// <summary>
@@ -538,37 +570,6 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 
         return fileContent;
     }
-
-    /// <summary>
-    /// Получить тип изображения по его имени. Жуткий костыль, так как не знаю, где это находится в метаданных.
-    /// </summary>
-    private static ImageType GetImageType(string name)
-    {
-        var safeName = name.EndsWith("_1")
-            ? name.Substring(0, name.Length - 2)
-            : name;
-
-        // todo Ну это уже совсем никуда не годится, исправить.
-        if (safeName.EndsWith("A2A00") || safeName.EndsWith("A2D00") ||
-            (safeName.Length > 8 && (safeName.Substring(safeName.Length - 9, 4) == "HEFF" ||
-                                     safeName.Substring(safeName.Length - 9, 4) == "TUCH")) ||
-            safeName.StartsWith("MRK") || safeName.StartsWith("DEATH"))
-            return ImageType.Aura;
-
-        if (safeName.StartsWith("POISONANIM") ||
-            safeName.StartsWith("FROSTBITEANIM") ||
-            safeName.StartsWith("BLISTERANIM") ||
-            safeName.StartsWith("UPGRADE"))
-        {
-            return ImageType.Aura;
-        }
-
-        if (safeName.EndsWith("S1A00") || safeName.EndsWith("S1D00") || safeName.StartsWith("MASKDEAD"))
-            return ImageType.Shadow;
-
-        return ImageType.Simple;
-    }
-
 
     #endregion
 }

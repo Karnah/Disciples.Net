@@ -18,17 +18,17 @@ public class File
 
 
     /// <summary>
-    /// Идентификатор файла
+    /// Идентификатор файла.
     /// </summary>
     public int Id { get; }
 
     /// <summary>
-    /// Имя файла
+    /// Имя файла.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// Размер файла
+    /// Размер файла.
     /// </summary>
     public int Size { get; }
 
