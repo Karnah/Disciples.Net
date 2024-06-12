@@ -6,7 +6,7 @@ using Disciples.Resources.Common.Extensions;
 using Disciples.Resources.Common.Models;
 using Disciples.Resources.Images.Enums;
 using Disciples.Resources.Images.Models;
-using ImageMagick;
+using SkiaSharp;
 using SubstreamSharp;
 using File = Disciples.Resources.Common.Models.File;
 
@@ -456,8 +456,9 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     {
         using var fileStream = new FileStream(ResourceFilePath, FileMode.Open, FileAccess.Read);
         using var streamReader = new Substream(fileStream, file.Offset, file.Size);
-        var magickImage = new MagickImage(streamReader, MagickFormat.Png);
-        var pixels = magickImage.GetPixels().ToByteArray("BGRA")!;
+        using var image = SKBitmap.Decode(streamReader);
+
+        var pixels = image.Bytes;
         var alphaColors = imageMetadata == null
                           ? GetDefaultAlphaColors()
                           : GetAlphaColors(imageMetadata.TransparentColorIndex, imageMetadata.OpacityAlgorithm, imageMetadata.Palette);
@@ -486,9 +487,9 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
 
         return new RawBitmap
         {
-            OriginalWidth = magickImage.Width,
-            OriginalHeight = magickImage.Height,
-            Bounds = new Rectangle(0, 0, magickImage.Width, magickImage.Height),
+            OriginalWidth = image.Width,
+            OriginalHeight = image.Height,
+            Bounds = new Rectangle(0, 0, image.Width, image.Height),
             Data = pixels
         };
     }
