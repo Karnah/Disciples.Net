@@ -174,6 +174,9 @@ public abstract class GameObject
     /// <param name="ticksCount">Количество тиков, которое прошло со времени предыдущего обновления.</param>
     public virtual void Update(long ticksCount)
     {
+        if (IsDestroyed)
+            return;
+
         foreach (var component in Components)
             component.Update(ticksCount);
     }

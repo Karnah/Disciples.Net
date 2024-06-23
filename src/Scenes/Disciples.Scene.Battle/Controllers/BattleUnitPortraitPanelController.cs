@@ -26,6 +26,10 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// Сдвиг для анимаций панели, чтобы она ложилась поверх портретов.
     /// </summary>
     private const int PANEL_ANIMATION_OFFSET = -2;
+    /// <summary>
+    /// Слой на котором располагаются анимации.
+    /// </summary>
+    private const int PANEL_ANIMATION_LAYER = BattleLayers.INTERFACE_ANIMATION_LAYER + 5;
 
     private readonly ILogger<BattleUnitPortraitPanelController> _logger;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
@@ -146,6 +150,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         }
 
         UpdateBorders(_mainPanel);
+        UpdateSummonPlaceholders(_mainPanel);
     }
 
     /// <summary>
@@ -158,6 +163,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
 
         SetDisplayingSquad(GetDefaultDisplayingSquad());
         UpdateBorders(_mainPanel);
+        UpdateSummonPlaceholders(_mainPanel);
     }
 
     /// <summary>
@@ -167,6 +173,27 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     {
         _isActionProcessing = false;
         _reflectPanelButton.SetActive();
+    }
+
+    /// <summary>
+    /// Обработать изменение состояния юнита.
+    /// Это может быть удаление, обновление или трансформация.
+    /// </summary>
+    public void ProcessBattleUnitUpdated(BattleUnit battleUnit)
+    {
+        var panel = _mainPanel.PanelSquadDirection == battleUnit.SquadPosition
+            ? _mainPanel
+            : _additionalPanel.PanelSquadDirection == battleUnit.SquadPosition
+                ? _additionalPanel
+                : null;
+        if (panel == null)
+            return;
+
+        // Принудительно перерисовываем панель целиком.
+        // TODO Также перевести на эту схему юнитов после превращения/повышения уровня.
+        // TODO Не слишком быстрая операция. Будет создано много объектов, если менялось сразу несколько юнитов.
+        panel.PanelSquadDirection = null;
+        UpdatePanel(panel, battleUnit.SquadPosition);
     }
 
     /// <summary>
@@ -263,7 +290,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             PortraitPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_PORTRAIT_PATTERN_PLACEHOLDER),
             HitPointsPlaceholders = _interfaceProvider.GetUnitPlaceholders(BattleUnitPanelElementNames.RIGHT_UNIT_PANEL_HP_PATTERN_PLACEHOLDER),
 
-            // Этой области нет для правой панели, поэтому вычисляем зеркально из данных для левой.
+            // В ресурсах нет границы отображения для правой панели, поэтому вычисляем зеркально из данных для левой.
             DisplayPanelBounds = new RectangleD(
                 GameInfo.Width - _leftPanel.DisplayPanelBounds.Width,
                 _leftPanel.DisplayPanelBounds.Y,
@@ -330,6 +357,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
 
         ArrangePortraits(panel, squadPosition);
         UpdateBorders(panel);
+        UpdateSummonPlaceholders(panel);
     }
 
     /// <summary>
@@ -356,8 +384,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         var portraits = new List<UnitPortraitObject>();
         foreach (var battleUnit in battleUnits)
         {
-            var portraitBounds = GetBounds(battleUnit.Unit, squadPosition, panel.PortraitPlaceholders);
-            var hitPointsBounds = GetBounds(battleUnit.Unit, squadPosition, panel.HitPointsPlaceholders);
+            var portraitBounds = GetBounds(battleUnit.UnitPosition, battleUnit.Unit.UnitType.IsSmall, panel.PortraitPlaceholders);
+            var hitPointsBounds = GetBounds(battleUnit.UnitPosition, battleUnit.Unit.UnitType.IsSmall, panel.HitPointsPlaceholders);
             var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit, squadPosition, portraitBounds, hitPointsBounds);
             portraits.Add(portrait);
 
@@ -372,14 +400,15 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Получить координаты на сцене для рамки портрета юнита.
     /// </summary>
-    private static RectangleD GetBounds(Unit unit, BattleSquadPosition squadPosition, IReadOnlyDictionary<int, SceneElement> placeholders)
+    private static RectangleD GetBounds(BattleUnitPosition position, bool isSmall, IReadOnlyDictionary<int, SceneElement> placeholders)
     {
-        var placeholderId = GetPlaceholderId(unit.SquadLinePosition, unit.SquadFlankPosition, squadPosition);
+        var (linePosition, flankPosition) = position.UnitPosition.GetPosition();
+        var placeholderId = GetPlaceholderId(linePosition, flankPosition, position.SquadPosition);
         var placeholderPosition = placeholders[placeholderId].Position;
-        if (unit.UnitType.IsSmall)
+        if (isSmall)
             return placeholderPosition;
 
-        var secondPlaceHolderId = GetPlaceholderId(UnitSquadLinePosition.Back, unit.SquadFlankPosition, squadPosition);
+        var secondPlaceHolderId = GetPlaceholderId(UnitSquadLinePosition.Back, flankPosition, position.SquadPosition);
         var secondPlaceHolderPosition = placeholders[secondPlaceHolderId].Position;
         return RectangleD.Union(placeholderPosition, secondPlaceHolderPosition);
     }
@@ -412,11 +441,17 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             borderAnimation.Destroy();
         }
 
+        foreach (var summonPlaceholder in panel.SummonPlaceholders)
+        {
+            summonPlaceholder.Destroy();
+        }
+
         panel.PanelImage.IsHidden = true;
         panel.PanelSquadDirection = null;
         panel.BattleUnits = Array.Empty<BattleUnit>();
         panel.UnitPortraits = Array.Empty<UnitPortraitObject>();
         panel.BorderAnimations = Array.Empty<AnimationObject>();
+        panel.SummonPlaceholders = Array.Empty<SummonPlaceholder>();
     }
 
     /// <summary>
@@ -438,7 +473,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         var unitPanelAnimations = new List<AnimationObject>();
 
         // Если отображается отряд текущего юнита, то нужно его выделить на панели.
-        if (CurrentBattleUnit.SquadPosition == panel.PanelSquadDirection)
+        if (CurrentBattleUnit.SquadPosition == panel.PanelSquadDirection && !CurrentBattleUnit.IsDestroyed)
         {
             var currentUnitPortrait = GetUnitPortrait(panel, CurrentBattleUnit);
             unitPanelAnimations.Add(
@@ -446,7 +481,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                     _interfaceProvider.GetUnitSelectionBorder(currentUnit.UnitType.IsSmall),
                     currentUnitPortrait.X + PANEL_ANIMATION_OFFSET,
                     currentUnitPortrait.Y + PANEL_ANIMATION_OFFSET,
-                    BattleLayers.INTERFACE_ANIMATION_LAYER));
+                    PANEL_ANIMATION_LAYER));
         }
 
         // Рамки для целей отображаем только в момент, когда нет действий.
@@ -475,7 +510,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                             : _interfaceProvider.GetFieldAttackBorder(),
                         topLeftElement.Position.X + PANEL_ANIMATION_OFFSET,
                         topLeftElement.Position.Y + PANEL_ANIMATION_OFFSET,
-                        BattleLayers.INTERFACE_ANIMATION_LAYER));
+                        PANEL_ANIMATION_LAYER));
             }
             // Иначе добавляем рамку только тем юнитам, которых можно атаковать.
             else
@@ -493,12 +528,66 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                                 : _interfaceProvider.GetUnitAttackBorder(targetBattleUnit.Unit.UnitType.IsSmall),
                             unitPortrait.X + PANEL_ANIMATION_OFFSET,
                             unitPortrait.Y + PANEL_ANIMATION_OFFSET,
-                            BattleLayers.INTERFACE_ANIMATION_LAYER));
+                            PANEL_ANIMATION_LAYER));
+                }
+            }
+
+            // Если отображается отряд текущего юнита и он призыватель,
+            // То располагаем рамку на тех местах, куда можно призвать юнита.
+            if (CurrentBattleUnit.SquadPosition == panel.PanelSquadDirection && _context.SummonPlaceholders.Count > 0)
+            {
+                foreach (var summonPlaceholder in _context.SummonPlaceholders)
+                {
+                    var bounds = GetBounds(summonPlaceholder.Position, true, panel.PortraitPlaceholders);
+                    unitPanelAnimations.Add(
+                        _battleGameObjectContainer.AddAnimation(
+                            _interfaceProvider.GetUnitSummonBorder(),
+                            bounds.X + PANEL_ANIMATION_OFFSET,
+                            bounds.Y + PANEL_ANIMATION_OFFSET,
+                            PANEL_ANIMATION_LAYER));
                 }
             }
         }
 
         panel.BorderAnimations = unitPanelAnimations;
+    }
+
+    /// <summary>
+    /// Обновить плейхолдеры для вызова юнита.
+    /// </summary>
+    private void UpdateSummonPlaceholders(BattleUnitPortraitPanelData panel)
+    {
+        RemoveSummonPlaceholders(panel);
+
+        // Плейхолдеры вызова отображаются только для отряда текущего юнита.
+        // Также сразу пропускаем, если текущий юнит не призыватель.
+        if (panel.PanelSquadDirection != CurrentBattleUnit.SquadPosition ||
+            _context.SummonPlaceholders.Count == 0)
+        {
+            return;
+        }
+
+        var summonPlaceholders = new List<SummonPlaceholder>();
+        foreach (var mainAreaSummonPlaceholder in _context.SummonPlaceholders)
+        {
+            var bounds = GetBounds(mainAreaSummonPlaceholder.Position, true, panel.PortraitPlaceholders);
+            var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(mainAreaSummonPlaceholder.Position, bounds);
+            summonPlaceholder.AnimationComponent.IsEnabled = false;
+            summonPlaceholders.Add(summonPlaceholder);
+
+            // Если плейсхолдер перекрывает юнита, то запрещаем выделять его.
+            // Все события будет обрабатывать плейсхолдер.
+            var hiddenPortraits = _context
+                .GetBattleUnits(mainAreaSummonPlaceholder.Position)
+                .Select(GetUnitPortrait);
+            foreach (var hiddenUnitPortrait in hiddenPortraits)
+            {
+                if (hiddenUnitPortrait != null)
+                    hiddenUnitPortrait.SelectionComponent!.IsSelectionEnabled = false;
+            }
+        }
+
+        panel.SummonPlaceholders = summonPlaceholders;
     }
 
     /// <summary>
@@ -513,6 +602,23 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             unitPanelAnimation.Destroy();
 
         panel.BorderAnimations = Array.Empty<AnimationObject>();
+    }
+
+    /// <summary>
+    /// Удалить плейхолдеры для вызова юнитов.
+    /// </summary>
+    private static void RemoveSummonPlaceholders(BattleUnitPortraitPanelData panel)
+    {
+        if (panel.SummonPlaceholders.Count == 0)
+            return;
+
+        foreach (var summonPlaceholder in panel.SummonPlaceholders)
+            summonPlaceholder.Destroy();
+
+        foreach (var unitPortrait in panel.UnitPortraits)
+            unitPortrait.SelectionComponent!.IsSelectionEnabled = true;
+
+        panel.SummonPlaceholders = Array.Empty<SummonPlaceholder>();
     }
 
     /// <summary>

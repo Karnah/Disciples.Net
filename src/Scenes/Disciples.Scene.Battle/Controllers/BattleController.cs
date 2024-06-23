@@ -115,6 +115,8 @@ internal class BattleController : BaseSupportLoading, IBattleController
     /// <inheritdoc />
     protected override void LoadInternal()
     {
+        _actionFactory.BeginBattle();
+
         ArrangeUnits();
         NextTurn();
     }
@@ -195,7 +197,10 @@ internal class BattleController : BaseSupportLoading, IBattleController
         switch (command.CommandType)
         {
             case BattleCommandType.Attack:
-                _actionFactory.BeginMainAttack(_context.GetBattleUnit(command.Target!));
+                var squadPosition = command.TargetSquad == _battleProcessor.AttackingSquad
+                    ? BattleSquadPosition.Attacker
+                    : BattleSquadPosition.Defender;
+                _actionFactory.BeginMainAttack(new BattleUnitPosition(squadPosition, command.TargetPosition!.Value));
                 break;
 
             case BattleCommandType.Defend:

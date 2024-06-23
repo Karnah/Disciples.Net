@@ -1,5 +1,7 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
 
@@ -8,35 +10,139 @@ namespace Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProce
 /// <summary>
 /// Процессор для атаки типа <see cref="UnitAttackType.Summon" />.
 /// </summary>
-/// <remarks>
-/// TODO Реализовать.
-/// </remarks>
-internal class SummonAttackProcessor : IAttackTypeProcessor
+internal class SummonAttackProcessor : BaseEffectAttackProcessor
 {
     /// <inheritdoc />
-    public UnitAttackType AttackType => UnitAttackType.Summon;
+    public override UnitAttackType AttackType => UnitAttackType.Summon;
 
     /// <inheritdoc />
-    public bool CanMainAttackBeSkipped => false;
+    protected override bool CanAttackFriends => true;
 
     /// <inheritdoc />
-    public bool CanAttackAfterBattle => false;
-
-    /// <inheritdoc />
-    public bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
+    public override bool CanAttack(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        return false;
+        return base.CanAttack(context, unitAttack) &&
+               context.TargetUnit is SummonedUnit;
     }
 
     /// <inheritdoc />
-    public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
+    public override void ProcessAttack(CalculatedAttackResult attackResult)
     {
-        throw new NotImplementedException();
+        // Добавляем призванного юнита в отряд.
+        // И удаляем мертвых/отступивших юнитов на место которых вызван юнит.
+        var squad = attackResult.Context.TargetUnitSquad;
+        var summonedUnit = (SummonedUnit)attackResult.Context.TargetUnit;
+        squad.Units.Add(summonedUnit);
+
+        foreach (var hiddenUnit in summonedUnit.HiddenUnits)
+            squad.Units.Remove(hiddenUnit);
+
+        base.ProcessAttack(attackResult);
     }
 
     /// <inheritdoc />
-    public void ProcessAttack(CalculatedAttackResult attackResult)
+    protected override void ProcessEffectCompleted(AttackProcessorContext context, UnitBattleEffect battleEffect)
     {
-        throw new NotImplementedException();
+        base.ProcessEffectCompleted(context, battleEffect);
+
+        // Удаляем призванного юнита из отряда и возвращаем тех юнитов, которые были перекрыты.
+        var squad = context.TargetUnitSquad;
+        var summonedUnit = (SummonedUnit)context.TargetUnit;
+        summonedUnit.IsUnsummoned = true;
+        squad.Units.Remove(summonedUnit);
+
+        foreach (var hiddenUnit in summonedUnit.HiddenUnits)
+        {
+            // Если вызванный юнит маленький и перекрывает большого юнита, то нужно проверить вторую клетку в линии.
+            // Если там тоже призванный юнит, то пока возвращать исходного юнита на место нельзя.
+            if (summonedUnit.UnitType.IsSmall && !hiddenUnit.UnitType.IsSmall)
+            {
+                var otherLinePosition = summonedUnit.SquadPosition.GetOtherLine();
+                var otherSummonedUnit = squad.GetUnits(otherLinePosition).OfType<SummonedUnit>().FirstOrDefault();
+                if (otherSummonedUnit != null)
+                    continue;
+            }
+
+            squad.Units.Add(hiddenUnit);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override EffectDuration GetEffectDuration(CalculatedUnitAttack unitAttack, bool isMaximum)
+    {
+        return unitAttack.IsInfinitive
+            ? EffectDuration.CreateInfinitive()
+            : EffectDuration.Create(2);
+    }
+
+    /// <summary>
+    /// Получить юниты, которые будут вызваны.
+    /// </summary>
+    public IReadOnlyList<Unit> GetSummonedUnits(BattleProcessorContext context, UnitSquadPosition summonPosition)
+    {
+        var currentUnit = context.CurrentUnit;
+        var summonPositions = GetSummonPositions(context);
+        var summonUnitTypes = context.CurrentUnit.UnitType.MainAttack.SummonTransformUnitTypes;
+        var bigSummonUnitTypes = summonUnitTypes.Where(ut => !ut.IsSmall).ToList();
+        var smallSummonUnitTypes = summonUnitTypes.Where(ut => ut.IsSmall).ToList();
+        var summonUnits = new List<Unit>();
+        foreach (var position in summonPositions.Where(p => currentUnit.MainAttack.Reach == UnitAttackReach.All || p == summonPosition))
+        {
+            // Позиция могла быть уже занята ранее большим юнитом.
+            if (bigSummonUnitTypes.Count > 0 && summonUnits.Any(su=> su.SquadPosition.IsIntersect(position)))
+                continue;
+
+            // Если юнит имеет вызывать больших существ и есть место для него
+            var canSummonBigUnit = bigSummonUnitTypes.Count > 0 &&
+                                   summonPositions.Any(sp => sp == position.GetOtherLine());
+            var summonUnitType = canSummonBigUnit
+                ? bigSummonUnitTypes.GetRandomElement()
+                : smallSummonUnitTypes.GetRandomElement();
+            summonUnits.Add(GetSummonedUnit(summonUnitType, position, context.CurrentUnitSquad));
+        }
+
+        return summonUnits;
+    }
+
+    /// <summary>
+    /// Получить возможные расположения для вызова юнитов.
+    /// </summary>
+    public IReadOnlyList<UnitSquadPosition> GetSummonPositions(BattleProcessorContext context)
+    {
+        var currentUnitSquad = context.CurrentUnitSquad;
+        return UnitSquadPositionExtensions
+            .Positions
+            .Where(p =>
+            {
+                var existingUnit = currentUnitSquad.GetUnits(p).FirstOrDefault();
+                return existingUnit == null || existingUnit.IsInactive;
+            })
+            .ToList();
+    }
+
+    /// <summary>
+    /// Получить вызванного юнита.
+    /// </summary>
+    private static SummonedUnit GetSummonedUnit(UnitType unitType, UnitSquadPosition position, Squad squad)
+    {
+        if (!unitType.IsSmall)
+            position |= UnitSquadPosition.Big;
+
+        var (linePosition, flankPosition) = position.GetPosition();
+
+        // Вычисляем какие юниты перекрываются вызываемым юнитом.
+        // Также отдельно обрабатываем следующий случай: в отряде был большой юнит, он умер/сбежал.
+        // Одна его клетка уже занята вызванным юнитом, сейчас занимаем вторую. Для нового юнита также будет хранить ссылку на исходного юнита.
+        var hiddenUnits = squad.GetUnits(position).ToList();
+        if (unitType.IsSmall)
+        {
+            var otherLinePosition = position.GetOtherLine();
+            var otherSummonedUnit = squad.GetUnits(otherLinePosition).OfType<SummonedUnit>().FirstOrDefault();
+            var bigHiddenUnit = otherSummonedUnit?.HiddenUnits.FirstOrDefault(hu => !hu.UnitType.IsSmall);
+            if (bigHiddenUnit != null)
+                hiddenUnits.Add(bigHiddenUnit);
+        }
+
+        return new SummonedUnit(unitType, squad.Player, squad, linePosition, flankPosition, hiddenUnits);
     }
 }

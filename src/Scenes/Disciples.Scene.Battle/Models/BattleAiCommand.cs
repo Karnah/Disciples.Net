@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Models;
+﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 
 namespace Disciples.Scene.Battle.Models;
@@ -22,10 +23,18 @@ internal class BattleAiCommand
     /// <summary>
     /// Создать объект типа <see cref="BattleAiCommand" /> с командой атаковать указанного юнита.
     /// </summary>
-    public BattleAiCommand(Unit? target)
+    public BattleAiCommand(Unit target) : this(target.Squad, target.SquadPosition)
+    {
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="BattleAiCommand" /> с командой атаковать указанную позицию.
+    /// </summary>
+    public BattleAiCommand(Squad? targetSquad, UnitSquadPosition targetPosition)
     {
         CommandType = BattleCommandType.Attack;
-        Target = target;
+        TargetSquad = targetSquad;
+        TargetPosition = targetPosition;
     }
 
     /// <summary>
@@ -34,10 +43,18 @@ internal class BattleAiCommand
     public BattleCommandType CommandType { get; }
 
     /// <summary>
-    /// Цель команды.
+    /// Целевой отряд.
     /// </summary>
     /// <remarks>
     /// NotNull, если <see cref="CommandType" /> равно <see cref="BattleCommandType.Attack" />.
     /// </remarks>
-    public Unit? Target { get; }
+    public Squad? TargetSquad { get; }
+
+    /// <summary>
+    /// Целевая позиция.
+    /// </summary>
+    /// <remarks>
+    /// NotNull, если <see cref="CommandType" /> равно <see cref="BattleCommandType.Attack" />.
+    /// </remarks>
+    public UnitSquadPosition? TargetPosition { get; }
 }

@@ -1,6 +1,6 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Models;
+using Disciples.Engine.Common.Enums;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 
@@ -29,7 +29,7 @@ internal interface IBattleInterfaceController : ISupportLoading
     /// <summary>
     /// Получить позицию юнита на поле боя.
     /// </summary>
-    RectangleD GetBattleUnitPosition(Unit unit, BattleSquadPosition unitSquadPosition);
+    RectangleD GetBattleUnitPosition(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition);
 
     #region События пользовательского ввода
 
@@ -52,6 +52,16 @@ internal interface IBattleInterfaceController : ISupportLoading
     /// Зажатая ПКМ на юните.
     /// </summary>
     void BattleUnitRightMouseButtonPressed(BattleUnit battleUnit);
+
+    /// <summary>
+    /// Клик ЛКМ на плейсхолдере вызова юнита.
+    /// </summary>
+    void SummonPlaceholderLeftMouseButtonClicked(SummonPlaceholder summonPlaceholder);
+
+    /// <summary>
+    /// Зажатая ПКМ на плейсхолдере вызова юнита.
+    /// </summary>
+    void SummonPlaceholderRightMouseButtonPressed(SummonPlaceholder summonPlaceholder);
 
     /// <summary>
     /// Событие выбора портрета юнита.

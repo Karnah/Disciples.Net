@@ -2,7 +2,7 @@
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors;
-using Disciples.Scene.Battle.Processors.UnitActionProcessors;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
@@ -19,10 +19,12 @@ internal class DefendUnitActionController : BaseBattleActionController
     public DefendUnitActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
+        BattleProcessor battleProcessor,
+        IBattleUnitResourceProvider unitResourceProvider
+        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
         _battleProcessor = battleProcessor;
     }

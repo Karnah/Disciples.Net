@@ -1,0 +1,76 @@
+{
+  "SagaName": "Summon many unit",
+  "SagaDescription": "Debug unit summon all area units",
+  "GameType": 0,
+  "MissionType": 1,
+  "TurnNumber": 1,
+  "DifficultyLevel": 2,
+  "Players": [
+    {
+      "Id": 1,
+      "IsComputer": false,
+      "Race": 0,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 2,
+              "Name": null,
+              "UnitTypeId": "G000UU6014", // мастер-оккультист.
+              "SquadLinePosition": 0,
+              "SquadFlankPosition": 1,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 310,
+              "IsDead": false
+            },
+            {
+              "Id": 5,
+              "Name": null,
+              "UnitTypeId": "G000UU8015", // кентавр-латник.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 2,
+              "Experience": 0,
+              "HitPoints": 1,
+              "IsDead": false
+            },
+            {
+              "Id": 6,
+              "Name": null,
+              "UnitTypeId": "G000UU0029", // холмовой великан.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 0,
+              "Level": 1,
+              "Experience": 0,
+              "HitPoints": 1,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "IsComputer": true,
+      "Race": 3,
+      "Squads": [
+        {
+          "Units": [
+            {
+              "Id": 10,
+              "Name": null,
+              "UnitTypeId": "G000UU0165", // мастер рун.
+              "SquadLinePosition": 1,
+              "SquadFlankPosition": 1,
+              "Level": 5,
+              "Experience": 0,
+              "HitPoints": 300,
+              "IsDead": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -13,10 +13,11 @@ internal class UnitRetreatedProcessor : IUnitEffectProcessor
     /// <summary>
     /// Создать объект тип <see cref="UnitRetreatedProcessor" />.
     /// </summary>
-    public UnitRetreatedProcessor(Unit targetUnit, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors)
+    public UnitRetreatedProcessor(Unit targetUnit, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors, IReadOnlyList<IUnitEffectProcessor> unsummonProcessors)
     {
         TargetUnit = targetUnit;
         _unitEffectProcessors = unitEffectProcessors;
+        UnsummonProcessors = unsummonProcessors;
     }
 
     /// <inheritdoc />
@@ -24,6 +25,11 @@ internal class UnitRetreatedProcessor : IUnitEffectProcessor
 
     /// <inheritdoc />
     public Unit TargetUnit { get; }
+
+    /// <summary>
+    /// Обработчики для удаления вызванных юнитов.
+    /// </summary>
+    public IReadOnlyList<IUnitEffectProcessor> UnsummonProcessors { get; }
 
     /// <inheritdoc />
     public void ProcessBeginAction()
@@ -34,6 +40,11 @@ internal class UnitRetreatedProcessor : IUnitEffectProcessor
         {
             unitEffectProcessor.ProcessBeginAction();
         }
+
+        foreach (var unsummonProcessor in UnsummonProcessors)
+        {
+            unsummonProcessor.ProcessBeginAction();
+        }
     }
 
     /// <inheritdoc />
@@ -42,6 +53,11 @@ internal class UnitRetreatedProcessor : IUnitEffectProcessor
         foreach (var unitEffectProcessor in _unitEffectProcessors)
         {
             unitEffectProcessor.ProcessCompletedAction();
+        }
+
+        foreach (var unsummonProcessor in UnsummonProcessors)
+        {
+            unsummonProcessor.ProcessCompletedAction();
         }
     }
 }

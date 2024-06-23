@@ -14,11 +14,12 @@ internal class UnitDeathProcessor : IUnitActionProcessor
     /// <summary>
     /// Создать объект типа <see cref="UnitDeathProcessor" />.
     /// </summary>
-    public UnitDeathProcessor(Unit targetUnit, Squad enemySquad, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors)
+    public UnitDeathProcessor(Unit targetUnit, Squad enemySquad, IReadOnlyList<IUnitEffectProcessor> unitEffectProcessors, IReadOnlyList<IUnitEffectProcessor> unsummonProcessors)
     {
         TargetUnit = targetUnit;
         _enemySquad = enemySquad;
         _unitEffectProcessors = unitEffectProcessors;
+        UnsummonProcessors = unsummonProcessors;
     }
 
     /// <inheritdoc />
@@ -27,15 +28,20 @@ internal class UnitDeathProcessor : IUnitActionProcessor
     /// <inheritdoc />
     public Unit TargetUnit { get; }
 
+    /// <summary>
+    /// Обработчики для удаления вызванных юнитов.
+    /// </summary>
+    public IReadOnlyList<IUnitEffectProcessor> UnsummonProcessors { get; }
+
     /// <inheritdoc />
     public void ProcessBeginAction()
     {
         TargetUnit.IsDead = true;
 
-        // Начисляем опыт вражеском отряду.
+        // Начисляем опыт вражескому отряду.
         var experienceEnemies = _enemySquad
             .Units
-            .Where(x => !x.IsDeadOrRetreated)
+            .Where(x => x is { IsInactive: false, Effects.IsSummoned: false })
             .ToArray();
         if (experienceEnemies.Length > 0)
         {
@@ -48,6 +54,11 @@ internal class UnitDeathProcessor : IUnitActionProcessor
         {
             unitEffectProcessor.ProcessBeginAction();
         }
+
+        foreach (var unsummonProcessor in UnsummonProcessors)
+        {
+            unsummonProcessor.ProcessBeginAction();
+        }
     }
 
     /// <inheritdoc />
@@ -56,6 +67,11 @@ internal class UnitDeathProcessor : IUnitActionProcessor
         foreach (var unitEffectProcessor in _unitEffectProcessors)
         {
             unitEffectProcessor.ProcessCompletedAction();
+        }
+
+        foreach (var unsummonProcessor in UnsummonProcessors)
+        {
+            unsummonProcessor.ProcessCompletedAction();
         }
     }
 }

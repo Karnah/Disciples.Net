@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Enums.Units;
+﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Enums;
@@ -31,11 +32,27 @@ internal class BattleAiProcessor
     {
         var attackingUnit = _battleProcessor.CurrentUnit;
         var mainAttack = attackingUnit.MainAttack;
-        if (mainAttack.AttackType == UnitAttackType.Doppelganger)
+
+        // Данные атаки имеют особую логику, поэтому обрабатываем их отдельно.
+        switch (mainAttack.AttackType)
         {
-            var doppelgangerCommand = GetDoppelgangerCommand(attackingUnit);
-            if (doppelgangerCommand != null)
-                return doppelgangerCommand;
+            case UnitAttackType.Summon:
+            {
+                var summonCommand = GetSummonnerCommand(attackingUnit);
+                if (summonCommand != null)
+                    return summonCommand;
+
+                break;
+            }
+
+            case UnitAttackType.Doppelganger:
+            {
+                var doppelgangerCommand = GetDoppelgangerCommand(attackingUnit);
+                if (doppelgangerCommand != null)
+                    return doppelgangerCommand;
+
+                break;
+            }
         }
 
         // Альтернативные атаки имеет Доппельгангер и Повелитель Волков.
@@ -115,7 +132,7 @@ internal class BattleAiProcessor
             attackingUnit.UnitType.SecondaryAttack?.AttackType is UnitAttackType.Heal)
         {
             var target = targetUnits
-                .Where(tu => tu.Unit.HitPoints < tu.Unit.MaxHitPoints && !tu.Unit.IsDeadOrRetreated)
+                .Where(tu => tu.Unit.HitPoints < tu.Unit.MaxHitPoints && !tu.Unit.IsInactive)
                 .OrderByWeakness()
                 .FirstOrDefault()
                 ?.Unit;
@@ -191,6 +208,20 @@ internal class BattleAiProcessor
             return new BattleAiCommand(targetUnit.Unit);
 
         return null;
+    }
+
+    /// <summary>
+    /// Получить команду для вызова юнитов.
+    /// </summary>
+    private BattleAiCommand? GetSummonnerCommand(Unit attackingUnit)
+    {
+        var summonPositions = _battleProcessor.GetSummonPositions();
+        if (summonPositions.Count == 0)
+            return null;
+
+        // Приоритет для вызова - передняя линия, так как она защищает призывателя.
+        var summonPosition = summonPositions.MaxBy(s => s.HasFlag(UnitSquadPosition.Front));
+        return new BattleAiCommand(_battleProcessor.GetUnitSquad(attackingUnit), summonPosition);
     }
 
     /// <summary>

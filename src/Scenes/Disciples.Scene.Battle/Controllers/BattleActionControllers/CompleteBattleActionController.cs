@@ -32,12 +32,13 @@ internal class CompleteBattleActionController : BaseBattleActionController
     public CompleteBattleActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleProcessor battleProcessor,
         IBattleUnitResourceProvider unitResourceProvider,
+        BattleProcessor battleProcessor,
         IBattleResourceProvider battleResourceProvider
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;

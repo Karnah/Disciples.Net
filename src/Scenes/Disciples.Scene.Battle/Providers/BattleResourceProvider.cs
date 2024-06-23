@@ -108,6 +108,9 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     public RawSound UnitLevelUpSound { get; private set; } = null!;
 
     /// <inheritdoc />
+    public RawSound UnitUnsummonSound { get; private set; } = null!;
+
+    /// <inheritdoc />
     public RawSound? GetSound(string soundName)
     {
         if (!_rawSounds.TryGetValue(soundName, out var rawSound))
@@ -141,6 +144,10 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
         var unitLevelUpSoundKey = new UnitLevelUpSoundResourceKey().Key;
         UnitLevelUpSound = GetSound(unitLevelUpSoundKey)
                          ?? throw new ResourceException($"Не найден ключ {unitLevelUpSoundKey} в ресурсах звука");
+
+        var unitUnsummonSoundKey = new UnitUnsummonSoundResourceKey().Key;;
+        UnitUnsummonSound = GetSound(unitUnsummonSoundKey)
+                            ?? throw new ResourceException($"Не найден ключ {unitUnsummonSoundKey} в ресурсах звука");
     }
 
     /// <inheritdoc />

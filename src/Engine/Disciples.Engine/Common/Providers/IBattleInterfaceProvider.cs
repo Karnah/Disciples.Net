@@ -84,6 +84,11 @@ public interface IBattleInterfaceProvider : ISupportLoading
     AnimationFrames GetUnitAttackBorder(bool isSmallUnit);
 
     /// <summary>
+    /// Получить анимацию для призыва юнита.
+    /// </summary>
+    AnimationFrames GetUnitSummonBorder();
+
+    /// <summary>
     /// Получить анимацию рамки атаки для юнита, который атакует всё поле боя.
     /// </summary>
     AnimationFrames GetFieldAttackBorder();

@@ -40,6 +40,11 @@ public class UnitEffects
         ExistsBattleEffect(UnitAttackType.Paralyze) || ExistsBattleEffect(UnitAttackType.Petrify);
 
     /// <summary>
+    /// Признак, что юнит призван.
+    /// </summary>
+    public bool IsSummoned => ExistsBattleEffect(UnitAttackType.Summon);
+
+    /// <summary>
     /// Признак, что юнит не сможет выполнить следующий ход.
     /// </summary>
     public bool IsDisabled => IsParalyzed || IsRetreating;

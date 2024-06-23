@@ -7,6 +7,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 
@@ -20,8 +21,10 @@ internal abstract class BaseBattleActionController : IBattleActionController
 
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly BattleBottomPanelController _bottomPanelController;
     private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
+    private readonly IBattleUnitResourceProvider _unitResourceProvider;
 
     private readonly BattleActionDelayContainer _delays = new();
     private readonly List<IPlayingSound> _playingSounds = new();
@@ -32,13 +35,17 @@ internal abstract class BaseBattleActionController : IBattleActionController
     protected BaseBattleActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
-        IBattleGameObjectContainer battleGameObjectContainer)
+        IBattleGameObjectContainer battleGameObjectContainer,
+        IBattleUnitResourceProvider unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _bottomPanelController = bottomPanelController;
         _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
+        _unitResourceProvider = unitResourceProvider;
     }
 
     /// <inheritdoc />
@@ -55,6 +62,21 @@ internal abstract class BaseBattleActionController : IBattleActionController
     /// <inheritdoc />
     public void Initialize()
     {
+        // Плесхолдеры для вызываемых юнитов создаются в начале хода юнита-призывателя.
+        // Завершение хода (т.е. любое следующее действие) должно их уничтожить.
+        if (_context.SummonPlaceholders.Count > 0)
+        {
+            foreach (var summonPlaceholder in _context.SummonPlaceholders)
+                summonPlaceholder.Destroy();
+
+            _context.SummonPlaceholders.Clear();
+
+            // Из-за плейсхолдеров часть юнитов могли быть заблокированы для выделения.
+            // Возвращаем это обратно.
+            foreach (var battleUnit in _context.BattleUnits)
+                battleUnit.IsSelectionEnabled = true;
+        }
+
         var targetSquadPosition = GetTargetSquadPosition();
         if (targetSquadPosition != null)
             _unitPortraitPanelController.SetDisplayingSquad(targetSquadPosition.Value);
@@ -165,6 +187,32 @@ internal abstract class BaseBattleActionController : IBattleActionController
     }
 
     /// <summary>
+    /// Добавить юнита на поле боя.
+    /// </summary>
+    protected BattleUnit AddBattleUnit(Unit unit, BattleSquadPosition squadPosition)
+    {
+        var battleUnit = _battleGameObjectContainer.AddBattleUnit(unit, squadPosition);
+
+        _context.BattleUnits.Add(battleUnit);
+        _unitPortraitPanelController.ProcessBattleUnitUpdated(battleUnit);
+        _bottomPanelController.ProcessBattleUnitUpdated(battleUnit);
+
+        // Удаляем юнитов, которые перекрываются вызванным.
+        if (battleUnit.Unit is SummonedUnit summonedUnit)
+        {
+            var hiddenUnits = summonedUnit
+                .HiddenUnits
+                .Select(_context.TryGetBattleUnit)
+                .Where(hu => hu != null)
+                .Select(hu => hu!);
+            foreach (var hiddenUnit in hiddenUnits)
+                RemoveBattleUnit(hiddenUnit);
+        }
+
+        return battleUnit;
+    }
+
+    /// <summary>
     /// Заменить юнита на поле боя.
     /// </summary>
     protected void ReplaceUnit(BattleUnit originalBattleUnit, Unit newUnit)
@@ -183,6 +231,67 @@ internal abstract class BaseBattleActionController : IBattleActionController
 
         var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
         targetUnitPortrait?.ChangeUnit(newUnit);
+    }
+
+    /// <summary>
+    /// Удалить юнита с поля боя.
+    /// </summary>
+    protected void RemoveBattleUnit(BattleUnit targetBattleUnit)
+    {
+        targetBattleUnit.Destroy();
+
+        _context.BattleUnits.Remove(targetBattleUnit);
+        _unitPortraitPanelController.ProcessBattleUnitUpdated(targetBattleUnit);
+        _bottomPanelController.ProcessBattleUnitUpdated(targetBattleUnit);
+
+        // Если юнит призванный, то возвращаем на место тех юнитов, что он скрывал.
+        if (targetBattleUnit.Unit is SummonedUnit summonedUnit)
+        {
+            foreach (var hiddenUnit in summonedUnit.HiddenUnits)
+            {
+                // Если вызванный юнит маленький и перекрывает большого юнита, то нужно проверить вторую клетку в линии.
+                // Если там тоже призванный юнит, то пока возвращать исходного юнита на место нельзя.
+                if (summonedUnit.UnitType.IsSmall && !hiddenUnit.UnitType.IsSmall)
+                {
+                    var otherLinePosition = summonedUnit.SquadPosition.GetOtherLine();
+                    var otherSummonedBattleUnit = _context.GetBattleUnits(new BattleUnitPosition(targetBattleUnit.SquadPosition, otherLinePosition)).FirstOrDefault();
+                    if (otherSummonedBattleUnit != null)
+                        continue;
+                }
+
+                var battleUnit = AddBattleUnit(hiddenUnit, targetBattleUnit.SquadPosition);
+                if (hiddenUnit.IsDead)
+                    battleUnit.UnitState = BattleUnitState.Dead;
+                else if (hiddenUnit.IsRetreated)
+                    battleUnit.UnitState = BattleUnitState.Retreated;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Добавить анимацию удаления призванного юнита.
+    /// </summary>
+    protected void AddUnitUnsummonAnimationAction(BattleUnit targetBattleUnit)
+    {
+        var animationPoint = targetBattleUnit.AnimationComponent.AnimationPoint;
+        var unsummonAnimationFrames = targetBattleUnit.Unit.UnitType.IsSmall
+            ? _unitResourceProvider.SmallUnitUnsummonAnimationFrames
+            : _unitResourceProvider.BigUnitUnsummonAnimationFrames;
+        var unitUnsummonAnimation = _battleGameObjectContainer.AddAnimation(
+            unsummonAnimationFrames,
+            animationPoint.X,
+            animationPoint.Y,
+            targetBattleUnit.AnimationComponent.Layer + 2,
+            false);
+        AddActionDelay(new BattleAnimationDelay(unitUnsummonAnimation.AnimationComponent));
+    }
+
+    /// <summary>
+    /// Проиграть звук удаления призванного юнита.
+    /// </summary>
+    protected void PlayUnitUnsummonSound()
+    {
+        _soundController.PlayUnitUsummonSound();
     }
 
     /// <summary>

@@ -17,7 +17,7 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
     /// Создать объект типа <see cref="TransformedEnemyUnit" />.
     /// </summary>
     public TransformedEnemyUnit(Unit originalUnit, UnitType transformedUnitType)
-        : base(originalUnit.Id, transformedUnitType, originalUnit.Player, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
+        : base(originalUnit.Id, transformedUnitType, originalUnit.Player, originalUnit.Squad, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
     {
         _baseUnit = originalUnit;
 
@@ -44,6 +44,13 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
     {
         get => OriginalUnit.IsRetreated;
         set => OriginalUnit.IsRetreated = value;
+    }
+
+    /// <inheritdoc />
+    public override bool IsUnsummoned
+    {
+        get => OriginalUnit.IsUnsummoned;
+        set => OriginalUnit.IsUnsummoned = value;
     }
 
     /// <inheritdoc />

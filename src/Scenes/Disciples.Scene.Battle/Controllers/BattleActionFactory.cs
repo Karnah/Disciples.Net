@@ -26,13 +26,24 @@ internal class BattleActionFactory
     }
 
     /// <summary>
-    /// Обработать атаку текущего юнита на указанного.
+    /// Начать битву.
     /// </summary>
-    public void BeginMainAttack(BattleUnit targetBattleUnit)
+    public void BeginBattle()
     {
-        _logger.LogDebug("Begin main attack, target unit: {targetUnit}", targetBattleUnit.Unit.Id);
+        _logger.LogDebug("Begin battle");
 
-        var mainAttackController = _resolver.Resolve<MainAttackActionController>(new object[] { targetBattleUnit });
+        var beginBattleController = _resolver.Resolve<BeginBattleActionController>();
+        _battleContext.AddAction(beginBattleController);
+    }
+
+    /// <summary>
+    /// Обработать атаку текущего юнита на указанную позицию.
+    /// </summary>
+    public void BeginMainAttack(BattleUnitPosition unitPosition)
+    {
+        _logger.LogDebug("Begin main attack, target position: {targetUnit}", unitPosition);
+
+        var mainAttackController = _resolver.Resolve<MainAttackActionController>(new object[] { unitPosition });
         _battleContext.AddAction(mainAttackController);
     }
 

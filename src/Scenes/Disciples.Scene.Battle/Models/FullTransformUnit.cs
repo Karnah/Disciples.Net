@@ -16,7 +16,7 @@ internal class FullTransformUnit : Unit, ITransformedUnit
     /// Создать объект типа <see cref="FullTransformUnit" />.
     /// </summary>
     public FullTransformUnit(Unit originalUnit, UnitType unitType)
-        : base(originalUnit.Id, unitType, originalUnit.Player, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
+        : base(originalUnit.Id, unitType, originalUnit.Player, originalUnit.Squad, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
     {
         OriginalUnit = originalUnit is ITransformedUnit transformedUnit
             ? transformedUnit.OriginalUnit
@@ -41,6 +41,13 @@ internal class FullTransformUnit : Unit, ITransformedUnit
     {
         get => OriginalUnit.IsRetreated;
         set => OriginalUnit.IsRetreated = value;
+    }
+
+    /// <inheritdoc />
+    public override bool IsUnsummoned
+    {
+        get => OriginalUnit.IsUnsummoned;
+        set => OriginalUnit.IsUnsummoned = value;
     }
 
     /// <inheritdoc />

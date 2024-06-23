@@ -4,6 +4,7 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Resources.Sounds.Models;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -14,16 +15,27 @@ internal class BattleSoundController : BaseSupportLoading
 {
     private readonly ISoundController _soundController;
     private readonly ISoundProvider _soundProvider;
+    private readonly IBattleResourceProvider _battleResourceProvider;
 
     private IPlayingSound _backgroundSound = null!;
 
     /// <summary>
     /// Создать объект типа <see cref="BattleSoundController" />.
     /// </summary>
-    public BattleSoundController(ISoundController soundController, ISoundProvider soundProvider)
+    public BattleSoundController(ISoundController soundController, ISoundProvider soundProvider, IBattleResourceProvider battleResourceProvider)
     {
         _soundController = soundController;
         _soundProvider = soundProvider;
+        _battleResourceProvider = battleResourceProvider;
+    }
+
+    /// <summary>
+    /// Проигрывать звук удаления призванного юнита с поля боя.
+    /// </summary>
+    public IPlayingSound PlayUnitUsummonSound()
+    {
+        // TODO Контроль удаления и отсутствие повторных вызовов.
+        return _soundController.PlaySound(_battleResourceProvider.UnitUnsummonSound);
     }
 
     /// <summary>

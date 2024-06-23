@@ -30,8 +30,9 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
-        BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
+        BattleProcessor battleProcessor,
+        BattleBottomPanelController bottomPanelController
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
@@ -70,6 +71,14 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
 
         foreach (var attackResult in unitSuccessAttackProcessor.AttackResults)
         {
+            // Если идёт вызов юнита, то нужно сразу создать для него игровой объект.
+            // Но видимым он станет только после завершения атаки.
+            if (attackResult.AttackType == UnitAttackType.Summon)
+            {
+                var battleUnit = AddBattleUnit(attackResult.Context.TargetUnit, CurrentBattleUnit.SquadPosition);
+                battleUnit.IsHidden = true;
+            }
+
             var targetBattleUnit = _context.GetBattleUnit(attackResult.Context.TargetUnit);
             ProcessBeginSuccessAttack(targetBattleUnit, attackResult);
         }
@@ -161,6 +170,12 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
                 var effectProcessors =
                     _battleProcessor.GetForceCompleteEffectProcessors(targetBattleUnit.Unit, attackResult.CuredEffects);
                 EnqueueEffectProcessors(effectProcessors);
+                break;
+            }
+
+            case UnitAttackType.Summon:
+            {
+                targetBattleUnit.IsHidden = false;
                 break;
             }
 

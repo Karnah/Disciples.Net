@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Common.Models;
+﻿using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
 
@@ -93,7 +94,7 @@ internal class BattleInstantProcessor
         switch (command.CommandType)
         {
             case BattleCommandType.Attack:
-                ProcessAttack(command.Target!);
+                ProcessAttack(command.TargetSquad!, command.TargetPosition!.Value);
                 break;
 
             case BattleCommandType.Defend:
@@ -122,18 +123,17 @@ internal class BattleInstantProcessor
     /// <summary>
     /// Обработать атаку.
     /// </summary>
-    private void ProcessAttack(Unit targetUnit)
+    private void ProcessAttack(Squad targetSquad, UnitSquadPosition targetPosition)
     {
         // Обрабатываем основную атаку.
-        var attackResult = _battleProcessor.ProcessMainAttack(targetUnit);
+        var attackResult = _battleProcessor.ProcessMainAttack(targetSquad, targetPosition);
         foreach (var attackProcessor in attackResult.AttackProcessors)
         {
             attackProcessor.ProcessBeginAction();
             attackProcessor.ProcessCompletedAction();
         }
 
-        var targetUnitSquad = _battleProcessor.GetUnitSquad(targetUnit);
-        ProcessDeaths(targetUnitSquad);
+        ProcessDeaths(targetSquad);
 
         // Обрабатываем вторую атаку.
         var secondAttackProcessors = attackResult
@@ -148,7 +148,7 @@ internal class BattleInstantProcessor
             attackProcessor.ProcessCompletedAction();
         }
 
-        ProcessDeaths(targetUnitSquad);
+        ProcessDeaths(targetSquad);
     }
 
     /// <summary>
@@ -208,7 +208,8 @@ internal class BattleInstantProcessor
 
         // Сбрасываем все эффекты с отряда-победителя.
         // Отряд проигравшего проверять не нужно. Там либо все погибли, либо сбежали.
-        foreach (var unit in winnerSquad.Units)
+        // Защитная копия нужна, так как при сбросе эффектов может происходить удаление призванных и трансформация юнитов.
+        foreach (var unit in winnerSquad.Units.ToArray())
         {
             var effectProcessors = _battleProcessor.GetForceCompleteEffectProcessors(unit);
             foreach (var effectProcessor in effectProcessors)

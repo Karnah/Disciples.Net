@@ -10,6 +10,9 @@ namespace Disciples.Scene.Battle.Providers;
 /// <summary>
 /// Поставщик ресурсов для юнитов на поле боя.
 /// </summary>
+/// <remarks>
+/// TODO Объединить Small/Big в один класс.
+/// </remarks>
 internal interface IBattleUnitResourceProvider : ISupportLoading
 {
     /// <summary>
@@ -31,6 +34,21 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     /// Анимация для выделения большое юнита, когда его выбрали в качестве цели.
     /// </summary>
     AnimationFrames BigUnitTargetAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация места, куда можно призвать юнита.
+    /// </summary>
+    AnimationFrames SummonPlaceholderAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация удаления маленького призванного юнита.
+    /// </summary>
+    AnimationFrames SmallUnitUnsummonAnimationFrames { get; }
+
+    /// <summary>
+    /// Анимация удаления большого призванного юнита.
+    /// </summary>
+    AnimationFrames BigUnitUnsummonAnimationFrames { get; }
 
     /// <summary>
     /// Анимация исцеления вампиризмом.

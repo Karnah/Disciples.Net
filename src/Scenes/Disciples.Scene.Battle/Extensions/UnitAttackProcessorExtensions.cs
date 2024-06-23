@@ -20,7 +20,7 @@ internal static class UnitAttackProcessorExtensions
         if (context.CurrentUnit.Player.Id == context.TargetUnit.Player.Id)
             return false;
 
-        if (context.TargetUnit.IsDeadOrRetreated)
+        if (context.TargetUnit.IsInactive)
             return false;
 
         if (!CanAttackPosition(context.CurrentUnit, context.TargetUnit, context.CurrentUnitSquad, context.TargetUnitSquad, unitAttack))
@@ -37,7 +37,7 @@ internal static class UnitAttackProcessorExtensions
         if (context.CurrentUnit.Player.Id != context.TargetUnit.Player.Id)
             return false;
 
-        if (context.TargetUnit.IsDeadOrRetreated)
+        if (context.TargetUnit.IsInactive)
             return false;
 
         return true;
@@ -82,7 +82,7 @@ internal static class UnitAttackProcessorExtensions
     /// </summary>
     private static bool IsFrontLineEmpty(Squad squad)
     {
-        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsDeadOrRetreated);
+        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsInactive);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ internal static class UnitAttackProcessorExtensions
     {
         return squad.Units.Any(u => u.SquadLinePosition == linePosition &&
                                     u.SquadFlankPosition == flankPosition &&
-                                    u.IsDeadOrRetreated == false) == false;
+                                    u.IsInactive == false) == false;
     }
 
     #endregion

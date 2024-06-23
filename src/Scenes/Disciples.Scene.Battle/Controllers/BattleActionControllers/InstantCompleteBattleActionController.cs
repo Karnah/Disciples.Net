@@ -4,6 +4,7 @@ using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
@@ -23,11 +24,13 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
     public InstantCompleteBattleActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
+        IBattleUnitResourceProvider unitResourceProvider,
         BattleInstantProcessor battleInstantProcessor,
         BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
@@ -51,9 +54,16 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
         _unitPortraitPanelController.SetDisplayingSquad(battleWinnerSquadPosition);
         _unitPortraitPanelController.DisableBorderAnimations();
 
-        // Создаём защитную копию, так как ReplaceUnit меняет коллекцию.
+        // Создаём защитную копию, так как RemoveBattleUnit/ReplaceUnit меняет коллекцию.
         foreach (var battleUnit in _context.BattleUnits.ToArray())
         {
+            // Призванных юнитов просто удаляем. Других действий совершать не нужно.
+            if (battleUnit.Unit is SummonedUnit)
+            {
+                RemoveBattleUnit(battleUnit);
+                continue;
+            }
+
             if (battleUnit.Unit.IsDead && battleUnit.UnitState != BattleUnitState.Dead)
                 battleUnit.UnitState = BattleUnitState.Dead;
             else if (battleUnit.Unit.IsRetreated)
@@ -61,7 +71,7 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
 
             // Для юнитов отряда победителя выводим опыт.
             if (battleUnit.SquadPosition == battleWinnerSquadPosition &&
-                !battleUnit.Unit.IsDeadOrRetreated)
+                !battleUnit.Unit.IsInactive)
             {
                 _unitPortraitPanelController.DisplayMessage(battleUnit,
                     new BattleUnitPortraitEventData(UnitActionType.Experience));
@@ -75,7 +85,6 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
                 }
             }
 
-            // TODO Отдельно обработать для вызова, там юнита может не быть.
             // Обрабатываем превращение юнита (из-за снятого эффекта или повышения уровня).
             var unitSquad = _battleProcessor.GetUnitSquad(battleUnit.Unit);
             var positionUnit = unitSquad.Units.First(u =>

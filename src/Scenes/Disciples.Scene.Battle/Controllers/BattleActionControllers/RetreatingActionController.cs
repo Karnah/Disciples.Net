@@ -2,6 +2,7 @@
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors;
+using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
@@ -18,10 +19,12 @@ internal class RetreatingActionController : BaseBattleActionController
     public RetreatingActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
+        BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
+        BattleProcessor battleProcessor,
+        IBattleUnitResourceProvider unitResourceProvider
+        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
         _battleProcessor = battleProcessor;
     }

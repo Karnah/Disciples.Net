@@ -50,6 +50,11 @@ internal interface IBattleResourceProvider : ISupportLoading
     RawSound UnitLevelUpSound { get; }
 
     /// <summary>
+    /// Звук удаления призванного юнита с поля боя.
+    /// </summary>
+    RawSound UnitUnsummonSound { get; }
+
+    /// <summary>
     /// Получить звук по имени.
     /// </summary>
     RawSound? GetSound(string soundName);

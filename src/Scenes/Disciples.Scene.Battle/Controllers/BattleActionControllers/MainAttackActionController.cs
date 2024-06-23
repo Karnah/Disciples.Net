@@ -36,22 +36,27 @@ internal class MainAttackActionController : BaseAttackActionController
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
+        BattleBottomPanelController bottomPanelController,
         BattleActionFactory actionFactory,
-        BattleUnit targetBattleUnit
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
+        BattleUnitPosition targetPosition
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _actionFactory = actionFactory;
 
-        TargetBattleUnit = targetBattleUnit;
+        TargetPosition = targetPosition;
     }
 
     /// <summary>
-    /// Атакуемый юнит.
+    /// Цель атаки.
     /// </summary>
-    public BattleUnit TargetBattleUnit { get; }
+    /// <remarks>
+    /// Практически для всех юнитов - это атакуемый юнит.
+    /// Но для призывателя это может быть пустой клеткой.
+    /// </remarks>
+    public BattleUnitPosition TargetPosition { get; }
 
     /// <inheritdoc />
     public override bool ShouldPassTurn { get; protected set; }
@@ -59,7 +64,7 @@ internal class MainAttackActionController : BaseAttackActionController
     /// <inheritdoc />
     protected override BattleSquadPosition? GetTargetSquadPosition()
     {
-        return TargetBattleUnit.SquadPosition;
+        return TargetPosition.SquadPosition;
     }
 
     /// <inheritdoc />
@@ -70,7 +75,10 @@ internal class MainAttackActionController : BaseAttackActionController
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
         ShouldPassTurn = !isFirstAttack;
 
-        _mainAttackResult = _battleProcessor.ProcessMainAttack(TargetBattleUnit.Unit);
+        var targetSquad = TargetPosition.SquadPosition == BattleSquadPosition.Attacker
+            ? _battleProcessor.AttackingSquad
+            : _battleProcessor.DefendingSquad;
+        _mainAttackResult = _battleProcessor.ProcessMainAttack(targetSquad, TargetPosition.UnitPosition);
 
         // Если юнит имеют альтернативную атаку, то анимация атаки/звук относятся именно к ней.
         // Основная атака в таком случае использует стандартную для данного типа атаки анимацию.
@@ -150,7 +158,7 @@ internal class MainAttackActionController : BaseAttackActionController
         if (_isAnimationAndSoundDisabled)
             return;
 
-        AddAttackAreaAnimationAction(CurrentBattleUnit, TargetBattleUnit);
+        AddAttackAreaAnimationAction(CurrentBattleUnit, TargetPosition.SquadPosition);
         PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
     }
 
@@ -176,17 +184,17 @@ internal class MainAttackActionController : BaseAttackActionController
     /// <summary>
     /// Добавить анимацию атаки, которая применяется к площади.
     /// </summary>
-    private void AddAttackAreaAnimationAction(BattleUnit attackerBattleUnit, BattleUnit targetBattleUnit)
+    private void AddAttackAreaAnimationAction(BattleUnit attackerBattleUnit, BattleSquadPosition targetSquadPosition)
     {
         var targetAnimation = attackerBattleUnit.AnimationComponent.BattleUnitAnimation.TargetAnimation;
-        var areaFrames = targetBattleUnit.IsAttacker
+        var areaFrames = targetSquadPosition == BattleSquadPosition.Attacker
             ? targetAnimation?.AttackerAreaFrames
             : targetAnimation?.DefenderAreaFrames;
         if (areaFrames == null)
             return;
 
         // Центр анимации будет приходиться на середину между первым и вторым рядом.
-        var isTargetAttacker = targetBattleUnit.IsAttacker;
+        var isTargetAttacker = targetSquadPosition == BattleSquadPosition.Attacker;
         var squad = isTargetAttacker
             ? _context.AttackingBattleSquad
             : _context.DefendingBattleSquad;

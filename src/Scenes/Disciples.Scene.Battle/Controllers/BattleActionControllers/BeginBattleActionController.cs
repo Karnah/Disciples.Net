@@ -1,47 +1,38 @@
 ﻿using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
-using Disciples.Scene.Battle.Enums;
+using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Models;
-using Disciples.Scene.Battle.Processors;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 
 /// <summary>
-/// Контроллер ожидания юнита.
+/// Контроллер начала битвы.
 /// </summary>
-internal class WaitUnitActionController : BaseBattleActionController
+/// <remarks>
+/// Необходимо, чтобы корректно отрабатывала инициализация всех классов в начале сцены.
+/// </remarks>
+internal class BeginBattleActionController : BaseBattleActionController
 {
-    private readonly BattleProcessor _battleProcessor;
-
     /// <summary>
-    /// Создать объект типа <see cref="DefendUnitActionController" />.
+    /// Создать объект типа <see cref="BeginBattleActionController" />.
     /// </summary>
-    public WaitUnitActionController(
+    public BeginBattleActionController(
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
-        BattleProcessor battleProcessor,
         IBattleUnitResourceProvider unitResourceProvider
         ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
-        _battleProcessor = battleProcessor;
     }
 
     /// <inheritdoc />
-    public override bool ShouldPassTurn { get; protected set; } = true;
-
-    /// <inheritdoc />
-    protected override BattleSquadPosition? GetTargetSquadPosition()
-    {
-        return CurrentBattleUnit.SquadPosition;
-    }
+    public override bool ShouldPassTurn { get; protected set; }
 
     /// <inheritdoc />
     protected override void InitializeInternal()
     {
-        var unitWaitingProcessor = _battleProcessor.ProcessWait();
-        AddProcessorAction(unitWaitingProcessor);
+        AddActionDelay(new BattleTimerDelay(1));
     }
 }

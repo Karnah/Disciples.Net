@@ -7,6 +7,7 @@ using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Components;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
+using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
@@ -19,7 +20,7 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Высота маленького юнита на сцене.
     /// </summary>
-    private const int SMALL_BATTLE_UNIT_HEIGHT = 105;
+    public const int SMALL_BATTLE_UNIT_HEIGHT = 105;
     /// <summary>
     /// Высота большого юнита на сцене.
     /// </summary>
@@ -43,7 +44,7 @@ internal class BattleUnit : GameObject
     /// <summary>
     /// Сдвиг анимаций выделения маленького юнита.
     /// </summary>
-    private static readonly PointD SmallBattleUnitSelectionAnimationOffset = new(-365, -220);
+    public static readonly PointD SmallBattleUnitSelectionAnimationOffset = new(-365, -220);
     /// <summary>
     /// Сдвиг анимаций выделения большого юнита.
     /// </summary>
@@ -58,8 +59,8 @@ internal class BattleUnit : GameObject
         IBattleUnitResourceProvider battleUnitResourceProvider,
         Action<BattleUnit> onUnitSelected,
         Action<BattleUnit> onUnitUnselected,
-        Action<BattleUnit> onUnitMouseRightButtonClicked,
         Action<BattleUnit> onUnitMouseLeftButtonPressed,
+        Action<BattleUnit> onUnitMouseRightButtonClicked,
         Unit unit,
         BattleSquadPosition unitSquadPosition,
         RectangleD bounds
@@ -97,9 +98,12 @@ internal class BattleUnit : GameObject
             new SelectionComponent(this,
                 () => onUnitSelected.Invoke(this),
                 () => onUnitUnselected.Invoke(this)),
-            new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onUnitMouseRightButtonClicked.Invoke(this)),
-            new MouseRightButtonClickComponent(this, () => onUnitMouseLeftButtonPressed.Invoke(this))
+            new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onUnitMouseLeftButtonPressed.Invoke(this)),
+            new MouseRightButtonClickComponent(this, () => onUnitMouseRightButtonClicked.Invoke(this))
         };
+
+        // TODO Идея: избавить от SelectionComponent/MouseLeftButtonClickComponent/MouseRightButtonClickComponent.
+        // Это будет отруливать отдельный игровой объект, который будет принимать решение юнит это или плейхолдер вызова.
 
         Height = Unit.UnitType.IsSmall
             ? SMALL_BATTLE_UNIT_HEIGHT
@@ -142,6 +146,11 @@ internal class BattleUnit : GameObject
     public BattleSquadPosition SquadPosition { get; }
 
     /// <summary>
+    /// Позиция юнита
+    /// </summary>
+    public BattleUnitPosition UnitPosition => new(SquadPosition, Unit.SquadPosition);
+
+    /// <summary>
     /// Направление, куда смотрит юнит.
     /// </summary>
     public BattleDirection Direction =>
@@ -165,6 +174,15 @@ internal class BattleUnit : GameObject
     {
         get => TargetAnimationComponent.IsEnabled;
         set => TargetAnimationComponent.IsEnabled = value;
+    }
+
+    /// <summary>
+    /// Признак, что объект доступен для выделения.
+    /// </summary>
+    public bool IsSelectionEnabled
+    {
+        get => SelectionComponent!.IsSelectionEnabled;
+        set => SelectionComponent!.IsSelectionEnabled = value;
     }
 
     /// <summary>

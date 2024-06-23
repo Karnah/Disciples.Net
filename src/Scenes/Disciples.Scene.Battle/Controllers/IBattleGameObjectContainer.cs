@@ -1,8 +1,10 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Base;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
+using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -17,6 +19,11 @@ internal interface IBattleGameObjectContainer : IGameObjectContainer
     /// <param name="unit">Юнит.</param>
     /// <param name="unitSquadPosition">Положение отряда юнита.</param>
     BattleUnit AddBattleUnit(Unit unit, BattleSquadPosition unitSquadPosition);
+
+    /// <summary>
+    /// Добавить плейсхолдер для вызываемого юнита.
+    /// </summary>
+    SummonPlaceholder AddSummonPlaceholder(BattleUnitPosition position, RectangleD bounds);
 
     /// <summary>
     /// Добавить портрет юнита на сцену.

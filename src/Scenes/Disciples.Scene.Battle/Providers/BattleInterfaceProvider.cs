@@ -132,6 +132,12 @@ internal class BattleInterfaceProvider : BaseSupportLoading, IBattleInterfacePro
     }
 
     /// <inheritdoc />
+    public AnimationFrames GetUnitSummonBorder()
+    {
+        return _battleResourceProvider.GetBattleAnimation("EMPTYSELSMALLA");
+    }
+
+    /// <inheritdoc />
     public AnimationFrames GetFieldAttackBorder()
     {
         return GetAttackBorder(BattleBorderSize.Field);

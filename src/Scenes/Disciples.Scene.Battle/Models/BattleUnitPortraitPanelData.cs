@@ -50,4 +50,9 @@ internal class BattleUnitPortraitPanelData
     /// Анимации-рамки, которые отрисовываются на панели с юнитами.
     /// </summary>
     public IReadOnlyList<AnimationObject> BorderAnimations { get; set; } = Array.Empty<AnimationObject>();
+
+    /// <summary>
+    /// Список плейсхолдеров для вызова юнитов.
+    /// </summary>
+    public IReadOnlyList<SummonPlaceholder> SummonPlaceholders { get; set; } = Array.Empty<SummonPlaceholder>();
 }

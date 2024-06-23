@@ -210,7 +210,8 @@ public class GameController : IGameController
             _selectedGameObject.Bounds.Contains(mousePosition) &&
             !_selectedGameObject.IsHidden &&
             !_selectedGameObject.IsDestroyed &&
-            !_selectedGameObject.IsDeactivated)
+            !_selectedGameObject.IsDeactivated &&
+            _selectedGameObject.SelectionComponent!.IsSelectionEnabled)
         {
             return;
         }
@@ -218,6 +219,7 @@ public class GameController : IGameController
         // TODO Можно каждый раз не проходиться по всем элементам, а создать отдельную коллекцию.
         var selectedGameObject = GameObjects
             .FirstOrDefault(go => go.SelectionComponent != null &&
+                                  go.SelectionComponent.IsSelectionEnabled &&
                                   go.Bounds.Contains(mousePosition) &&
                                   !go.IsHidden &&
                                   !go.IsDeactivated);

@@ -47,7 +47,7 @@ internal class UnitTurnQueue
         {
             _turnOrder.Remove(nextUnitTurnOrder);
 
-            if (nextUnitTurnOrder.Unit.IsDeadOrRetreated)
+            if (nextUnitTurnOrder.Unit.IsInactive)
                 continue;
 
             return nextUnitTurnOrder.Unit;
@@ -63,7 +63,7 @@ internal class UnitTurnQueue
                 var nextUnit = _waitingTurnOrder.Last.Value;
                 _waitingTurnOrder.RemoveLast();
 
-                if (nextUnit.IsDeadOrRetreated)
+                if (nextUnit.IsInactive)
                     continue;
 
                 return nextUnit;

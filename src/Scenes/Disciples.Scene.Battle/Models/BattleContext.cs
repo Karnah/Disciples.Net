@@ -1,6 +1,7 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
@@ -108,6 +109,14 @@ internal class BattleContext : BaseSupportLoading
     public List<BattleUnit> BattleUnits { get; set; } = null!;
 
     /// <summary>
+    /// Плейсхолдеры для вызова юнитов.
+    /// </summary>
+    /// <remarks>
+    /// Заполнено только, когда текущий ход юнита-призывателя.
+    /// </remarks>
+    public List<SummonPlaceholder> SummonPlaceholders { get; } = new();
+
+    /// <summary>
     /// Действие, которое выполняется в данный момент.
     /// </summary>
     public IBattleActionController? Action { get; private set; }
@@ -150,10 +159,13 @@ internal class BattleContext : BaseSupportLoading
         if (Action.IsCompleted)
         {
             CompletedAction = Action;
-            Action = NextAction == null
-                ? null
-                : InitializeAction(NextAction);
+            Action = null;
+            var nextAction = NextAction;
             NextAction = null;
+
+            Action = nextAction == null
+                ? null
+                : InitializeAction(nextAction);
         }
     }
 
@@ -163,6 +175,24 @@ internal class BattleContext : BaseSupportLoading
     public BattleUnit GetBattleUnit(Unit unit)
     {
         return BattleUnits.First(u => u.Unit.Id == unit.Id);
+    }
+
+    /// <summary>
+    /// Попробовать получить игровой объекта юнита.
+    /// </summary>
+    public BattleUnit? TryGetBattleUnit(Unit unit)
+    {
+        return BattleUnits.FirstOrDefault(u => u.Unit.Id == unit.Id);
+    }
+
+    /// <summary>
+    /// Получить юнитов на указанной позиции.
+    /// </summary>
+    public IEnumerable<BattleUnit> GetBattleUnits(BattleUnitPosition position)
+    {
+        return BattleUnits
+            .Where(bu => bu.SquadPosition == position.SquadPosition &&
+                                  bu.UnitPosition.UnitPosition.IsIntersect(position.UnitPosition));
     }
 
     /// <summary>
@@ -187,7 +217,6 @@ internal class BattleContext : BaseSupportLoading
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        Action?.Initialize();
     }
 
     /// <inheritdoc />
@@ -202,13 +231,8 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Инициализировать действие.
     /// </summary>
-    private IBattleActionController? InitializeAction(IBattleActionController action)
+    private static IBattleActionController? InitializeAction(IBattleActionController action)
     {
-        // Нельзя инициализировать действие, если только идёт загрузка битвы.
-        // В этот момент могли еще не все контроллеры инициализированы.
-        if (!IsLoaded)
-            return action;
-
         action.Initialize();
 
         // Если действие совершается мгновенно, то его дальше обрабатывать никак не нужно.

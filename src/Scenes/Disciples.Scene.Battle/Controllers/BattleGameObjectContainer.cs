@@ -44,15 +44,26 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
     /// <inheritdoc />
     public BattleUnit AddBattleUnit(Unit unit, BattleSquadPosition unitSquadPosition)
     {
-        var battleUnit = new BattleUnit(_sceneObjectContainer, _battleUnitResourceProvider, 
+        var battleUnit = new BattleUnit(_sceneObjectContainer, _battleUnitResourceProvider,
             _battleInterfaceController.Value.BattleUnitSelected,
             _battleInterfaceController.Value.BattleUnitUnselected,
             _battleInterfaceController.Value.BattleUnitLeftMouseButtonClicked,
             _battleInterfaceController.Value.BattleUnitRightMouseButtonPressed,
             unit,
             unitSquadPosition,
-            _battleInterfaceController.Value.GetBattleUnitPosition(unit, unitSquadPosition));
+            _battleInterfaceController.Value.GetBattleUnitPosition(unitSquadPosition, unit.SquadPosition));
         return AddObject(battleUnit);
+    }
+
+    /// <inheritdoc />
+    public SummonPlaceholder AddSummonPlaceholder(BattleUnitPosition position, RectangleD bounds)
+    {
+        var summonPlaceholder = new SummonPlaceholder(_sceneObjectContainer, _battleUnitResourceProvider,
+            _battleInterfaceController.Value.SummonPlaceholderLeftMouseButtonClicked,
+            _battleInterfaceController.Value.SummonPlaceholderRightMouseButtonPressed,
+            position,
+            bounds);
+        return AddObject(summonPlaceholder);
     }
 
     /// <inheritdoc />

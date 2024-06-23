@@ -130,11 +130,12 @@ internal class LoadingSaveScene : BaseScene, ILoadingSaveScene
     /// </summary>
     private Squad CreateSquad(Player player, PlayerSquad playerSquad)
     {
+        var squad = new Squad(player);
         var units = playerSquad
             .Units
             .Where(u => !u.IsDead)
-            .Select(u => new Unit(u.Id.ToString(), _unitInfoProvider.GetUnitType(u.UnitTypeId), player, u.SquadLinePosition, u.SquadFlankPosition) { Level = u.Level, Experience = u.Experience, HitPoints = u.HitPoints})
-            .ToList();
-        return new Squad(player, units);
+            .Select(u => new Unit(u.Id.ToString(), _unitInfoProvider.GetUnitType(u.UnitTypeId), player, squad, u.SquadLinePosition, u.SquadFlankPosition) { Level = u.Level, Experience = u.Experience, HitPoints = u.HitPoints});
+        squad.Units.AddRange(units);
+        return squad;
     }
 }

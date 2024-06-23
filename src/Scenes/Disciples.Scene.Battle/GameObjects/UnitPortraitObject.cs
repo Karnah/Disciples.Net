@@ -280,7 +280,7 @@ internal class UnitPortraitObject : GameObject
     }
 
     /// <summary>
-    /// Заменить юнита на портерте.
+    /// Заменить юнита на портрете.
     /// </summary>
     public void ChangeUnit(Unit newUnit)
     {
@@ -480,6 +480,7 @@ internal class UnitPortraitObject : GameObject
             UnitAttackType.DrainLifeOverflow => BattleColors.Damage,
             UnitAttackType.Revive => BattleColors.Heal,
             UnitAttackType.Cure => BattleColors.Heal,
+            UnitAttackType.Summon => BattleColors.Summon,
             UnitAttackType.ReduceLevel => BattleColors.ReduceLevel,
             UnitAttackType.Doppelganger => BattleColors.Transform,
             UnitAttackType.TransformSelf => BattleColors.Transform,
@@ -681,7 +682,6 @@ internal class UnitPortraitObject : GameObject
                     case UnitAttackType.ReduceInitiative:
                     case UnitAttackType.Revive:
                     case UnitAttackType.Cure:
-                    case UnitAttackType.Summon:
                     case UnitAttackType.ReduceLevel:
                     case UnitAttackType.GiveAdditionalAttack:
                     case UnitAttackType.Doppelganger:

@@ -11,11 +11,10 @@ public class Squad
     /// Создать объект типа <see cref="Squad" />.
     /// </summary>
     /// <param name="player">Игрок, которому принадлежит отряд.</param>
-    /// <param name="units">Юниты в отряде.</param>
-    public Squad(Player player, List<Unit> units)
+    public Squad(Player player)
     {
         Player = player;
-        Units = units;
+        Units = new List<Unit>();
     }
 
     /// <summary>

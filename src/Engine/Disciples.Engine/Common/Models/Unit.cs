@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper.Internal;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
+using Disciples.Engine.Extensions;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -17,7 +18,7 @@ public class Unit
     /// </summary>
     public static Unit CreateNextLevelUnit(Unit oldUnit)
     {
-        var newUnit = new Unit(oldUnit.Id, oldUnit.UnitType, oldUnit.Player, oldUnit.SquadLinePosition, oldUnit.SquadFlankPosition);
+        var newUnit = new Unit(oldUnit.Id, oldUnit.UnitType, oldUnit.Player, oldUnit.Squad, oldUnit.SquadLinePosition, oldUnit.SquadFlankPosition);
         newUnit.Level = oldUnit.Level + 1;
         newUnit.HitPoints = newUnit.MaxHitPoints;
 
@@ -31,6 +32,7 @@ public class Unit
         string id,
         UnitType unitType,
         Player player,
+        Squad squad,
         UnitSquadLinePosition squadLinePosition,
         UnitSquadFlankPosition squadFlankPosition)
     {
@@ -39,6 +41,7 @@ public class Unit
         UnitType = unitType;
         Player = player;
 
+        Squad = squad;
         SquadLinePosition = squadLinePosition;
         SquadFlankPosition = squadFlankPosition;
 
@@ -73,6 +76,11 @@ public class Unit
 
 
     /// <summary>
+    /// Отряд юнита.
+    /// </summary>
+    public Squad Squad { get; set; }
+
+    /// <summary>
     /// На какой линии располагается юнит в отряде.
     /// </summary>
     public UnitSquadLinePosition SquadLinePosition { get; set; }
@@ -82,6 +90,11 @@ public class Unit
     /// </summary>
     public UnitSquadFlankPosition SquadFlankPosition { get; set; }
 
+    /// <summary>
+    /// Позиция юнита в отряде.
+    /// </summary>
+    public UnitSquadPosition SquadPosition =>
+        UnitSquadPositionExtensions.GetPosition(UnitType.IsSmall, SquadLinePosition, SquadFlankPosition);
 
     /// <summary>
     /// Имя юнита.
@@ -177,7 +190,7 @@ public class Unit
     /// <summary>
     /// Признак, что юнита не нужно учитывать на поле боя.
     /// </summary>
-    public bool IsDeadOrRetreated => IsDead || IsRetreated;
+    public bool IsInactive => IsDead || IsRetreated || IsUnsummoned;
 
     /// <summary>
     /// Мёртв ли юнит.
@@ -188,6 +201,11 @@ public class Unit
     /// Юнит сбежал.
     /// </summary>
     public virtual bool IsRetreated { get; set; }
+
+    /// <summary>
+    /// Юнит был удалён после призыва.
+    /// </summary>
+    public virtual bool IsUnsummoned { get; set; }
 
     /// <summary>
     /// Признак, что в этом бою юнит был воскрешен способностью <see cref="UnitAttackType.Revive" />.

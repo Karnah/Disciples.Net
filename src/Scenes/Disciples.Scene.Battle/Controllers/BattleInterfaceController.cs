@@ -2,9 +2,11 @@
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Constants;
 using Disciples.Engine.Common.Controllers;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
@@ -105,27 +107,28 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     }
 
     /// <inheritdoc />
-    public RectangleD GetBattleUnitPosition(Unit unit, BattleSquadPosition unitSquadPosition)
+    public RectangleD GetBattleUnitPosition(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition)
     {
-        var squad = unitSquadPosition == BattleSquadPosition.Attacker
+        var squad = squadPosition == BattleSquadPosition.Attacker
             ? _context.AttackingBattleSquad
             : _context.DefendingBattleSquad;
-        var unitPosition = squad.GetUnitPosition(unit.SquadLinePosition, unit.SquadFlankPosition);
-        if (unit.UnitType.IsSmall)
-            return unitPosition;
+        var (linePosition, flankPosition) = unitPosition.GetPosition();
+        var battleUnitPosition = squad.GetUnitPosition(linePosition, flankPosition);
+        if (!unitPosition.HasFlag(UnitSquadPosition.Big))
+            return battleUnitPosition;
 
         // Для больших юнитов необходимо пересчитать позицию.
-        return unitSquadPosition == BattleSquadPosition.Attacker
+        return squadPosition == BattleSquadPosition.Attacker
             ? new RectangleD(
-                unitPosition.X - 30,
-                unitPosition.Y - 60,
-                unitPosition.Width,
-                unitPosition.Height)
+                battleUnitPosition.X - 30,
+                battleUnitPosition.Y - 60,
+                battleUnitPosition.Width,
+                battleUnitPosition.Height)
             : new RectangleD(
-                unitPosition.X + 35,
-                unitPosition.Y - 20,
-                unitPosition.Width,
-                unitPosition.Height);
+                battleUnitPosition.X + 35,
+                battleUnitPosition.Y - 20,
+                battleUnitPosition.Width,
+                battleUnitPosition.Height);
     }
 
     #region События от игровых объектов
@@ -134,7 +137,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     public void BattleUnitSelected(BattleUnit battleUnit)
     {
         // Если выбрали кости юнита, то не нужно менять портрет.
-        if (battleUnit.Unit.IsDeadOrRetreated)
+        if (battleUnit.Unit.IsInactive)
             return;
 
         UpdateTargetUnit(battleUnit);
@@ -160,6 +163,26 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             return;
 
         ShowDetailUnitInfo(battleUnit.Unit);
+    }
+
+    /// <inheritdoc />
+    public void SummonPlaceholderLeftMouseButtonClicked(SummonPlaceholder summonPlaceholder)
+    {
+        if (_isAnimating)
+            return;
+
+        _actionFactory.BeginMainAttack(summonPlaceholder.Position);
+    }
+
+    /// <inheritdoc />
+    public void SummonPlaceholderRightMouseButtonPressed(SummonPlaceholder summonPlaceholder)
+    {
+        // Находим юнита, который перекрыт плейсхолдером. Выводим информацию по нему.
+        var hiddenUnit = _context
+            .GetBattleUnits(summonPlaceholder.Position)
+            .FirstOrDefault();
+        if (hiddenUnit != null)
+            BattleUnitRightMouseButtonPressed(hiddenUnit);
     }
 
     /// <inheritdoc />
@@ -257,7 +280,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         if (_battleProcessor.CanAttack(targetBattleUnit.Unit))
         {
-            _actionFactory.BeginMainAttack(targetBattleUnit);
+            _actionFactory.BeginMainAttack(targetBattleUnit.UnitPosition);
             return;
         }
 
@@ -273,7 +296,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             newTargetUnit = GetAttackBattleUnit(targetBattleUnit, alternativeAttack, secondaryAttack);
 
         if (newTargetUnit != null)
-            _actionFactory.BeginMainAttack(newTargetUnit);
+            _actionFactory.BeginMainAttack(newTargetUnit.UnitPosition);
     }
 
     /// <summary>
@@ -356,7 +379,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         if (targetBattleUnit == null)
             return;
 
-        if (targetBattleUnit.Unit.IsDeadOrRetreated)
+        if (targetBattleUnit.Unit.IsInactive)
         {
             targetBattleUnit.IsTarget = false;
             return;

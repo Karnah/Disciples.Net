@@ -93,7 +93,10 @@ internal class BattleBottomPanelController : BaseSupportLoading
         UpdateCurrentUnitPortrait();
 
         if (_context.Action is MainAttackActionController mainAttackUnitAction)
-            UpdateTargetUnitPortrait(mainAttackUnitAction.TargetBattleUnit);
+        {
+            var targetUnit = _context.GetBattleUnits(mainAttackUnitAction.TargetPosition).FirstOrDefault();
+            UpdateTargetUnitPortrait(targetUnit);
+        }
     }
 
     /// <summary>
@@ -134,6 +137,23 @@ internal class BattleBottomPanelController : BaseSupportLoading
         _exitButton.IsHidden = false;
     }
 
+    /// <summary>
+    /// Обработать изменение состояния юнита.
+    /// Это может быть удаление, обновление или трансформация.
+    /// </summary>
+    public void ProcessBattleUnitUpdated(BattleUnit battleUnit)
+    {
+        // Таким образом мы можем как найти нового юнита (например, после трансформации),
+        // Или не найти совсем (после удаления).
+        var newBattleUnit = _context.TryGetBattleUnit(battleUnit.Unit);
+
+        if (_leftUnitPortrait.BattleUnit == battleUnit)
+            _leftUnitPortrait.BattleUnit = newBattleUnit;
+
+        if (_rightUnitPortrait.BattleUnit == battleUnit)
+            _rightUnitPortrait.BattleUnit = newBattleUnit;
+    }
+
     /// <inheritdoc />
     protected override void LoadInternal()
     {
@@ -157,12 +177,12 @@ internal class BattleBottomPanelController : BaseSupportLoading
             battleInterfaceElements[BattleBottomPanelElementNames.LEFT_UNIT_PORTRAIT_IMAGE],
             battleInterfaceElements[BattleBottomPanelElementNames.LEFT_LEADER_ITEMS_IMAGE],
             battleInterfaceElements[BattleBottomPanelElementNames.LEFT_UNIT_INFO_TEXT_BLOCK]);
-        _leftUnitPortrait.BattleUnit = _context.CurrentBattleUnit;
         _rightUnitPortrait = _gameObjectContainer.AddBottomUnitPortrait(false,
             battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_UNIT_PORTRAIT_IMAGE],
             battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_LEADER_ITEMS_IMAGE],
             battleInterfaceElements[BattleBottomPanelElementNames.RIGHT_UNIT_INFO_TEXT_BLOCK]
         );
+        UpdateCurrentUnitPortrait();
     }
 
     /// <inheritdoc />

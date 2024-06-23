@@ -36,7 +36,7 @@ internal abstract class BaseEffectAttackProcessor : IEffectAttackProcessor
     /// Признак, что на юнита может быть наложен только один эффект данного типа.
     /// </summary>
     /// <remarks>
-    /// Единственный эффект, который может быть наложен сразу несколько раз - <see cref="UnitAttackType.GiveProtection"/>
+    /// Единственный эффект, который может быть наложен сразу несколько раз - <see cref="UnitAttackType.GiveProtection" />.
     /// </remarks>
     protected virtual bool IsSingleEffectOnly => true;
 

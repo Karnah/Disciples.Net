@@ -58,8 +58,9 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
-        BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer)
+        BattleProcessor battleProcessor,
+        BattleBottomPanelController bottomPanelController
+        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
@@ -141,6 +142,14 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
                     return true;
                 }
 
+                case UnitAttackType.Summon when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
+                {
+                    AddProcessorAction(attackEffectProcessor);
+                    AddUnitUnsummonAnimationAction(targetBattleUnit);
+                    PlayUnitUnsummonSound();
+                    return true;
+                }
+
                 case UnitAttackType.ReduceLevel when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.Doppelganger when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
                 case UnitAttackType.TransformSelf when attackEffectProcessor.EffectResult.NewDuration.IsCompleted:
@@ -184,6 +193,12 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
         {
             switch (attackEffectProcessor.EffectResult.Effect.AttackType)
             {
+                case UnitAttackType.Summon:
+                {
+                    RemoveBattleUnit(targetBattleUnit);
+                    break;
+                }
+
                 case UnitAttackType.ReduceLevel:
                 case UnitAttackType.Doppelganger:
                 case UnitAttackType.TransformSelf:
@@ -254,6 +269,9 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
         if (targetBattleUnit.Unit is ITransformedUnit)
             ProcessTransformUnitBack(targetBattleUnit);
 
+        // Если юнит призывал других, то после его смерти они будут уничтожены.
+        EnqueueEffectProcessors(unitDeathProcessor.UnsummonProcessors);
+
         // Юнит умер в результате срабатывания эффекта.
         // Всё равно продолжаем обрабатывать очередь, так как в очереди могут быть эффекты на других юнитов.
         // Например, когда умер юнит, который наложил на других "Даровать защиту".
@@ -273,7 +291,20 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
             animationPoint.Y,
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
-        AddActionDelay(new BattleAnimationDelay(deathAnimation.AnimationComponent));
+        AddActionDelay(new BattleAnimationDelay(deathAnimation.AnimationComponent, () => OnUnitDeathAnimationCompleted(targetBattleUnit)));
+    }
+
+    /// <summary>
+    /// Обработать завершение анимации смерти юнита.
+    /// </summary>
+    private void OnUnitDeathAnimationCompleted(BattleUnit targetBattleUnit)
+    {
+        // Призванный юнит просто удаляется.
+        if (targetBattleUnit.Unit is SummonedUnit)
+        {
+            RemoveBattleUnit(targetBattleUnit);
+            PlayUnitUnsummonSound();
+        }
     }
 
     /// <summary>

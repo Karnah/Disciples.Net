@@ -15,7 +15,10 @@ namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 /// </summary>
 internal class BeginUnitTurnController : BaseUnitEffectActionController
 {
+    private readonly BattleContext _context;
+    private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
+    private readonly IBattleInterfaceController _battleInterfaceController;
 
     /// <summary>
     /// Создать объект типа <see cref="BeginUnitTurnController" />.
@@ -27,10 +30,15 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
-        BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
+        BattleProcessor battleProcessor,
+        BattleBottomPanelController bottomPanelController,
+        IBattleInterfaceController battleInterfaceController
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
     {
+        _context = context;
+        _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
+        _battleInterfaceController = battleInterfaceController;
     }
 
     /// <inheritdoc />
@@ -53,7 +61,28 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
     protected override void OnCompleted()
     {
         if (CurrentBattleUnit.Unit.IsDead)
+        {
             ShouldPassTurn = true;
+        }
+        // Добавляем плейсхолдеры для возможности вызова юнита.
+        else if (CurrentBattleUnit.Unit.MainAttack.AttackType == UnitAttackType.Summon)
+        {
+            foreach (var summonPosition in _battleProcessor.GetSummonPositions())
+            {
+                var battlePosition = new BattleUnitPosition(CurrentBattleUnit.SquadPosition, summonPosition);
+                var bounds = _battleInterfaceController.GetBattleUnitPosition(battlePosition.SquadPosition, battlePosition.UnitPosition);
+                var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(battlePosition, bounds);
+                _context.SummonPlaceholders.Add(summonPlaceholder);
+
+                // Если плейсхолдер перекрывает юнита, то запрещаем выделять его.
+                // Все события будет обрабатывать плейсхолдер.
+                var hiddenBattleUnit = _context
+                    .GetBattleUnits(battlePosition)
+                    .FirstOrDefault();
+                if (hiddenBattleUnit != null)
+                    hiddenBattleUnit.IsSelectionEnabled = false;
+            }
+        }
 
         base.OnCompleted();
     }
@@ -83,9 +112,19 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
                 }
             }
         }
-        else if (effectProcessor is UnitRetreatedProcessor)
+        else if (effectProcessor is UnitRetreatedProcessor unitRetreatedProcessor)
         {
             targetBattleUnit.UnitState = BattleUnitState.Retreated;
+
+            if (_context.CurrentBattleUnit.Unit is SummonedUnit)
+            {
+                AddUnitUnsummonAnimationAction(targetBattleUnit);
+                PlayUnitUnsummonSound();
+                RemoveBattleUnit(_context.CurrentBattleUnit);
+            }
+
+            // Если сбегающий юнит вызывал других юнитов, то они будут уничтожены.
+            EnqueueEffectProcessors(unitRetreatedProcessor.UnsummonProcessors);
 
             // Добавляем небольшую задержку, чтобы действие не закончилось сразу.
             // Это позволит обработать ShouldPassTurn для контроллера битвы.

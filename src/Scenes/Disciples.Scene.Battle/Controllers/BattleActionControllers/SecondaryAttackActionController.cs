@@ -13,7 +13,6 @@ namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 /// </summary>
 internal sealed class SecondaryAttackActionController : BaseAttackActionController
 {
-    private readonly BattleContext _context;
     private readonly BattleProcessor _battleProcessor;
     private readonly IReadOnlyList<BattleUnit> _targetBattleUnits;
 
@@ -28,11 +27,11 @@ internal sealed class SecondaryAttackActionController : BaseAttackActionControll
         IBattleUnitResourceProvider unitResourceProvider,
         IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
+        BattleBottomPanelController bottomPanelController,
         IReadOnlyList<BattleUnit> targetBattleUnits,
         bool shouldPassTurn
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
     {
-        _context = context;
         _battleProcessor = battleProcessor;
         _targetBattleUnits = targetBattleUnits;
 

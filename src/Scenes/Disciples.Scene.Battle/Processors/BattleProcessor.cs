@@ -2,10 +2,12 @@
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors;
+using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors;
 using Disciples.Scene.Battle.Processors.UnitActionProcessors.AttackTypeProcessors.Base;
 
 namespace Disciples.Scene.Battle.Processors;
@@ -120,13 +122,13 @@ internal class BattleProcessor
     /// </summary>
     public Squad? CheckAndSetBattleWinnerSquad()
     {
-        if (AttackingSquad.Units.All(u => u.IsDeadOrRetreated))
+        if (AttackingSquad.Units.All(u => u.IsInactive))
         {
             WinnerSquad = DefendingSquad;
             return WinnerSquad;
         }
 
-        if (DefendingSquad.Units.All(u => u.IsDeadOrRetreated))
+        if (DefendingSquad.Units.All(u => u.IsInactive))
         {
             WinnerSquad = AttackingSquad;
             return WinnerSquad;
@@ -147,7 +149,7 @@ internal class BattleProcessor
         {
             // TODO Убежавшим тоже юнитам начисляется опыт.
             // Интересно, они могут повысить уровень?
-            if (unit.IsDeadOrRetreated)
+            if (unit.IsInactive)
                 continue;
 
             var completeEffectProcessors = GetForceCompleteEffectProcessors(unit);
@@ -165,7 +167,7 @@ internal class BattleProcessor
             // TODO Вообще повышать нужно исходя из того, какое строение построено.
             // TODO Если есть юнит для повышения, но не построено здание, то по умолчанию юнит остаётся с NextLevelExperience - 1.
             var upgradeUnit = upgradeUnitsTypes.Count > 0
-                ? new Unit(unit.Id, upgradeUnitsTypes.GetRandomElement(), unit.Player, unit.SquadLinePosition, unit.SquadFlankPosition)
+                ? new Unit(unit.Id, upgradeUnitsTypes.GetRandomElement(), unit.Player, unit.Squad, unit.SquadLinePosition, unit.SquadFlankPosition)
                 : Unit.CreateNextLevelUnit(unit);
             processors.Add(new UnitCompleteBattleProcessor(unit, upgradeUnit, winnerSquad, completeEffectProcessors));
             unit.BattleExperience = 0;
@@ -184,7 +186,7 @@ internal class BattleProcessor
     {
         var allAvailableUnits = AttackingSquad.Units
             .Concat(DefendingSquad.Units)
-            .Where(u => !u.IsDeadOrRetreated)
+            .Where(u => !u.IsInactive)
             .ToArray();
         var turnOrders = allAvailableUnits
             .Select(u => new UnitTurnOrder(u, u.Initiative + RandomGenerator.Get(0, INITIATIVE_RANGE)));
@@ -275,6 +277,26 @@ internal class BattleProcessor
     }
 
     /// <summary>
+    /// Получить юнитов, которые будут вызваны при атаке.
+    /// </summary>
+    private IReadOnlyList<Unit> GetSummonAttackTargetUnits(
+        UnitSquadPosition targetPosition,
+        out CalculatedUnitAttack? unitAttack,
+        out bool isAlternativeAttackUsed)
+    {
+        var mainAttack = CurrentUnit.MainAttack;
+        if (mainAttack.AttackType != UnitAttackType.Summon)
+            throw new InvalidOperationException($"Unit {CurrentUnit.Id} is not summoner");
+
+        unitAttack = mainAttack;
+        isAlternativeAttackUsed = false;
+
+        var summonProcessor = (SummonAttackProcessor)_attackTypeProcessors[unitAttack.AttackType];
+        var context = GetProcessorContext();
+        return summonProcessor.GetSummonedUnits(context, targetPosition);
+    }
+
+    /// <summary>
     /// Проверить, можно ли атаковать указанного юнита.
     /// </summary>
     private bool CanAttack(Unit targetUnit,
@@ -311,14 +333,47 @@ internal class BattleProcessor
     #region Рассчет атаки
 
     /// <summary>
-    /// Выполнить атаку юнита с помощью основной атаки.
+    /// Получить позиции, куда может быть призван юнит.
+    /// </summary>
+    public IReadOnlyList<UnitSquadPosition> GetSummonPositions()
+    {
+        if (CurrentUnit.UnitType.MainAttack.AttackType != UnitAttackType.Summon)
+            throw new InvalidOperationException("Текущий юнит не имеет атаки призыва");
+
+        var summonProcessor = (SummonAttackProcessor)_attackTypeProcessors[CurrentUnit.UnitType.MainAttack.AttackType];
+        var context = GetProcessorContext();
+        return summonProcessor.GetSummonPositions(context);
+    }
+
+    /// <summary>
+    /// Выполнить юнита с помощью основной атаки.
     /// Атака выполняется на весь отряд, если атака по площади.
     /// </summary>
-    public MainAttackResult ProcessMainAttack(Unit targetUnit)
+    public MainAttackResult ProcessMainAttack(Squad targetSquad, UnitSquadPosition targetPosition)
     {
-        var squadTargetUnits = GetMainAttackTargetUnits(targetUnit,
-            out var attack,
-            out var isAlternativeAttackUsed);
+        IReadOnlyList<Unit> squadTargetUnits;
+        CalculatedUnitAttack? attack;
+        bool isAlternativeAttackUsed;
+
+        // Если юнит призыватель, то проверяем возможность призыва.
+        if (CurrentUnit.UnitType.MainAttack.AttackType == UnitAttackType.Summon &&
+            targetSquad.Player == CurrentUnit.Player)
+        {
+            squadTargetUnits = GetSummonAttackTargetUnits(targetPosition,
+                out attack,
+                out isAlternativeAttackUsed);
+        }
+        else
+        {
+            var targetUnit = targetSquad.GetUnits(targetPosition).FirstOrDefault();
+            if (targetUnit == null)
+                throw new InvalidOperationException("Невозможно атаковать указанную позицию");
+
+            squadTargetUnits = GetMainAttackTargetUnits(targetUnit,
+                out attack,
+                out isAlternativeAttackUsed);
+        }
+
         if (attack == null)
             throw new InvalidOperationException("Невозможно атаковать указанного юнита");
 
@@ -474,12 +529,29 @@ internal class BattleProcessor
             processors.Add(new DefendCompletedProcessor(CurrentUnit));
 
         // Отступление возможно только в том случае, если юнит можешь совершить ход.
-        if (CurrentUnit.Effects.IsRetreating && !CurrentUnit.Effects.IsParalyzed)
+        if (CurrentUnit.Effects is { IsRetreating: true, IsParalyzed: false })
         {
-            processors.Add(new UnitRetreatedProcessor(CurrentUnit, GetForceCompleteEffectProcessors(CurrentUnit)));
+            processors.Add(new UnitRetreatedProcessor(
+                CurrentUnit,
+                GetForceCompleteEffectProcessors(CurrentUnit),
+                GetUnsommonProcessors(CurrentUnit)));
         }
 
         return processors;
+    }
+
+    /// <summary>
+    /// Получить обработчики для изгнания всех вызванных юнитов указанным.
+    /// </summary>
+    private IReadOnlyList<IUnitEffectProcessor> GetUnsommonProcessors(Unit summonerUnit)
+    {
+        var currentUnitSquad = GetUnitSquad(summonerUnit);
+        var summonedTargetUnits = currentUnitSquad
+            .Units
+            .Where(u => u != summonerUnit &&
+                        u.Effects.IsSummoned &&
+                        u.Effects.GetBattleEffects(UnitAttackType.Summon)[0].DurationControlUnit == summonerUnit);
+        return summonedTargetUnits.SelectMany(GetForceCompleteEffectProcessors).ToList();
     }
 
     /// <summary>
@@ -491,6 +563,16 @@ internal class BattleProcessor
 
         var attackProcessorContext = GetAttackProcessorContext(targetUnit);
         var targetUnitBattleEffects = targetUnit.Effects.GetBattleEffects();
+
+        // Если юнит призван, то обрабатываем только один эффект - его уничтожение.
+        var isSummoned = targetUnit.Effects.IsSummoned;
+        if (isSummoned)
+        {
+            var summonedEffect = targetUnitBattleEffects.First(e => e.AttackType == UnitAttackType.Summon);
+            processors.AddRange(GetAttackEffectProcessors(attackProcessorContext, new []{ summonedEffect }, true));
+            return processors;
+        }
+
         processors.AddRange(GetAttackEffectProcessors(attackProcessorContext, targetUnitBattleEffects, true));
 
         if (targetUnit.Effects.IsDefended)
@@ -571,17 +653,24 @@ internal class BattleProcessor
 
         return new UnitDeathProcessor(targetUnit,
             GetUnitEnemySquad(targetUnit),
-            GetForceCompleteEffectProcessors(targetUnit));
+            GetForceCompleteEffectProcessors(targetUnit),
+            GetUnsommonProcessors(targetUnit));
     }
 
     #endregion
 
-    #region Окончание битвы
-
-
-    #endregion
-
     #region Контексты и вспомогательные методы.
+
+    /// <summary>
+    /// Получить контекст битвы.
+    /// </summary>
+    public BattleProcessorContext GetProcessorContext()
+    {
+        return new BattleProcessorContext(
+            CurrentUnit,
+            AttackingSquad, DefendingSquad,
+            UnitTurnQueue, RoundNumber);
+    }
 
     /// <summary>
     /// Получить контекст атаки на указанного юнита.

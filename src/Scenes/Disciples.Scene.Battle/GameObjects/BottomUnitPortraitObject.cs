@@ -95,11 +95,13 @@ internal class BottomUnitPortraitObject : GameObject
 
         // Вычисляем юнита, который должен отображаться.
         // Если BattleUnit null, то отображаем последнего юнита (BattleUnit становится null, когда снимается выделение с него).
-        // Также делаем хитрый хак: если юнит изменился (превращение, повышение уровня), то мы получим нового юнита через _battleContext.GetBattleUnit.
+        // Также делаем хитрый хак: если юнит изменился (превращение, повышение уровня), то мы получим нового юнита через _battleContext.TryGetBattleUnit.
+        // Try нужен, чтобы корректно обрабатывать убийство призванного юнита (он удаляется из отряда).
+        // TODO Можно будет отказаться от этой логики, если будет принудительно меняться юнит после превращения.
         var displayUnit = BattleUnit?.Unit ?? _displayBattleUnit?.Unit;
         var displayBattleUnit = displayUnit == null
             ? null
-            : _battleContext.GetBattleUnit(displayUnit);
+            : _battleContext.TryGetBattleUnit(displayUnit);
         if (_displayBattleUnit != displayBattleUnit && displayBattleUnit != null)
         {
             _displayBattleUnit = displayBattleUnit;

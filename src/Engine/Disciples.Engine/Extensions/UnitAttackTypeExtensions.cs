@@ -18,6 +18,7 @@ public static class UnitAttackTypeExtensions
             case UnitAttackType.IncreaseDamage:
             case UnitAttackType.Revive:
             case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
             case UnitAttackType.GiveAdditionalAttack:
             case UnitAttackType.TransformSelf:
             case UnitAttackType.GiveProtection:

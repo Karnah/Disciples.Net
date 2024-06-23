@@ -26,6 +26,11 @@ public class SelectionComponent : BaseComponent
     public bool IsHover { get; private set; }
 
     /// <summary>
+    /// Признак, что объект доступен для выделения.
+    /// </summary>
+    public bool IsSelectionEnabled { get; set; } = true;
+
+    /// <summary>
     /// Обработать наведение указателя на объект.
     /// </summary>
     public void Hovered()

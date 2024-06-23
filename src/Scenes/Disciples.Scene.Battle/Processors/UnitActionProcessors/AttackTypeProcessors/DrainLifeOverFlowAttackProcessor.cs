@@ -45,7 +45,7 @@ internal class DrainLifeOverFlowAttackProcessor : BaseDirectDamageAttackProcesso
             .Context
             .CurrentUnitSquad
             .Units
-            .Where(u => u != attackingUnit && !u.IsDeadOrRetreated && u.HitPoints < u.MaxHitPoints)
+            .Where(u => u != attackingUnit && !u.IsInactive && u.HitPoints < u.MaxHitPoints)
             .OrderBy(u => u.MaxHitPoints - u.HitPoints)
             .ToArray();
         for (var unitIndex = 0; unitIndex < damagedUnits.Length; unitIndex++)
