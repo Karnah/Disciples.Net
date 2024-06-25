@@ -1,10 +1,8 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
-using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Controllers;
 
@@ -23,7 +21,7 @@ internal interface IBattleGameObjectContainer : IGameObjectContainer
     /// <summary>
     /// Добавить плейсхолдер для вызываемого юнита.
     /// </summary>
-    SummonPlaceholder AddSummonPlaceholder(BattleUnitPosition position, RectangleD bounds);
+    SummonPlaceholder AddSummonPlaceholder(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition, RectangleD bounds);
 
     /// <summary>
     /// Добавить портрет юнита на сцену.

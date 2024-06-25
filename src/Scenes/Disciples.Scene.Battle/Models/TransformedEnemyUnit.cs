@@ -17,7 +17,7 @@ internal class TransformedEnemyUnit : Unit, ITransformedUnit
     /// Создать объект типа <see cref="TransformedEnemyUnit" />.
     /// </summary>
     public TransformedEnemyUnit(Unit originalUnit, UnitType transformedUnitType)
-        : base(originalUnit.Id, transformedUnitType, originalUnit.Player, originalUnit.Squad, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
+        : base(originalUnit.Id, transformedUnitType, originalUnit.Player, originalUnit.Squad, originalUnit.Position)
     {
         _baseUnit = originalUnit;
 

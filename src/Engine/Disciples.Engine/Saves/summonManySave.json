@@ -17,7 +17,7 @@
               "Id": 2,
               "Name": null,
               "UnitTypeId": "G000UU6014", // мастер-оккультист.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 1,
               "Experience": 0,
@@ -28,7 +28,7 @@
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU8015", // кентавр-латник.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 2,
               "Experience": 0,
@@ -39,7 +39,7 @@
               "Id": 6,
               "Name": null,
               "UnitTypeId": "G000UU0029", // холмовой великан.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 3,
               "SquadFlankPosition": 0,
               "Level": 1,
               "Experience": 0,
@@ -61,7 +61,7 @@
               "Id": 10,
               "Name": null,
               "UnitTypeId": "G000UU0165", // мастер рун.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 5,
               "Experience": 0,

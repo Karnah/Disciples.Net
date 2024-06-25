@@ -167,7 +167,7 @@ internal class BattleProcessor
             // TODO Вообще повышать нужно исходя из того, какое строение построено.
             // TODO Если есть юнит для повышения, но не построено здание, то по умолчанию юнит остаётся с NextLevelExperience - 1.
             var upgradeUnit = upgradeUnitsTypes.Count > 0
-                ? new Unit(unit.Id, upgradeUnitsTypes.GetRandomElement(), unit.Player, unit.Squad, unit.SquadLinePosition, unit.SquadFlankPosition)
+                ? new Unit(unit.Id, upgradeUnitsTypes.GetRandomElement(), unit.Player, unit.Squad, unit.Position)
                 : Unit.CreateNextLevelUnit(unit);
             processors.Add(new UnitCompleteBattleProcessor(unit, upgradeUnit, winnerSquad, completeEffectProcessors));
             unit.BattleExperience = 0;
@@ -365,7 +365,7 @@ internal class BattleProcessor
         }
         else
         {
-            var targetUnit = targetSquad.GetUnits(targetPosition).FirstOrDefault();
+            var targetUnit = targetSquad.GetUnits(targetPosition).SingleOrDefault();
             if (targetUnit == null)
                 throw new InvalidOperationException("Невозможно атаковать указанную позицию");
 

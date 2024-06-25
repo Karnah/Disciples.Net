@@ -1,6 +1,6 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Base;
-using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 

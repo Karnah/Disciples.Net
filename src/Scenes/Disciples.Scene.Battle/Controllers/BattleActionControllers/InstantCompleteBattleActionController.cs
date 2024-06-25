@@ -86,11 +86,9 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
 
             // Обрабатываем превращение юнита (из-за снятого эффекта или повышения уровня).
             var unitSquad = _battleProcessor.GetUnitSquad(battleUnit.Unit);
-            var positionUnit = unitSquad.Units.First(u =>
-                u.SquadLinePosition == battleUnit.Unit.SquadLinePosition &&
-                u.SquadFlankPosition == battleUnit.Unit.SquadFlankPosition);
-            if (battleUnit.Unit != positionUnit)
-                ReplaceUnit(battleUnit, positionUnit);
+            var newUnit = unitSquad.Units.First(u => u.Id == battleUnit.Unit.Id);
+            if (battleUnit.Unit != newUnit)
+                ReplaceUnit(battleUnit, newUnit);
         }
     }
 

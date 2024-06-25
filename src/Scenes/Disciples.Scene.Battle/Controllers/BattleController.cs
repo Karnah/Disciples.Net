@@ -200,7 +200,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
                 var squadPosition = command.TargetSquad == _battleProcessor.AttackingSquad
                     ? BattleSquadPosition.Attacker
                     : BattleSquadPosition.Defender;
-                _actionFactory.BeginMainAttack(new BattleUnitPosition(squadPosition, command.TargetPosition!.Value));
+                _actionFactory.BeginMainAttack(squadPosition, command.TargetPosition!.Value);
                 break;
 
             case BattleCommandType.Defend:

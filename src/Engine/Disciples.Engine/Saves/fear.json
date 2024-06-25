@@ -17,7 +17,7 @@
               "Id": 2,
               "Name": null,
               "UnitTypeId": "G000UU0073", // баронесса.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 10,
               "Experience": 0,
@@ -28,7 +28,7 @@
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU0092", // оборотень.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 1,
               "Experience": 0,
@@ -50,7 +50,7 @@
               "Id": 10,
               "Name": null,
               "UnitTypeId": "G000UU0165", // мастер рун.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 5,
               "Experience": 0,
@@ -61,7 +61,7 @@
               "Id": 11,
               "Name": null,
               "UnitTypeId": "G000UU0039", // король гномов.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 0,
               "Level": 5,
               "Experience": 0,

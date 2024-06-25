@@ -384,8 +384,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         var portraits = new List<UnitPortraitObject>();
         foreach (var battleUnit in battleUnits)
         {
-            var portraitBounds = GetBounds(battleUnit.UnitPosition, battleUnit.Unit.UnitType.IsSmall, panel.PortraitPlaceholders);
-            var hitPointsBounds = GetBounds(battleUnit.UnitPosition, battleUnit.Unit.UnitType.IsSmall, panel.HitPointsPlaceholders);
+            var portraitBounds = GetBounds(battleUnit.SquadPosition, battleUnit.Unit.Position, panel.PortraitPlaceholders);
+            var hitPointsBounds = GetBounds(battleUnit.SquadPosition, battleUnit.Unit.Position, panel.HitPointsPlaceholders);
             var portrait = _battleGameObjectContainer.AddUnitPortrait(battleUnit.Unit, squadPosition, portraitBounds, hitPointsBounds);
             portraits.Add(portrait);
 
@@ -400,15 +400,14 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Получить координаты на сцене для рамки портрета юнита.
     /// </summary>
-    private static RectangleD GetBounds(BattleUnitPosition position, bool isSmall, IReadOnlyDictionary<int, SceneElement> placeholders)
+    private static RectangleD GetBounds(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition, IReadOnlyDictionary<int, SceneElement> placeholders)
     {
-        var (linePosition, flankPosition) = position.UnitPosition.GetPosition();
-        var placeholderId = GetPlaceholderId(linePosition, flankPosition, position.SquadPosition);
+        var placeholderId = GetPlaceholderId(unitPosition.Line, unitPosition.Flank, squadPosition);
         var placeholderPosition = placeholders[placeholderId].Position;
-        if (isSmall)
+        if (unitPosition.Line != UnitSquadLinePosition.Both)
             return placeholderPosition;
 
-        var secondPlaceHolderId = GetPlaceholderId(UnitSquadLinePosition.Back, flankPosition, position.SquadPosition);
+        var secondPlaceHolderId = GetPlaceholderId(UnitSquadLinePosition.Back, unitPosition.Flank, squadPosition);
         var secondPlaceHolderPosition = placeholders[secondPlaceHolderId].Position;
         return RectangleD.Union(placeholderPosition, secondPlaceHolderPosition);
     }
@@ -418,8 +417,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     private static int GetPlaceholderId(UnitSquadLinePosition squadLinePosition, UnitSquadFlankPosition squadFlankPosition, BattleSquadPosition squadPosition)
     {
-        var lineOffset = (int)squadLinePosition;
-        var flankOffset = (int)squadFlankPosition;
+        var lineOffset = squadLinePosition.ToIndex();
+        var flankOffset = squadFlankPosition.ToIndex();
 
         return squadPosition == BattleSquadPosition.Defender
             ? 6 - lineOffset - flankOffset * 2
@@ -538,7 +537,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             {
                 foreach (var summonPlaceholder in _context.SummonPlaceholders)
                 {
-                    var bounds = GetBounds(summonPlaceholder.Position, true, panel.PortraitPlaceholders);
+                    var bounds = GetBounds(summonPlaceholder.SquadPosition, summonPlaceholder.UnitPosition, panel.PortraitPlaceholders);
                     unitPanelAnimations.Add(
                         _battleGameObjectContainer.AddAnimation(
                             _interfaceProvider.GetUnitSummonBorder(),
@@ -570,15 +569,15 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         var summonPlaceholders = new List<SummonPlaceholder>();
         foreach (var mainAreaSummonPlaceholder in _context.SummonPlaceholders)
         {
-            var bounds = GetBounds(mainAreaSummonPlaceholder.Position, true, panel.PortraitPlaceholders);
-            var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(mainAreaSummonPlaceholder.Position, bounds);
+            var bounds = GetBounds(mainAreaSummonPlaceholder.SquadPosition, mainAreaSummonPlaceholder.UnitPosition, panel.PortraitPlaceholders);
+            var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(mainAreaSummonPlaceholder.SquadPosition, mainAreaSummonPlaceholder.UnitPosition, bounds);
             summonPlaceholder.AnimationComponent.IsEnabled = false;
             summonPlaceholders.Add(summonPlaceholder);
 
             // Если плейсхолдер перекрывает юнита, то запрещаем выделять его.
             // Все события будет обрабатывать плейсхолдер.
             var hiddenPortraits = _context
-                .GetBattleUnits(mainAreaSummonPlaceholder.Position)
+                .GetBattleUnits(mainAreaSummonPlaceholder.SquadPosition, mainAreaSummonPlaceholder.UnitPosition)
                 .Select(GetUnitPortrait);
             foreach (var hiddenUnitPortrait in hiddenPortraits)
             {

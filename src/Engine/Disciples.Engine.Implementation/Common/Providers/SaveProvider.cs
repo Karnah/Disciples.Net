@@ -272,14 +272,17 @@ internal class SaveProvider : ISaveProvider
         var maxHitPoints = unitType.HitPoints
                            + unitType.LowLevelUpgradeHitPoints * lowLevelDiff
                            + unitType.HighLevelUpgradeHitPoints * highLevelDiff;
+        var linePosition = unitType.IsSmall
+            ? IsFromLineUnit(unitType)
+                ? UnitSquadLinePosition.Front
+                : UnitSquadLinePosition.Back
+            : UnitSquadLinePosition.Both;
 
         return new SquadUnit
         {
             Id = RandomGenerator.GetUnitId(),
             UnitTypeId = unitType.Id,
-            SquadLinePosition = IsFromLineUnit(unitType)
-                ? UnitSquadLinePosition.Front
-                : UnitSquadLinePosition.Back,
+            SquadLinePosition = linePosition,
             SquadFlankPosition = flankPosition,
             Level = unitLevel,
             Experience = 0,

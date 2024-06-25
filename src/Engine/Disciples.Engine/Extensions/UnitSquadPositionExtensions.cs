@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 
 namespace Disciples.Engine.Extensions;
 
@@ -9,81 +11,97 @@ namespace Disciples.Engine.Extensions;
 public static class UnitSquadPositionExtensions
 {
     /// <summary>
-    /// Возможные позиции для юнита.
+    /// Все возможные позиции для маленьких юнитов в отряде.
     /// </summary>
-    public static readonly IReadOnlyList<UnitSquadPosition> Positions = new[]
-    {
-        UnitSquadPosition.BackBottom,
-        UnitSquadPosition.BackCenter,
-        UnitSquadPosition.BackTop,
-        UnitSquadPosition.FrontBottom,
-        UnitSquadPosition.FrontCenter,
-        UnitSquadPosition.FrontTop,
-    };
+    public static IReadOnlyList<UnitSquadPosition> Positions { get; } = GetPositions();
 
     /// <summary>
     /// Проверить, пересекаются ли две позиции.
     /// </summary>
-    public static bool IsIntersect(this UnitSquadPosition position, UnitSquadPosition otherPosition)
+    public static bool IsIntersect(this UnitSquadPosition squadPosition, UnitSquadPosition otherSquadPosition)
     {
-        var intersection = position & otherPosition;
-        var isLineIntersect = intersection.HasFlag(UnitSquadPosition.Back) ||
-                              intersection.HasFlag(UnitSquadPosition.Front);
-        var isFlankIntersect = intersection.HasFlag(UnitSquadPosition.Bottom) ||
-                               intersection.HasFlag(UnitSquadPosition.Center) ||
-                               intersection.HasFlag(UnitSquadPosition.Top);
-        return isLineIntersect && isFlankIntersect;
+        return squadPosition.Line.IsIntersect(otherSquadPosition.Line) &&
+               squadPosition.Flank == otherSquadPosition.Flank;
     }
 
     /// <summary>
-    /// Получить позицию юнита в отряде.
+    /// Проверить, пересекаются ли две позиции.
     /// </summary>
-    public static UnitSquadPosition GetPosition(bool isSmall, UnitSquadLinePosition linePosition, UnitSquadFlankPosition flankPosition)
+    public static bool IsIntersect(this UnitSquadLinePosition linePosition, UnitSquadLinePosition otherLinePosition)
     {
-        var line = isSmall
-            ? 1 << (int)linePosition
-            : (int)UnitSquadPosition.Big;
-        var flank = 1 << ((int)flankPosition + 5);
-        return (UnitSquadPosition) (line | flank);
+        return (linePosition & otherLinePosition) != UnitSquadLinePosition.None;
     }
 
     /// <summary>
-    /// Получить позицию юнита в отряде.
+    /// Превратить линию в позицию смещения.
     /// </summary>
-    public static (UnitSquadLinePosition LinePosition, UnitSquadFlankPosition FlankPosition) GetPosition(this UnitSquadPosition position)
+    public static int ToIndex(this UnitSquadLinePosition linePosition)
     {
-        var linePosition = position.HasFlag(UnitSquadPosition.Front)
-            ? UnitSquadLinePosition.Front
-            : UnitSquadLinePosition.Back;
-        var flankPosition = position.HasFlag(UnitSquadPosition.Top)
-            ? UnitSquadFlankPosition.Top
-            : position.HasFlag(UnitSquadPosition.Center)
-                ? UnitSquadFlankPosition.Center
-                : UnitSquadFlankPosition.Bottom;
-        return (linePosition, flankPosition);
+        return linePosition switch
+        {
+            UnitSquadLinePosition.Back => 0,
+            UnitSquadLinePosition.Front => 1,
+            // Большие юниты считаются как юниты первой линии.
+            UnitSquadLinePosition.Both => 1,
+            _ => throw new ArgumentOutOfRangeException(nameof(linePosition), linePosition, null)
+        };
     }
 
     /// <summary>
-    /// Получить линию.
+    /// Превратить линию в позицию смещения в обратном порядке.
     /// </summary>
-    public static UnitSquadPosition GetLine(this UnitSquadPosition position)
+    public static int ToReverseIndex(this UnitSquadLinePosition linePosition)
     {
-        return position & UnitSquadPosition.HorizontalLine;
+        return 1 - linePosition.ToIndex();
     }
 
     /// <summary>
-    /// Получить позицию по вертикали.
+    /// Превратить положение в позицию смещения.
     /// </summary>
-    public static UnitSquadPosition GetFlank(this UnitSquadPosition position)
+    public static int ToIndex(this UnitSquadFlankPosition flankPosition)
     {
-        return position & UnitSquadPosition.VerticalLine;
+        return (int)flankPosition;
     }
 
     /// <summary>
-    /// Получить ту же позицию на другой линии.
+    /// Превратить положение в позицию смещения в обратном порядке.
+    /// </summary>
+    public static int ToReverseIndex(this UnitSquadFlankPosition flankPosition)
+    {
+        return 2 - flankPosition.ToIndex();
+    }
+
+    /// <summary>
+    /// Получить позицию на противоположной линии.
     /// </summary>
     public static UnitSquadPosition GetOtherLine(this UnitSquadPosition position)
     {
-        return position ^ UnitSquadPosition.HorizontalLine;
+        return new UnitSquadPosition(position.Line.GetOtherLine(), position.Flank);
+    }
+
+    /// <summary>
+    /// Получить противоположную линию.
+    /// </summary>
+    public static UnitSquadLinePosition GetOtherLine(this UnitSquadLinePosition linePosition)
+    {
+        return linePosition switch
+        {
+            UnitSquadLinePosition.Back => UnitSquadLinePosition.Front,
+            UnitSquadLinePosition.Front => UnitSquadLinePosition.Back,
+            UnitSquadLinePosition.Both => UnitSquadLinePosition.Both,
+            _ => throw new ArgumentOutOfRangeException(nameof(linePosition), linePosition, null)
+        };
+    }
+
+    /// <summary>
+    /// Получить все возможные позиции для маленьких юнитов в отряде.
+    /// </summary>
+    private static IReadOnlyList<UnitSquadPosition> GetPositions()
+    {
+        var positions = new List<UnitSquadPosition>(6);
+        foreach (var line in new[] { UnitSquadLinePosition.Back, UnitSquadLinePosition.Front })
+        foreach (var flank in new [] { UnitSquadFlankPosition.Bottom, UnitSquadFlankPosition.Center, UnitSquadFlankPosition.Top })
+            positions.Add(new UnitSquadPosition(line, flank));
+        return positions;
     }
 }

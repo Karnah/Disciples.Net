@@ -1,6 +1,8 @@
-﻿using DryIoc;
+﻿using Disciples.Engine.Common.Models;
+using DryIoc;
 using Microsoft.Extensions.Logging;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers;
+using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
 
@@ -39,11 +41,11 @@ internal class BattleActionFactory
     /// <summary>
     /// Обработать атаку текущего юнита на указанную позицию.
     /// </summary>
-    public void BeginMainAttack(BattleUnitPosition unitPosition)
+    public void BeginMainAttack(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition)
     {
-        _logger.LogDebug("Begin main attack, target position: {targetUnit}", unitPosition);
+        _logger.LogDebug("Begin main attack, target position: {squadPosition} {unitPosition}", squadPosition, unitPosition);
 
-        var mainAttackController = _resolver.Resolve<MainAttackActionController>(new object[] { unitPosition });
+        var mainAttackController = _resolver.Resolve<MainAttackActionController>(new object[] { squadPosition, unitPosition });
         _battleContext.AddAction(mainAttackController);
     }
 

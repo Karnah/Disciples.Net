@@ -7,7 +7,6 @@ using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Components;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
-using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
@@ -144,11 +143,6 @@ internal class BattleUnit : GameObject
     /// Позиция отряда юнита.
     /// </summary>
     public BattleSquadPosition SquadPosition { get; }
-
-    /// <summary>
-    /// Позиция юнита
-    /// </summary>
-    public BattleUnitPosition UnitPosition => new(SquadPosition, Unit.SquadPosition);
 
     /// <summary>
     /// Направление, куда смотрит юнит.

@@ -18,7 +18,7 @@ public class Unit
     /// </summary>
     public static Unit CreateNextLevelUnit(Unit oldUnit)
     {
-        var newUnit = new Unit(oldUnit.Id, oldUnit.UnitType, oldUnit.Player, oldUnit.Squad, oldUnit.SquadLinePosition, oldUnit.SquadFlankPosition);
+        var newUnit = new Unit(oldUnit.Id, oldUnit.UnitType, oldUnit.Player, oldUnit.Squad, oldUnit.Position);
         newUnit.Level = oldUnit.Level + 1;
         newUnit.HitPoints = newUnit.MaxHitPoints;
 
@@ -33,17 +33,14 @@ public class Unit
         UnitType unitType,
         Player player,
         Squad squad,
-        UnitSquadLinePosition squadLinePosition,
-        UnitSquadFlankPosition squadFlankPosition)
+        UnitSquadPosition position)
     {
         Id = id;
         IsLeader = unitType.UnitCategory is UnitCategory.Leader or UnitCategory.NeutralLeader or UnitCategory.LeaderThief;
         UnitType = unitType;
         Player = player;
-
         Squad = squad;
-        SquadLinePosition = squadLinePosition;
-        SquadFlankPosition = squadFlankPosition;
+        Position = position;
 
         Level = UnitType.Level;
         Experience = 0;
@@ -81,20 +78,9 @@ public class Unit
     public Squad Squad { get; set; }
 
     /// <summary>
-    /// На какой линии располагается юнит в отряде.
-    /// </summary>
-    public UnitSquadLinePosition SquadLinePosition { get; set; }
-
-    /// <summary>
-    /// На какой позиции находится юнит в отряде.
-    /// </summary>
-    public UnitSquadFlankPosition SquadFlankPosition { get; set; }
-
-    /// <summary>
     /// Позиция юнита в отряде.
     /// </summary>
-    public UnitSquadPosition SquadPosition =>
-        UnitSquadPositionExtensions.GetPosition(UnitType.IsSmall, SquadLinePosition, SquadFlankPosition);
+    public UnitSquadPosition Position { get; set; }
 
     /// <summary>
     /// Имя юнита.

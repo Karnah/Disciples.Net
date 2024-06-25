@@ -6,7 +6,6 @@ using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.Providers;
-using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
@@ -112,9 +111,8 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         var squad = squadPosition == BattleSquadPosition.Attacker
             ? _context.AttackingBattleSquad
             : _context.DefendingBattleSquad;
-        var (linePosition, flankPosition) = unitPosition.GetPosition();
-        var battleUnitPosition = squad.GetUnitPosition(linePosition, flankPosition);
-        if (!unitPosition.HasFlag(UnitSquadPosition.Big))
+        var battleUnitPosition = squad.GetUnitPosition(unitPosition.Line, unitPosition.Flank);
+        if (unitPosition.Line != UnitSquadLinePosition.Both)
             return battleUnitPosition;
 
         // Для больших юнитов необходимо пересчитать позицию.
@@ -171,7 +169,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
         if (_isAnimating)
             return;
 
-        _actionFactory.BeginMainAttack(summonPlaceholder.Position);
+        _actionFactory.BeginMainAttack(summonPlaceholder.SquadPosition, summonPlaceholder.UnitPosition);
     }
 
     /// <inheritdoc />
@@ -179,7 +177,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
     {
         // Находим юнита, который перекрыт плейсхолдером. Выводим информацию по нему.
         var hiddenUnit = _context
-            .GetBattleUnits(summonPlaceholder.Position)
+            .GetBattleUnits(summonPlaceholder.SquadPosition, summonPlaceholder.UnitPosition)
             .FirstOrDefault();
         if (hiddenUnit != null)
             BattleUnitRightMouseButtonPressed(hiddenUnit);
@@ -280,7 +278,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
 
         if (_battleProcessor.CanAttack(targetBattleUnit.Unit))
         {
-            _actionFactory.BeginMainAttack(targetBattleUnit.UnitPosition);
+            _actionFactory.BeginMainAttack(targetBattleUnit.SquadPosition, targetBattleUnit.Unit.Position);
             return;
         }
 
@@ -296,7 +294,7 @@ internal class BattleInterfaceController : BaseSupportLoading, IBattleInterfaceC
             newTargetUnit = GetAttackBattleUnit(targetBattleUnit, alternativeAttack, secondaryAttack);
 
         if (newTargetUnit != null)
-            _actionFactory.BeginMainAttack(newTargetUnit.UnitPosition);
+            _actionFactory.BeginMainAttack(newTargetUnit.SquadPosition, newTargetUnit.Unit.Position);
     }
 
     /// <summary>

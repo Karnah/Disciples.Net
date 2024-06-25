@@ -15,10 +15,9 @@ internal class SummonedUnit : Unit
         UnitType unitType,
         Player player,
         Squad squad,
-        UnitSquadLinePosition squadLinePosition,
-        UnitSquadFlankPosition squadFlankPosition,
+        UnitSquadPosition position,
         IReadOnlyList<Unit> hiddenUnits
-        ) : base(Guid.NewGuid().ToString(), unitType, player, squad, squadLinePosition, squadFlankPosition)
+        ) : base(Guid.NewGuid().ToString(), unitType, player, squad, position)
     {
         HiddenUnits = hiddenUnits;
     }

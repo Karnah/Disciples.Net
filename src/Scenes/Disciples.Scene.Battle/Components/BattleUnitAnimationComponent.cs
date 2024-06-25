@@ -5,6 +5,7 @@ using Disciples.Engine.Common.Components;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
 using Disciples.Engine.Common.SceneObjects;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -153,12 +154,12 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
         var unitBaseLayer = battleUnit.IsAttacker
             ? BattleLayers.ATTACKER_UNIT_BASE_LAYER
             : BattleLayers.DEFENDER_UNIT_BASE_LAYER;
-        var battleLine = battleUnit.IsAttacker
-            ? (int)battleUnit.Unit.SquadLinePosition
-            : 3 - (int)battleUnit.Unit.SquadLinePosition;
-        var flankPosition = 2 - (int)battleUnit.Unit.SquadFlankPosition;
+        var linePosition = battleUnit.IsAttacker
+            ? battleUnit.Unit.Position.Line.ToIndex()
+            : battleUnit.Unit.Position.Line.ToReverseIndex();
+        var flankPosition = battleUnit.Unit.Position.Flank.ToReverseIndex();
 
-        return unitBaseLayer + flankPosition * 100 + battleLine * 10;
+        return unitBaseLayer + flankPosition * 100 + linePosition * 10;
     }
 
     /// <summary>

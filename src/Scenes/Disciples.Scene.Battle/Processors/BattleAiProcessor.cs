@@ -220,7 +220,7 @@ internal class BattleAiProcessor
             return null;
 
         // Приоритет для вызова - передняя линия, так как она защищает призывателя.
-        var summonPosition = summonPositions.MaxBy(s => s.HasFlag(UnitSquadPosition.Front));
+        var summonPosition = summonPositions.MaxBy(sp => sp.Line == UnitSquadLinePosition.Front);
         return new BattleAiCommand(_battleProcessor.GetUnitSquad(attackingUnit), summonPosition);
     }
 

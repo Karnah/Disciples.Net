@@ -188,11 +188,11 @@ internal class BattleContext : BaseSupportLoading
     /// <summary>
     /// Получить юнитов на указанной позиции.
     /// </summary>
-    public IEnumerable<BattleUnit> GetBattleUnits(BattleUnitPosition position)
+    public IEnumerable<BattleUnit> GetBattleUnits(BattleSquadPosition squadPosition, UnitSquadPosition unitPosition)
     {
         return BattleUnits
-            .Where(bu => bu.SquadPosition == position.SquadPosition &&
-                                  bu.UnitPosition.UnitPosition.IsIntersect(position.UnitPosition));
+            .Where(bu => bu.SquadPosition == squadPosition &&
+                                  bu.Unit.Position.IsIntersect(unitPosition));
     }
 
     /// <summary>

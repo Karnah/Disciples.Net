@@ -94,7 +94,7 @@ internal class BattleBottomPanelController : BaseSupportLoading
 
         if (_context.Action is MainAttackActionController mainAttackUnitAction)
         {
-            var targetUnit = _context.GetBattleUnits(mainAttackUnitAction.TargetPosition).FirstOrDefault();
+            var targetUnit = _context.GetBattleUnits(mainAttackUnitAction.TargetSquadPosition, mainAttackUnitAction.TargetUnitPosition).FirstOrDefault();
             UpdateTargetUnitPortrait(targetUnit);
         }
     }

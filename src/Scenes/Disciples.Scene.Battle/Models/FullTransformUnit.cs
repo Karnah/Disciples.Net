@@ -16,7 +16,7 @@ internal class FullTransformUnit : Unit, ITransformedUnit
     /// Создать объект типа <see cref="FullTransformUnit" />.
     /// </summary>
     public FullTransformUnit(Unit originalUnit, UnitType unitType)
-        : base(originalUnit.Id, unitType, originalUnit.Player, originalUnit.Squad, originalUnit.SquadLinePosition, originalUnit.SquadFlankPosition)
+        : base(originalUnit.Id, unitType, originalUnit.Player, originalUnit.Squad, originalUnit.Position)
     {
         OriginalUnit = originalUnit is ITransformedUnit transformedUnit
             ? transformedUnit.OriginalUnit

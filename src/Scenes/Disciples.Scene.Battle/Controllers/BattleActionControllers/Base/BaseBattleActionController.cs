@@ -241,9 +241,9 @@ internal abstract class BaseBattleActionController : IBattleActionController
                 // Если там тоже призванный юнит, то пока возвращать исходного юнита на место нельзя.
                 if (summonedUnit.UnitType.IsSmall && !hiddenUnit.UnitType.IsSmall)
                 {
-                    var otherLinePosition = summonedUnit.SquadPosition.GetOtherLine();
-                    var otherSummonedBattleUnit = _context.GetBattleUnits(new BattleUnitPosition(targetBattleUnit.SquadPosition, otherLinePosition)).FirstOrDefault();
-                    if (otherSummonedBattleUnit != null)
+                    var otherLinePosition = summonedUnit.Position.GetOtherLine();
+                    var hasOtherSummonedBattleUnit = _context.GetBattleUnits(targetBattleUnit.SquadPosition, otherLinePosition).Any();
+                    if (hasOtherSummonedBattleUnit)
                         continue;
                 }
 

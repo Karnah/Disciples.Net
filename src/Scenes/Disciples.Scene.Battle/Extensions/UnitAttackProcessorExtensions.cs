@@ -1,6 +1,7 @@
 ﻿using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 using Disciples.Scene.Battle.Models;
 
 namespace Disciples.Scene.Battle.Extensions;
@@ -57,22 +58,16 @@ internal static class UnitAttackProcessorExtensions
             return true;
 
         // Атакующий юнит сзади, впереди мешает линия союзников.
-        if (attackingUnit.SquadLinePosition == UnitSquadLinePosition.Back && !IsFrontLineEmpty(attackingSquad))
+        if (attackingUnit.Position.Line == UnitSquadLinePosition.Back && !IsFrontLineEmpty(attackingSquad))
             return false;
 
         // Цель находится на задней линии, но на передней линии есть юниты.
-        if (targetUnit.SquadLinePosition == UnitSquadLinePosition.Back && !IsFrontLineEmpty(targetSquad))
+        if (targetUnit.Position.Line == UnitSquadLinePosition.Back && !IsFrontLineEmpty(targetSquad))
             return false;
 
         // Проверка, может ли юнит дотянуться до врага.
-        if (!CanAttackOnFlank(
-                attackingUnit.SquadFlankPosition,
-                targetUnit.SquadFlankPosition,
-                targetUnit.SquadLinePosition,
-                targetSquad))
-        {
+        if (!CanAttackOnFlank(attackingUnit.Position, targetUnit.Position, targetSquad))
             return false;
-        }
 
         return true;
     }
@@ -82,37 +77,30 @@ internal static class UnitAttackProcessorExtensions
     /// </summary>
     private static bool IsFrontLineEmpty(Squad squad)
     {
-        return !squad.Units.Any(u => u.SquadLinePosition == UnitSquadLinePosition.Front && !u.IsInactive);
+        return !squad.Units.Any(u => u.Position.Line.HasFlag(UnitSquadLinePosition.Front) && !u.IsInactive);
     }
 
     /// <summary>
     /// Проверить, можно ли атаковать цель в зависимости от расположения на фланге.
     /// </summary>
     private static bool CanAttackOnFlank(
-        UnitSquadFlankPosition currentUnitFlankPosition,
-        UnitSquadFlankPosition targetUnitFlankPosition,
-        UnitSquadLinePosition targetUnitLinePosition,
+        UnitSquadPosition currentUnitPosition,
+        UnitSquadPosition targetUnitPosition,
         Squad targetSquad)
     {
+        var line = targetUnitPosition.Line == UnitSquadLinePosition.Both
+            ? UnitSquadLinePosition.Front
+            : targetUnitPosition.Line;
+
         // Если юниты находятся по разные стороны флагов и занят вражеский центр или соседняя с атакующим клетка, то атаковать нельзя.
-        if (Math.Abs(currentUnitFlankPosition - targetUnitFlankPosition) > 1 &&
-            (!IsPlaceEmpty(targetSquad, targetUnitLinePosition, UnitSquadFlankPosition.Center)
-             || !IsPlaceEmpty(targetSquad, targetUnitLinePosition, currentUnitFlankPosition)))
+        if (Math.Abs(currentUnitPosition.Flank - targetUnitPosition.Flank) > 1 &&
+            (targetSquad.IsPositionBusy(line, UnitSquadFlankPosition.Center, u => !u.IsInactive) ||
+             targetSquad.IsPositionBusy(line, currentUnitPosition.Flank, u => !u.IsInactive)))
         {
             return false;
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Проверить, свободна ли клетка на арене.
-    /// </summary>
-    private static bool IsPlaceEmpty(Squad squad, UnitSquadLinePosition linePosition, UnitSquadFlankPosition flankPosition)
-    {
-        return squad.Units.Any(u => u.SquadLinePosition == linePosition &&
-                                    u.SquadFlankPosition == flankPosition &&
-                                    u.IsInactive == false) == false;
     }
 
     #endregion

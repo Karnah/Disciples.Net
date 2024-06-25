@@ -57,9 +57,9 @@ internal class SummonAttackProcessor : BaseEffectAttackProcessor
             // Если там тоже призванный юнит, то пока возвращать исходного юнита на место нельзя.
             if (summonedUnit.UnitType.IsSmall && !hiddenUnit.UnitType.IsSmall)
             {
-                var otherLinePosition = summonedUnit.SquadPosition.GetOtherLine();
-                var otherSummonedUnit = squad.GetUnits(otherLinePosition).OfType<SummonedUnit>().FirstOrDefault();
-                if (otherSummonedUnit != null)
+                var otherLinePosition = summonedUnit.Position.GetOtherLine();
+                var hasOtherSummonedUnit = squad.IsPositionBusy(otherLinePosition, u => u is SummonedUnit);
+                if (hasOtherSummonedUnit)
                     continue;
             }
 
@@ -89,10 +89,10 @@ internal class SummonAttackProcessor : BaseEffectAttackProcessor
         foreach (var position in summonPositions.Where(p => currentUnit.MainAttack.Reach == UnitAttackReach.All || p == summonPosition))
         {
             // Позиция могла быть уже занята ранее большим юнитом.
-            if (bigSummonUnitTypes.Count > 0 && summonUnits.Any(su=> su.SquadPosition.IsIntersect(position)))
+            if (bigSummonUnitTypes.Count > 0 && summonUnits.Any(su=> su.Position.IsIntersect(position)))
                 continue;
 
-            // Если юнит имеет вызывать больших существ и есть место для него
+            // Если юнит имеет вызывать больших существ и есть место для него.
             var canSummonBigUnit = bigSummonUnitTypes.Count > 0 &&
                                    summonPositions.Any(sp => sp == position.GetOtherLine());
             var summonUnitType = canSummonBigUnit
@@ -112,11 +112,7 @@ internal class SummonAttackProcessor : BaseEffectAttackProcessor
         var currentUnitSquad = context.CurrentUnitSquad;
         return UnitSquadPositionExtensions
             .Positions
-            .Where(p =>
-            {
-                var existingUnit = currentUnitSquad.GetUnits(p).FirstOrDefault();
-                return existingUnit == null || existingUnit.IsInactive;
-            })
+            .Where(p => currentUnitSquad.IsPositionEmpty(p, u => !u.IsInactive))
             .ToList();
     }
 
@@ -125,10 +121,9 @@ internal class SummonAttackProcessor : BaseEffectAttackProcessor
     /// </summary>
     private static SummonedUnit GetSummonedUnit(UnitType unitType, UnitSquadPosition position, Squad squad)
     {
-        if (!unitType.IsSmall)
-            position |= UnitSquadPosition.Big;
-
-        var (linePosition, flankPosition) = position.GetPosition();
+        position = unitType.IsSmall
+            ? position
+            : new UnitSquadPosition(UnitSquadLinePosition.Both, position.Flank);
 
         // Вычисляем какие юниты перекрываются вызываемым юнитом.
         // Также отдельно обрабатываем следующий случай: в отряде был большой юнит, он умер/сбежал.
@@ -143,6 +138,6 @@ internal class SummonAttackProcessor : BaseEffectAttackProcessor
                 hiddenUnits.Add(bigHiddenUnit);
         }
 
-        return new SummonedUnit(unitType, squad.Player, squad, linePosition, flankPosition, hiddenUnits);
+        return new SummonedUnit(unitType, squad.Player, squad, position, hiddenUnits);
     }
 }

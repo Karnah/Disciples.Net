@@ -17,7 +17,7 @@
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU8015", // кентавр-латник.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 20,
               "Experience": 0,
@@ -28,7 +28,7 @@
               "Id": 6,
               "Name": null,
               "UnitTypeId": "G000UU0173", // суккуб.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 2,
               "Level": 4,
               "Experience": 0,
@@ -39,7 +39,7 @@
               "Id": 7,
               "Name": null,
               "UnitTypeId": "G000UU0068", // колдунья.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 3,
               "Experience": 0,
@@ -61,7 +61,7 @@
               "Id": 9,
               "Name": null,
               "UnitTypeId": "G000UU6104", // жирный бес.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 3,
               "SquadFlankPosition": 0,
               "Level": 1,
               "Experience": 0,
@@ -72,7 +72,7 @@
               "Id": 10,
               "Name": null,
               "UnitTypeId": "G000UU0001", // сквайр.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 1,
               "Experience": 0,
@@ -83,7 +83,7 @@
               "Id": 11,
               "Name": null,
               "UnitTypeId": "G000UU0029", // холмовой великан.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 3,
               "SquadFlankPosition": 2,
               "Level": 1,
               "Experience": 0,
@@ -94,7 +94,7 @@
               "Id": 12,
               "Name": null,
               "UnitTypeId": "G000UU5034", // бес.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 1,
               "Experience": 0,

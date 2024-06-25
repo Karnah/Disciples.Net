@@ -17,7 +17,7 @@
               "Id": 1,
               "Name": null,
               "UnitTypeId": "G000UU8023", // warden.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 2,
               "Level": 3,
               "Experience": 0,
@@ -28,7 +28,7 @@
               "Id": 2,
               "Name": null,
               "UnitTypeId": "G000UU8035", // sylph.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 4,
               "Experience": 0,
@@ -39,7 +39,7 @@
               "Id": 3,
               "Name": null,
               "UnitTypeId": "G000UU8023", // warden.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 0,
               "Level": 3,
               "Experience": 0,
@@ -50,7 +50,7 @@
               "Id": 4,
               "Name": null,
               "UnitTypeId": "G000UU8015", // centaur charger.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 2,
               "Level": 2,
               "Experience": 0,
@@ -61,7 +61,7 @@
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU8010", // dryad.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 18,
               "Experience": 0,
@@ -72,7 +72,7 @@
               "Id": 6,
               "Name": null,
               "UnitTypeId": "G000UU8015", // centaur charger.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 0,
               "Level": 2,
               "Experience": 0,
@@ -94,7 +94,7 @@
               "Id": 7,
               "Name": null,
               "UnitTypeId": "G000UU0151", // prophetess.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 1,
               "Level": 4,
               "Experience": 0,
@@ -105,7 +105,7 @@
               "Id": 8,
               "Name": null,
               "UnitTypeId": "G000UU0154", // imperial assassin.
-              "SquadLinePosition": 0,
+              "SquadLinePosition": 1,
               "SquadFlankPosition": 0,
               "Level": 3,
               "Experience": 0,
@@ -116,7 +116,7 @@
               "Id": 9,
               "Name": null,
               "UnitTypeId": "G000UU8049", // gumtic bledwater.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 3,
               "SquadFlankPosition": 2,
               "Level": 1,
               "Experience": 0,
@@ -127,7 +127,7 @@
               "Id": 10,
               "Name": null,
               "UnitTypeId": "G000UU0156", // defender of faith.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 5,
               "Experience": 0,
@@ -138,7 +138,7 @@
               "Id": 11,
               "Name": null,
               "UnitTypeId": "G000UU8150", // sir allemon.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 0,
               "Level": 1,
               "Experience": 0,

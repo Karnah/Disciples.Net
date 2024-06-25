@@ -23,7 +23,7 @@ internal class BattleAiCommand
     /// <summary>
     /// Создать объект типа <see cref="BattleAiCommand" /> с командой атаковать указанного юнита.
     /// </summary>
-    public BattleAiCommand(Unit target) : this(target.Squad, target.SquadPosition)
+    public BattleAiCommand(Unit target) : this(target.Squad, target.Position)
     {
     }
 

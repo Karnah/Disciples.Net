@@ -1,5 +1,6 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Common.Models;
 using Disciples.Scene.Battle.Constants;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Base;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
@@ -38,7 +39,8 @@ internal class MainAttackActionController : BaseAttackActionController
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController,
         BattleActionFactory actionFactory,
-        BattleUnitPosition targetPosition
+        BattleSquadPosition targetSquadPosition,
+        UnitSquadPosition targetUnitPosition
         ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
@@ -47,8 +49,14 @@ internal class MainAttackActionController : BaseAttackActionController
         _battleProcessor = battleProcessor;
         _actionFactory = actionFactory;
 
-        TargetPosition = targetPosition;
+        TargetSquadPosition = targetSquadPosition;
+        TargetUnitPosition = targetUnitPosition;
     }
+
+    /// <summary>
+    /// Целевой отряд.
+    /// </summary>
+    public BattleSquadPosition TargetSquadPosition { get; }
 
     /// <summary>
     /// Цель атаки.
@@ -57,7 +65,7 @@ internal class MainAttackActionController : BaseAttackActionController
     /// Практически для всех юнитов - это атакуемый юнит.
     /// Но для призывателя это может быть пустой клеткой.
     /// </remarks>
-    public BattleUnitPosition TargetPosition { get; }
+    public UnitSquadPosition TargetUnitPosition { get; }
 
     /// <inheritdoc />
     public override bool ShouldPassTurn { get; protected set; }
@@ -65,7 +73,7 @@ internal class MainAttackActionController : BaseAttackActionController
     /// <inheritdoc />
     protected override BattleSquadPosition? GetTargetSquadPosition()
     {
-        return TargetPosition.SquadPosition;
+        return TargetSquadPosition;
     }
 
     /// <inheritdoc />
@@ -76,10 +84,10 @@ internal class MainAttackActionController : BaseAttackActionController
         var isFirstAttack = CurrentBattleUnit.Unit.UnitType.IsAttackTwice && !_context.IsSecondAttack;
         ShouldPassTurn = !isFirstAttack;
 
-        var targetSquad = TargetPosition.SquadPosition == BattleSquadPosition.Attacker
+        var targetSquad = TargetSquadPosition == BattleSquadPosition.Attacker
             ? _battleProcessor.AttackingSquad
             : _battleProcessor.DefendingSquad;
-        _mainAttackResult = _battleProcessor.ProcessMainAttack(targetSquad, TargetPosition.UnitPosition);
+        _mainAttackResult = _battleProcessor.ProcessMainAttack(targetSquad, TargetUnitPosition);
 
         // Если юнит имеют альтернативную атаку, то анимация атаки/звук относятся именно к ней.
         // Основная атака в таком случае использует стандартную для данного типа атаки анимацию.
@@ -159,7 +167,7 @@ internal class MainAttackActionController : BaseAttackActionController
         if (_isAnimationAndSoundDisabled)
             return;
 
-        AddAttackAreaAnimationAction(CurrentBattleUnit, TargetPosition.SquadPosition);
+        AddAttackAreaAnimationAction(CurrentBattleUnit, TargetSquadPosition);
         _soundController.PlayRandomHitSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
     }
 

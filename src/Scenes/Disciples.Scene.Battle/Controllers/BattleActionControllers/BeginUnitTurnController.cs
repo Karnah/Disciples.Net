@@ -68,17 +68,17 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
         // Добавляем плейсхолдеры для возможности вызова юнита.
         else if (CurrentBattleUnit.Unit.MainAttack.AttackType == UnitAttackType.Summon)
         {
+            var squadPosition = CurrentBattleUnit.SquadPosition;
             foreach (var summonPosition in _battleProcessor.GetSummonPositions())
             {
-                var battlePosition = new BattleUnitPosition(CurrentBattleUnit.SquadPosition, summonPosition);
-                var bounds = _battleInterfaceController.GetBattleUnitPosition(battlePosition.SquadPosition, battlePosition.UnitPosition);
-                var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(battlePosition, bounds);
+                var bounds = _battleInterfaceController.GetBattleUnitPosition(squadPosition, summonPosition);
+                var summonPlaceholder = _battleGameObjectContainer.AddSummonPlaceholder(squadPosition, summonPosition, bounds);
                 _context.SummonPlaceholders.Add(summonPlaceholder);
 
                 // Если плейсхолдер перекрывает юнита, то запрещаем выделять его.
                 // Все события будет обрабатывать плейсхолдер.
                 var hiddenBattleUnit = _context
-                    .GetBattleUnits(battlePosition)
+                    .GetBattleUnits(squadPosition, summonPosition)
                     .FirstOrDefault();
                 if (hiddenBattleUnit != null)
                     hiddenBattleUnit.IsSelectionEnabled = false;

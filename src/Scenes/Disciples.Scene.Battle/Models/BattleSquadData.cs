@@ -1,6 +1,7 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Extensions;
 
 namespace Disciples.Scene.Battle.Models;
 
@@ -19,7 +20,7 @@ internal class BattleSquadData
     /// </summary>
     public RectangleD GetUnitPosition(UnitSquadLinePosition linePosition, UnitSquadFlankPosition flankPosition)
     {
-        var unitPlaceholderId = 6 - (int)linePosition - (int)flankPosition * 2;
+        var unitPlaceholderId = 6 - linePosition.ToIndex() - flankPosition.ToIndex() * 2;
         return UnitPlaceholders[unitPlaceholderId].Position;
     }
 }

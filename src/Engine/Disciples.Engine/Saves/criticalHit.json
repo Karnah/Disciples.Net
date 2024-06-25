@@ -17,7 +17,7 @@
               "Id": 5,
               "Name": null,
               "UnitTypeId": "G000UU8017", // кентавр-дикарь.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 0,
               "Level": 3,
               "Experience": 0,
@@ -28,7 +28,7 @@
               "Id": 6,
               "Name": null,
               "UnitTypeId": "G000UU8017", // кентавр-дикарь.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 3,
               "Experience": 0,
@@ -39,7 +39,7 @@
               "Id": 7,
               "Name": null,
               "UnitTypeId": "G000UU8017", // кентавр-дикарь.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 2,
               "Level": 3,
               "Experience": 0,
@@ -61,7 +61,7 @@
               "Id": 10,
               "Name": null,
               "UnitTypeId": "G000UU0165", // мастер рун.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 1,
               "Level": 5,
               "Experience": 0,
@@ -72,7 +72,7 @@
               "Id": 11,
               "Name": null,
               "UnitTypeId": "G000UU0039", // король гномов.
-              "SquadLinePosition": 1,
+              "SquadLinePosition": 2,
               "SquadFlankPosition": 0,
               "Level": 5,
               "Experience": 0,
