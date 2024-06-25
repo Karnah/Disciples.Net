@@ -1,7 +1,5 @@
 ﻿using Disciples.Engine.Common.Models;
 using Disciples.Engine.Extensions;
-using Disciples.Engine.Models;
-using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -22,12 +20,10 @@ internal abstract class BaseBattleActionController : IBattleActionController
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
     private readonly BattleBottomPanelController _bottomPanelController;
-    private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
 
     private readonly BattleActionDelayContainer _delays = new();
-    private readonly List<IPlayingSound> _playingSounds = new();
 
     /// <summary>
     /// Создать объект типа <see cref="BaseBattleActionController" />.
@@ -36,14 +32,12 @@ internal abstract class BaseBattleActionController : IBattleActionController
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
-        BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
         _bottomPanelController = bottomPanelController;
-        _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitResourceProvider = unitResourceProvider;
     }
@@ -112,13 +106,7 @@ internal abstract class BaseBattleActionController : IBattleActionController
         _delays.AfterSceneUpdate();
 
         if (IsCompleted)
-        {
-            // BUG Не нужно останавливать воспроизведение, так как некоторые звуки не успевают проиграться.
-            foreach (var playingSound in _playingSounds)
-                playingSound.Stop();
-
             OnCompleted();
-        }
     }
 
     /// <summary>
@@ -284,32 +272,5 @@ internal abstract class BaseBattleActionController : IBattleActionController
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
         AddActionDelay(new BattleAnimationDelay(unitUnsummonAnimation.AnimationComponent));
-    }
-
-    /// <summary>
-    /// Проиграть звук удаления призванного юнита.
-    /// </summary>
-    protected void PlayUnitUnsummonSound()
-    {
-        _soundController.PlayUnitUsummonSound();
-    }
-
-    /// <summary>
-    /// Проиграть случайный звук.
-    /// </summary>
-    protected void PlayRandomSound(IReadOnlyList<RawSound> sounds)
-    {
-        var sound = sounds.TryGetRandomElement();
-        if (sound != null)
-            PlaySound(sound);
-    }
-
-    /// <summary>
-    /// Проиграть звук.
-    /// </summary>
-    protected void PlaySound(RawSound sound)
-    {
-        var playingSound = _soundController.PlaySound(sound);
-        _playingSounds.Add(playingSound);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Disciples.Engine.Models;
+﻿using System;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Implementation.Models;
 
@@ -8,11 +9,21 @@ namespace Disciples.Engine.Implementation.Models;
 internal class NullPlayingSound : IPlayingSound
 {
     /// <inheritdoc />
-    public bool IsCompleted { get; private set; }
+    public bool IsCompleted { get; } = true;
+
+    /// <inheritdoc />
+    public TimeSpan PlayingPosition { get; } = TimeSpan.Zero;
+
+    /// <inheritdoc />
+    public TimeSpan Duration { get; } = TimeSpan.Zero;
 
     /// <inheritdoc />
     public void Stop()
     {
-        IsCompleted = true;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
     }
 }

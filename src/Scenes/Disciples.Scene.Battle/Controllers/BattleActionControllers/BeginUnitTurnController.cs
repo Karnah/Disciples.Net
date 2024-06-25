@@ -16,6 +16,7 @@ namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 internal class BeginUnitTurnController : BaseUnitEffectActionController
 {
     private readonly BattleContext _context;
+    private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleInterfaceController _battleInterfaceController;
@@ -29,13 +30,13 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController,
         IBattleInterfaceController battleInterfaceController
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
+        _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _battleInterfaceController = battleInterfaceController;
@@ -106,7 +107,7 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
                 {
                     AddProcessorAction(attackEffectProcessor);
                     AddAttackTypeAnimationAction(targetBattleUnit, attackType);
-                    PlayAttackTypeSound(attackType);
+                    _soundController.PlayAttackTypeSound(attackType);
 
                     return true;
                 }
@@ -119,8 +120,8 @@ internal class BeginUnitTurnController : BaseUnitEffectActionController
             if (_context.CurrentBattleUnit.Unit is SummonedUnit)
             {
                 AddUnitUnsummonAnimationAction(targetBattleUnit);
-                PlayUnitUnsummonSound();
                 RemoveBattleUnit(_context.CurrentBattleUnit);
+                _soundController.PlayUnitUsummonSound();
             }
 
             // Если сбегающий юнит вызывал других юнитов, то они будут уничтожены.

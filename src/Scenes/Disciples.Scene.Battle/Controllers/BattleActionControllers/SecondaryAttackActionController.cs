@@ -25,12 +25,11 @@ internal sealed class SecondaryAttackActionController : BaseAttackActionControll
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController,
         IReadOnlyList<BattleUnit> targetBattleUnits,
         bool shouldPassTurn
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _battleProcessor = battleProcessor;
         _targetBattleUnits = targetBattleUnits;

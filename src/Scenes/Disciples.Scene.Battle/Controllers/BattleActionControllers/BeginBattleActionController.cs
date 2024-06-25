@@ -20,10 +20,9 @@ internal class BeginBattleActionController : BaseBattleActionController
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
-        BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider
-        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, battleGameObjectContainer, unitResourceProvider)
     {
     }
 

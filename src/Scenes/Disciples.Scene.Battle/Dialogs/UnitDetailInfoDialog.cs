@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
@@ -149,10 +150,7 @@ internal class UnitDetailInfoDialog : BaseReleaseButtonCloseDialog
             GetAttackPower(mainAttack.BasePower, mainAttack.AttackType),
             mainAttack.PowerBonus);
 
-        if (secondaryAttack != null &&
-            secondaryAttack.AttackType is not UnitAttackType.ReduceDamage
-                and not UnitAttackType.ReduceInitiative
-                and not UnitAttackType.ReduceArmor)
+        if (ShouldDisplaySecondAttackDamage(secondaryAttack?.AttackType))
         {
             var secondaryAttackPower = GetValueWithModifier(
                 GetAttackPower(secondaryAttack.BasePower, secondaryAttack.AttackType),
@@ -164,6 +162,46 @@ internal class UnitDetailInfoDialog : BaseReleaseButtonCloseDialog
         }
 
         return mainAttackPower;
+    }
+
+    /// <summary>
+    /// Проверить, нужно ли отображать урон второй атаки.
+    /// </summary>
+    private static bool ShouldDisplaySecondAttackDamage([NotNullWhen(true)]UnitAttackType? attackType)
+    {
+        switch (attackType)
+        {
+            case UnitAttackType.Damage:
+            case UnitAttackType.DrainLife:
+            case UnitAttackType.Heal:
+            case UnitAttackType.IncreaseDamage:
+            case UnitAttackType.Poison:
+            case UnitAttackType.Frostbite:
+            case UnitAttackType.DrainLifeOverflow:
+            case UnitAttackType.Blister:
+                return true;
+
+            case UnitAttackType.Paralyze:
+            case UnitAttackType.Fear:
+            case UnitAttackType.Petrify:
+            case UnitAttackType.ReduceDamage:
+            case UnitAttackType.ReduceInitiative:
+            case UnitAttackType.Revive:
+            case UnitAttackType.Cure:
+            case UnitAttackType.Summon:
+            case UnitAttackType.ReduceLevel:
+            case UnitAttackType.GiveAdditionalAttack:
+            case UnitAttackType.Doppelganger:
+            case UnitAttackType.TransformSelf:
+            case UnitAttackType.TransformEnemy:
+            case UnitAttackType.GiveProtection:
+            case UnitAttackType.ReduceArmor:
+            case null:
+                return false;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(attackType), attackType, null);
+        }
     }
 
     /// <summary>

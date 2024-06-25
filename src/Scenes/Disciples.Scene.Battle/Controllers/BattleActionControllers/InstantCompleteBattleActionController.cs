@@ -25,12 +25,11 @@ internal class InstantCompleteBattleActionController : BaseBattleActionControlle
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
-        BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
         BattleInstantProcessor battleInstantProcessor,
         BattleProcessor battleProcessor
-        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;

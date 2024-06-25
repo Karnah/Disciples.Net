@@ -1,4 +1,6 @@
-﻿using Disciples.Engine.Models;
+﻿using System;
+using System.Diagnostics;
+using Disciples.Engine.Models;
 using ManagedBass;
 
 namespace Disciples.Engine.Implementation.Models;
@@ -9,6 +11,7 @@ namespace Disciples.Engine.Implementation.Models;
 internal class BassPlayingSound : IPlayingSound
 {
     private readonly int _soundHandle;
+    private readonly Stopwatch _playingStopwatch;
 
     private bool _isDisposed;
 
@@ -18,18 +21,49 @@ internal class BassPlayingSound : IPlayingSound
     public BassPlayingSound(int soundHandle)
     {
         _soundHandle = soundHandle;
+        _playingStopwatch = Stopwatch.StartNew();
+
+        var byteLength = Bass.ChannelGetLength(_soundHandle);
+        var durationSeconds = Bass.ChannelBytes2Seconds(_soundHandle, byteLength);
+        Duration = TimeSpan.FromSeconds(durationSeconds);
+    }
+
+    ~BassPlayingSound()
+    {
+        ReleaseUnmanagedResources();
     }
 
     /// <inheritdoc />
-    public bool IsCompleted => _isDisposed || Bass.ChannelIsActive(_soundHandle) != PlaybackState.Playing;
+    public TimeSpan PlayingPosition => _playingStopwatch.Elapsed;
+
+    /// <inheritdoc />
+    public TimeSpan Duration { get; }
+
+    /// <inheritdoc />
+    public bool IsCompleted => _isDisposed || PlayingPosition >= Duration;
 
     /// <inheritdoc />
     public void Stop()
     {
+        Dispose();
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _playingStopwatch.Stop();
+        ReleaseUnmanagedResources();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Освободить неуправляемые ресурсы.
+    /// </summary>
+    private void ReleaseUnmanagedResources()
+    {
         if (_isDisposed)
             return;
 
-        // TODO Реализовать через IDisposable?
         Bass.ChannelStop(_soundHandle);
         Bass.MusicFree(_soundHandle);
 

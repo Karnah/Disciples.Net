@@ -20,11 +20,10 @@ internal class WaitUnitActionController : BaseBattleActionController
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
-        BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         BattleProcessor battleProcessor,
         IBattleUnitResourceProvider unitResourceProvider
-        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, battleGameObjectContainer, unitResourceProvider)
     {
         _battleProcessor = battleProcessor;
     }

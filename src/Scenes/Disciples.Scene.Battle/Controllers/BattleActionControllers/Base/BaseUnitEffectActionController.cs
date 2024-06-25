@@ -1,5 +1,4 @@
 ﻿using Disciples.Engine.Common.Enums.Units;
-using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Controllers.BattleActionControllers.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
@@ -17,20 +16,10 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
 {
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
-    private readonly IBattleResourceProvider _battleResourceProvider;
     private readonly BattleProcessor _battleProcessor;
-
-    /// <summary>
-    /// Признак, что проигрывается звук получения урона юнитом.
-    /// </summary>
-    private bool _isDamagedSoundPlaying;
-
-    /// <summary>
-    /// Признак, что проигрывается звук смерти.
-    /// </summary>
-    private bool _isDeathSoundPlaying;
 
     /// <summary>
     /// Очередь из обработчиков эффектов.
@@ -57,16 +46,15 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController
-        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
+        ) : base(context, unitPortraitPanelController, bottomPanelController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitResourceProvider = unitResourceProvider;
-        _battleResourceProvider = battleResourceProvider;
         _battleProcessor = battleProcessor;
     }
 
@@ -146,7 +134,7 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
                 {
                     AddProcessorAction(attackEffectProcessor);
                     AddUnitUnsummonAnimationAction(targetBattleUnit);
-                    PlayUnitUnsummonSound();
+                    _soundController.PlayUnitUsummonSound();
                     return true;
                 }
 
@@ -157,7 +145,7 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
                 {
                     AddProcessorAction(attackEffectProcessor);
                     AddAttackTypeAnimationAction(targetBattleUnit, attackType);
-                    PlayAttackTypeSound(attackType);
+                    _soundController.PlayAttackTypeSound(attackType);
                     return true;
                 }
             }
@@ -244,7 +232,7 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
 
         AddProcessorAction(unitDeathProcessor);
         AddUnitDeathAnimationAction(targetBattleUnit);
-        PlayUnitDeathSound();
+        _soundController.PlayUnitDeathSound();
 
         // Если юнит был превращён, то сразу возвращаем портрет оригинального юнита.
         // При этом BattleUnit будет сброшен только в конце.
@@ -303,21 +291,8 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
         if (targetBattleUnit.Unit is SummonedUnit)
         {
             RemoveBattleUnit(targetBattleUnit);
-            PlayUnitUnsummonSound();
+            _soundController.PlayUnitUsummonSound();
         }
-    }
-
-    /// <summary>
-    /// Проиграть звук смерти юнита.
-    /// </summary>
-    private void PlayUnitDeathSound()
-    {
-        // Если несколько юнитов умирает сразу, то звук проигрываем только один раз.
-        if (_isDeathSoundPlaying)
-            return;
-
-        _isDeathSoundPlaying = true;
-        PlaySound(_battleResourceProvider.UnitDeathSound);
     }
 
     #endregion
@@ -341,32 +316,6 @@ internal abstract class BaseUnitEffectActionController : BaseBattleActionControl
             battleUnit.AnimationComponent.Layer + 2,
             false);
         AddActionDelay(new BattleAnimationDelay(animation.AnimationComponent));
-    }
-
-    /// <summary>
-    /// Проиграть случай звук получения урона.
-    /// </summary>
-    protected void PlayRandomDamagedSound(IReadOnlyList<RawSound> sounds)
-    {
-        // Если несколько юнитов получили урон, то звук будет проигрываться только один раз.
-        if (_isDamagedSoundPlaying)
-            return;
-
-        _isDamagedSoundPlaying = true;
-        PlayRandomSound(sounds);
-    }
-
-    protected void PlayAttackTypeSound(UnitAttackType attackType)
-    {
-        if (_isDamagedSoundPlaying)
-            return;
-
-        var attackSound = _battleResourceProvider.GetAttackTypeSound(attackType);
-        if (attackSound == null)
-            return;
-
-        _isDamagedSoundPlaying = true;
-        PlaySound(attackSound);
     }
 
     #endregion

@@ -19,12 +19,7 @@ internal class CompleteBattleActionController : BaseBattleActionController
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
-    private readonly IBattleResourceProvider _battleResourceProvider;
-
-    /// <summary>
-    /// Признак, что проигрывается звук повышения уровня юнитом.
-    /// </summary>
-    private bool _isUnitLevelUpSoundPlaying;
+    private readonly BattleSoundController _soundController;
 
     /// <summary>
     /// Создать объект типа <see cref="CompleteBattleActionController" />.
@@ -33,19 +28,18 @@ internal class CompleteBattleActionController : BaseBattleActionController
         BattleContext context,
         BattleUnitPortraitPanelController unitPortraitPanelController,
         BattleBottomPanelController bottomPanelController,
-        BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
         BattleProcessor battleProcessor,
-        IBattleResourceProvider battleResourceProvider
-        ) : base(context, unitPortraitPanelController, bottomPanelController, soundController, battleGameObjectContainer, unitResourceProvider)
+        BattleSoundController soundController
+        ) : base(context, unitPortraitPanelController, bottomPanelController, battleGameObjectContainer, unitResourceProvider)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _unitResourceProvider = unitResourceProvider;
-        _battleResourceProvider = battleResourceProvider;
+        _soundController = soundController;
     }
 
     /// <inheritdoc />
@@ -111,7 +105,7 @@ internal class CompleteBattleActionController : BaseBattleActionController
         targetUnitPortrait?.ChangeUnit(unitCompleteBattleProcessor.LevelUpUnit);
 
         AddUnitLevelUpAnimationAction(targetBattleUnit);
-        PlayUnitLevelUpSound();
+        _soundController.PlayUnitLevelUpSound();
 
         AddActionDelay(new BattleTimerDelay(SMALL_ACTION_DELAY,
             () => OnUnitCompleteBattleProcessorActionCompleted(unitCompleteBattleProcessor)));
@@ -143,17 +137,5 @@ internal class CompleteBattleActionController : BaseBattleActionController
             targetBattleUnit.AnimationComponent.Layer + 2,
             false);
         AddActionDelay(new BattleAnimationDelay(unitLevelUpAnimation.AnimationComponent));
-    }
-
-    /// <summary>
-    /// Добавить звук повышения уровня юнитом.
-    /// </summary>
-    private void PlayUnitLevelUpSound()
-    {
-        if (_isUnitLevelUpSoundPlaying)
-            return;
-
-        _isUnitLevelUpSoundPlaying = true;
-        PlaySound(_battleResourceProvider.UnitLevelUpSound);
     }
 }

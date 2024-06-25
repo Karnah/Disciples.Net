@@ -18,6 +18,7 @@ namespace Disciples.Scene.Battle.Controllers.BattleActionControllers;
 internal class MainAttackActionController : BaseAttackActionController
 {
     private readonly BattleContext _context;
+    private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly BattleProcessor _battleProcessor;
     private readonly BattleActionFactory _actionFactory;
@@ -34,14 +35,14 @@ internal class MainAttackActionController : BaseAttackActionController
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController,
         BattleActionFactory actionFactory,
         BattleUnitPosition targetPosition
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
+        _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _battleProcessor = battleProcessor;
         _actionFactory = actionFactory;
@@ -123,7 +124,7 @@ internal class MainAttackActionController : BaseAttackActionController
     /// </summary>
     private void PlayAttackSound()
     {
-        PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.AttackSounds);
+        _soundController.PlayRandomAttackSound(CurrentBattleUnit.SoundComponent.Sounds.AttackSounds);
     }
 
     /// <summary>
@@ -159,7 +160,7 @@ internal class MainAttackActionController : BaseAttackActionController
             return;
 
         AddAttackAreaAnimationAction(CurrentBattleUnit, TargetPosition.SquadPosition);
-        PlayRandomSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
+        _soundController.PlayRandomHitSound(CurrentBattleUnit.SoundComponent.Sounds.HitTargetSounds);
     }
 
     /// <inheritdoc />

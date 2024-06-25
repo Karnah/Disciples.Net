@@ -23,10 +23,9 @@ internal class BeforeCompleteBattleActionController : BaseUnitEffectActionContro
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
         _battleProcessor = battleProcessor;

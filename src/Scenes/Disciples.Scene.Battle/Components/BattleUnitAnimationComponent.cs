@@ -154,13 +154,11 @@ internal class BattleUnitAnimationComponent : BaseAnimationComponent
             ? BattleLayers.ATTACKER_UNIT_BASE_LAYER
             : BattleLayers.DEFENDER_UNIT_BASE_LAYER;
         var battleLine = battleUnit.IsAttacker
-            ? battleUnit.Unit.UnitType.IsSmall
-                ? (int)battleUnit.Unit.SquadLinePosition
-                : (int)UnitSquadLinePosition.Back
+            ? (int)battleUnit.Unit.SquadLinePosition
             : 3 - (int)battleUnit.Unit.SquadLinePosition;
         var flankPosition = 2 - (int)battleUnit.Unit.SquadFlankPosition;
 
-        return unitBaseLayer + battleLine * 100 + flankPosition * 10;
+        return unitBaseLayer + flankPosition * 100 + battleLine * 10;
     }
 
     /// <summary>

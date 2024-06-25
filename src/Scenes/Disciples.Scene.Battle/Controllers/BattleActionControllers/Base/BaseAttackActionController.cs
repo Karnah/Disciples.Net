@@ -16,6 +16,7 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
 {
     private readonly BattleContext _context;
     private readonly BattleUnitPortraitPanelController _unitPortraitPanelController;
+    private readonly BattleSoundController _soundController;
     private readonly IBattleGameObjectContainer _battleGameObjectContainer;
     private readonly IBattleUnitResourceProvider _unitResourceProvider;
     private readonly BattleProcessor _battleProcessor;
@@ -29,13 +30,13 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
         BattleSoundController soundController,
         IBattleGameObjectContainer battleGameObjectContainer,
         IBattleUnitResourceProvider unitResourceProvider,
-        IBattleResourceProvider battleResourceProvider,
         BattleProcessor battleProcessor,
         BattleBottomPanelController bottomPanelController
-        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleResourceProvider, battleProcessor, bottomPanelController)
+        ) : base(context, unitPortraitPanelController, soundController, battleGameObjectContainer, unitResourceProvider, battleProcessor, bottomPanelController)
     {
         _context = context;
         _unitPortraitPanelController = unitPortraitPanelController;
+        _soundController = soundController;
         _battleGameObjectContainer = battleGameObjectContainer;
         _unitResourceProvider = unitResourceProvider;
         _battleProcessor = battleProcessor;
@@ -123,7 +124,7 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
                 targetBattleUnit.UnitState = BattleUnitState.TakingDamage;
                 AddActionDelay(new BattleAnimationDelay(targetBattleUnit.AnimationComponent,
                     () => OnUnitDamagedAnimationCompleted(targetBattleUnit)));
-                PlayRandomDamagedSound(targetBattleUnit.SoundComponent.Sounds.DamagedSounds);
+                _soundController.PlayRandomDamagedSound(targetBattleUnit.SoundComponent.Sounds.DamagedSounds);
                 break;
             }
 
@@ -147,7 +148,7 @@ internal abstract class BaseAttackActionController : BaseUnitEffectActionControl
             }
         }
 
-        PlayAttackTypeSound(attackResult.AttackType);
+        _soundController.PlayAttackTypeSound(attackType);
     }
 
     /// <summary>
