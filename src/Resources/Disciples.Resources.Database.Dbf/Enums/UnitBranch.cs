@@ -24,14 +24,19 @@ public enum UnitBranch
     Mage = 2,
 
     /// <summary>
-    /// Специальный юнит.
+    /// Юнит поддержки.
     /// </summary>
-    Special = 3,
+    Support = 3,
 
     /// <summary>
-    /// todo
+    /// Особый юнит расы.
     /// </summary>
-    Sideshow = 4,
+    /// <remarks>
+    /// Для империи - титан.
+    /// Для нежити - оборотень.
+    /// И так далее. Требует отдельного здания для найма.
+    /// </remarks>
+    Special = 4,
 
     /// <summary>
     /// Герой.

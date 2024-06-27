@@ -154,6 +154,8 @@ internal class BattleProcessor
 
             var completeEffectProcessors = GetForceCompleteEffectProcessors(unit);
 
+            // Начисляем минимум 1 единицу опыта. Может быть такое, что все юниты сбежали.
+            unit.BattleExperience = Math.Max(unit.BattleExperience, 1);
             var nextLevelExperience = unit.NextLevelExperience - unit.Experience;
             if (unit.BattleExperience < nextLevelExperience)
             {
@@ -314,7 +316,7 @@ internal class BattleProcessor
             return true;
         }
 
-        // BUG Доппельгангер может атаковать альтернативной атакой только в том случае,
+        // BUG: Доппельгангер может атаковать альтернативной атакой только в том случае,
         // Если не может ни в кого превратиться на поле боя.
         var alternativeAttack = attackingUnit.AlternativeAttack;
         if (alternativeAttack != null && CanAttack(targetUnit, alternativeAttack, secondaryAttack))
@@ -489,7 +491,10 @@ internal class BattleProcessor
         if (attackSourceProtection?.ProtectionCategory == ProtectionCategory.Immunity)
             return new ImmunityAttackProcessor(targetUnit);
 
-        var chanceOfAttack = RandomGenerator.Get(0, 100);
+        // Для расчета точности используется более хитрая формула.
+        // Увеличен шанс попадания при шансе атаки выше 50.
+        // Уменьшен, если шанс атаки ниже 50.
+        var chanceOfAttack = (RandomGenerator.Get(0, 100) + RandomGenerator.Get(0, 100)) / 2;
         if (chanceOfAttack >= unitAttack.TotalAccuracy)
             return new MissAttackProcessor(targetUnit);
 

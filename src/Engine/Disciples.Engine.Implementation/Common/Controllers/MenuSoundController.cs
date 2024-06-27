@@ -1,5 +1,6 @@
 ﻿using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Providers;
+using Disciples.Engine.Extensions;
 using Disciples.Engine.Implementation.Base;
 using Disciples.Engine.Models;
 
@@ -37,7 +38,6 @@ public class MenuSoundController : BaseSupportLoading
     /// </summary>
     public void AfterSceneUpdate()
     {
-        // TODO Проверять это раз в секунду, не чаще.
         if (_backgroundSound?.IsCompleted != false)
             _backgroundSound = GetBackgroundSound();
     }
@@ -68,6 +68,7 @@ public class MenuSoundController : BaseSupportLoading
     /// </summary>
     private IPlayingSound GetBackgroundSound()
     {
-        return _soundController.PlayBackground(_soundProvider.MenuSound);
+        var sound = _soundProvider.MenuSounds.GetRandomElement();
+        return _soundController.PlayBackground(sound);
     }
 }

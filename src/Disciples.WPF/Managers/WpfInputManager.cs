@@ -103,7 +103,6 @@ public class WpfInputManager : IInputManager
         if (keyboardButton == null)
             return;
 
-        // todo Не обрабатываю событие того, что кнопку отпустили. Вроде как сейчас и не нужно.
         KeyButtonEvent?.Invoke(this, new KeyButtonEventArgs(keyboardButton.Value, ButtonState.Pressed));
     }
 

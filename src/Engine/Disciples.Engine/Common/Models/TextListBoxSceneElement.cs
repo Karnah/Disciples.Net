@@ -72,18 +72,18 @@ public class TextListBoxSceneElement : SceneElement
     public TextStyle? CommonTextStyle { get; init; }
 
     /// <summary>
-    /// Изображение для выделенного элемента.
+    /// Изображение для выделенного элемента?
     /// </summary>
     /// <remarks>
-    /// TODO Не уверен, что правильное описание.
+    /// Не уверен, что корректное назначение. В ресурсах игры не используется.
     /// </remarks>
     public IBitmap? SelectionImageName { get; init; }
 
     /// <summary>
-    /// Изображения для неактивного элемента.
+    /// Изображения для неактивного элемента?
     /// </summary>
     /// <remarks>
-    /// TODO Не уверен, что правильное описание.
+    /// Не уверен, что корректное назначение. В ресурсах игры не используется.
     /// </remarks>
     public IBitmap? UnselectedImageName { get; init; }
 

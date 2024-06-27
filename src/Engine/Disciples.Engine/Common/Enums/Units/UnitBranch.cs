@@ -8,40 +8,45 @@ public enum UnitBranch
     /// <summary>
     /// Боец ближнего боя.
     /// </summary>
-    Fighter,
+    Fighter = 0,
 
     /// <summary>
     /// Стрелок.
     /// </summary>
-    Archer,
+    Archer = 1,
 
     /// <summary>
     /// Маг.
     /// </summary>
-    Mage,
+    Mage = 2,
 
     /// <summary>
-    /// Специальный юнит.
+    /// Юнит поддержки.
     /// </summary>
-    Special,
+    Support = 3,
 
     /// <summary>
-    /// todo
+    /// Особый юнит расы.
     /// </summary>
-    Sideshow,
+    /// <remarks>
+    /// Для империи - титан.
+    /// Для нежити - оборотень.
+    /// И так далее. Требует отдельного здания для найма.
+    /// </remarks>
+    Special = 4,
 
     /// <summary>
     /// Герой.
     /// </summary>
-    Leader,
+    Leader = 5,
 
     /// <summary>
     /// Лидер-вор.
     /// </summary>
-    LeaderThief,
+    LeaderThief = 6,
 
     /// <summary>
     /// Вызванный юнит.
     /// </summary>
-    Summon
+    Summon = 7
 }

@@ -28,8 +28,8 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     private readonly BattleSoundsMappingExtractor _soundMappingExtractor;
 
     private readonly Dictionary<(string unidId, BattleDirection direction), BattleUnitAnimation> _unitsAnimations = new();
-    private readonly Dictionary<(UnitAttackType effectAttackType, bool isSmall), AnimationFrames> _effectsAnimations = new();
-    private readonly Dictionary<(RaceType RaceType, bool isSmall), AnimationFrames> _unitLevelUpAnimations = new();
+    private readonly Dictionary<UnitAttackType, UnitAnimationFrames> _effectsAnimations = new();
+    private readonly Dictionary<RaceType, UnitAnimationFrames> _unitLevelUpAnimations = new();
     private readonly Dictionary<string, BattleUnitSounds> _unitSounds;
 
     /// <inheritdoc />
@@ -50,25 +50,16 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     }
 
     /// <inheritdoc />
-    public AnimationFrames SmallUnitTurnAnimationFrames { get; private set; } = null!;
+    public UnitAnimationFrames UnitTurnAnimationFrames { get; private set; } = null!;
 
     /// <inheritdoc />
-    public AnimationFrames BigUnitTurnAnimationFrames { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public AnimationFrames SmallUnitTargetAnimationFrames { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public AnimationFrames BigUnitTargetAnimationFrames { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public AnimationFrames SmallUnitUnsummonAnimationFrames { get; private set; } = null!;
-
-    /// <inheritdoc />
-    public AnimationFrames BigUnitUnsummonAnimationFrames { get; private set; } = null!;
+    public UnitAnimationFrames UnitTargetAnimationFrames { get; private set; } = null!;
 
     /// <inheritdoc />
     public AnimationFrames SummonPlaceholderAnimationFrames { get; private set; } = null!;
+
+    /// <inheritdoc />
+    public UnitAnimationFrames UnitUnsummonAnimationFrames { get; private set; } = null!;
 
     /// <inheritdoc />
     public AnimationFrames DrainLifeHealAnimationFrames { get; private set; } = null!;
@@ -108,21 +99,28 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
         if (!effectAttackType.HasResourceKey())
             return null;
 
-        var animationKey = (effectAttackType, isSmall: isSmallUnit);
-        if (!_effectsAnimations.ContainsKey(animationKey))
-            _effectsAnimations[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, isSmallUnit).Key);
+        if (!_effectsAnimations.ContainsKey(effectAttackType))
+        {
+            _effectsAnimations[effectAttackType] = new UnitAnimationFrames(
+                _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, true).Key),
+                _battleResourceProvider.GetBattleAnimation(new UnitBattleEffectAnimationResourceKey(effectAttackType, false).Key));
+        }
 
-        return _effectsAnimations[animationKey];
+        return _effectsAnimations[effectAttackType].GetAnimationFrames(isSmallUnit);
     }
 
     /// <inheritdoc />
     public AnimationFrames GetUnitLevelUpAnimation(UnitType unitType)
     {
-        var animationKey = (unitType.RaceType, isSmall: unitType.IsSmall);
-        if (!_unitLevelUpAnimations.ContainsKey(animationKey))
-            _unitLevelUpAnimations[animationKey] = _battleResourceProvider.GetBattleAnimation(new UnitLevelUpAnimationResourceKey(unitType.RaceType, unitType.IsSmall).Key);
+        var raceType = unitType.RaceType;
+        if (!_unitLevelUpAnimations.ContainsKey(raceType))
+        {
+            _unitLevelUpAnimations[raceType] = new UnitAnimationFrames(
+                _battleResourceProvider.GetBattleAnimation(new UnitLevelUpAnimationResourceKey(unitType.RaceType, true).Key),
+                _battleResourceProvider.GetBattleAnimation(new UnitLevelUpAnimationResourceKey(unitType.RaceType, true).Key));
+        }
 
-        return _unitLevelUpAnimations[animationKey];
+        return _unitLevelUpAnimations[raceType].GetAnimationFrames(unitType.IsSmall);
     }
 
     /// <inheritdoc />
@@ -141,13 +139,16 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// <inheritdoc />
     protected override void LoadInternal()
     {
-        SmallUnitTurnAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKCURSMALLA");
-        BigUnitTurnAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKCURLARGEA");
-        SmallUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKSMALLA");
-        BigUnitTargetAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKLARGEA");
+        UnitTurnAnimationFrames = new UnitAnimationFrames(
+            _battleResourceProvider.GetBattleAnimation("MRKCURSMALLA"),
+            _battleResourceProvider.GetBattleAnimation("MRKCURLARGEA"));
+        UnitTargetAnimationFrames = new UnitAnimationFrames(
+            _battleResourceProvider.GetBattleAnimation("MRKSMALLA"),
+            _battleResourceProvider.GetBattleAnimation("MRKLARGEA"));
         SummonPlaceholderAnimationFrames = _battleResourceProvider.GetBattleAnimation("MRKEMPTYSMALLA");
-        SmallUnitUnsummonAnimationFrames = _battleResourceProvider.GetBattleAnimation("USUMMONANIMS");
-        BigUnitUnsummonAnimationFrames = _battleResourceProvider.GetBattleAnimation("USUMMONANIML");
+        UnitUnsummonAnimationFrames = new UnitAnimationFrames(
+            _battleResourceProvider.GetBattleAnimation("USUMMONANIMS"),
+            _battleResourceProvider.GetBattleAnimation("USUMMONANIML"));
         DrainLifeHealAnimationFrames = GetAnimationFrames(new StaticResourceKey("HEALTUCHA1B00"));
     }
 

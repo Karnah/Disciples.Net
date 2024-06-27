@@ -61,10 +61,7 @@ internal class CureAttackProcessor : IAttackTypeProcessor
             var effectProcessor = _effectAttackProcessors.Value[battleEffect.AttackType];
             var calculateEffect = effectProcessor.CalculateEffect(attackResult.Context, battleEffect, true);
             if (calculateEffect == null)
-            {
-                // TODO Logger.Fatal
-                continue;
-            }
+                throw new InvalidOperationException($"Curing of {battleEffect.AttackType} is not allowed");
 
             effectProcessor.ProcessEffect(calculateEffect);
         }

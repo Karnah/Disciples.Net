@@ -6,9 +6,9 @@
 public enum LeaderAbilityType
 {
     /// <summary>
-    /// TODO Фанатик?
+    /// Улучшенное зрение.
     /// </summary>
-    Zealot = 1,
+    KeenSight = 1,
 
     /// <summary>
     /// Защита от воров.

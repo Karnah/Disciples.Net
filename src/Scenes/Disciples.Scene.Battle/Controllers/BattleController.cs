@@ -1,5 +1,4 @@
-﻿using Disciples.Engine.Common.Models;
-using Disciples.Engine.Implementation.Base;
+﻿using Disciples.Engine.Implementation.Base;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.GameObjects;
 using Disciples.Scene.Battle.Models;
@@ -157,7 +156,7 @@ internal class BattleController : BaseSupportLoading, IBattleController
             return;
         }
 
-        // BUG Сейчас есть проблемы с эффектами, которые привязаны в ходу юнита, который наложил его.
+        // BUG: Сейчас есть проблемы с эффектами, которые привязаны к ходу юнита, который наложил его.
         // Например, усиление урона или даровать защиту.
         // Если юнит умирает, то игра не сбрасывает такие эффекты.
         // По-хорошему, таких юнитов нужно сохранять в очереди и вызывать для них обработку.

@@ -39,16 +39,15 @@ internal abstract class BaseDirectDamageAttackProcessor : IAttackTypeProcessor
     /// <inheritdoc />
     public CalculatedAttackResult CalculateAttackResult(AttackProcessorContext context, CalculatedUnitAttack unitAttack)
     {
-        // todo Максимальное значение атаки - 250/300/400.
         var targetUnit = context.TargetUnit;
         var attackRandomBonus = RandomGenerator.Get(ATTACK_RANGE);
-        var attackPower = unitAttack.TotalPower + attackRandomBonus;
+        var attackPower = Math.Min(unitAttack.TotalPower + attackRandomBonus, unitAttack.MaxPower);
 
         // Уменьшаем входящий урон в зависимости от защиты.
         attackPower = (int)(attackPower * (1 - targetUnit.Armor / 100.0));
 
         // Если юнит защитился, то урон уменьшается в два раза.
-        // BUG Механизм хитрее и зависит от брони юнита. Кроме того есть параметр в GVar.
+        // TODO Механизм хитрее и зависит от брони юнита. Кроме того есть параметр в GVar.
         if (targetUnit.Effects.IsDefended)
             attackPower /= 2;
 

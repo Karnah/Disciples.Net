@@ -172,9 +172,7 @@ internal class BattleSoundController : BaseSupportLoading
     /// </summary>
     private IPlayingSound GetBackgroundSound()
     {
-        // TODO Сделать так, чтобы не повторялись одна и та же музыка.
-        var sounds = _soundProvider.GetBackgroundBattleSounds();
-        var soundIndex = RandomGenerator.Get(sounds.Count);
-        return _soundController.PlayBackground(sounds[soundIndex]);
+        var sound = _soundProvider.BattleSounds.GetRandomElement();
+        return _soundController.PlayBackground(sound);
     }
 }

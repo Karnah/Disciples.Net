@@ -145,7 +145,7 @@ internal static class ImageResourceKeyExtensions
             UnitAttackType.Poison => "POISONANIM",
             UnitAttackType.Frostbite => "FROSTBITEANIM",
             UnitAttackType.Revive => "REVIVEANIM",
-            // TODO Для возвращения в прежним облик есть UNDRAINLVL.
+            // TODO Для возвращения в прежний облик есть UNDRAINLVL.
             UnitAttackType.ReduceLevel => "DRAINLVL",
             UnitAttackType.Doppelganger => "DOPPEL",
             UnitAttackType.TransformSelf => "TRANSF",

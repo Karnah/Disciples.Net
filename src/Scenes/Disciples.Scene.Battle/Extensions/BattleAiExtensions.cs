@@ -21,6 +21,7 @@ internal static class BattleAiExtensions
     /// </summary>
     public static IOrderedEnumerable<AiTargetUnit> ThenByWeakness(this IOrderedEnumerable<AiTargetUnit> units)
     {
+        // TODO Учитывать при этом броню/защиту цели.
         return units.ThenBy(u => u.Unit.HitPoints);
     }
 
@@ -47,13 +48,13 @@ internal static class BattleAiExtensions
     {
         var attack = targetUnit.Unit.AlternativeAttack ?? targetUnit.Unit.MainAttack;
 
-        // BUG Здесь некорректно будет отрабатывать в случае эффектов усиления/ослабления.
+        // BUG: Здесь некорректно будет отрабатывать в случае эффектов усиления/ослабления.
         var power = attack.TotalPower + (targetUnit.Unit.SecondaryAttack?.TotalPower ?? 0);
 
         if (targetUnit.Unit.UnitType.IsAttackTwice)
             power *= 2;
 
-        // BUG Вообще правильно считать по количеству целей.
+        // BUG: Вообще правильно считать по количеству целей.
         // Но для простоты умножаем в три раза.
         if (attack.Reach == UnitAttackReach.All)
             power *= 3;

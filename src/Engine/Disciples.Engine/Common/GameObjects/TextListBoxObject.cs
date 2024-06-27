@@ -56,9 +56,7 @@ public class TextListBoxObject : GameObject
         _textListBox = textListBox;
         _layer = layer;
 
-        // TODO Вычисление страницы было осуществлено подбором формулы.
-        // Возможно, она неправильная.
-        _pageSize = (int) textListBox.Position.Height/ (textListBox.VerticalSpacing + ROW_HEIGHT);
+        _pageSize = (int) textListBox.Position.Height / (textListBox.VerticalSpacing + ROW_HEIGHT);
     }
 
     /// <summary>

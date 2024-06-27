@@ -77,15 +77,11 @@ internal class BattleUnit : GameObject
         var unitSelectionAnimationOffset = Unit.UnitType.IsSmall
             ? SmallBattleUnitSelectionAnimationOffset
             : BigBattleUnitSelectionAnimationOffset;
-        var unitTurnAnimationFrames = Unit.UnitType.IsSmall
-            ? battleUnitResourceProvider.SmallUnitTurnAnimationFrames
-            : battleUnitResourceProvider.BigUnitTurnAnimationFrames;
-        UnitTurnAnimationComponent = new AnimationComponent(this, sceneObjectContainer, unitTurnAnimationFrames,
+        UnitTurnAnimationComponent = new AnimationComponent(this, sceneObjectContainer,
+            battleUnitResourceProvider.UnitTurnAnimationFrames.GetAnimationFrames(Unit),
             BattleLayers.UNIT_SELECTION_ANIMATION_LAYER, unitSelectionAnimationOffset);
-        var targetAnimationFrames = Unit.UnitType.IsSmall
-            ? battleUnitResourceProvider.SmallUnitTargetAnimationFrames
-            : battleUnitResourceProvider.BigUnitTargetAnimationFrames;
-        TargetAnimationComponent = new AnimationComponent(this, sceneObjectContainer, targetAnimationFrames,
+        TargetAnimationComponent = new AnimationComponent(this, sceneObjectContainer,
+            battleUnitResourceProvider.UnitTargetAnimationFrames.GetAnimationFrames(Unit),
             BattleLayers.UNIT_SELECTION_ANIMATION_LAYER, unitSelectionAnimationOffset);
         SoundComponent = new BattleUnitSoundComponent(this, battleUnitResourceProvider);
         Components = new IComponent[]
@@ -190,6 +186,7 @@ internal class BattleUnit : GameObject
             if (_unitState == value)
                 return;
 
+            // TODO Если BattleUnitState.Dead, то также нужно менять слой изображения.
             _unitState = value;
 
             // Сразу после смены состояния нужно обновить состояние анимаций.

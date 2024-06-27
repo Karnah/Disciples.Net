@@ -9,14 +9,18 @@
 public enum UnitModifierItemType
 {
     /// <summary>
-    /// TODO Модификатор количества целей?
+    /// Модификатор количества целей?
     /// </summary>
+    /// <remarks>
+    /// В ресурсах игры ни разу не встречается.
+    /// Точное назначение неизвестно.
+    /// </remarks>
     QtyTarget = 0,
 
     /// <summary>
     /// Дальность обзора лидера.
     /// </summary>
-    ScoutPoints = 1,
+    SightPoints = 1,
 
     /// <summary>
     /// Лидерство.
@@ -24,16 +28,13 @@ public enum UnitModifierItemType
     Leadership = 2,
 
     /// <summary>
-    /// Сила атаки.
+    /// Точность.
     /// </summary>
-    Power = 3,
+    Accuracy = 3,
 
     /// <summary>
     /// Сила урона.
     /// </summary>
-    /// <remarks>
-    /// TODO В чем отличие от Power?
-    /// </remarks>
     Damage = 4,
 
     /// <summary>

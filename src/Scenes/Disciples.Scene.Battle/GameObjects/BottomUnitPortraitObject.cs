@@ -6,7 +6,6 @@ using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Common.SceneObjects;
 using Disciples.Engine.Models;
 using Disciples.Scene.Battle.Constants;
-using Disciples.Scene.Battle.Models;
 using Disciples.Scene.Battle.Providers;
 
 namespace Disciples.Scene.Battle.GameObjects;
@@ -19,7 +18,6 @@ internal class BottomUnitPortraitObject : GameObject
     private readonly ISceneObjectContainer _sceneObjectContainer;
     private readonly ITextProvider _textProvider;
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
-    private readonly BattleContext _battleContext;
 
     private readonly bool _isLeft;
     private readonly ImageSceneElement _portraitSceneElement;
@@ -40,7 +38,6 @@ internal class BottomUnitPortraitObject : GameObject
         ISceneObjectContainer sceneObjectContainer,
         ITextProvider textProvider,
         IBattleUnitResourceProvider battleUnitResourceProvider,
-        BattleContext battleContext,
         bool isLeft,
         SceneElement portraitSceneElement,
         SceneElement leaderPanelSceneElement,
@@ -52,7 +49,6 @@ internal class BottomUnitPortraitObject : GameObject
         _textProvider = textProvider;
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _isLeft = isLeft;
-        _battleContext = battleContext;
 
         // В Interf.dlg не всегда правильно лежат плейсхолдеры (например, unitInfo там Image).
         // Поэтому просто конвертируем в нужный тип, сохраняя положение и имя.
@@ -93,21 +89,24 @@ internal class BottomUnitPortraitObject : GameObject
     {
         base.Update(ticksCount);
 
-        // Вычисляем юнита, который должен отображаться.
-        // Если BattleUnit null, то отображаем последнего юнита (BattleUnit становится null, когда снимается выделение с него).
-        // Также делаем хитрый хак: если юнит изменился (превращение, повышение уровня), то мы получим нового юнита через _battleContext.TryGetBattleUnit.
-        // Try нужен, чтобы корректно обрабатывать убийство призванного юнита (он удаляется из отряда).
-        // TODO Можно будет отказаться от этой логики, если будет принудительно меняться юнит после превращения.
-        var displayUnit = BattleUnit?.Unit ?? _displayBattleUnit?.Unit;
-        var displayBattleUnit = displayUnit == null
-            ? null
-            : _battleContext.TryGetBattleUnit(displayUnit);
-        if (_displayBattleUnit != displayBattleUnit && displayBattleUnit != null)
+        if (_displayBattleUnit != BattleUnit)
         {
-            _displayBattleUnit = displayBattleUnit;
-            _portrait.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(_displayBattleUnit.Unit.UnitType);
-            _leaderPanel.IsHidden = !_displayBattleUnit.Unit.IsLeader;
-            UpdateUnitInfo();
+            _displayBattleUnit = BattleUnit;
+
+            if (_displayBattleUnit == null)
+            {
+                _portrait.Bitmap = null;
+                _leaderPanel.IsHidden = true;
+                // BUG: Конвертер в Avalonia не очищает объект, если задать null.
+                _unitInfo.Text = new TextContainer(string.Empty);
+                _displayHitPoints = null;
+            }
+            else
+            {
+                _portrait.Bitmap = _battleUnitResourceProvider.GetUnitBattleFace(_displayBattleUnit.Unit.UnitType);
+                _leaderPanel.IsHidden = !_displayBattleUnit.Unit.IsLeader;
+                UpdateUnitInfo();
+            }
         }
         else if (_displayBattleUnit?.Unit.HitPoints != _displayHitPoints)
         {

@@ -217,8 +217,8 @@ internal abstract class BaseBattleActionController : IBattleActionController
         if (_context.CurrentBattleUnit == originalBattleUnit)
             _context.CurrentBattleUnit = newBattleUnit;
 
-        var targetUnitPortrait = _unitPortraitPanelController.GetUnitPortrait(originalBattleUnit);
-        targetUnitPortrait?.ChangeUnit(newUnit);
+        _unitPortraitPanelController.ProcessBattleUnitUpdated(originalBattleUnit);
+        _bottomPanelController.ProcessBattleUnitUpdated(originalBattleUnit);
     }
 
     /// <summary>
@@ -262,11 +262,8 @@ internal abstract class BaseBattleActionController : IBattleActionController
     protected void AddUnitUnsummonAnimationAction(BattleUnit targetBattleUnit)
     {
         var animationPoint = targetBattleUnit.AnimationComponent.AnimationPoint;
-        var unsummonAnimationFrames = targetBattleUnit.Unit.UnitType.IsSmall
-            ? _unitResourceProvider.SmallUnitUnsummonAnimationFrames
-            : _unitResourceProvider.BigUnitUnsummonAnimationFrames;
         var unitUnsummonAnimation = _battleGameObjectContainer.AddAnimation(
-            unsummonAnimationFrames,
+            _unitResourceProvider.UnitUnsummonAnimationFrames.GetAnimationFrames(targetBattleUnit.Unit),
             animationPoint.X,
             animationPoint.Y,
             targetBattleUnit.AnimationComponent.Layer + 2,

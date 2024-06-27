@@ -188,7 +188,7 @@ public class UnitType : IEntity
     /// Дальность обзора для юнита-героя.
     /// </summary>
     [Column("SCOUT")]
-    public int? LeaderScoutPoints { get; init; }
+    public int? LeaderSightPoints { get; init; }
 
     /// <summary>
     /// Количество ходов, которое живёт юнит-герой.
@@ -216,10 +216,9 @@ public class UnitType : IEntity
 
     /// <summary>
     /// Категория лидера.
-    /// TODO Разобраться, обернуть в Enum.
     /// </summary>
     [Column("LEADER_CAT")]
-    public int? LeaderCategory { get; init; }
+    public LeaderCategory? LeaderCategory { get; init; }
 
     /// <summary>
     /// Идентификатор записи, которая указывает рост характеристик юнита при повышении уровня.

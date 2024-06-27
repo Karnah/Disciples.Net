@@ -8,40 +8,40 @@ public enum UnitCategory
     /// <summary>
     /// Солдат.
     /// </summary>
-    Soldier,
+    Soldier = 0,
 
     /// <summary>
     /// Лидер-вор.
     /// </summary>
-    LeaderThief,
+    LeaderThief = 1,
 
     /// <summary>
     /// Лидер.
     /// </summary>
-    Leader,
+    Leader = 2,
 
     /// <summary>
     /// Вызванный юнит.
     /// </summary>
-    Summon,
+    Summon = 3,
 
     /// <summary>
     /// Иллюзия.
     /// </summary>
-    Illusion,
+    Illusion = 4,
 
     /// <summary>
     /// Нейтральный лидер.
     /// </summary>
-    NeutralLeader,
+    NeutralLeader = 5,
 
     /// <summary>
     /// Нейтральный солдат.
     /// </summary>
-    NeutralSoldier,
+    NeutralSoldier = 6,
 
     /// <summary>
     /// Защитник столицы.
     /// </summary>
-    Guardian
+    Guardian = 7
 }

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper.Internal;
-using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Enums.Units;
-using Disciples.Engine.Extensions;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -237,6 +235,8 @@ public class Unit
             shouldUseModifiers ? GetAttackPowerModifier(unitAttack) : 0,
             unitAttack.Accuracy + CalculateLevelUpgrade(ulu => ulu.Accuracy),
             shouldUseModifiers ? GetAttackAccuracyModifier(unitAttack) : 0,
+            IsLeader,
+            UnitType.IsSmall,
             unitAttack);
     }
 

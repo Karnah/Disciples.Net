@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Disciples.Engine.Base;
 using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Models;
 using Disciples.Engine.Enums;
+using Disciples.Engine.Implementation.Extensions;
 
 namespace Disciples.Engine.Implementation.Base;
 
@@ -73,16 +73,19 @@ public abstract class BaseScene : BaseSupportLoading, IScene
     /// <inheritdoc />
     public void UpdateScene(UpdateSceneData data)
     {
-        BeforeSceneUpdate(data);
+        // IsLoaded == false, признак, что сцена уже завершена и сейчас происходит переход на новую сцену.
+        // Требуется обновлять игровые объекты и только.
+        if (IsLoaded)
+        {
+            BeforeSceneUpdate(data);
 
-        if (IsProcessInputDeviceEvents)
-            ProcessInputDeviceEvents(data.InputDeviceEvents);
+            if (IsProcessInputDeviceEvents)
+                ProcessInputDeviceEvents(data.InputDeviceEvents);
+        }
 
         GameObjectContainer.UpdateGameObjects(data.TicksCount);
 
-        // При обработке событий от пользователя, может поменяться сцена.
-        // В таком случае дальше обновлять не нужно.
-        // TODO Вообще, это может стрельнуть где угодно. Нужно посмотреть, куда это лучше вынести.
+        // Здесь сцена либо уже была завершена заранее, либо завершилась при обработке событий ввода.
         if (IsLoaded)
             AfterSceneUpdate();
 
@@ -119,46 +122,17 @@ public abstract class BaseScene : BaseSupportLoading, IScene
 
         foreach (var inputDeviceEvent in inputDeviceEvents)
         {
-            var inputDeviceGameObject = MainInputGameObject ?? inputDeviceEvent.GameObject;
-
-            switch (inputDeviceEvent.ActionType)
+            if (inputDeviceEvent.ActionType == InputDeviceActionType.KeyboardButton)
             {
-                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.SelectionComponent?.Hovered();
-                    continue;
-                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.SelectionComponent?.Unhovered();
-                    continue;
-
-                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Pressed();
-                    continue;
-                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Clicked();
-                    continue;
-
-                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Pressed();
-                    continue;
-                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Released();
-                    continue;
-
-                case InputDeviceActionType.KeyboardButton when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    if (MainInputGameObject != null)
-                    {
-                        MainInputGameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
-                    }
-                    else
-                    {
-                        // TODO Оптимизация.
-                        foreach (var gameObject in GameObjectContainer.GameObjects.ToArray())
-                        {
-                            gameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
-                        }
-                    }
-
-                    break;
+                var gameObjects = MainInputGameObject == null
+                    ? GameObjectContainer.GameObjects
+                    : new[] { MainInputGameObject };
+                InputDeviceEventExtensions.ProcessKeyboardEvent(inputDeviceEvent.ActionState, inputDeviceEvent.KeyboardButton!.Value, gameObjects);
+            }
+            else
+            {
+                var gameObject = MainInputGameObject ?? inputDeviceEvent.GameObject;
+                InputDeviceEventExtensions.ProcessMouseEvent(inputDeviceEvent.ActionType, inputDeviceEvent.ActionState, gameObject);
             }
         }
     }

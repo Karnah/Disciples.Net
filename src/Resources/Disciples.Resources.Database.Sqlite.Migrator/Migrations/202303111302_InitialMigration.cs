@@ -149,7 +149,7 @@ public class InitialMigration : Migration
             .WithColumn("UpgradeBuildingId").AsString(ID_LENGTH).Nullable().WithColumnDescription("Здание, которое позволяет тренировать данный тип юнита")
             .WithColumn("XpNext").AsInt32().NotNullable().WithColumnDescription("Количество опыта, необходимо для получения следующего уровня")
             .WithColumn("LeaderMovePoints").AsInt32().Nullable().WithColumnDescription("Количество очков движения для юнита-героя")
-            .WithColumn("LeaderScoutPoints").AsInt32().Nullable().WithColumnDescription("Дальность обзора для юнита-героя")
+            .WithColumn("LeaderSightPoints").AsInt32().Nullable().WithColumnDescription("Дальность обзора для юнита-героя")
             .WithColumn("LeaderLifeTime").AsInt32().Nullable().WithColumnDescription("Количество ходов, которое живёт юнит-герой")
             .WithColumn("Leadership").AsInt32().Nullable().WithColumnDescription("Лидерство героя")
             .WithColumn("LeaderThiefProtection").AsInt32().Nullable().WithColumnDescription("Рост снижения шанса успеха, когда вор применяет навык на отряд этого героя")

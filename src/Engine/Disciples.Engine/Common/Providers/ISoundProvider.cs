@@ -10,10 +10,10 @@ public interface ISoundProvider
     /// <summary>
     /// Музыка, которая воспроизводится в главном меню.
     /// </summary>
-    string MenuSound { get; }
+    IReadOnlyList<string> MenuSounds { get; }
 
     /// <summary>
-    /// Получить фоновые звуки битвы.
+    /// Фоновые звуки битвы.
     /// </summary>
-    IReadOnlyList<string> GetBackgroundBattleSounds();
+    IReadOnlyList<string> BattleSounds { get; }
 }

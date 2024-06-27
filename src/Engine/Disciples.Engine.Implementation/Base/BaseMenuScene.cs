@@ -45,7 +45,7 @@ public abstract class BaseMenuScene : BaseScene
 
         if (TransitionAnimationName != null)
         {
-            // BUG При переходе между страницами в начале возникает черный экран, а только потом начинает проигрываться анимация.
+            // BUG: При переходе между страницами в начале возникает черный экран, а только потом начинает проигрываться анимация.
             // Связано это с особенностью воспроизведения видео на нативных контролах. Не смог побороть ни для Avalonia, ни для WPF.
             var transitionAnimation = _interfaceProvider.GetSceneTransitionAnimation(TransitionAnimationName);
             var stream = new MemoryStream(transitionAnimation.Data);

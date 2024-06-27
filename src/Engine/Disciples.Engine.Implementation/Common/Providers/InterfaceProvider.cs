@@ -255,9 +255,9 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
             Name = image.Name,
             Position = image.Position,
             ImageBitmap = GetElementImage(image.ImageName),
-            // TODO Какая-то магия. Иногда для изображений вместо tooltip выводить просто имя изображения.
+            // BUG: Какая-то магия. Иногда для изображений вместо tooltip задано просто имя изображения.
             // Например IMG_BIGFACESBG из DLG_BATTLE_A.
-            // Возможно, одно и тоже имя может быть частью некоторых файлов, поэтому идёт уточнение.
+            // Возможно, одно и то же имя может быть частью некоторых файлов, поэтому идёт уточнение.
             ToolTip = image.ToolTipTextId?.StartsWith("X") == true
                 ? GetElementText(image.ToolTipTextId)
                 : null,

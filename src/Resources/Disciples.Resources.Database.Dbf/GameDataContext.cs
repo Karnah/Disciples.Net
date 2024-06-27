@@ -198,7 +198,6 @@ public class GameDataContext
             if (string.IsNullOrWhiteSpace(columnName?.Name))
                 throw new ArgumentException($"Для свойства {typeof(TEntity).Name}.{property.Name} не указан атрибут {nameof(ColumnAttribute)}.{nameof(ColumnAttribute.Name)}");
 
-            // TODO Проверить на nullable reference.
             var value = GetValue(reader, columnName.Name, property.Name, property.PropertyType);
             property.SetValue(entity, value);
         }

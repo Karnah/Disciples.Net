@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Disciples.Engine.Common.Enums.Units;
 
 namespace Disciples.Engine.Common.Models;
@@ -11,12 +12,14 @@ public class CalculatedUnitAttack
     /// <summary>
     /// Создать объект типа <see cref="CalculatedUnitAttack" />.
     /// </summary>
-    public CalculatedUnitAttack(int basePower, decimal powerModifier, int baseAccuracy, decimal accuracyModifier, UnitAttack attack)
+    public CalculatedUnitAttack(int basePower, decimal powerModifier, int baseAccuracy, decimal accuracyModifier, bool isLeader, bool isSmall, UnitAttack attack)
     {
-        BasePower = basePower;
-        PowerBonus = (int)(basePower * powerModifier);
-        BaseAccuracy = baseAccuracy;
-        AccuracyBonus = (int)(baseAccuracy * accuracyModifier);
+        MaxPower = GetMaxAttackPower(attack.Reach, isLeader, isSmall);
+
+        BasePower = Math.Min(basePower, MaxPower);
+        PowerBonus = Math.Min((int)(basePower * powerModifier), MaxPower - basePower);
+        BaseAccuracy = Math.Min(baseAccuracy, MaxAccuracy);
+        AccuracyBonus = Math.Min((int)(baseAccuracy * accuracyModifier), MaxAccuracy);
         Attack = attack;
     }
 
@@ -46,6 +49,11 @@ public class CalculatedUnitAttack
     public int TotalPower => BasePower + PowerBonus;
 
     /// <summary>
+    /// Максимальная сила атаки.
+    /// </summary>
+    public int MaxPower { get; }
+
+    /// <summary>
     /// Базовое значение точности атаки.
     /// </summary>
     public int BaseAccuracy { get; }
@@ -54,6 +62,11 @@ public class CalculatedUnitAttack
     /// Бонус к точности атаки.
     /// </summary>
     public int AccuracyBonus { get; }
+
+    /// <summary>
+    /// Максимальная точность.
+    /// </summary>
+    public int MaxAccuracy => 100;
 
     /// <summary>
     /// Итоговое значение точности первой атаки.
@@ -111,4 +124,18 @@ public class CalculatedUnitAttack
     /// Для атак типа <see cref="UnitAttackType.TransformSelf" /> и <see cref="UnitAttackType.TransformEnemy" /> идентификаторы во что идёт превращение.
     /// </remarks>>
     public IReadOnlyList<UnitType> SummonTransformUnitTypes => Attack.SummonTransformUnitTypes;
+
+    /// <summary>
+    /// Получить максимальный уровень урона.
+    /// </summary>
+    private static int GetMaxAttackPower(UnitAttackReach reach, bool isLeader, bool isSmall)
+    {
+        return isLeader || !isSmall
+            ? reach == UnitAttackReach.All
+                ? 300
+                : 400
+            : reach == UnitAttackReach.All
+                ? 250
+                : 300;
+    }
 }

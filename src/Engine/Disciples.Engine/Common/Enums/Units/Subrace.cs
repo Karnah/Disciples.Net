@@ -8,75 +8,75 @@ public enum Subrace
     /// <summary>
     /// Общая.
     /// </summary>
-    Custom,
+    Custom = 0,
 
     /// <summary>
     /// Защитники Империи.
     /// </summary>
-    Human,
+    Human = 1,
 
     /// <summary>
     /// Орды Нежити.
     /// </summary>
-    Undead,
+    Undead = 2,
 
     /// <summary>
     /// Легионы проклятых.
     /// </summary>
-    Heretic,
+    Heretic = 3,
 
     /// <summary>
     /// Горные Кланы.
     /// </summary>
-    Dwarf,
+    Dwarf = 4,
 
     /// <summary>
     /// Нейтралы.
     /// </summary>
-    Neutral,
+    Neutral = 5,
 
     /// <summary>
     /// Нейтральные люди.
     /// </summary>
-    NeutralHuman,
+    NeutralHuman = 6,
 
     /// <summary>
     /// Нейтральные эльфы.
     /// </summary>
-    NeutralElf,
+    NeutralElf = 7,
 
     /// <summary>
     /// Нейтральные зеленокожие (орки).
     /// </summary>
-    NeutralGreenSkin,
+    NeutralGreenSkin = 8,
 
     /// <summary>
     /// Нейтральные драконы.
     /// </summary>
-    NeutralDragon,
+    NeutralDragon = 9,
 
     /// <summary>
     /// Нейтральные болотные жители.
     /// </summary>
-    NeutralMarsh,
+    NeutralMarsh = 10,
 
     /// <summary>
     /// Нейтральные водяные жители.
     /// </summary>
-    NeutralWater,
+    NeutralWater = 11,
 
     /// <summary>
     /// Нейтральные варвары.
     /// </summary>
-    NeutralBarbarian,
+    NeutralBarbarian = 12,
 
     /// <summary>
     /// Нейтральные волки.
     /// </summary>
-    NeutralWolf,
+    NeutralWolf = 13,
 
     /// <summary>
     /// Эльфийский Союз.
     /// </summary>
-    Elf
+    Elf = 14
 }

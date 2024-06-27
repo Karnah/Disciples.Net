@@ -20,7 +20,6 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
     private readonly IBattleUnitResourceProvider _battleUnitResourceProvider;
     private readonly IBattleInterfaceProvider _battleInterfaceProvider;
     private readonly ITextProvider _textProvider;
-    private readonly BattleContext _battleContext;
     private readonly Lazy<IBattleInterfaceController> _battleInterfaceController;
 
     public BattleGameObjectContainer(
@@ -37,7 +36,6 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         _battleUnitResourceProvider = battleUnitResourceProvider;
         _battleInterfaceProvider = battleInterfaceProvider;
         _textProvider = textProvider;
-        _battleContext = battleContext;
         _battleInterfaceController = battleInterfaceController;
     }
 
@@ -82,7 +80,7 @@ internal class BattleGameObjectContainer : BaseSceneGameObjectContainer, IBattle
         SceneElement leaderPanelSceneElement,
         SceneElement unitInfoSceneElement)
     {
-        var bottomUnitPortrait = new BottomUnitPortraitObject(_sceneObjectContainer, _textProvider, _battleUnitResourceProvider, _battleContext,
+        var bottomUnitPortrait = new BottomUnitPortraitObject(_sceneObjectContainer, _textProvider, _battleUnitResourceProvider,
             isLeft, portraitSceneElement, leaderPanelSceneElement, unitInfoSceneElement,
             _battleInterfaceController.Value.BottomUnitPortraitRightMouseButtonPressed);
         return AddObject(bottomUnitPortrait);

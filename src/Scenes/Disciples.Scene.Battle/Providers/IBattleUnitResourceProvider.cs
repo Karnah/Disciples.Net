@@ -10,30 +10,17 @@ namespace Disciples.Scene.Battle.Providers;
 /// <summary>
 /// Поставщик ресурсов для юнитов на поле боя.
 /// </summary>
-/// <remarks>
-/// TODO Объединить Small/Big в один класс.
-/// </remarks>
 internal interface IBattleUnitResourceProvider : ISupportLoading
 {
     /// <summary>
-    /// Анимация для выделения маленького юнита при его ходе.
+    /// Анимация для выделения юнита при его ходе.
     /// </summary>
-    AnimationFrames SmallUnitTurnAnimationFrames { get; }
+    UnitAnimationFrames UnitTurnAnimationFrames { get; }
 
     /// <summary>
-    /// Анимация для выделения большое юнита при его ходе.
+    /// Анимация для выделения юнита, когда его выбрали в качестве цели.
     /// </summary>
-    AnimationFrames BigUnitTurnAnimationFrames { get; }
-
-    /// <summary>
-    /// Анимация для выделения маленького юнита, когда его выбрали в качестве цели.
-    /// </summary>
-    AnimationFrames SmallUnitTargetAnimationFrames { get; }
-
-    /// <summary>
-    /// Анимация для выделения большое юнита, когда его выбрали в качестве цели.
-    /// </summary>
-    AnimationFrames BigUnitTargetAnimationFrames { get; }
+    UnitAnimationFrames UnitTargetAnimationFrames { get; }
 
     /// <summary>
     /// Анимация места, куда можно призвать юнита.
@@ -41,14 +28,9 @@ internal interface IBattleUnitResourceProvider : ISupportLoading
     AnimationFrames SummonPlaceholderAnimationFrames { get; }
 
     /// <summary>
-    /// Анимация удаления маленького призванного юнита.
+    /// Анимация удаления призванного юнита.
     /// </summary>
-    AnimationFrames SmallUnitUnsummonAnimationFrames { get; }
-
-    /// <summary>
-    /// Анимация удаления большого призванного юнита.
-    /// </summary>
-    AnimationFrames BigUnitUnsummonAnimationFrames { get; }
+    UnitAnimationFrames UnitUnsummonAnimationFrames { get; }
 
     /// <summary>
     /// Анимация исцеления вампиризмом.

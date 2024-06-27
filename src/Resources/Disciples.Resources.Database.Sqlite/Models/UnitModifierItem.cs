@@ -39,7 +39,7 @@ public class UnitModifierItem : IEntity
     /// Численное значение на которое изменяется характеристика.
     /// </summary>
     /// <remarks>
-    /// Заполнено если <see cref="UnitModifierItemType.ScoutPoints" />, <see cref="UnitModifierItemType.Leadership" />,
+    /// Заполнено если <see cref="UnitModifierItemType.SightPoints" />, <see cref="UnitModifierItemType.Leadership" />,
     /// <see cref="UnitModifierItemType.Armor" />, <see cref="UnitModifierItemType.HitPoints" />
     /// </remarks>
     public int? Number { get; init; }

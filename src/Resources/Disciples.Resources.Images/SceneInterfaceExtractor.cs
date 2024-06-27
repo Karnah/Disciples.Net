@@ -77,7 +77,7 @@ public class SceneInterfaceExtractor : BaseResourceExtractor
 
         // Сцена может занимать меньше места, чем на 800*600.
         // Координаты объектов при этом будут рассчитываться от нового границы сцены.
-        // Пересчитываем их глобальные.
+        // Пересчитываем их на глобальные.
         // TODO Использовать константы из GameInfo.
         const int screenWidth = 800;
         const int screenHeight = 600;

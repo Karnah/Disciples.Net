@@ -193,7 +193,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
             var size = stream.ReadInt();
 
             var mqIndex = new MqIndex(id, name, relatedOffset, size);
-            // todo Возможно дублирование. WTF?
+            // BUG: Возможно дублирование, почему?
             mqIndices.TryAdd(mqIndex.Name, mqIndex);
         }
 
@@ -471,7 +471,7 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
                 var opacity = alphaColors.GetValueOrDefault(color, byte.MaxValue);
                 pixels[i + 3] = opacity;
 
-                // BUG в Avalonia: если не выставить пиксели в 0, то у изображения появляется фиолетовая рамка.
+                // BUG: в Avalonia если не выставить пиксели в 0, то у изображения появляется фиолетовая рамка.
                 if (opacity == 0)
                 {
                     pixels[i] = 0;

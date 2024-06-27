@@ -5,6 +5,7 @@ using Disciples.Engine.Common.Controllers;
 using Disciples.Engine.Common.GameObjects;
 using Disciples.Engine.Common.Providers;
 using Disciples.Engine.Enums;
+using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Implementation.Dialogs.Base;
@@ -44,48 +45,10 @@ public abstract class BaseClickCloseDialog : BaseDialog
     {
         foreach (var inputDeviceEvent in inputDeviceEvents)
         {
-            var inputDeviceGameObject = inputDeviceEvent.GameObject;
-
-            // Обрабатываются только объекты диалога.
-            if (inputDeviceEvent.ActionType != InputDeviceActionType.KeyboardButton &&
-                !DialogGameObjects.Contains(inputDeviceGameObject))
-            {
-                continue;
-            }
-
-            // TODO Дублирование кода с базовой сценой.
-            switch (inputDeviceEvent.ActionType)
-            {
-                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.SelectionComponent?.Hovered();
-                    continue;
-                case InputDeviceActionType.Hover when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.SelectionComponent?.Unhovered();
-                    continue;
-
-                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Pressed();
-                    continue;
-                case InputDeviceActionType.MouseLeft when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.MouseLeftButtonClickComponent?.Clicked();
-                    continue;
-
-                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Pressed();
-                    continue;
-                case InputDeviceActionType.MouseRight when inputDeviceEvent.ActionState == InputDeviceActionState.Deactivated:
-                    inputDeviceGameObject?.MouseRightButtonClickComponent?.Released();
-                    continue;
-
-                case InputDeviceActionType.KeyboardButton when inputDeviceEvent.ActionState == InputDeviceActionState.Activated:
-                    // TODO Оптимизация.
-                    foreach (var gameObject in DialogGameObjects.ToArray())
-                    {
-                        gameObject.MouseLeftButtonClickComponent?.PressedKeyboardButton(inputDeviceEvent.KeyboardButton!.Value);
-                    }
-
-                    break;
-            }
+            if (inputDeviceEvent.ActionType == InputDeviceActionType.KeyboardButton)
+                InputDeviceEventExtensions.ProcessKeyboardEvent(inputDeviceEvent.ActionState, inputDeviceEvent.KeyboardButton!.Value, DialogGameObjects);
+            else
+                InputDeviceEventExtensions.ProcessMouseEvent(inputDeviceEvent.ActionType, inputDeviceEvent.ActionState, inputDeviceEvent.GameObject);
         }
     }
 }

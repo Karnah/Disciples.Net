@@ -74,8 +74,7 @@ public class UnitInfoProvider : BaseSupportLoading, IUnitInfoProvider
     {
         if (!_unitFaces.TryGetValue(unitTypeId, out var unitFace))
         {
-            // BUG: MagickImage не может распарсить некоторые png, поэтому загружаем целиком файл.
-            unitFace = _bitmapFactory.FromByteArray(_unitFaceExtractor.GetFileContent($"{unitTypeId}FACE.PNG"));
+            unitFace = _bitmapFactory.FromRawBitmap(_unitFaceExtractor.GetImage($"{unitTypeId}FACE"));
             _unitFaces.Add(unitTypeId, unitFace);
         }
 

@@ -114,6 +114,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             if (isNeedHideOppositePanel)
             {
                 IsDisplayingBothPanels = false;
+                _reflectPanelButton.IsDeactivated = false;
 
                 UpdatePanel(_mainPanel, _displayingSquad!.Value);
                 RemovePanel(_additionalPanel);
@@ -127,6 +128,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             if (isNeedDisplayOppositePanel)
             {
                 IsDisplayingBothPanels = true;
+                _reflectPanelButton.IsDeactivated = true;
 
                 UpdatePanel(_leftPanel, BattleSquadPosition.Attacker);
                 UpdatePanel(_rightPanel, BattleSquadPosition.Defender);
@@ -190,8 +192,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
             return;
 
         // Принудительно перерисовываем панель целиком.
-        // TODO Также перевести на эту схему юнитов после превращения/повышения уровня.
-        // TODO Не слишком быстрая операция. Будет создано много объектов, если менялось сразу несколько юнитов.
+        // TODO Не слишком оптимальное решение. Будет создано много объектов, если менялось сразу несколько юнитов.
         panel.PanelSquadDirection = null;
         UpdatePanel(panel, battleUnit.SquadPosition);
     }
@@ -316,12 +317,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     {
         // Смена отряда не работает, если отображаются обе панели.
         if (IsDisplayingBothPanels)
-        {
-            // TODO Смена состояния кнопки происходит в самой кнопке. Здесь мы возвращаем его обратно.
-            // Думаю, требуется другой механизм для обработки этого.
-            _reflectPanelButton.SetState(_displayingSquad == BattleSquadPosition.Attacker);
             return;
-        }
 
         SetDisplayingSquad(_displayingSquad == BattleSquadPosition.Defender
             ? BattleSquadPosition.Attacker
