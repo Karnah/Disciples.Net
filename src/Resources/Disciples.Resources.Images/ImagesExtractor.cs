@@ -38,14 +38,22 @@ public class ImagesExtractor : BaseMqdbResourceExtractor
     protected override int FilesRecordId => 2;
 
     /// <summary>
+    /// Проверить, что существует указанная анимация.
+    /// </summary>
+    public bool IsAnimationExists(string name)
+    {
+        return _mqAnimations?.ContainsKey(name) == true;
+    }
+
+    /// <summary>
     /// Получить кадры анимации по её имени.
     /// </summary>
     public IReadOnlyCollection<RawBitmap>? TryGetAnimationFrames(string name)
     {
-        if (_mqAnimations?.ContainsKey(name) != true)
-            return null;
+        if (_mqAnimations?.TryGetValue(name, out var animation) == true)
+            return GetAnimationFramesInternal(animation);
 
-        return GetAnimationFramesInternal(_mqAnimations[name]);
+        return null;
     }
 
     /// <summary>

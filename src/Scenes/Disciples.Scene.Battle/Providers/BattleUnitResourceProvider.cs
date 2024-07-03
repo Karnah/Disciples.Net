@@ -8,6 +8,7 @@ using Disciples.Engine.Implementation.Extensions;
 using Disciples.Engine.Implementation.Resources;
 using Disciples.Engine.Platform.Factories;
 using Disciples.Resources.Common.Exceptions;
+using Disciples.Resources.Images.Models;
 using Disciples.Resources.Sounds.Models;
 using Disciples.Scene.Battle.Enums;
 using Disciples.Scene.Battle.Models;
@@ -243,11 +244,9 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </summary>
     private AnimationFrames? TryGetAnimationFrames(BaseResourceKey key)
     {
-        var images = _imagesExtractor.TryGetAnimationFrames(key.Key);
-        if (images == null)
-            return null;
-
-        return _bitmapFactory.ConvertToFrames(images);
+        return _bitmapFactory.ConvertToFrames(() =>
+            _imagesExtractor.TryGetAnimationFrames(key.Key) ??
+            Array.Empty<RawBitmap>());
     }
 
     /// <summary>

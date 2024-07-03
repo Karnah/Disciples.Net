@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using Disciples.Engine.Common.Models;
@@ -18,6 +19,18 @@ public static class BitmapExtensions
     public static IBitmap FromRawToBitmap(this IBitmapFactory bitmapFactory, RawBitmap image, Rectangle? bounds = null)
     {
         return bitmapFactory.FromRawBitmap(image, bounds);
+    }
+
+    /// <summary>
+    /// Получить конечные кадры анимации из сырых данных.
+    /// </summary>
+    public static AnimationFrames ConvertToFrames(this IBitmapFactory bitmapFactory, Func<IReadOnlyCollection<RawBitmap>> imagesFunc)
+    {
+        return new AnimationFrames(new Lazy<IReadOnlyList<IBitmap>>(() => 
+            imagesFunc
+            .Invoke()
+            .Select(i => bitmapFactory.FromRawBitmap(i))
+            .ToList()));
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace Disciples.Engine.Common.Models;
 /// </summary>
 public class AnimationFrames : IReadOnlyList<IBitmap>
 {
-    private readonly IReadOnlyList<IBitmap> _frames;
+    private readonly Lazy<IReadOnlyList<IBitmap>> _frames;
 
     /// <summary>
     /// Создать объект типа <see cref="AnimationFrames" />.
@@ -23,19 +23,27 @@ public class AnimationFrames : IReadOnlyList<IBitmap>
     /// </summary>
     public AnimationFrames(IReadOnlyList<IBitmap> frames)
     {
+        _frames = new Lazy<IReadOnlyList<IBitmap>>(frames);
+    }
+
+    /// <summary>
+    /// Создать объект типа <see cref="AnimationFrames" />.
+    /// </summary>
+    public AnimationFrames(Lazy<IReadOnlyList<IBitmap>> frames)
+    {
         _frames = frames;
     }
 
     /// <inheritdoc />
-    public IBitmap this[int index] => _frames[index];
+    public IBitmap this[int index] => _frames.Value[index];
 
     /// <inheritdoc />
-    public int Count => _frames.Count;
+    public int Count => _frames.Value.Count;
 
     /// <inheritdoc />
     public IEnumerator<IBitmap> GetEnumerator()
     {
-        return _frames.GetEnumerator();
+        return _frames.Value.GetEnumerator();
     }
 
     /// <inheritdoc />

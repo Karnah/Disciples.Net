@@ -69,11 +69,9 @@ internal class BattleResourceProvider : BaseSupportLoading, IBattleResourceProvi
     /// <param name="animationName">Имя анимации в ресурсах игры.</param>
     private AnimationFrames ExtractAnimationFrames(string animationName)
     {
-        var images = _imagesExtractor.TryGetAnimationFrames(animationName);
-        if (images == null)
-            throw new ArgumentException($"Не найдена анимация {animationName}", nameof(animationName));
-
-        return _bitmapFactory.ConvertToFrames(images);
+        return _bitmapFactory.ConvertToFrames(() =>
+            _imagesExtractor.TryGetAnimationFrames(animationName) ??
+            throw new ArgumentException($"Не найдена анимация {animationName}", nameof(animationName)));
     }
 
     #endregion

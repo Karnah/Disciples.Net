@@ -236,16 +236,13 @@ public class InterfaceProvider : BaseSupportLoading, IInterfaceProvider
         var image = (Disciples.Resources.Images.Models.ImageSceneElement)resourceSceneElement;
 
         // Если изображение является анимацией, то обрабатываем как анимацию.
-        var animationFrames = image.ImageName == null
-            ? null
-            : _interfaceImagesExtractor.TryGetAnimationFrames(image.ImageName);
-        if (animationFrames != null)
+        if (image.ImageName != null && _interfaceImagesExtractor.IsAnimationExists(image.ImageName))
         {
             return new AnimationSceneElement
             {
                 Name = image.Name,
                 Position = image.Position,
-                Frames = _bitmapFactory.ConvertToFrames(animationFrames),
+                Frames = _bitmapFactory.ConvertToFrames(() => _interfaceImagesExtractor.TryGetAnimationFrames(image.ImageName)!),
                 ToolTip = GetElementText(image.ToolTipTextId)
             };
         }
