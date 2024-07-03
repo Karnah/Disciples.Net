@@ -30,13 +30,13 @@ public class GameWindowViewModel : ReactiveObject
     /// Объекты, которые отображаются на сцене.
     /// </summary>
     [Reactive]
-    public IReadOnlyList<ISceneObject> SceneObjects { get; private set; }
+    public IReadOnlyList<ISceneObject>? SceneObjects { get; private set; }
 
 
     /// <summary>
     /// Обработать событие изменения сцены.
     /// </summary>
-    private void OnSceneChanged(object sender, EventArgs e)
+    private void OnSceneChanged(object? sender, EventArgs e)
     {
         SceneObjects = _gameController.CurrentSceneContainer?.SceneObjects;
     }
