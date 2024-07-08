@@ -23,6 +23,7 @@
         <c:TextHorizontalAlignmentConverter x:Key="TextHorizontalAlignmentConverter" />
         <c:TextBackgroundConverter x:Key="TextBackgroundConverter" />
         <c:TextContainerConverter x:Key="TextContainerConverter" />
+        <c:MaxWidthConverter x:Key="MaxWidthConverter" />
     </Window.Resources>
 
     <Grid Name="Field" Width="{x:Static e:GameInfo.OriginalWidth}" Height="{x:Static e:GameInfo.OriginalHeight}"
@@ -59,7 +60,8 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vo:ITextSceneObject}">
-                    <Decorator Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}">
+                    <Decorator Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}"
+                               MaxWidth="{Binding Bounds, Converter={StaticResource MaxWidthConverter}}">
                         <TextBlock TextWrapping="Wrap">
                             <TextBlock.VerticalAlignment>
                                 <MultiBinding Converter="{StaticResource TextVerticalAlignmentConverter}">

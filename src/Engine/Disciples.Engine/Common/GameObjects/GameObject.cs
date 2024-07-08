@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Disciples.Common.Models;
 using Disciples.Engine.Common.Components;
+using Disciples.Engine.Common.Enums;
 using Disciples.Engine.Common.Exceptions;
 using Disciples.Engine.Common.Models;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.GameObjects;
 
@@ -44,6 +47,7 @@ public abstract class GameObject
     protected GameObject(SceneElement sceneElement) : this(sceneElement.Position)
     {
         Name = sceneElement.Name;
+        ToolTip = GetToolTip(sceneElement);
     }
 
     /// <summary>
@@ -61,6 +65,11 @@ public abstract class GameObject
     /// Имя объекта.
     /// </summary>
     public string? Name { get; }
+
+    /// <summary>
+    /// Подсказка для объекта.
+    /// </summary>
+    public TextContainer? ToolTip { get; }
 
     /// <summary>
     /// Положение объекта на сцене, координата X.
@@ -249,5 +258,33 @@ public abstract class GameObject
     protected virtual void OnHiddenChanged(bool isHidden)
     {
 
+    }
+
+    /// <summary>
+    /// Получить подсказку при наведении.
+    /// </summary>
+    private static TextContainer? GetToolTip(SceneElement sceneElement)
+    {
+        var toolTip = sceneElement.ToolTip;
+        if (toolTip == null)
+            return null;
+
+        var hotkeys = sceneElement switch
+        {
+            ButtonSceneElement bse => bse.HotKeys,
+            ToggleButtonSceneElement tbse => tbse.HotKeys,
+            _ => null
+        };
+        var displayHotkeys = hotkeys
+            ?.Where(h => h != KeyboardButton.Escape && h != KeyboardButton.Enter)
+            .ToList();
+        if (displayHotkeys == null || displayHotkeys.Count == 0)
+            return toolTip;
+
+        return new TextContainer(
+            toolTip
+                .TextPieces
+                .Append(new TextPiece($" ({string.Join(", ", displayHotkeys)})"))
+                .ToList());
     }
 }

@@ -34,7 +34,7 @@ public abstract class BaseButtonObject : GameObject
 
         Components = new IComponent[]
         {
-            new SelectionComponent(this, OnHovered, OnUnhovered),
+            new SelectionComponent(this, sceneObjectContainer, OnHovered, OnUnhovered),
             new MouseLeftButtonClickComponent(this, hotKeys, OnPressed, OnClicked)
         };
     }

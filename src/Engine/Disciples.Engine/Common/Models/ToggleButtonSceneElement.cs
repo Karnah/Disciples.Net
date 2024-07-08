@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -26,11 +25,6 @@ public class ToggleButtonSceneElement : SceneElement
     /// Вид кнопки для каждого состояния, когда кнопка активирована.
     /// </summary>
     public ButtonStates? CheckedButtonStates { get; init; }
-
-    /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
-    /// </summary>
-    public TextContainer? ToolTip { get; init; }
 
     /// <summary>
     /// Список "горячих клавиш" для кнопки.

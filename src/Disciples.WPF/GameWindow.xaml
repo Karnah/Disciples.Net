@@ -55,6 +55,7 @@
                     <dts:SceneObjectTemplateSelector.TextTemplate>
                         <DataTemplate DataType="{x:Type so:ITextSceneObject}">
                             <controls:SceneTextBlock Width="{Binding Bounds.Width}" Height="{Binding Bounds.Height}"
+                                                     MaxWidth="{Binding Bounds, Converter={c:MaxWidthConverter}}"
                                                      TextStyle="{Binding TextStyle}"
                                                      Text="{Binding Text}" />
                         </DataTemplate>

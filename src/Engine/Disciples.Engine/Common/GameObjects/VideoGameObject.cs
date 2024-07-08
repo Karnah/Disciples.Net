@@ -32,7 +32,7 @@ public class VideoGameObject : GameObject
         {
             Components = new IComponent[]
             {
-                new SelectionComponent(this),
+                new SelectionComponent(this, sceneObjectContainer),
                 new MouseLeftButtonClickComponent(this, new [] { KeyboardButton.Escape }, Destroy)
             };
         }

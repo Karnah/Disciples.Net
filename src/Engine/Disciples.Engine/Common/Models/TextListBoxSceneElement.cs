@@ -93,11 +93,6 @@ public class TextListBoxSceneElement : SceneElement
     public int BorderSize { get; init; }
 
     /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
-    /// </summary>
-    public TextContainer? ToolTip { get; init; }
-
-    /// <summary>
     /// Требуется ли создать фоновое изображение.
     /// </summary>
     public bool ShouldCreateBackgroundImage { get; init; }

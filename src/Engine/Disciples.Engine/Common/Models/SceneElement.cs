@@ -1,5 +1,6 @@
 ﻿using Disciples.Common.Models;
 using Disciples.Engine.Common.Enums;
+using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -22,4 +23,9 @@ public abstract class SceneElement
     /// Позиция элемента.
     /// </summary>
     public RectangleD Position { get; init; }
+
+    /// <summary>
+    /// Текстовая подсказка при наведении на элемент.
+    /// </summary>
+    public TextContainer? ToolTip { get; init; }
 }

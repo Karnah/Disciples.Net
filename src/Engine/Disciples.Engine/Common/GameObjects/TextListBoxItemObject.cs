@@ -45,7 +45,7 @@ internal class TextListBoxItemObject : GameObject
 
         Components = new IComponent[]
         {
-            new SelectionComponent(this),
+            new SelectionComponent(this, sceneObjectContainer),
             new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(),
                 () => onItemPressed.Invoke(this),
                 onDoubleClickedAction: () => onItemMouseLeftButtonDoubleClicked.Invoke(this))

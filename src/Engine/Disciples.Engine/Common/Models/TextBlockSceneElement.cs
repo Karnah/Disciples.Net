@@ -20,9 +20,4 @@ public class TextBlockSceneElement : SceneElement
     /// Текст.
     /// </summary>
     public TextContainer? Text { get; init; }
-
-    /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
-    /// </summary>
-    public TextContainer? ToolTip { get; init; }
 }

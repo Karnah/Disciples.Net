@@ -61,7 +61,7 @@ internal class BottomUnitPortraitObject : GameObject
 
         Components = new IComponent[]
         {
-            new SelectionComponent(this, () => {}),
+            new SelectionComponent(this, sceneObjectContainer),
             new MouseRightButtonClickComponent(this, () => onBottomUnitPortraitMouseLeftButtonPressed.Invoke(this))
         };
     }

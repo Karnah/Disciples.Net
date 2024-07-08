@@ -90,7 +90,7 @@ internal class BattleUnit : GameObject
             UnitTurnAnimationComponent,
             TargetAnimationComponent,
             SoundComponent,
-            new SelectionComponent(this,
+            new SelectionComponent(this, sceneObjectContainer,
                 () => onUnitSelected.Invoke(this),
                 () => onUnitUnselected.Invoke(this)),
             new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onUnitMouseLeftButtonPressed.Invoke(this)),

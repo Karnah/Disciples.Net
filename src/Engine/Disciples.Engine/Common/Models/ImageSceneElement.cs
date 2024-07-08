@@ -1,5 +1,4 @@
 ﻿using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -15,9 +14,4 @@ public class ImageSceneElement : SceneElement
     /// Изображение.
     /// </summary>
     public IBitmap? ImageBitmap { get; init; }
-
-    /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
-    /// </summary>
-    public TextContainer? ToolTip { get; init; }
 }

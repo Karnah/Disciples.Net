@@ -188,8 +188,11 @@ internal class BattleInstantProcessor
             effectProcessor.ProcessCompletedAction();
 
             var targetUnit = effectProcessor.TargetUnit;
-            if (targetUnit.HitPoints == 0 && !targetUnit.IsDead)
+            if (targetUnit is { HitPoints: 0, IsDead: false })
+            {
                 ProcessUnitDeath(targetUnit);
+                return;
+            }
         }
     }
 

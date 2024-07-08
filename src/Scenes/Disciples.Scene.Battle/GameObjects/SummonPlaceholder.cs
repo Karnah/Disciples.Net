@@ -36,7 +36,7 @@ internal class SummonPlaceholder : GameObject
         Components = new IComponent[]
         {
             AnimationComponent,
-            new SelectionComponent(this),
+            new SelectionComponent(this, sceneObjectContainer),
             new MouseLeftButtonClickComponent(this, Array.Empty<KeyboardButton>(), onClickedAction: () => onPlaceholderMouseLeftButtonClicked.Invoke(this)),
             new MouseRightButtonClickComponent(this, () => onUnitMouseRightButtonClicked.Invoke(this))
         };

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Disciples.Engine.Common.Enums;
-using Disciples.Engine.Models;
 
 namespace Disciples.Engine.Common.Models;
 
@@ -21,11 +20,6 @@ public class ButtonSceneElement : SceneElement
     /// И нужна только для обработки горячих клавиш.
     /// </remarks>
     public ButtonStates? ButtonStates { get; init; }
-
-    /// <summary>
-    /// Текстовая подсказка при наведении на элемент.
-    /// </summary>
-    public TextContainer? ToolTip { get; init; }
 
     /// <summary>
     /// Признак, что при зажатой кнопке мыши срабатывают периодические клики.
