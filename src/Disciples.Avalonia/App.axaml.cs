@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using DryIoc;
 using Disciples.Engine.Game;
 
 namespace Disciples.Avalonia;
@@ -12,11 +11,6 @@ namespace Disciples.Avalonia;
 public partial class App : Application
 {
     private Game _game = null!;
-
-    /// <summary>
-    /// IoC контейнер.
-    /// </summary>
-    public IContainer Container => _game!.Container;
 
     /// <inheritdoc />
     public override void Initialize()
@@ -29,10 +23,7 @@ public partial class App : Application
     /// <inheritdoc />
     public override void OnFrameworkInitializationCompleted()
     {
-        var gameWindow = new GameWindow();
-        gameWindow.Loaded += (sender, args) => { _game.Start(); };
-        gameWindow.Closing += (sender, eventArgs) => { _game.Stop(); };
-
+        var gameWindow = new GameWindow(_game);
         ((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!).MainWindow = gameWindow;
         base.OnFrameworkInitializationCompleted();
     }

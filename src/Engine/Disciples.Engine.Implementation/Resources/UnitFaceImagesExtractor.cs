@@ -11,7 +11,7 @@ public class UnitFaceImagesExtractor : ImagesExtractor
     /// <summary>
     /// Создать объект типа <see cref="UnitFaceImagesExtractor" />.
     /// </summary>
-    public UnitFaceImagesExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Faces.ff")
+    public UnitFaceImagesExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/Imgs/Faces.ff")
     {
     }
 }

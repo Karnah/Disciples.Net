@@ -11,7 +11,7 @@ public class BattleImagesExtractor : ImagesExtractor
     /// <summary>
     /// Создать объект типа <see cref="BattleImagesExtractor" />.
     /// </summary>
-    public BattleImagesExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\Imgs\\Battle.ff")
+    public BattleImagesExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/Imgs/Battle.ff")
     {
     }
 }

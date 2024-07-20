@@ -11,7 +11,7 @@ public class MenuAnimationExtractor : ImagesExtractor
     /// <summary>
     /// Создать объект типа <see cref="MenuAnimationExtractor" />.
     /// </summary>
-    public MenuAnimationExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\MenuAnim.ff")
+    public MenuAnimationExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/interf/MenuAnim.ff")
     {
     }
 }

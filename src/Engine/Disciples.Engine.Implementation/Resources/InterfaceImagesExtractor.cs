@@ -11,7 +11,7 @@ public class InterfaceImagesExtractor : ImagesExtractor
     /// <summary>
     /// Создать объект типа <see cref="InterfaceImagesExtractor" />.
     /// </summary>
-    public InterfaceImagesExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.ff")
+    public InterfaceImagesExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/interf/Interf.ff")
     {
     }
 }

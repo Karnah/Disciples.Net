@@ -1,11 +1,12 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Disciples.Avalonia.Models;
 using Disciples.Engine;
+using Disciples.Engine.Game;
 using DryIoc;
+using Microsoft.Extensions.Logging;
 
 namespace Disciples.Avalonia;
 
@@ -14,19 +15,31 @@ namespace Disciples.Avalonia;
 /// </summary>
 public partial class GameWindow : Window
 {
+    private readonly Game _game;
     private readonly AvaloniaGameInfo _gameInfo;
+    private readonly ILogger<GameWindow> _logger;
 
     private bool _isClosing;
 
     /// <summary>
     /// Создать объект типа <see cref="GameWindow" />.
     /// </summary>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public GameWindow()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
-        var container = ((App)Application.Current!).Container;
-        _gameInfo = container.Resolve<AvaloniaGameInfo>();
+    }
 
-        DataContext = container.Resolve<GameWindowViewModel>();
+    /// <summary>
+    /// Создать объект типа <see cref="GameWindow" />.
+    /// </summary>
+    public GameWindow(Game game)
+    {
+        _game = game;
+        _gameInfo = _game.Container.Resolve<AvaloniaGameInfo>();
+        _logger = _game.Container.Resolve<ILogger<GameWindow>>();
+
+        DataContext = _game.Container.Resolve<GameWindowViewModel>();
 
         Activated += OnActivated;
 
@@ -35,17 +48,6 @@ public partial class GameWindow : Window
 #if DEBUG
         this.AttachDevTools();
 #endif
-    }
-
-    /// <inheritdoc />
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-
-        // FieldTransform задаём именно в OnLoaded, в OnActivated будут некорректные координаты.
-        // Но OnActivated срабатывает раньше.
-        var gameField = this.Find<Grid>("Field")!;
-        _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
     }
 
     /// <summary>
@@ -59,12 +61,24 @@ public partial class GameWindow : Window
         if (screen == null)
             return;
 
+        var bounds = screen.Bounds;
+        _logger.LogDebug($"GameWindow. Windows size: {bounds}, scaling: {screen.Scaling}");
+
+        // BUG: Здесь и ниже с overlapWindow костыли для Linux:
+        // Почему-то не разворачивается во весь экран, явно задаём размеры.
+        if (_gameInfo.IsLinux)
+        {
+            Width = bounds.Width;
+            Height = bounds.Height;
+        }
+
         // Рассчитываем реальные размер экрана и пропорционально растягиваем изображение.
         var scale = Math.Min(Width / GameInfo.OriginalWidth, Height / GameInfo.OriginalHeight);
         scale /= screen.Scaling;
 
         var gameField = this.Find<Grid>("Field")!;
         gameField.RenderTransform = new ScaleTransform(scale, scale);
+        _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
 
         GameInfo.Width = scale * GameInfo.OriginalWidth;
         GameInfo.Height = scale * GameInfo.OriginalHeight;
@@ -75,6 +89,16 @@ public partial class GameWindow : Window
         if (_gameInfo.OverlapWindow == null)
         {
             var overlapWindow = new OverlapWindow();
+
+            if (_gameInfo.IsLinux)
+            {
+                overlapWindow.Activated += (_, _) =>
+                {
+                    overlapWindow.Width = Width;
+                    overlapWindow.Height = Height;
+                };
+            }
+
             overlapWindow.Closed += (_, _) =>
             {
                 if (_isClosing)
@@ -86,6 +110,28 @@ public partial class GameWindow : Window
             overlapWindow.Show(this);
 
             _gameInfo.OverlapWindow = overlapWindow;
+            _game.Start();
         }
+    }
+
+    /// <inheritdoc />
+    protected override void ArrangeCore(Rect finalRect)
+    {
+        base.ArrangeCore(finalRect);
+
+        // Для Linux из-за асинхронности X11 пересчитывать нужно еще здесь.
+        if (_gameInfo.IsLinux)
+        {
+            var gameField = this.Find<Grid>("Field")!;
+            _gameInfo.FieldTransform = this.TransformToVisual(gameField) ?? default;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+
+        _game.Stop();
     }
 }

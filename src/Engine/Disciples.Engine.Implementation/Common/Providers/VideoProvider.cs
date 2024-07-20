@@ -7,7 +7,7 @@ namespace Disciples.Engine.Implementation.Common.Providers;
 /// <inheritdoc />
 internal class VideoProvider : IVideoProvider
 {
-    private const string VIDEO_PATH = "Resources\\Video";
+    private const string VIDEO_PATH = "Resources/Video";
 
     /// <inheritdoc />
     public IReadOnlyList<string> StartGameVideoPaths { get; } = new[]

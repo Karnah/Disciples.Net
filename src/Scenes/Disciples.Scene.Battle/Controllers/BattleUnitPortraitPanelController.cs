@@ -48,11 +48,6 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     private bool _isActionProcessing;
     private bool _isBorderAnimationsDisabled;
 
-    /// <summary>
-    /// Отряд, который отображается на основной панели.
-    /// </summary>
-    private BattleSquadPosition? _displayingSquad;
-
     private ToggleButtonObject _reflectPanelButton = null!;
 
     /// <summary>
@@ -80,7 +75,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// <summary>
     /// Отряд, который отображается на панели.
     /// </summary>
-    public BattleSquadPosition DisplayingSquad => _displayingSquad!.Value;
+    public BattleSquadPosition DisplayingSquad { get; private set; }
 
     /// <summary>
     ///  Юнит, который выполняет свой ход.
@@ -116,7 +111,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
                 IsDisplayingBothPanels = false;
                 _reflectPanelButton.IsDeactivated = false;
 
-                UpdatePanel(_mainPanel, _displayingSquad!.Value);
+                UpdatePanel(_mainPanel, DisplayingSquad);
                 RemovePanel(_additionalPanel);
             }
         }
@@ -214,10 +209,10 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
     /// </summary>
     public void SetDisplayingSquad(BattleSquadPosition displayingSquad)
     {
-        if (_displayingSquad == displayingSquad)
+        if (DisplayingSquad == displayingSquad)
             return;
 
-        _displayingSquad = displayingSquad;
+        DisplayingSquad = displayingSquad;
 
         // Если отображаются обе панели, то запоминаем новый отряд, который отображается на основной панели.
         // При этом само отображение не меняем.
@@ -302,7 +297,8 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         _mainPanel = _context.PlayerSquadPosition == BattleSquadPosition.Attacker ? _rightPanel : _leftPanel;
         _additionalPanel = _context.PlayerSquadPosition == BattleSquadPosition.Attacker ? _leftPanel : _rightPanel;
 
-        SetDisplayingSquad(GetDefaultDisplayingSquad());
+        DisplayingSquad = GetDefaultDisplayingSquad();
+        ArrangePortraits(_mainPanel, DisplayingSquad);
     }
 
     /// <inheritdoc />
@@ -319,7 +315,7 @@ internal class BattleUnitPortraitPanelController : BaseSupportLoading
         if (IsDisplayingBothPanels)
             return;
 
-        SetDisplayingSquad(_displayingSquad == BattleSquadPosition.Defender
+        SetDisplayingSquad(DisplayingSquad == BattleSquadPosition.Defender
             ? BattleSquadPosition.Attacker
             : BattleSquadPosition.Defender);
     }

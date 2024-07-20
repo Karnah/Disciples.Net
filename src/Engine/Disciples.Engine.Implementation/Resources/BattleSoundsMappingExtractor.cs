@@ -11,7 +11,7 @@ public class BattleSoundsMappingExtractor : SoundsMappingExtractor
     /// <summary>
     /// Создать объект типа <see cref="BattleSoundsMappingExtractor" />.
     /// </summary>
-    public BattleSoundsMappingExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\Sounds\\Battle.wdt")
+    public BattleSoundsMappingExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/Sounds/Battle.wdt")
     {
     }
 }

@@ -26,7 +26,7 @@ internal class SoundInfoRecord
     public int EndAttackSoundFrameIndex { get; init; }
 
     /// <summary>
-    /// Названия списка с звуками попадания по цели.
+    /// Названия списка со звуками попадания по цели.
     /// </summary>
     public string HitTargetListName { get; init; } = null!;
 
@@ -41,12 +41,12 @@ internal class SoundInfoRecord
     public int EndAttackHitSoundFrameIndex { get; init; }
 
     /// <summary>
-    /// Названия списка с звуками получения повреждения.
+    /// Названия списка со звуками получения повреждения.
     /// </summary>
     public string DamagedListName { get; init; } = null!;
 
     /// <summary>
-    /// Названия списка с звуками передвижения по глобальной карте.
+    /// Названия списка со звуками передвижения по глобальной карте.
     /// </summary>
     public string GlobalMapWalkListName { get; init; } = null!;
 }

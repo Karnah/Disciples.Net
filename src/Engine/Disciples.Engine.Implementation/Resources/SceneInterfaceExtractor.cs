@@ -10,7 +10,7 @@ public class SceneInterfaceExtractor : Disciples.Resources.Images.SceneInterface
     /// <summary>
     /// Создать объект типа <see cref="SceneInterfaceExtractor" />.
     /// </summary>
-    public SceneInterfaceExtractor() : base($"{Directory.GetCurrentDirectory()}\\Resources\\interf\\Interf.dlg")
+    public SceneInterfaceExtractor() : base($"{Directory.GetCurrentDirectory()}/Resources/interf/Interf.dlg")
     {
     }
 }
