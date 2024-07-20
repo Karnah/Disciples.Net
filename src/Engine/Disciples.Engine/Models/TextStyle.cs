@@ -17,6 +17,10 @@ public readonly record struct TextStyle
     /// Символа конца токена стиля текста.
     /// </summary>
     public const char END_TEXT_STYLE_TOKEN = ';';
+    /// <summary>
+    /// Альтернативный символ конца токена стиля текста.
+    /// </summary>
+    public const char END_TEXT_STYLE_TOKEN_2 = ' ';
 
     /// <summary>
     /// Создать объект типа <see cref="TextStyle" />
@@ -181,12 +185,17 @@ public readonly record struct TextStyle
         if (textStyleTokenType is 'C' or 'O' or 'B')
             return input[offset..(offset+14)];
 
-        // Во всех остальных случаях будет брать до первого символа ;.
         var endTokenIndex = input.IndexOf(END_TEXT_STYLE_TOKEN, offset);
-        if (endTokenIndex == -1)
-            throw new ArgumentException($"Неизвестный тип токена: {input}");
+        if (endTokenIndex != -1)
+            return input[offset..(endTokenIndex + 1)];
 
-        return input[offset..(endTokenIndex + 1)];
+        // В русских ресурсах иногда выступает пробел в качестве окончания.
+        // Нужно пробел заменить на символ ";", чтобы было единообразно.
+        endTokenIndex = input.IndexOf(END_TEXT_STYLE_TOKEN_2, offset);
+        if (endTokenIndex != -1)
+            return $"{input[offset..endTokenIndex]}{END_TEXT_STYLE_TOKEN}";
+
+        throw new ArgumentException($"Неизвестный тип токена: {input}");
     }
 
     /// <summary>
