@@ -1,4 +1,4 @@
-# Disciples II (English)
+# Disciples II
 Part of the original game developed on `Avalonia` and `WPF` frameworks.
 
 ## License
@@ -34,7 +34,7 @@ sudo apt install libvlc-dev
 
 ****
 
-# Disciples II (Русский)
+# Disciples II
 Часть оригинальной игры, разработанная на фреймворках `Avalonia` и `WPF`.
 
 ## Лицензия
