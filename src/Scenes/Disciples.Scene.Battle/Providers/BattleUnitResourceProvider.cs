@@ -244,9 +244,11 @@ internal class BattleUnitResourceProvider : BaseSupportLoading, IBattleUnitResou
     /// </summary>
     private AnimationFrames? TryGetAnimationFrames(BaseResourceKey key)
     {
+        if (!_imagesExtractor.IsAnimationExists(key.Key))
+            return null;
+
         return _bitmapFactory.ConvertToFrames(() =>
-            _imagesExtractor.TryGetAnimationFrames(key.Key) ??
-            Array.Empty<RawBitmap>());
+            _imagesExtractor.TryGetAnimationFrames(key.Key)!);
     }
 
     /// <summary>
