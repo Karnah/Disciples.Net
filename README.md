@@ -17,7 +17,7 @@ For running game, it's necessary to:
 1. Have Windows x64
 2. Install `.NET Runtime 8`. [You can download it from official Microsoft site](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) 
 
-[Download version Windows 0.1.0.0 (english)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%212766&cid=A7FF1191A63D99FB)
+[Download version Windows 0.1.0.0 (english)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%215301&cid=A7FF1191A63D99FB)
 
 ### Linux
 For running game, it's necessary to:
@@ -29,7 +29,7 @@ sudo apt install vlc
 sudo apt install libvlc-dev
 ```
 
-[Download version Linux 0.1.0.0 (english)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%212765&cid=A7FF1191A63D99FB)
+[Download version Linux 0.1.0.0 (english)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%215235&cid=A7FF1191A63D99FB)
 
 
 ****
@@ -53,7 +53,7 @@ sudo apt install libvlc-dev
 1. Иметь 64 разрядную систему Windows
 2. Установить `Среда выполнения .NET 8`. [Скачать можно с официального сайта Microsoft](https://dotnet.microsoft.com/ru-ru/download/dotnet/8.0)
 
-[Скачать версию Windows 0.1.0.0 (русская)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%212769&cid=A7FF1191A63D99FB)
+[Скачать версию Windows 0.1.0.0 (русская)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%216294&cid=A7FF1191A63D99FB)
 
 ### Linux
 Для запуска необходимо:
@@ -65,4 +65,4 @@ sudo apt install vlc
 sudo apt install libvlc-dev
 ```
 
-[Скачать версию Linux 0.1.0.0 (русская)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%212768&cid=A7FF1191A63D99FB)
+[Скачать версию Linux 0.1.0.0 (русская)](https://onedrive.live.com/?authkey=%21ACKM5znYwj8j%5FtQ&id=A7FF1191A63D99FB%216293&cid=A7FF1191A63D99FB)
